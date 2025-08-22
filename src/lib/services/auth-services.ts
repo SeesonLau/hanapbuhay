@@ -5,12 +5,10 @@ import { validatePassword, validateEmail } from '../utils/validation';
 export class AuthService {
   static async signUp(email: string, password: string): Promise<AuthResponse> {
     try {
-      // Validate email
       if (!validateEmail(email)) {
         return { success: false, message: 'Invalid email format' };
       }
 
-      // Validate password
       const passwordErrors = validatePassword(password);
       if (passwordErrors.length > 0) {
         return { 
@@ -19,35 +17,32 @@ export class AuthService {
         };
       }
 
-      // Create user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/confirm`,
-      },
-    });
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/confirm`,
+        },
+      });
 
       if (authError) {
         return { success: false, message: authError.message };
       }
 
       if (authData.user) {
-        // Create user in custom users table
         const { error: dbError } = await supabase
           .from('users')
           .insert({
-            userId: authData.user.id,
+            userid: authData.user.id,
             email: authData.user.email,
             role: 'user',
-            createdBy: authData.user.id,
-            createdAt: new Date().toISOString(),
-            updatedBy: authData.user.id,
-            updatedAt: new Date().toISOString(),
+            createdby: authData.user.id,
+            createdat: new Date().toISOString(),
+            updatedby: authData.user.id,
+            updatedat: new Date().toISOString(),
           });
 
         if (dbError) {
-          // Rollback auth user creation if db insert fails
           await supabase.auth.admin.deleteUser(authData.user.id);
           return { success: false, message: dbError.message };
         }
