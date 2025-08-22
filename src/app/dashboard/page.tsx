@@ -1,39 +1,81 @@
-import { supabaseServer } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+// src/app/dashboard/page.tsx
+'use client';
 
-export default async function DashboardPage() {
-  const supabase = supabaseServer()
-  const { data: { session }, error } = await supabase.auth.getSession()
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { AuthService } from '@/lib/services/auth-services';
+import { UserService } from '@/lib/services/user-services';
+import { User } from '@/lib/models';
+import { ROUTES } from '@/lib/constants';
 
-   if (error || !session) {
-    redirect('/login')
+export default function DashboardPage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const currentUser = await AuthService.getCurrentUser();
+      
+      if (!currentUser) {
+        router.push(ROUTES.LOGIN);
+        return;
+      }
+
+      const userData = await UserService.getUserById(currentUser.id);
+      setUser(userData);
+      setLoading(false);
+    };
+
+    checkAuth();
+  }, [router]);
+
+  const handleSignOut = async () => {
+    await AuthService.signOut();
+    router.push(ROUTES.HOME);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
   }
 
-  const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', session.user.id)
-    .single()
-
   return (
-    <div className="min-h-screen">
-      <header className="bg-background border-b border-foreground/10">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-xl font-semibold">Dashboard</h1>
-          <form action="/auth/signout" method="POST">
-            <button className="text-sm text-blue-500 hover:underline" type="submit">
-              Logout
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center">
+            <h1 className="text-xl font-semibold">Dashboard</h1>
+            <button
+              onClick={handleSignOut}
+              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+            >
+              Sign Out
             </button>
-          </form>
+          </div>
         </div>
-      </header>
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        <div className="bg-background border border-foreground/10 p-6 rounded-lg shadow-md">
-          <h2 className="text-lg font-medium">Welcome, {user?.username || user?.email}</h2>
-          <p className="mt-2 text-foreground/80">Role: {user?.role}</p>
-          <p className="mt-2 text-foreground/80">Member since: {new Date(user?.created_at).toLocaleDateString()}</p>
+      </nav>
+
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <h2 className="text-lg font-medium text-gray-900">Welcome to your dashboard!</h2>
+              {user && (
+                <div className="mt-4 space-y-2">
+                  <p><strong>Email:</strong> {user.email}</p>
+                  <p><strong>Role:</strong> {user.role}</p>
+                  <p><strong>User ID:</strong> {user.userId}</p>
+                  <p><strong>Created:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </main>
     </div>
-  )
+  );
 }
