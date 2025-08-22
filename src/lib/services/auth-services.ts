@@ -17,11 +17,15 @@ export class AuthService {
         };
       }
 
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+                     (typeof window !== 'undefined' ? window.location.origin : '') ||
+                     'http://localhost:3000';
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/confirm`,
+          emailRedirectTo: `${siteUrl}/auth/confirm`,
         },
       });
 
@@ -68,12 +72,10 @@ export class AuthService {
       });
 
       if (error) {
-        // Check if the error is due to email not confirmed
-        if (error.message.includes('Email not confirmed')) {
-          // Offer to resend confirmation email
+        if (error.message?.includes('Email not confirmed')) {
           return { 
             success: false, 
-            message: 'Email not confirmed. Would you like us to resend the confirmation email?',
+            message: 'Email not confirmed. Please check your email for verification link.',
             needsConfirmation: true 
           };
         }
@@ -103,27 +105,14 @@ export class AuthService {
     }
   }
 
-  static async verifyEmail(token: string): Promise<AuthResponse> {
-    try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        token_hash: token,
-        type: 'signup',
-      });
-
-      if (error) {
-        return { success: false, message: error.message };
-      }
-
-      return { success: true, message: 'Email verified successfully', data };
-    } catch (error) {
-      return { success: false, message: 'An unexpected error occurred' };
-    }
-  }
-
   static async forgotPassword(email: string): Promise<AuthResponse> {
     try {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+                     (typeof window !== 'undefined' ? window.location.origin : '') ||
+                     'http://localhost:3000';
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${siteUrl}/reset-password`,
       });
 
       if (error) {
