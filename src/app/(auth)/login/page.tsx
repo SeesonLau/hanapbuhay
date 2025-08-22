@@ -1,4 +1,3 @@
-// src/app/(auth)/login/page.tsx
 import { LoginForm } from '@/components/auth/LoginForm';
 import Link from 'next/link';
 import { ROUTES } from '@/lib/constants';

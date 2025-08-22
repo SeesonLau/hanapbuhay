@@ -1,4 +1,3 @@
-// src/components/ui/Modal.tsx
 'use client';
 
 interface ModalProps {

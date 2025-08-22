@@ -1,4 +1,3 @@
-// src/lib/services/user-service.ts
 import { supabase } from './supabase/client';
 import { User } from '../models';
 

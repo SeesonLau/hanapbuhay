@@ -1,4 +1,3 @@
-// src/app/(auth)/signup/page.tsx
 import { SignupForm } from '@/components/auth/SignupForm';
 import Link from 'next/link';
 import { ROUTES } from '@/lib/constants';

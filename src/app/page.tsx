@@ -1,4 +1,3 @@
-// src/app/page.tsx
 import Link from 'next/link';
 import { ROUTES } from '@/lib/constants';
 
