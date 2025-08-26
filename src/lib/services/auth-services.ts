@@ -37,13 +37,13 @@ export class AuthService {
         const { error: dbError } = await supabase
           .from('users')
           .insert({
-            userid: authData.user.id,
+            userId: authData.user.id,
             email: authData.user.email,
             role: 'user',
-            createdby: authData.user.id,
-            createdat: new Date().toISOString(),
-            updatedby: authData.user.id,
-            updatedat: new Date().toISOString(),
+            createdBy: authData.user.id,
+            createdAt: new Date().toISOString(),
+            updatedBy: authData.user.id,
+            updatedAt: new Date().toISOString(),
           });
 
         if (dbError) {
