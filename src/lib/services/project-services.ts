@@ -1,0 +1,113 @@
+import { supabase } from './supabase/client';
+import { Project } from '../models/profile';
+import { toast } from 'react-hot-toast';
+import { ProjectMessages } from '@/resources/messages/project';
+
+export class ProjectService {
+  static async getProjectsByUserId(userId: string): Promise<Project[]> {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('userId', userId)
+      .order('createdAt', { ascending: false });
+
+    if (error) {
+      toast.error(ProjectMessages.FETCH_PROJECTS_ERROR);
+      return [];
+    }
+
+    return data as Project[];
+  }
+
+  static async getProjectById(projectId: string): Promise<Project | null> {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('projectId', projectId)
+      .single();
+
+    if (error) {
+      toast.error(ProjectMessages.FETCH_PROJECT_ERROR);
+      return null;
+    }
+
+    return data as Project;
+  }
+
+  static async upsertProject(project: Project): Promise<boolean> {
+  let existing = null;
+
+  if (project.projectId) {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('projectId')
+      .eq('projectId', project.projectId)
+      .maybeSingle(); 
+
+    if (error) {
+      toast.error(ProjectMessages.CHECK_EXISTING_PROJECT_ERROR);
+      return false;
+    }
+
+    existing = data;
+  }
+
+  const { error } = await supabase
+    .from('projects')
+    .upsert({
+      ...project,
+      updatedAt: new Date().toISOString(),
+      updatedBy: project.userId,
+      createdAt: existing ? undefined : new Date().toISOString(),
+      createdBy: existing ? undefined : project.userId,
+    });
+
+  if (error) {
+    toast.error(ProjectMessages.SAVE_PROJECT_ERROR);
+    return false;
+  }
+
+  toast.success(ProjectMessages.SAVE_PROJECT_SUCCESS);
+  return true;
+}
+
+  static async uploadProjectImage(userId: string, file: File): Promise<string | null> {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}-${Date.now()}.${fileExt}`;
+    const filePath = `project-images/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('project-images')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      toast.error(ProjectMessages.UPLOAD_IMAGE_ERROR);
+      return null;
+    }
+
+    const { data } = supabase.storage
+      .from('project-images')
+      .getPublicUrl(filePath);
+
+    toast.success(ProjectMessages.UPLOAD_IMAGE_SUCCESS);
+    return data.publicUrl;
+  }
+
+  static async deleteProject(projectId: string, userId: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('projects')
+      .update({
+        deletedBy: userId,
+        deletedAt: new Date().toISOString(),
+      })
+      .eq('projectId', projectId);
+
+    if (error) {
+      toast.error(ProjectMessages.DELETE_PROJECT_ERROR);
+      return false;
+    }
+
+    toast.success(ProjectMessages.DELETE_PROJECT_SUCCESS);
+    return true;
+  }
+}

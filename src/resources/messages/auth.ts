@@ -1,0 +1,23 @@
+export const AuthMessages = {
+  //service messages
+  SIGNUP_SUCCESS: 'Signup successful. Please check your email for verification.',
+  SIGNUP_ERROR: 'Signup failed. Please try again.',
+  LOGIN_SUCCESS: 'Login successful!',
+  LOGIN_ERROR: 'Login failed. Please check your credentials.',
+  EMAIL_NOT_CONFIRMED: 'Email not confirmed. Please check your email for verification link.',
+  PASSWORD_RESET_SENT: 'Password reset instructions sent to your email',
+  PASSWORD_RESET_ERROR: 'Failed to send password reset instructions',
+  SIGNOUT_SUCCESS: 'Signed out successfully',
+  SIGNOUT_ERROR: 'Failed to sign out',
+  UNEXPECTED_ERROR: 'An unexpected error occurred',
+  INVALID_EMAIL: 'Invalid email format',
+  PASSWORD_REQUIREMENTS: 'Password requirements not met',
+  CONFIRMATION_EMAIL_SENT: 'Confirmation email sent successfully',
+  PASSWORD_MISMATCH: 'Passwords do not match',
+
+  //UI messages
+  SENDING_RESET: 'Sending reset instructions...',
+  BACK_TO_LOGIN: 'Back to Login',
+  SIGNING_IN: 'Signing in...',
+  RESENDING_CONFIRMATION: 'Sending confirmation email...',
+};

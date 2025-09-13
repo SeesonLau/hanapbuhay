@@ -1,11 +1,14 @@
 import { supabase } from './supabase/client';
 import { AuthResponse } from '../models';
 import { validatePassword, validateEmail } from '../utils/validation';
+import { toast } from 'react-hot-toast';
+import { AuthMessages } from '@/resources/messages/auth';
 
 export class AuthService {
   static async signUp(email: string, password: string): Promise<AuthResponse> {
     try {
       if (!validateEmail(email)) {
+        toast.error(AuthMessages.INVALID_EMAIL);
         return { success: false, message: 'Invalid email format' };
       }
 
@@ -30,6 +33,7 @@ export class AuthService {
       });
 
       if (authError) {
+        toast.error(authError.message);
         return { success: false, message: authError.message };
       }
 
@@ -48,19 +52,20 @@ export class AuthService {
 
         if (dbError) {
           await supabase.auth.admin.deleteUser(authData.user.id);
+          toast.error(dbError.message);
           return { success: false, message: dbError.message };
         }
 
-        return { 
-          success: true, 
-          message: 'Signup successful. Please check your email for verification.',
-          data: authData.user 
-        };
+        toast.success(AuthMessages.SIGNUP_SUCCESS);
+        return { success: true, message: AuthMessages.SIGNUP_SUCCESS, data: authData.user };
       }
+      
 
-      return { success: false, message: 'Signup failed' };
-    } catch (error) {
-      return { success: false, message: 'An unexpected error occurred' };
+      toast.error(AuthMessages.SIGNUP_ERROR);
+      return { success: false, message: AuthMessages.SIGNUP_ERROR };
+    } catch (err) {
+      toast.error(AuthMessages.UNEXPECTED_ERROR);
+      return { success: false, message: AuthMessages.UNEXPECTED_ERROR };
     }
   }
 
@@ -72,19 +77,24 @@ export class AuthService {
       });
 
       if (error) {
-        if (error.message?.includes('Email not confirmed')) {
+        // Check if the error is due to email not confirmed
+        if (error.message.includes('Email not confirmed')) {
+          // Offer to resend confirmation email
           return { 
             success: false, 
-            message: 'Email not confirmed. Please check your email for verification link.',
+            message: 'Email not confirmed. Would you like us to resend the confirmation email?',
             needsConfirmation: true 
           };
         }
+        toast.error(error.message);
         return { success: false, message: error.message };
       }
 
+      toast.success(AuthMessages.LOGIN_SUCCESS);
       return { success: true, data: data.user };
-    } catch (error) {
-      return { success: false, message: 'An unexpected error occurred' };
+    } catch (err) {
+      toast.error(AuthMessages.UNEXPECTED_ERROR);
+      return { success: false, message: AuthMessages.UNEXPECTED_ERROR };
     }
   }
 
@@ -96,10 +106,28 @@ export class AuthService {
       });
 
       if (error) {
+        toast.error(error.message);
         return { success: false, message: error.message };
       }
 
       return { success: true, message: 'Confirmation email sent successfully' };
+    } catch (error) {
+      return { success: false, message: 'An unexpected error occurred' };
+    }
+  }
+
+  static async verifyEmail(token: string): Promise<AuthResponse> {
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        token_hash: token,
+        type: 'signup',
+      });
+
+      if (error) {
+        return { success: false, message: error.message };
+      }
+
+      return { success: true, message: 'Email verified successfully', data };
     } catch (error) {
       return { success: false, message: 'An unexpected error occurred' };
     }
@@ -116,29 +144,44 @@ export class AuthService {
       });
 
       if (error) {
+        toast.error(error.message);
         return { success: false, message: error.message };
       }
 
-      return { success: true, message: 'Password reset instructions sent to your email' };
-    } catch (error) {
-      return { success: false, message: 'An unexpected error occurred' };
+      toast.success(AuthMessages.PASSWORD_RESET_SENT);
+      return { success: true, message: AuthMessages.PASSWORD_RESET_SENT };
+    } catch (err) {
+      toast.error(AuthMessages.UNEXPECTED_ERROR);
+      return { success: false, message: AuthMessages.UNEXPECTED_ERROR };
     }
   }
 
   static async getCurrentUser() {
-    const { data: { user } } = await supabase.auth.getUser();
-    return user;
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        toast.error(error.message);
+        return null;
+      }
+      return user;
+    } catch (err) {
+      toast.error(AuthMessages.UNEXPECTED_ERROR);
+      return null;
+    }
   }
 
   static async signOut(): Promise<AuthResponse> {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
+        toast.error(error.message);
         return { success: false, message: error.message };
       }
-      return { success: true, message: 'Signed out successfully' };
-    } catch (error) {
-      return { success: false, message: 'An unexpected error occurred' };
+      toast.success(AuthMessages.SIGNOUT_SUCCESS);
+      return { success: true, message: AuthMessages.SIGNOUT_SUCCESS };
+    } catch (err) {
+      toast.error(AuthMessages.UNEXPECTED_ERROR);
+      return { success: false, message: AuthMessages.UNEXPECTED_ERROR };
     }
   }
 }

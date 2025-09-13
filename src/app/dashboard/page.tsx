@@ -87,6 +87,12 @@ export default function DashboardPage() {
                 Settings
               </button>
               <button
+                onClick={() => router.push(ROUTES.PROFILE)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Profile
+              </button>
+              <button
                 onClick={handleSignOut}
                 className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
               >
@@ -96,6 +102,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </nav>
+
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
