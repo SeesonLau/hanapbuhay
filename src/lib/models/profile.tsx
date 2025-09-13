@@ -15,8 +15,17 @@ export interface Profile {
   deletedAt?: string | null;
 }
 
-export interface ProfileResponse {
-  success: boolean;       // true if operation succeeded
-  data?: Profile;         // profile object when successful
-  message?: string;       // error or status message
+export interface Project {
+  userId: string;
+  projectId?: string;
+  projectPictureUrl?: string | null; 
+  title: string;
+  description?: string | null;
+  createdBy?: string | null;
+  createdAt: string;                 
+  updatedBy?: string | null;
+  updatedAt: string;                 
+  deletedBy?: string | null;
+  deletedAt?: string | null;
 }
+  

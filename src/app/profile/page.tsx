@@ -7,9 +7,11 @@ import { UserService } from '@/lib/services/user-services';
 import { User } from '@/lib/models';
 import { ROUTES } from '@/lib/constants';
 import ProfileForm from '@/components/profile/profile-form';
+import ProjectsSection from '@/components/profile/project-section';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
+  
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -40,7 +42,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Top Nav */}
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
@@ -55,7 +56,6 @@ export default function ProfilePage() {
         </div>
       </nav>
 
-      {/* User ID Display */}
       {user && (
         <div className="text-center mt-6">
           <p className="text-lg font-semibold text-black">
@@ -64,17 +64,10 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Main Section */}
       <main className="flex-grow flex items-center justify-center p-6">
         <div className="max-w-5xl w-full flex gap-6">
-          {/* Profile Form (Left Side) */}
           {user && <ProfileForm userId={user.userId} />}
-
-          {/* Project Section (Right Side placeholder for now) */}
-          <div className="w-1/2 bg-white shadow rounded-lg p-4">
-            <h2 className="text-lg font-semibold mb-4">Projects</h2>
-            <p className="text-gray-500">Project section coming soon...</p>
-          </div>
+          {user && <ProjectsSection userId={user.userId} />}
         </div>
       </main>
     </div>
