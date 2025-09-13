@@ -9,30 +9,41 @@ interface ProfileFormProps {
 }
 
 export default function ProfileForm({ userId }: ProfileFormProps) {
-  const [profile, setProfile] = useState<(Profile & { email?: string | null }) | null>(null);
+  const [profile, setProfile] = useState<Profile & { email?: string | null } | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [email, setEmail] = useState<string>("");
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const data = await ProfileService.getProfileByUserId(userId);
-        if (data) {
-          setProfile(data);
-          const [f, ...l] = (data.name ?? "").split(" ");
-          setFirstName(f ?? "");
-          setLastName(l.join(" ") ?? "");
-        }
-      } catch (err) {
-        console.error("Error loading profile:", err);
-      } finally {
-        setLoading(false);
+    const fetchProfileAndEmail = async () => {
+    try {
+      const profileData = await ProfileService.getProfileByUserId(userId);
+      const userEmail = await ProfileService.getEmailByUserId(userId);
+
+      if (profileData) {
+        setProfile(profileData);
+        const [f, ...l] = (profileData.name ?? "").split(" ");
+        setFirstName(f ?? "");
+        setLastName(l.join(" ") ?? "");
+        setPreviewUrl(profileData.profilePictureUrl ?? null);
       }
-    };
-    fetchProfile();
-  }, [userId]);
+
+      if (userEmail) {
+        setEmail(userEmail); 
+      }
+    } catch (err) {
+      console.error("Error loading profile or email:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProfileAndEmail();
+}, [userId]);
 
   const handleChange = (field: keyof Profile, value: any) => {
     setProfile((prev) => prev ? { ...prev, [field]: value } : prev);
@@ -41,7 +52,7 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
   const handleBirthdateChange = (value: string) => {
     const birthdate = new Date(value);
     const today = new Date();
-    if (birthdate > today) return; // prevent future dates
+    if (birthdate > today) return;
 
     const age = today.getFullYear() - birthdate.getFullYear() -
       (today < new Date(today.getFullYear(), birthdate.getMonth(), birthdate.getDate()) ? 1 : 0);
@@ -49,12 +60,25 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
     setProfile((prev) => prev ? { ...prev, birthdate: value, age } : prev);
   };
 
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files || !event.target.files[0]) return;
+    const file = event.target.files[0];
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
   const handleSave = async () => {
     if (!profile) return;
     setSaving(true);
+
     try {
+      let uploadedUrl = profile.profilePictureUrl ?? null;
+      if (selectedFile) {
+        uploadedUrl = await ProfileService.uploadProfileImage(userId, selectedFile);
+      }
+
       const fullName = `${firstName} ${lastName}`.trim();
-      await ProfileService.upsertProfile({ ...profile, name: fullName });
+      await ProfileService.upsertProfile({ ...profile, name: fullName, profilePictureUrl: uploadedUrl });
       alert("Profile saved successfully!");
     } catch (err) {
       console.error("Error saving profile:", err);
@@ -64,66 +88,71 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
     }
   };
 
-  if (loading) return <p>Loading profile...</p>;
+  if (loading) return <p className="text-black">Loading profile...</p>;
 
   return (
-    <div className="p-4 bg-white shadow rounded-lg w-1/2">
+    <div className="p-4 bg-white shadow rounded-lg w-1/2 text-black">
       <h2 className="text-lg font-semibold mb-4">Profile Information</h2>
 
-      {/* Profile Picture URL */}
+      {/* Profile Picture Upload */}
+      <label className="block mb-2">Profile Picture</label>
+      {previewUrl && (
+        <img src={previewUrl} alt="Profile" className="w-24 h-24 object-cover mb-2 rounded-full border" />
+      )}
       <input
-        type="text"
-        placeholder="Profile Picture URL"
-        value={profile?.profilePictureUrl ?? ""}
-        onChange={(e) => handleChange("profilePictureUrl", e.target.value)}
-        className="border p-2 w-full mb-2"
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="mb-4"
       />
 
       {/* First Name */}
+      <label className="block mb-1">First Name</label>
       <input
         type="text"
-        placeholder="First Name"
         value={firstName}
         onChange={(e) => setFirstName(e.target.value)}
         className="border p-2 w-full mb-2"
       />
 
       {/* Last Name */}
+      <label className="block mb-1">Last Name</label>
       <input
         type="text"
-        placeholder="Last Name"
         value={lastName}
         onChange={(e) => setLastName(e.target.value)}
         className="border p-2 w-full mb-2"
       />
 
       {/* Address */}
+      <label className="block mb-1">Address</label>
       <input
         type="text"
-        placeholder="Address"
         value={profile?.address ?? ""}
         onChange={(e) => handleChange("address", e.target.value)}
         className="border p-2 w-full mb-2"
       />
 
-      {/* Email (read-only) */}
+      {/* Email */}
+      <label className="block mb-1">Email</label>
       <input
         type="email"
-        value={profile?.email ?? ""}
+        value={email}
         readOnly
         className="border p-2 w-full mb-2 bg-gray-100"
       />
 
       {/* Phone Number */}
+      <label className="block mb-1">Phone Number</label>
       <input
         type="tel"
-        placeholder="Phone Number"
         value={profile?.phoneNumber ?? ""}
         onChange={(e) => handleChange("phoneNumber", e.target.value)}
         className="border p-2 w-full mb-2"
       />
 
       {/* Birthdate */}
+      <label className="block mb-1">Birthdate</label>
       <input
         type="date"
         value={profile?.birthdate ?? ""}
@@ -131,7 +160,8 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
         className="border p-2 w-full mb-2"
       />
 
-      {/* Age (read-only, calculated) */}
+      {/* Age  */}
+      <label className="block mb-1">Age</label>
       <input
         type="number"
         value={profile?.age ?? ""}
@@ -140,6 +170,7 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
       />
 
       {/* Sex */}
+      <label className="block mb-1">Sex</label>
       <select
         value={profile?.sex ?? ""}
         onChange={(e) => handleChange("sex", e.target.value)}
