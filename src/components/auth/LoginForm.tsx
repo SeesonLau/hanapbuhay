@@ -5,39 +5,28 @@ import { AuthService } from '@/lib/services/auth-services';
 import { ROUTES } from '@/lib/constants';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { toast } from 'react-hot-toast';
-import { AuthMessages } from '@/resources/messages/auth';
 
 export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
-  const [resendSuccess, setResendSuccess] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     setNeedsConfirmation(false);
-    setResendSuccess(false);
 
     try {
       const result = await AuthService.login(email, password);
-      
+
       if (result.success) {
         router.push(ROUTES.DASHBOARD);
-      } else {
-        if (result.needsConfirmation) {
-          setNeedsConfirmation(true);
-        }
-        setError(result.message || 'Login failed. Please check your credentials and try again.');
+      } else if (result.needsConfirmation) {
+        setNeedsConfirmation(true);
       }
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -45,19 +34,9 @@ export const LoginForm: React.FC = () => {
 
   const handleResendConfirmation = async () => {
     setResendLoading(true);
-    setResendSuccess(false);
-    
     try {
-      const result = await AuthService.resendConfirmationEmail(email);
-      
-      if (result.success) {
-        setResendSuccess(true);
-        setError('');
-      } else {
-        setError(result.message || 'Failed to resend confirmation email. Please try again.');
-      }
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      await AuthService.resendConfirmationEmail(email);
+      setNeedsConfirmation(false);
     } finally {
       setResendLoading(false);
     }
@@ -65,18 +44,6 @@ export const LoginForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md text-sm">
-          {error}
-        </div>
-      )}
-      
-      {resendSuccess && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md text-sm">
-          Confirmation email sent! Please check your inbox.
-        </div>
-      )}
-      
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
           Email Address

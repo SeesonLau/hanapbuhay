@@ -1,4 +1,5 @@
 export const AuthMessages = {
+  //service messages
   SIGNUP_SUCCESS: 'Signup successful. Please check your email for verification.',
   SIGNUP_ERROR: 'Signup failed. Please try again.',
   LOGIN_SUCCESS: 'Login successful!',
@@ -12,4 +13,11 @@ export const AuthMessages = {
   INVALID_EMAIL: 'Invalid email format',
   PASSWORD_REQUIREMENTS: 'Password requirements not met',
   CONFIRMATION_EMAIL_SENT: 'Confirmation email sent successfully',
+  PASSWORD_MISMATCH: 'Passwords do not match',
+
+  //UI messages
+  SENDING_RESET: 'Sending reset instructions...',
+  BACK_TO_LOGIN: 'Back to Login',
+  SIGNING_IN: 'Signing in...',
+  RESENDING_CONFIRMATION: 'Sending confirmation email...',
 };
