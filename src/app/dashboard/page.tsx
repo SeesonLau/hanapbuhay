@@ -7,7 +7,7 @@ import { AuthService } from '@/lib/services/auth-services';
 import { UserService } from '@/lib/services/user-services';
 import { User } from '@/lib/models';
 import { ROUTES } from '@/lib/constants';
-import SettingsModal from '@/components/ui/settings-modal'; 
+import SettingsModal from '@/components/ui/SettingsModal'; 
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);

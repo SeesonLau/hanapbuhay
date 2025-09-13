@@ -1,4 +1,3 @@
-// components/buttons/DeleteButton.tsx
 import { ButtonProps } from '../types';
 import { getRedColor, getWhiteColor } from '@/lib/colors';
 import { FaTrash } from 'react-icons/fa';

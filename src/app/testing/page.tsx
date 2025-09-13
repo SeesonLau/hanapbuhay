@@ -1,4 +1,3 @@
-// app/testing/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -10,11 +9,21 @@ import {
   SubmitNowButton,
   CancelButton,
   SendCodeButton,
-  UploadPhotoButton
+  UploadPhotoButton,
+  ApplyNowButton,
+  VisitProfileButton,
+  LoginButton,
+  SignUpButton,
+  SeePreviousNotificationsButton
 } from '@/components';
 
 export default function TestingPage() {
   const [clickCounts, setClickCounts] = useState({
+    applyNow: 0,
+    visitProfile: 0,
+    login: 0,
+    signUp: 0,
+    seeNotifications: 0,
     apply: 0,
     delete: 0,
     search: 0,
@@ -26,6 +35,11 @@ export default function TestingPage() {
   });
 
   const [disabledStates, setDisabledStates] = useState({
+    applyNow: false,
+    visitProfile: false,
+    login: false,
+    signUp: false,
+    seeNotifications: false,
     apply: false,
     delete: false,
     search: false,
@@ -59,10 +73,126 @@ export default function TestingPage() {
           <h2 className="text-xl font-semibold mb-2">Instructions</h2>
           <p className="text-gray-600">
             Click on buttons to test their active states. Use the toggle switches to enable/disable each button.
+            Hover over buttons to see hover effects.
           </p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Apply Now Button */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Apply Now Button</h2>
+              <label className="flex items-center space-x-2">
+                <span className="text-sm">Disabled</span>
+                <input 
+                  type="checkbox" 
+                  checked={disabledStates.applyNow}
+                  onChange={() => toggleDisabled('applyNow')}
+                  className="toggle"
+                />
+              </label>
+            </div>
+            <div className="flex justify-center mb-4">
+              <ApplyNowButton 
+                onClick={() => handleClick('applyNow')} 
+                disabled={disabledStates.applyNow}
+              />
+            </div>
+            <p className="mt-2 text-sm text-gray-600 text-center">Clicked: {clickCounts.applyNow} times</p>
+          </div>
+
+          {/* Visit Profile Button */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Visit Profile Button</h2>
+              <label className="flex items-center space-x-2">
+                <span className="text-sm">Disabled</span>
+                <input 
+                  type="checkbox" 
+                  checked={disabledStates.visitProfile}
+                  onChange={() => toggleDisabled('visitProfile')}
+                  className="toggle"
+                />
+              </label>
+            </div>
+            <div className="flex justify-center mb-4">
+              <VisitProfileButton 
+                onClick={() => handleClick('visitProfile')} 
+                disabled={disabledStates.visitProfile}
+              />
+            </div>
+            <p className="mt-2 text-sm text-gray-600 text-center">Clicked: {clickCounts.visitProfile} times</p>
+          </div>
+
+          {/* Login Button */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Login Button</h2>
+              <label className="flex items-center space-x-2">
+                <span className="text-sm">Disabled</span>
+                <input 
+                  type="checkbox" 
+                  checked={disabledStates.login}
+                  onChange={() => toggleDisabled('login')}
+                  className="toggle"
+                />
+              </label>
+            </div>
+            <div className="flex justify-center mb-4">
+              <LoginButton 
+                onClick={() => handleClick('login')} 
+                disabled={disabledStates.login}
+              />
+            </div>
+            <p className="mt-2 text-sm text-gray-600 text-center">Clicked: {clickCounts.login} times</p>
+          </div>
+
+          {/* Sign Up Button */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Sign Up Button</h2>
+              <label className="flex items-center space-x-2">
+                <span className="text-sm">Disabled</span>
+                <input 
+                  type="checkbox" 
+                  checked={disabledStates.signUp}
+                  onChange={() => toggleDisabled('signUp')}
+                  className="toggle"
+                />
+              </label>
+            </div>
+            <div className="flex justify-center mb-4">
+              <SignUpButton 
+                onClick={() => handleClick('signUp')} 
+                disabled={disabledStates.signUp}
+              />
+            </div>
+            <p className="mt-2 text-sm text-gray-600 text-center">Clicked: {clickCounts.signUp} times</p>
+          </div>
+
+          {/* See Previous Notifications Button */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">See Previous Notifications Button</h2>
+              <label className="flex items-center space-x-2">
+                <span className="text-sm">Disabled</span>
+                <input 
+                  type="checkbox" 
+                  checked={disabledStates.seeNotifications}
+                  onChange={() => toggleDisabled('seeNotifications')}
+                  className="toggle"
+                />
+              </label>
+            </div>
+            <div className="flex justify-center mb-4">
+              <SeePreviousNotificationsButton 
+                onClick={() => handleClick('seeNotifications')} 
+                disabled={disabledStates.seeNotifications}
+              />
+            </div>
+            <p className="mt-2 text-sm text-gray-600 text-center">Clicked: {clickCounts.seeNotifications} times</p>
+          </div>
+
           {/* Apply Button */}
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-4">

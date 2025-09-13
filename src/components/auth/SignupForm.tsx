@@ -5,6 +5,7 @@ import { AuthService } from '@/lib/services/auth-services';
 import { passwordRequirements } from '@/lib/constants';
 import { validatePassword } from '@/lib/utils/validation';
 import { Modal } from '@/components/ui/Modal';
+import { SignUpButton, ApplyNowButton } from '@/components';
 
 export const SignupForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -131,13 +132,14 @@ export const SignupForm: React.FC = () => {
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
-        <button
+        
+        <SignUpButton
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+          className="w-full justify-center"
         >
           {loading ? 'Creating account...' : 'Create Account'}
-        </button>
+        </SignUpButton>
       </form>
 
       <Modal
@@ -150,16 +152,14 @@ export const SignupForm: React.FC = () => {
             We've sent a verification email to <strong>{email}</strong>. 
             Please check your inbox and click the verification link to activate your account.
           </p>
-          <button
+          <ApplyNowButton
             onClick={() => setShowValidationModal(false)}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+            className="w-full justify-center"
           >
             OK
-          </button>
+          </ApplyNowButton>
         </div>
       </Modal>
     </>
   );
 };
-
-

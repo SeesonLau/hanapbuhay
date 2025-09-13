@@ -1,4 +1,3 @@
-// components/buttons/UploadPhotoButton.tsx
 import { ButtonProps } from '../types';
 import { getBlueColor, getWhiteColor } from '@/lib/colors';
 import { FaUpload } from 'react-icons/fa';

@@ -1,4 +1,3 @@
-// components/buttons/CancelButton.tsx
 import { ButtonProps } from '../types';
 import { getGrayColor, getBlackColor } from '@/lib/colors';
 

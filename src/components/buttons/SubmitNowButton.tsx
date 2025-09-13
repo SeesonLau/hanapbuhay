@@ -1,4 +1,3 @@
-// components/buttons/SubmitNowButton.tsx
 import { ButtonProps } from '../types';
 import { getBlueColor, getWhiteColor } from '@/lib/colors';
 

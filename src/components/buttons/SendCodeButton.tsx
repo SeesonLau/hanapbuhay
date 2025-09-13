@@ -1,4 +1,3 @@
-// components/buttons/SendCodeButton.tsx
 import { ButtonProps } from '../types';
 import { getBlueDarkColor, getWhiteColor } from '@/lib/colors';
 
