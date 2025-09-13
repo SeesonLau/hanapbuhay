@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Profile } from "@/lib/models/profile";
 import { ProfileService } from "@/lib/services/profile-services";
+import { toast } from "react-hot-toast";
+import { ProfileMessages } from "@/resources/messages/profile";
 
 interface ProfileFormProps {
   userId: string;
@@ -36,7 +38,7 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
         setEmail(userEmail); 
       }
     } catch (err) {
-      console.error("Error loading profile or email:", err);
+      toast.error(ProfileMessages.LOAD_ERROR);
     } finally {
       setLoading(false);
     }
@@ -71,24 +73,35 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
     if (!profile) return;
     setSaving(true);
 
-    try {
+     try {
       let uploadedUrl = profile.profilePictureUrl ?? null;
       if (selectedFile) {
-        uploadedUrl = await ProfileService.uploadProfileImage(userId, selectedFile);
+        const result = await ProfileService.uploadProfileImage(userId, selectedFile);
+        if (!result) {
+          toast.error(ProfileMessages.UPLOAD_ERROR);
+          setSaving(false);
+          return;
+        }
+        uploadedUrl = result;
       }
 
       const fullName = `${firstName} ${lastName}`.trim();
-      await ProfileService.upsertProfile({ ...profile, name: fullName, profilePictureUrl: uploadedUrl });
-      alert("Profile saved successfully!");
+      const success = await ProfileService.upsertProfile({ ...profile, name: fullName, profilePictureUrl: uploadedUrl });
+      
+      if (success) {
+        toast.success(ProfileMessages.SAVE_SUCCESS);
+      } else {
+        toast.error(ProfileMessages.SAVE_ERROR);
+      }
     } catch (err) {
       console.error("Error saving profile:", err);
-      alert("Failed to save profile");
+      toast.error(ProfileMessages.SAVE_ERROR);
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <p className="text-black">Loading profile...</p>;
+  if (loading) return <p className="text-black">{ProfileMessages.LOADING}</p>;
 
   return (
     <div className="p-4 bg-white shadow rounded-lg w-1/2 text-black">

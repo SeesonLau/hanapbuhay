@@ -1,5 +1,7 @@
 import { supabase } from './supabase/client';
 import { Project } from '../models/profile';
+import { toast } from 'react-hot-toast';
+import { ProjectMessages } from '@/resources/messages/project';
 
 export class ProjectService {
   static async getProjectsByUserId(userId: string): Promise<Project[]> {
@@ -10,7 +12,7 @@ export class ProjectService {
       .order('createdAt', { ascending: false });
 
     if (error) {
-      console.error('Error fetching projects:', error);
+      toast.error(ProjectMessages.FETCH_PROJECTS_ERROR);
       return [];
     }
 
@@ -25,7 +27,7 @@ export class ProjectService {
       .single();
 
     if (error) {
-      console.error('Error fetching project:', error);
+      toast.error(ProjectMessages.FETCH_PROJECT_ERROR);
       return null;
     }
 
@@ -43,7 +45,7 @@ export class ProjectService {
       .maybeSingle(); 
 
     if (error) {
-      console.error('Error checking existing project:', error);
+      toast.error(ProjectMessages.CHECK_EXISTING_PROJECT_ERROR);
       return false;
     }
 
@@ -61,10 +63,11 @@ export class ProjectService {
     });
 
   if (error) {
-    console.error('Error saving project:', error);
+    toast.error(ProjectMessages.SAVE_PROJECT_ERROR);
     return false;
   }
 
+  toast.success(ProjectMessages.SAVE_PROJECT_SUCCESS);
   return true;
 }
 
@@ -78,7 +81,7 @@ export class ProjectService {
       .upload(filePath, file, { upsert: true });
 
     if (uploadError) {
-      console.error('Error uploading project image:', uploadError);
+      toast.error(ProjectMessages.UPLOAD_IMAGE_ERROR);
       return null;
     }
 
@@ -86,6 +89,7 @@ export class ProjectService {
       .from('project-images')
       .getPublicUrl(filePath);
 
+    toast.success(ProjectMessages.UPLOAD_IMAGE_SUCCESS);
     return data.publicUrl;
   }
 
@@ -99,10 +103,11 @@ export class ProjectService {
       .eq('projectId', projectId);
 
     if (error) {
-      console.error('Error deleting project:', error);
+      toast.error(ProjectMessages.DELETE_PROJECT_ERROR);
       return false;
     }
 
+    toast.success(ProjectMessages.DELETE_PROJECT_SUCCESS);
     return true;
   }
 }

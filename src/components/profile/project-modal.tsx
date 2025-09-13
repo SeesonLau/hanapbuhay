@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import { Project } from '@/lib/models/profile';
 import { ProjectService } from '@/lib/services/project-services';
+import { toast } from 'react-hot-toast';
+import { ProjectMessages } from '@/resources/messages/project';
+import { GeneralMessages } from '@/resources/messages/general';
 
 interface ProjectAddModalProps {
   userId: string;
-  project?: Project; // optional for editing
+  project?: Project; 
   onClose: () => void;
-  onProjectAdded: () => void; // refresh list
+  onProjectAdded: () => void; 
 }
 
 export default function ProjectAddModal({
@@ -23,18 +26,26 @@ export default function ProjectAddModal({
   const [loading, setLoading] = useState(false);
 
   const handleApply = async () => {
-    if (!title.trim()) return;
-
-    setLoading(true);
+    if (!title.trim()) {
+        toast.error(ProjectMessages.TITLE_REQUIRED);
+        return;
+    }
 
     try {
       let imageUrl = project?.projectPictureUrl || null;
       if (imageFile) {
-        imageUrl = await ProjectService.uploadProjectImage(userId, imageFile);
+        const uploadedUrl = await ProjectService.uploadProjectImage(userId, imageFile);
+        if (!uploadedUrl) {
+          toast.error(ProjectMessages.UPLOAD_IMAGE_ERROR);
+          setLoading(false);
+          return;
+        }
+        imageUrl = uploadedUrl;
       }
 
+
       const newProject: Project = {
-        projectId: project?.projectId, // undefined if creating
+        projectId: project?.projectId, 
         userId,
         title,
         description,
@@ -45,11 +56,14 @@ export default function ProjectAddModal({
 
       const success = await ProjectService.upsertProject(newProject);
       if (success) {
+        toast.success(ProjectMessages.SAVE_PROJECT_SUCCESS)
         onProjectAdded();
         onClose();
+      } else {
+        toast.error(ProjectMessages.SAVE_PROJECT_ERROR)
       }
     } catch (err) {
-      console.error('Error saving project:', err);
+      toast.error(GeneralMessages.UNEXPECTED_ERROR);
     } finally {
       setLoading(false);
     }

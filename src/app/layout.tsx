@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import '@/styles/globals.css'
+import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
   title: 'Hanapbuhay',
@@ -13,7 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen">
+        <Toaster position="top-center" />
+        {children}
+      </body>
     </html>
   )
 }
