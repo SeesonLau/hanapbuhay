@@ -1,0 +1,33 @@
+/* app/globals.css */
+.toggle {
+  position: relative;
+  width: 40px;
+  height: 20px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #ccc;
+  outline: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.toggle:checked {
+  background: #3b82f6;
+}
+
+.toggle::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  top: 1px;
+  left: 1px;
+  background: white;
+  transition: transform 0.3s;
+}
+
+.toggle:checked::before {
+  transform: translateX(20px);
+}
