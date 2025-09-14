@@ -101,12 +101,13 @@ export class AuthService {
       });
 
       if (error) {
-        if (error.message?.includes('Email not confirmed')) {
-          toast.error(AuthMessages.EMAIL_NOT_CONFIRMED);
-          return {
-            success: false,
-            message: AuthMessages.EMAIL_NOT_CONFIRMED,
-            needsConfirmation: true,
+        // Check if the error is due to email not confirmed
+        if (error.message.includes('Email not confirmed')) {
+          // Offer to resend confirmation email
+          return { 
+            success: false, 
+            message: 'Email not confirmed. Would you like us to resend the confirmation email?',
+            needsConfirmation: true 
           };
         }
         toast.error(error.message);
@@ -133,11 +134,26 @@ export class AuthService {
         return { success: false, message: error.message };
       }
 
-      toast.success(AuthMessages.CONFIRMATION_EMAIL_SENT);
-      return { success: true, message: AuthMessages.CONFIRMATION_EMAIL_SENT };
-    } catch (err) {
-      toast.error(AuthMessages.UNEXPECTED_ERROR);
-      return { success: false, message: AuthMessages.UNEXPECTED_ERROR };
+      return { success: true, message: 'Confirmation email sent successfully' };
+    } catch (error) {
+      return { success: false, message: 'An unexpected error occurred' };
+    }
+  }
+
+  static async verifyEmail(token: string): Promise<AuthResponse> {
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        token_hash: token,
+        type: 'signup',
+      });
+
+      if (error) {
+        return { success: false, message: error.message };
+      }
+
+      return { success: true, message: 'Email verified successfully', data };
+    } catch (error) {
+      return { success: false, message: 'An unexpected error occurred' };
     }
   }
 

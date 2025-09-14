@@ -1,5 +1,7 @@
+'use client';
 import Link from 'next/link';
 import { ROUTES } from '@/lib/constants';
+import { LoginButton, SignUpButton } from '@/components';
 
 export default function HomePage() {
   return (
@@ -9,23 +11,30 @@ export default function HomePage() {
           <h1 className="text-3xl font-bold text-gray-900">Welcome</h1>
           <p className="mt-2 text-gray-600">Please choose an option to continue</p>
         </div>
-        
-        <div className="space-y-4">
-          <Link
-            href={ROUTES.LOGIN}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 block text-center"
-          >
-            Login
+
+        <div className="space-y-4 flex flex-col items-center">
+          <Link href={ROUTES.LOGIN} className="w-full flex justify-center">
+            <LoginButton 
+              onClick={() => {}} 
+              className="w-full justify-center"
+            >
+              Login
+            </LoginButton>
           </Link>
           
-          <Link
-            href={ROUTES.SIGNUP}
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 block text-center"
-          >
-            Sign Up
+          <Link href={ROUTES.SIGNUP} className="w-full flex justify-center">
+            <SignUpButton 
+              onClick={() => {}} 
+              className="w-full justify-center"
+            >
+              Sign Up
+            </SignUpButton>
           </Link>
         </div>
+
+        
       </div>
     </div>
   );
 }
+
