@@ -5,6 +5,7 @@ import { AuthService } from '@/lib/services/auth-services';
 import { ROUTES } from '@/lib/constants';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { SignUpButton, ApplyNowButton } from '@/components';
 
 export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -76,10 +77,10 @@ export const LoginForm: React.FC = () => {
         />
       </div>
 
-      <button
+      <SignUpButton
         type="submit"
         disabled={loading}
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full justify-center"
       >
         {loading ? (
           <span className="flex items-center">
@@ -92,20 +93,20 @@ export const LoginForm: React.FC = () => {
         ) : (
           'Sign In'
         )}
-      </button>
+      </SignUpButton>
 
       {needsConfirmation && (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-md text-sm">
           <p className="font-medium mb-2">Email Verification Required</p>
           <p className="mb-3">Your email needs to be confirmed before you can sign in.</p>
-          <button
+          <ApplyNowButton
             type="button"
             onClick={handleResendConfirmation}
             disabled={resendLoading}
-            className="w-full bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 disabled:opacity-50 text-sm"
+            className="w-full justify-center bg-yellow-600 hover:bg-yellow-700"
           >
             {resendLoading ? 'Sending...' : 'Resend Confirmation Email'}
-          </button>
+          </ApplyNowButton>
         </div>
       )}
 
