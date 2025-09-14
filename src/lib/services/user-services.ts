@@ -1,5 +1,7 @@
 import { supabase } from './supabase/client';
 import { User } from '../models';
+import { toast } from 'react-hot-toast';
+import { UserMessages } from '@/resources/messages/user';
 
 export class UserService {
   static async getUserById(userId: string): Promise<User | null> {
@@ -10,7 +12,7 @@ export class UserService {
       .single();
 
     if (error) {
-      console.error('Error fetching user:', error);
+      toast.error(UserMessages.FETCH_USER_ERROR);
       return null;
     }
 
@@ -28,10 +30,11 @@ export class UserService {
       .eq('userId', userId);
 
     if (error) {
-      console.error('Error updating user:', error);
+      toast.error(UserMessages.UPDATE_USER_ERROR);
       return false;
     }
 
+    toast.success(UserMessages.UPDATE_USER_SUCCESS);
     return true;
   }
 }

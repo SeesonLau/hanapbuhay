@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Project } from '@/lib/models/profile';
 import { ProjectService } from '@/lib/services/project-services';
-import ProjectAddModal from './project-modal';
+import ProjectAddModal from './ProjectModal';
 
 interface ProjectsSectionProps {
   userId: string;
