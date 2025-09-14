@@ -16,6 +16,7 @@ import {
   SignUpButton,
   SeePreviousNotificationsButton
 } from '@/components';
+import NavigationBar from '@/components/navbar/LandingPageNavBar';
 
 export default function TestingPage() {
   const [clickCounts, setClickCounts] = useState({
@@ -65,8 +66,10 @@ export default function TestingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-4">
+      <NavigationBar />
+      <div className="pt-24">
+        <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-center">Component Testing Page</h1>
         
         <div className="mb-6 p-4 bg-white rounded-lg shadow">
@@ -376,6 +379,7 @@ export default function TestingPage() {
           </div>
         </div>
       </div>
+      </div>     
     </div>
   );
 }

@@ -125,8 +125,9 @@ export const SignupForm: React.FC = () => {
                      focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
         >
           {loading ? 'Creating account...' : 'Create Account'}
-        </SignUpButton>
+        </button>
       </form>
+      <SignUpButton/>
 
       <Modal
         isOpen={showValidationModal}
