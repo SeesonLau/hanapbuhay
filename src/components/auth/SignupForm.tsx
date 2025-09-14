@@ -11,38 +11,21 @@ export const SignupForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-
-    // Validate passwords match
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    // Validate password requirements
-    const errors = validatePassword(password);
-    if (errors.length > 0) {
-      setPasswordErrors(errors);
-      return;
-    }
 
     setLoading(true);
 
-    const result = await AuthService.signUp(email, password);
-    
+    const result = await AuthService.signUp(email, password, confirmPassword);
+
     if (result.success) {
       setShowValidationModal(true);
-    } else {
-      setError(result.message || 'Signup failed');
     }
-    
+
     setLoading(false);
   };
 
@@ -55,14 +38,14 @@ export const SignupForm: React.FC = () => {
   const getRequirementStatus = (requirement: { re: RegExp; label: string }) => {
     const isMet = requirement.re.test(password);
     const isError = passwordErrors.includes(requirement.label);
-    
+
     return {
       isMet,
       isError,
-      className: isMet 
-        ? 'text-green-600' 
-        : isError 
-        ? 'text-red-600' 
+      className: isMet
+        ? 'text-green-600'
+        : isError
+        ? 'text-red-600'
         : 'text-gray-500'
     };
   };
@@ -70,12 +53,6 @@ export const SignupForm: React.FC = () => {
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-        
         <div>
           <label className="block text-sm font-medium text-gray-700">Email</label>
           <input
@@ -83,7 +60,8 @@ export const SignupForm: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
+                       focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -97,9 +75,10 @@ export const SignupForm: React.FC = () => {
               checkPasswordRequirements(e.target.value);
             }}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
+                       focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
-          
+
           {/* Password Requirements List */}
           <div className="mt-2 p-3 bg-gray-50 rounded-md">
             <p className="text-sm font-medium text-gray-700 mb-2">Password must contain:</p>
@@ -107,11 +86,15 @@ export const SignupForm: React.FC = () => {
               {passwordRequirements.map((requirement, index) => {
                 const status = getRequirementStatus(requirement);
                 return (
-                  <li 
-                    key={index} 
+                  <li
+                    key={index}
                     className={`flex items-center ${status.className}`}
                   >
-                    <span className={`mr-2 ${status.isMet ? 'text-green-500' : 'text-gray-400'}`}>
+                    <span
+                      className={`mr-2 ${
+                        status.isMet ? 'text-green-500' : 'text-gray-400'
+                      }`}
+                    >
                       {status.isMet ? '✓' : '•'}
                     </span>
                     {requirement.label}
@@ -129,10 +112,10 @@ export const SignupForm: React.FC = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
+                       focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
-        
         <SignUpButton
           type="submit"
           disabled={loading}
