@@ -14,7 +14,8 @@ import {
   VisitProfileButton,
   LoginButton,
   SignUpButton,
-  SeePreviousNotificationsButton
+  SeePreviousNotificationsButton,
+  JobCard
 } from '@/components';
 import DashboardNavBar from '@/components/navbar/DashboardNavBar';
 
@@ -381,6 +382,63 @@ export default function TestingPage() {
             disabled={disabledStates.upload}
           />
           <p className="mt-2 text-sm text-gray-600">Clicked: {clickCounts.upload} times</p>
+        </div>
+      </div>
+
+      {/* JobCard Testing Section */}
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold mb-6 text-center">JobCard Component Testing</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+          <JobCard
+            title="LF: Babysitter"
+            description="As parents, we just want someone we can trust with our children. We need help looking after them while we're away or busy."
+            jobType="Baby Sitter"
+            experienceLevel="Entry level"
+            gender="Female"
+            location="Casuntingan, Mandaue City"
+            salary={{
+              amount: "5,000.00",
+              currency: "PHP",
+              period: "/month"
+            }}
+            postedDate="August 20, 2025"
+            applicantsCount={2}
+            onApply={() => console.log('Applied to Babysitter job')}
+          />
+          
+          <JobCard
+            title="Software Developer"
+            description="We are looking for a skilled software developer to join our team. You will be working on cutting-edge web applications using modern technologies. gdsadjhgsajfgjasgfjhgafjgsaf jsahdkjasd  jkashdkjasf jdsjgsajdhas jdjgashdgh"
+            jobType="IT"
+            experienceLevel="Professional"
+            gender="Any"
+            location="Makati City, Metro Manila"
+            salary={{
+              amount: "50,000.00",
+              currency: "PHP",
+              period: "/month"
+            }}
+            postedDate="August 19, 2025"
+            applicantsCount={15}
+            onApply={() => console.log('Applied to Software Developer job')}
+          />
+          
+          <JobCard
+            title="Marketing Assistant"
+            description="Join our marketing team and help us create engaging campaigns. Perfect for someone looking to start their career in digital marketing."
+            jobType="Marketing"
+            experienceLevel="Entry level"
+            gender="Any"
+            location="Quezon City, Metro Manila"
+            salary={{
+              amount: "25,000.00",
+              currency: "PHP",
+              period: "/month"
+            }}
+            postedDate="August 18, 2025"
+            applicantsCount={8}
+            onApply={() => console.log('Applied to Marketing Assistant job')}
+          />
         </div>
       </div>
     </div>

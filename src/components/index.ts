@@ -12,6 +12,7 @@ export { default as VisitProfileButton } from './buttons/VisitProfileButton';
 export { default as LoginButton } from './buttons/LoginButton';
 export { default as SignUpButton } from './buttons/SignUpButton';
 export { default as SeePreviousNotificationsButton } from './buttons/SeePreviousNotificationsButton';
+export { default as JobCard } from './cards/JobCard';
 /*
 import { 
   ApplyButton, 
