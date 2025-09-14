@@ -6,8 +6,8 @@ import { AuthService } from '@/lib/services/auth-services';
 import { UserService } from '@/lib/services/user-services';
 import { User } from '@/lib/models';
 import { ROUTES } from '@/lib/constants';
-import ProfileForm from '@/components/profile/profile-form';
-import ProjectsSection from '@/components/profile/project-section';
+import ProfileForm from '@/components/profile/ProfileForm';
+import ProjectsSection from '@/components/profile/ProjectSection';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);

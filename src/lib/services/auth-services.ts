@@ -5,16 +5,21 @@ import { toast } from 'react-hot-toast';
 import { AuthMessages } from '@/resources/messages/auth';
 
 export class AuthService {
-  static async signUp(email: string, password: string): Promise<AuthResponse> {
+  static async signUp(email: string, password: string, confirmPassword: string): Promise<AuthResponse> {
     try {
       if (!validateEmail(email)) {
         toast.error(AuthMessages.INVALID_EMAIL);
-        return { success: false, message: 'Invalid email format' };
+        return { success: false, message: AuthMessages.INVALID_EMAIL };
       }
 
+      if (password !== confirmPassword) {
+        toast.error(AuthMessages.PASSWORD_MISMATCH);
+        return { success: false, message: AuthMessages.PASSWORD_MISMATCH };
+      }
+ 
       const passwordErrors = validatePassword(password);
       if (passwordErrors.length > 0) {
-        const msg = `Password requirements not met: ${passwordErrors.join(', ')}`;
+        const msg = `${AuthMessages.PASSWORD_REQUIREMENTS}: ${passwordErrors.join(', ')}`;
         toast.error(msg);
         return { success: false, message: msg };
       }
@@ -55,11 +60,31 @@ export class AuthService {
           return { success: false, message: dbError.message };
         }
 
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            userId: authData.user.id,
+            createdBy: authData.user.id,
+            updatedBy: authData.user.id,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+
+        if (profileError) {
+          await supabase
+            .from('users')
+            .delete()
+            .eq('userId', authData.user.id);
+
+          await supabase.auth.admin.deleteUser(authData.user.id);
+          toast.error(profileError.message);
+          return { success: false, message: profileError.message };
+        }
+
         toast.success(AuthMessages.SIGNUP_SUCCESS);
         return { success: true, message: AuthMessages.SIGNUP_SUCCESS, data: authData.user };
       }
       
-
       toast.error(AuthMessages.SIGNUP_ERROR);
       return { success: false, message: AuthMessages.SIGNUP_ERROR };
     } catch (err) {

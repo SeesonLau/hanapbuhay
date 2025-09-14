@@ -1,5 +1,7 @@
 import { supabase } from './supabase/client';
 import { Profile } from '../models/profile';
+import { toast } from 'react-hot-toast';
+import { ProfileMessages } from '@/resources/messages/profile';
 
 export class ProfileService {
   static async getEmailByUserId(userId: string): Promise<string | null> {
@@ -10,7 +12,7 @@ export class ProfileService {
       .single();
 
     if (error) {
-      console.error('Error fetching email:', error);
+      toast.error(ProfileMessages.FETCH_EMAIL_ERROR);
       return null;
     }
 
@@ -25,7 +27,7 @@ export class ProfileService {
       .single();
 
     if (error) {
-      console.error('Error fetching profile:', error);
+      toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
       return null;
     }
 
@@ -40,7 +42,7 @@ export class ProfileService {
       .single();
 
     if (fetchError && fetchError.code !== 'PGRST116') { 
-      console.error('Error checking existing profile:', fetchError);
+      toast.error(ProfileMessages.CHECK_EXISTING_PROFILE_ERROR);
       return false;
     }
 
@@ -55,13 +57,12 @@ export class ProfileService {
       });
 
     if (error) {
-      console.error('Error saving profile:', error);
+      toast.error(ProfileMessages.SAVE_PROFILE_ERROR);
       return false;
     }
 
     return true;
   }
-
 
   static async uploadProfileImage(userId: string, file: File): Promise<string | null> {
     const fileExt = file.name.split('.').pop();
@@ -73,11 +74,10 @@ export class ProfileService {
       .upload(filePath, file, { upsert: true });
 
     if (uploadError) {
-      console.error('Error uploading image:', uploadError);
+      toast.error(ProfileMessages.UPLOAD_IMAGE_ERROR);
       return null;
     }
 
-    // Get public URL
     const { data } = supabase.storage
       .from('profile-images')
       .getPublicUrl(filePath);
