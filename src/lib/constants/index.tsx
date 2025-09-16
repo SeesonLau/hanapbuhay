@@ -13,5 +13,8 @@ export const ROUTES = {
   FORGOT_PASSWORD: '/forgot-password',
   DASHBOARD: '/dashboard',
   CHAT: '/chat',
-  PROFILE: '/profile'
+  PROFILE: '/profile',
+  FIND_JOBS: '/find-jobs',
+  MANAGE_POSTS: '/manage-posts',
+  APPLICATIONS: '/applications',
 };
