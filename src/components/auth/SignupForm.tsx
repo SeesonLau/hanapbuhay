@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { AuthService } from '@/lib/services/auth-services';
 import { passwordRequirements } from '@/lib/constants';
 import { validatePassword } from '@/lib/utils/validation';
-import { Modal } from '@/components/ui/Modal';
+import { Modal } from '@/components/modals/Modal';
 import { SignUpButton, ApplyNowButton } from '@/components';
 
 export const SignupForm: React.FC = () => {

@@ -1,3 +1,4 @@
+// lib/constants/index.tsx
 export const passwordRequirements = [
   { re: /.{8,}/, label: 'At least 8 characters' },
   { re: /[A-Z]/, label: 'At least one uppercase letter' },
@@ -13,5 +14,8 @@ export const ROUTES = {
   FORGOT_PASSWORD: '/forgot-password',
   DASHBOARD: '/dashboard',
   CHAT: '/chat',
-  PROFILE: '/profile'
+  PROFILE: '/profile',
+  MANAGEJOBPOSTS: '/manageJobPosts',
+  APPLIEDJOBS: '/appliedJobs',
+  FINDJOBS: '/findJobs'
 };
