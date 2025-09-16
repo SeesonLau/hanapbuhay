@@ -42,10 +42,6 @@ export default function DashboardPage() {
     router.push(ROUTES.CHAT); 
   };
 
-  const handleTestingClick = () => {
-    router.push('/testing'); 
-  };
-
   const openSettings = () => {
     setIsSettingsOpen(true);
   };

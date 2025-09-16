@@ -5,7 +5,16 @@ import { AuthService } from '@/lib/services/auth-services';
 import { passwordRequirements } from '@/lib/constants';
 import { validatePassword } from '@/lib/utils/validation';
 import { Modal } from '@/components/modals/Modal';
-import { SignUpButton, ApplyNowButton } from '@/components';
+import Button from '@/components/ui/Button';
+import { 
+  getGrayColor, 
+  getNeutral600Color, 
+  TYPOGRAPHY_CLASSES, 
+  getBlueColor, 
+  getRedColor, 
+  getGreenColor,
+  getBlueDarkColor
+} from '@/styles';
 
 export const SignupForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -14,19 +23,41 @@ export const SignupForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoading(true);
+    setError('');
 
-    const result = await AuthService.signUp(email, password, confirmPassword);
-
-    if (result.success) {
-      setShowValidationModal(true);
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
     }
 
-    setLoading(false);
+    // Validate password requirements
+    const validationErrors = validatePassword(password);
+    if (validationErrors.length > 0) {
+      setError('Please fix the password requirements below');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const result = await AuthService.signUp(email, password, confirmPassword);
+
+      if (result.success) {
+        setShowValidationModal(true);
+      } else {
+        setError(result.message || 'Failed to create account. Please try again.');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const checkPasswordRequirements = (pwd: string) => {
@@ -53,20 +84,41 @@ export const SignupForm: React.FC = () => {
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div 
+            className="p-3 rounded-md text-sm"
+            style={{
+              backgroundColor: '#FEF2F2',
+              color: '#DC2626',
+              border: '1px solid #FECACA'
+            }}
+          >
+            {error}
+          </div>
+        )}
+
         <div>
-          <label className="block text-sm font-medium text-gray-700">Email</label>
+          <label 
+            className={`block ${TYPOGRAPHY_CLASSES.small} font-medium text-gray-700`}
+          >
+            Email
+          </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
-                       focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter your email"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Password</label>
+          <label 
+            className={`block ${TYPOGRAPHY_CLASSES.small} font-medium text-gray-700`}
+          >
+            Password
+          </label>
           <input
             type="password"
             value={password}
@@ -75,25 +127,31 @@ export const SignupForm: React.FC = () => {
               checkPasswordRequirements(e.target.value);
             }}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
-                       focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Create a password"
           />
 
           {/* Password Requirements List */}
-          <div className="mt-2 p-3 bg-gray-50 rounded-md">
-            <p className="text-sm font-medium text-gray-700 mb-2">Password must contain:</p>
+          <div className="mt-2 p-3 rounded-md bg-gray-50 border border-gray-200">
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              Password must contain:
+            </p>
             <ul className="space-y-1 text-sm">
               {passwordRequirements.map((requirement, index) => {
                 const status = getRequirementStatus(requirement);
                 return (
                   <li
                     key={index}
-                    className={`flex items-center ${status.className}`}
+                    className="flex items-center"
+                    style={{
+                      color: status.isMet ? '#059669' : status.isError ? '#DC2626' : '#4B5563'
+                    }}
                   >
                     <span
-                      className={`mr-2 ${
-                        status.isMet ? 'text-green-500' : 'text-gray-400'
-                      }`}
+                      className="mr-2"
+                      style={{
+                        color: status.isMet ? '#059669' : '#4B5563'
+                      }}
                     >
                       {status.isMet ? '✓' : '•'}
                     </span>
@@ -106,23 +164,33 @@ export const SignupForm: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+          <label 
+            className={`block ${TYPOGRAPHY_CLASSES.small} font-medium text-gray-700`}
+          >
+            Confirm Password
+          </label>
           <input
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
-                       focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Confirm your password"
           />
         </div>
-        <SignUpButton
+        
+        <Button
           type="submit"
           disabled={loading}
           className="w-full justify-center"
+          isLoading={loading}
+          variant="primary"
+          size="lg"
+          fullRounded={true}
+          useCustomHover={true}
         >
           {loading ? 'Creating account...' : 'Create Account'}
-        </SignUpButton>
+        </Button>
       </form>
 
       <Modal
@@ -131,16 +199,17 @@ export const SignupForm: React.FC = () => {
         title="Email Verification"
       >
         <div className="space-y-4">
-          <p className="text-gray-600">
+          <p className="text-gray-700">
             We've sent a verification email to <strong>{email}</strong>. 
             Please check your inbox and click the verification link to activate your account.
           </p>
-          <ApplyNowButton
+          <Button
             onClick={() => setShowValidationModal(false)}
             className="w-full justify-center"
+            variant="primary"
           >
             OK
-          </ApplyNowButton>
+          </Button>
         </div>
       </Modal>
     </>
