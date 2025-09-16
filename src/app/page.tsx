@@ -1,40 +1,57 @@
+// src/app/page.tsx
 'use client';
 import Link from 'next/link';
 import { ROUTES } from '@/lib/constants';
 import { LoginButton, SignUpButton } from '@/components';
+import HeaderHome from '@/components/ui/HeaderHome';
+import BenefitsSection from '@/components/home/BenefitsSection';
+import HowItWorksSection from '@/components/home/HowItWorksSection';
+import TestimonialsSection from '@/components/home/TestimonialsSection';
+import ContactUsSection from '@/components/home/ContactUsSection';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome</h1>
-          <p className="mt-2 text-gray-600">Please choose an option to continue</p>
-        </div>
+    <div className="min-h-screen" style={{ backgroundColor: '#141515' }}>
+      {/* Header Section */}
+      <header className="w-full flex justify-center pt-8">
+        <HeaderHome />
+      </header>
 
-        <div className="space-y-4 flex flex-col items-center">
-          <Link href={ROUTES.LOGIN} className="w-full flex justify-center">
-            <LoginButton 
-              onClick={() => {}} 
-              className="w-full justify-center"
-            >
-              Login
-            </LoginButton>
-          </Link>
-          
-          <Link href={ROUTES.SIGNUP} className="w-full flex justify-center">
-            <SignUpButton 
-              onClick={() => {}} 
-              className="w-full justify-center"
-            >
-              Sign Up
-            </SignUpButton>
-          </Link>
-        </div>
+      {/* Default Section with Login/Signup */}
+      <section id="default" className="min-h-screen flex items-center justify-center">
+        <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900">Welcome</h1>
+            <p className="mt-2 text-gray-600">Please choose an option to continue</p>
+          </div>
 
-        
-      </div>
+          <div className="space-y-4 flex flex-col items-center">
+            <Link href={ROUTES.LOGIN} className="w-full flex justify-center">
+              <LoginButton 
+                onClick={() => {}} 
+                className="w-full justify-center"
+              >
+                Login
+              </LoginButton>
+            </Link>
+            
+            <Link href={ROUTES.SIGNUP} className="w-full flex justify-center">
+              <SignUpButton 
+                onClick={() => {}} 
+                className="w-full justify-center"
+              >
+                Sign Up
+              </SignUpButton>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Other Sections */}
+      <BenefitsSection />
+      <HowItWorksSection />
+      <TestimonialsSection />
+      <ContactUsSection />
     </div>
   );
 }
-
