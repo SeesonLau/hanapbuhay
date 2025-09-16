@@ -21,7 +21,7 @@ export default function DashboardPage() {
       const currentUser = await AuthService.getCurrentUser();
       
       if (!currentUser) {
-        router.push(ROUTES.LOGIN);
+        router.push(ROUTES.HOME);
         return;
       }
 
