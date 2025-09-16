@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthService } from '@/lib/services/auth-services';
 import { ROUTES } from '@/lib/constants';
-import { getWhiteColor } from '@/lib/colors';
+import { getWhiteColor, TYPOGRAPHY, fontClasses } from '@/styles';
 
 export default function HeaderDashboard() {
   const router = useRouter();
@@ -38,7 +38,15 @@ export default function HeaderDashboard() {
         {/* Find Jobs */}
         <Link href={ROUTES.FINDJOBS}>
           <button className="flex justify-center items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="text-center justify-center text-neutral-200 text-lg font-medium font-['DM_Sans'] leading-relaxed px-4 py-2">
+            <div 
+              className="text-center justify-center text-neutral-200 px-4 py-2"
+              style={{
+                fontSize: TYPOGRAPHY.body.fontSize,
+                fontWeight: TYPOGRAPHY.body.fontWeight,
+                lineHeight: TYPOGRAPHY.body.lineHeight,
+                fontFamily: TYPOGRAPHY.body.fontFamily
+              }}
+            >
               Find Jobs
             </div>
           </button>
@@ -47,7 +55,15 @@ export default function HeaderDashboard() {
         {/* Manage Job Posts */}
         <Link href={ROUTES.MANAGEJOBPOSTS}>
           <button className="flex justify-center items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="text-center justify-center text-neutral-200 text-lg font-medium font-['DM_Sans'] leading-relaxed px-4 py-2">
+            <div 
+              className="text-center justify-center text-neutral-200 px-4 py-2"
+              style={{
+                fontSize: TYPOGRAPHY.body.fontSize,
+                fontWeight: TYPOGRAPHY.body.fontWeight,
+                lineHeight: TYPOGRAPHY.body.lineHeight,
+                fontFamily: TYPOGRAPHY.body.fontFamily
+              }}
+            >
               Manage Job Posts
             </div>
           </button>
@@ -56,7 +72,15 @@ export default function HeaderDashboard() {
         {/* Applied Jobs */}
         <Link href={ROUTES.APPLIEDJOBS}>
           <button className="flex justify-center items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="text-center justify-center text-neutral-200 text-lg font-medium font-['DM_Sans'] leading-relaxed px-4 py-2">
+            <div 
+              className="text-center justify-center text-neutral-200 px-4 py-2"
+              style={{
+                fontSize: TYPOGRAPHY.body.fontSize,
+                fontWeight: TYPOGRAPHY.body.fontWeight,
+                lineHeight: TYPOGRAPHY.body.lineHeight,
+                fontFamily: TYPOGRAPHY.body.fontFamily
+              }}
+            >
               Applied Jobs
             </div>
           </button>
@@ -65,7 +89,15 @@ export default function HeaderDashboard() {
         {/* Chat */}
         <Link href={ROUTES.CHAT}>
           <button className="flex justify-center items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="text-center justify-center text-neutral-200 text-lg font-medium font-['DM_Sans'] leading-relaxed px-4 py-2">
+            <div 
+              className="text-center justify-center text-neutral-200 px-4 py-2"
+              style={{
+                fontSize: TYPOGRAPHY.body.fontSize,
+                fontWeight: TYPOGRAPHY.body.fontWeight,
+                lineHeight: TYPOGRAPHY.body.lineHeight,
+                fontFamily: TYPOGRAPHY.body.fontFamily
+              }}
+            >
               Chat
             </div>
           </button>
@@ -88,7 +120,15 @@ export default function HeaderDashboard() {
           onClick={handleSignOut}
           className="flex justify-center items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
         >
-          <div className="text-center justify-center text-neutral-200 text-lg font-medium font-['DM_Sans'] leading-relaxed px-4 py-2">
+          <div 
+            className="text-center justify-center text-neutral-200 px-4 py-2"
+            style={{
+              fontSize: TYPOGRAPHY.body.fontSize,
+              fontWeight: TYPOGRAPHY.body.fontWeight,
+              lineHeight: TYPOGRAPHY.body.lineHeight,
+              fontFamily: TYPOGRAPHY.body.fontFamily
+            }}
+          >
             Sign Out
           </div>
         </button>
