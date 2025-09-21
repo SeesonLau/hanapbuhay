@@ -20,6 +20,7 @@ import { TYPOGRAPHY } from '@/styles/typography';
 import { AuthService } from '@/lib/services/auth-services';
 import { ROUTES } from '@/lib/constants';
 import SettingsModal from '@/components/modals/SettingsModal';
+import NotificationPopUp from './NotificationPopUp';
 
 interface HeaderDashboardProps {
   userName?: string;
@@ -45,6 +46,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false); // New state for notifications TEMPORARY
   const [activeLink, setActiveLink] = useState('');
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
   
@@ -64,16 +66,19 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
     setIsProfileOpen(false);
+    setShowNotifications(false); 
   };
 
   const toggleProfile = () => {
     setIsProfileOpen(!isProfileOpen);
     setIsMenuOpen(false);
+    setShowNotifications(false);
   };
 
   const openSettings = () => {
     setIsSettingsOpen(true);
     setIsProfileOpen(false);
+    setShowNotifications(false);
   };
 
   const closeSettings = () => {
@@ -102,6 +107,10 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
       ) {
         setIsProfileOpen(false);
       }
+
+      if (!(event.target as HTMLElement).closest('#notification-button')) {
+        setShowNotifications(false);
+      }
     };
 
     if (isMenuOpen || isProfileOpen) {
@@ -111,7 +120,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isMenuOpen, isProfileOpen]);
+  }, [isMenuOpen, isProfileOpen, showNotifications]);
 
   const navigationLinks = [
     { id: 'find-jobs', label: 'Find Jobs', route: ROUTES.FINDJOBS },
@@ -185,21 +194,17 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
             <div className="flex items-center space-x-4">
               {/* Notification Bell */}
               <div className="relative">
-                <button 
+                <button
+                  id="notification-button"
                   className="p-2 transition-colors duration-300 focus:outline-none"
-                  style={{ 
-                    color: getWhiteColor(),
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.color = getBlueColor();
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.color = getWhiteColor();
-                  }}
+                  style={{ color: getWhiteColor() }}
+                  onMouseOver={(e) => (e.currentTarget.style.color = getBlueColor())}
+                  onMouseOut={(e) => (e.currentTarget.style.color = getWhiteColor())}
+                  onClick={() => setShowNotifications(!showNotifications)}
                 >
                   <HiBell className="w-6 h-6" />
-                  {notificationCount > 0 && (
-                    <span 
+                  {notificationCount && notificationCount > 0 && (
+                    <span
                       className="absolute -top-1 -right-1 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
                       style={{ backgroundColor: getRedColor() }}
                     >
@@ -207,6 +212,8 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                     </span>
                   )}
                 </button>
+
+                {showNotifications && <NotificationPopUp />}
               </div>
 
               {/* User Profile */}
