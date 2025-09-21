@@ -1,3 +1,4 @@
+// src/app/profile/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -8,6 +9,7 @@ import { User } from '@/lib/models';
 import { ROUTES } from '@/lib/constants';
 import ProfileForm from '@/components/profile/ProfileForm';
 import ProjectsSection from '@/components/profile/ProjectSection';
+import HeaderDashboard from '@/components/ui/HeaderDashboard';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -20,7 +22,7 @@ export default function ProfilePage() {
       const currentUser = await AuthService.getCurrentUser();
 
       if (!currentUser) {
-        router.push(ROUTES.LOGIN);
+        router.push(ROUTES.HOME);
         return;
       }
 
@@ -42,19 +44,10 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <h1 className="text-xl font-semibold">Profile</h1>
-            <button
-              onClick={() => router.push(ROUTES.DASHBOARD)}
-              className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
-            >
-              Back to Dashboard
-            </button>
-          </div>
-        </div>
-      </nav>
+      {/* Replace the nav with HeaderDashboard */}
+      <header className="w-full flex justify-center pt-8 px-4">
+        <HeaderDashboard />
+      </header>
 
       {user && (
         <div className="text-center mt-6">
