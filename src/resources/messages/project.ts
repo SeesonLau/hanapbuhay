@@ -9,6 +9,7 @@ export const ProjectMessages = {
   UPLOAD_IMAGE_SUCCESS: 'Project image uploaded successfully.',
   DELETE_PROJECT_ERROR: 'Error deleting project.',
   DELETE_PROJECT_SUCCESS: 'Project deleted successfully.',
+  FILE_SIZE_EXCEEDED: 'File size must be less than 5 MBs.',
 
   //UI messages
   TITLE_REQUIRED: 'Title is required',

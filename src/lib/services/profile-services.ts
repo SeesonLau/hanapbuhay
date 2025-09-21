@@ -78,15 +78,23 @@ export class ProfileService {
   }
 
   static async uploadProfileImage(userId: string, file: File): Promise<string | null> {
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error(ProfileMessages.FILE_SIZE_EXCEEDED);
+      return null;
+    }
+
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}-${Date.now()}.${fileExt}`;
-    const filePath = `profile-images/${fileName}`;
+    const filePath = `${userId}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
-      .from('profile-images') 
-      .upload(filePath, file, { upsert: true });
+      .from('profile-images')
+      .upload(filePath, file);
 
     if (uploadError) {
+      console.error("Upload error:", uploadError.message);
       toast.error(ProfileMessages.UPLOAD_IMAGE_ERROR);
       return null;
     }

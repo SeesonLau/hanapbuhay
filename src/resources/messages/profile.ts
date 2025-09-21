@@ -1,3 +1,5 @@
+import { FILE } from "dns";
+
 export const ProfileMessages = {
   //service messages
   FETCH_EMAIL_ERROR: 'Error fetching email.',
@@ -7,6 +9,7 @@ export const ProfileMessages = {
   SAVE_PROFILE_SUCCESS: 'Profile saved successfully.',
   UPLOAD_IMAGE_ERROR: 'Error uploading profile image.',
   UPLOAD_IMAGE_SUCCESS: 'Profile image uploaded successfully.',
+  FILE_SIZE_EXCEEDED: 'File size must be less than 5 MB.',
 
   //UI messages
   LOADING: "Loading profile...",
