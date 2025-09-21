@@ -56,7 +56,6 @@ export default function ProjectAddModal({
 
       const success = await ProjectService.upsertProject(newProject);
       if (success) {
-        toast.success(ProjectMessages.SAVE_PROJECT_SUCCESS)
         onProjectAdded();
         onClose();
       } else {

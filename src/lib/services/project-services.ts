@@ -35,41 +35,55 @@ export class ProjectService {
   }
 
   static async upsertProject(project: Project): Promise<boolean> {
-  let existing = null;
+    try {
+      let existing = null;
 
-  if (project.projectId) {
-    const { data, error } = await supabase
-      .from('projects')
-      .select('projectId')
-      .eq('projectId', project.projectId)
-      .maybeSingle(); 
+      if (project.projectId) {
+        const { data, error } = await supabase
+          .from('projects')
+          .select('projectId, createdAt, createdBy')
+          .eq('projectId', project.projectId)
+          .single();
 
-    if (error) {
+        if (error && error.code !== 'PGRST116') {
+          toast.error(ProjectMessages.CHECK_EXISTING_PROJECT_ERROR);
+          return false;
+        }
+
+        existing = data;
+      }
+
+      const payload: any = {
+        ...project,
+        updatedAt: new Date().toISOString(),
+        updatedBy: project.userId,
+      };
+
+      if (!existing) {
+        payload.createdAt = new Date().toISOString();
+        payload.createdBy = project.userId;
+      } else {
+        payload.createdAt = existing.createdAt;
+        payload.createdBy = existing.createdBy;
+      }
+
+      const { error } = await supabase.from('projects').upsert(payload, {
+        onConflict: 'projectId',
+      });
+
+      if (error) {
+        toast.error(ProjectMessages.SAVE_PROJECT_ERROR);
+        return false;
+      }
+
+      toast.success(ProjectMessages.SAVE_PROJECT_SUCCESS);
+      return true;
+    } catch {
       toast.error(ProjectMessages.CHECK_EXISTING_PROJECT_ERROR);
       return false;
     }
-
-    existing = data;
   }
 
-  const { error } = await supabase
-    .from('projects')
-    .upsert({
-      ...project,
-      updatedAt: new Date().toISOString(),
-      updatedBy: project.userId,
-      createdAt: existing ? undefined : new Date().toISOString(),
-      createdBy: existing ? undefined : project.userId,
-    });
-
-  if (error) {
-    toast.error(ProjectMessages.SAVE_PROJECT_ERROR);
-    return false;
-  }
-
-  toast.success(ProjectMessages.SAVE_PROJECT_SUCCESS);
-  return true;
-}
 
   static async uploadProjectImage(userId: string, file: File): Promise<string | null> {
     const fileExt = file.name.split('.').pop();
