@@ -1,6 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+import { 
+  getWhiteColor, 
+  getGrayColor, 
+  getNeutral100Color,
+  getNeutral300Color,
+  getNeutral600Color,
+  getPrimary500Color,
+  getRedColor
+} from '@/styles/colors';
+import { fontClasses } from '@/styles/fonts';
+import { TYPOGRAPHY } from '@/styles/typography';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -134,30 +145,76 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 flex items-center justify-center z-50 p-4 transition-opacity duration-300"
+      style={{ backgroundColor: getWhiteColor(0.5) }}
       onClick={onClose}
     >
       <div 
-        className="bg-[#F1F6FA] rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        className={`${fontClasses.body} rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto transition-transform duration-300`}
+        style={{ 
+          backgroundColor: getNeutral100Color(),
+          color: getGrayColor('neutral600')
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-semibold mb-6 text-[#141515]">Settings</h2>
+        <h2 
+          className="text-xl font-semibold mb-6"
+          style={{ 
+            fontSize: TYPOGRAPHY.h3.fontSize,
+            fontFamily: TYPOGRAPHY.h3.fontFamily,
+            fontWeight: TYPOGRAPHY.h3.fontWeight,
+            color: getGrayColor('neutral600')
+          }}
+        >
+          Settings
+        </h2>
         
         {user && (
-          <div className="mb-6 p-4 bg-white rounded-lg border border-gray-200">
-            <h3 className="font-medium text-[#141515] mb-3">User Information</h3>
+          <div 
+            className="mb-6 p-4 rounded-lg border"
+            style={{ 
+              backgroundColor: getWhiteColor(),
+              borderColor: getGrayColor('border')
+            }}
+          >
+            <h3 
+              className="font-medium mb-3"
+              style={{ color: getGrayColor('neutral600') }}
+            >
+              User Information
+            </h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-sm text-[#141515]"><span className="font-medium">Email:</span> {user.email}</p>
+                <p 
+                  className="text-sm"
+                  style={{ color: getGrayColor('neutral600') }}
+                >
+                  <span className="font-medium">Email:</span> {user.email}
+                </p>
               </div>
               <div>
-                <p className="text-sm text-[#141515]"><span className="font-medium">User ID:</span> {user.userId}</p>
+                <p 
+                  className="text-sm"
+                  style={{ color: getGrayColor('neutral600') }}
+                >
+                  <span className="font-medium">User ID:</span> {user.userId}
+                </p>
               </div>
               <div>
-                <p className="text-sm text-[#141515]"><span className="font-medium">Role:</span> {user.role}</p>
+                <p 
+                  className="text-sm"
+                  style={{ color: getGrayColor('neutral600') }}
+                >
+                  <span className="font-medium">Role:</span> {user.role}
+                </p>
               </div>
               <div>
-                <p className="text-sm text-[#141515]"><span className="font-medium">Member since:</span> {new Date(user.createdAt).toLocaleDateString()}</p>
+                <p 
+                  className="text-sm"
+                  style={{ color: getGrayColor('neutral600') }}
+                >
+                  <span className="font-medium">Member since:</span> {new Date(user.createdAt).toLocaleDateString()}
+                </p>
               </div>
             </div>
           </div>
@@ -165,58 +222,124 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
         
         <div className="space-y-6">
           {/* Password Change Section */}
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <h3 className="font-medium text-[#141515] mb-4">Change Password</h3>
+          <div 
+            className="p-4 rounded-lg border"
+            style={{ 
+              backgroundColor: getWhiteColor(),
+              borderColor: getGrayColor('border')
+            }}
+          >
+            <h3 
+              className="font-medium mb-4"
+              style={{ color: getGrayColor('neutral600') }}
+            >
+              Change Password
+            </h3>
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#141515] mb-1">Current Password</label>
+                <label 
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: getGrayColor('neutral600') }}
+                >
+                  Current Password
+                </label>
                 <input
                   type="password"
                   name="currentPassword"
                   value={passwordData.currentPassword}
                   onChange={handlePasswordChange}
-                  className={`w-full rounded-md border ${errors.currentPassword ? 'border-red-500' : 'border-gray-300'} p-2 focus:border-[#193D8F] focus:ring-[#193D8F]`}
+                  className={`w-full rounded-md border p-2 transition-colors duration-300`}
+                  style={{ 
+                    borderColor: errors.currentPassword ? getRedColor() : getGrayColor('border'),
+                    color: getGrayColor('neutral600'),
+                    backgroundColor: getWhiteColor()
+                  }}
                   placeholder="Enter current password"
                 />
                 {errors.currentPassword && (
-                  <p className="mt-1 text-sm text-red-500">{errors.currentPassword}</p>
+                  <p 
+                    className="mt-1 text-sm"
+                    style={{ color: getRedColor() }}
+                  >
+                    {errors.currentPassword}
+                  </p>
                 )}
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-[#141515] mb-1">New Password</label>
+                <label 
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: getGrayColor('neutral600') }}
+                >
+                  New Password
+                </label>
                 <input
                   type="password"
                   name="newPassword"
                   value={passwordData.newPassword}
                   onChange={handlePasswordChange}
-                  className={`w-full rounded-md border ${errors.newPassword ? 'border-red-500' : 'border-gray-300'} p-2 focus:border-[#193D8F] focus:ring-[#193D8F]`}
+                  className={`w-full rounded-md border p-2 transition-colors duration-300`}
+                  style={{ 
+                    borderColor: errors.newPassword ? getRedColor() : getGrayColor('border'),
+                    color: getGrayColor('neutral600'),
+                    backgroundColor: getWhiteColor()
+                  }}
                   placeholder="Enter new password (8-20 characters)"
                 />
                 {errors.newPassword && (
-                  <p className="mt-1 text-sm text-red-500">{errors.newPassword}</p>
+                  <p 
+                    className="mt-1 text-sm"
+                    style={{ color: getRedColor() }}
+                  >
+                    {errors.newPassword}
+                  </p>
                 )}
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-[#141515] mb-1">Confirm New Password</label>
+                <label 
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: getGrayColor('neutral600') }}
+                >
+                  Confirm New Password
+                </label>
                 <input
                   type="password"
                   name="confirmPassword"
                   value={passwordData.confirmPassword}
                   onChange={handlePasswordChange}
-                  className={`w-full rounded-md border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} p-2 focus:border-[#193D8F] focus:ring-[#193D8F]`}
+                  className={`w-full rounded-md border p-2 transition-colors duration-300`}
+                  style={{ 
+                    borderColor: errors.confirmPassword ? getRedColor() : getGrayColor('border'),
+                    color: getGrayColor('neutral600'),
+                    backgroundColor: getWhiteColor()
+                  }}
                   placeholder="Confirm new password"
                 />
                 {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>
+                  <p 
+                    className="mt-1 text-sm"
+                    style={{ color: getRedColor() }}
+                  >
+                    {errors.confirmPassword}
+                  </p>
                 )}
               </div>
               
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="bg-[#193D8F] text-white px-4 py-2 rounded-md hover:bg-[#152c6b] transition-colors"
+                  className="px-4 py-2 rounded-md transition-colors duration-300"
+                  style={{ 
+                    backgroundColor: getPrimary500Color(),
+                    color: getWhiteColor()
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = getPrimary500Color(0.8);
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = getPrimary500Color();
+                  }}
                 >
                   Change Password
                 </button>
@@ -225,17 +348,38 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
           </div>
           
           {/* Preferences Section */}
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <h3 className="font-medium text-[#141515] mb-4">Preferences</h3>
+          <div 
+            className="p-4 rounded-lg border"
+            style={{ 
+              backgroundColor: getWhiteColor(),
+              borderColor: getGrayColor('border')
+            }}
+          >
+            <h3 
+              className="font-medium mb-4"
+              style={{ color: getGrayColor('neutral600') }}
+            >
+              Preferences
+            </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-[#141515] mb-2">Theme</label>
+                <label 
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: getGrayColor('neutral600') }}
+                >
+                  Theme
+                </label>
                 <select
                   name="theme"
                   value={settings.theme}
                   onChange={handleInputChange}
-                  className="w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-[#193D8F] focus:ring-[#193D8F]"
+                  className="w-full rounded-md border p-2 transition-colors duration-300"
+                  style={{ 
+                    borderColor: getGrayColor('border'),
+                    color: getGrayColor('neutral600'),
+                    backgroundColor: getWhiteColor()
+                  }}
                 >
                   <option value="light">Light</option>
                   <option value="dark">Dark</option>
@@ -244,12 +388,22 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-[#141515] mb-2">Language</label>
+                <label 
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: getGrayColor('neutral600') }}
+                >
+                  Language
+                </label>
                 <select
                   name="language"
                   value={settings.language}
                   onChange={handleInputChange}
-                  className="w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-[#193D8F] focus:ring-[#193D8F]"
+                  className="w-full rounded-md border p-2 transition-colors duration-300"
+                  style={{ 
+                    borderColor: getGrayColor('border'),
+                    color: getGrayColor('neutral600'),
+                    backgroundColor: getWhiteColor()
+                  }}
                 >
                   <option value="en">English</option>
                   <option value="es">Spanish</option>
@@ -260,7 +414,12 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
             </div>
             
             <div className="mt-4">
-              <label className="block text-sm font-medium text-[#141515] mb-2">Notifications</label>
+              <label 
+                className="block text-sm font-medium mb-2"
+                style={{ color: getGrayColor('neutral600') }}
+              >
+                Notifications
+              </label>
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input
@@ -268,9 +427,18 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
                     name="email"
                     checked={settings.notifications.email}
                     onChange={handleInputChange}
-                    className="rounded border-gray-300 text-[#193D8F] focus:ring-[#193D8F]"
+                    className="rounded border-gray-300 transition-colors duration-300"
+                    style={{ 
+                      color: getPrimary500Color(),
+                      borderColor: getGrayColor('border')
+                    }}
                   />
-                  <span className="ml-2 text-[#141515]">Email notifications</span>
+                  <span 
+                    className="ml-2 text-sm"
+                    style={{ color: getGrayColor('neutral600') }}
+                  >
+                    Email notifications
+                  </span>
                 </label>
                 <label className="flex items-center">
                   <input
@@ -278,9 +446,18 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
                     name="push"
                     checked={settings.notifications.push}
                     onChange={handleInputChange}
-                    className="rounded border-gray-300 text-[#193D8F] focus:ring-[#193D8F]"
+                    className="rounded border-gray-300 transition-colors duration-300"
+                    style={{ 
+                      color: getPrimary500Color(),
+                      borderColor: getGrayColor('border')
+                    }}
                   />
-                  <span className="ml-2 text-[#141515]">Push notifications</span>
+                  <span 
+                    className="ml-2 text-sm"
+                    style={{ color: getGrayColor('neutral600') }}
+                  >
+                    Push notifications
+                  </span>
                 </label>
               </div>
             </div>
@@ -290,13 +467,33 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
         <div className="mt-8 flex justify-end space-x-3">
           <button
             onClick={onClose}
-            className="bg-gray-300 text-[#141515] px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+            className="px-4 py-2 rounded-md transition-colors duration-300"
+            style={{ 
+              backgroundColor: getGrayColor('neutral300'),
+              color: getGrayColor('neutral600')
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = getGrayColor('neutral400');
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = getGrayColor('neutral300');
+            }}
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="bg-[#193D8F] text-white px-4 py-2 rounded-md hover:bg-[#152c6b] transition-colors"
+            className="px-4 py-2 rounded-md transition-colors duration-300"
+            style={{ 
+              backgroundColor: getPrimary500Color(),
+              color: getWhiteColor()
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = getPrimary500Color(0.8);
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = getPrimary500Color();
+            }}
           >
             Save Preferences
           </button>
