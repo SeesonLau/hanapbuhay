@@ -36,13 +36,11 @@ export default function ProjectAddModal({
       if (imageFile) {
         const uploadedUrl = await ProjectService.uploadProjectImage(userId, imageFile);
         if (!uploadedUrl) {
-          toast.error(ProjectMessages.UPLOAD_IMAGE_ERROR);
           setLoading(false);
           return;
         }
         imageUrl = uploadedUrl;
       }
-
 
       const newProject: Project = {
         projectId: project?.projectId, 
@@ -56,7 +54,6 @@ export default function ProjectAddModal({
 
       const success = await ProjectService.upsertProject(newProject);
       if (success) {
-        toast.success(ProjectMessages.SAVE_PROJECT_SUCCESS)
         onProjectAdded();
         onClose();
       } else {

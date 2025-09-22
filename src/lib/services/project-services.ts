@@ -35,63 +35,84 @@ export class ProjectService {
   }
 
   static async upsertProject(project: Project): Promise<boolean> {
-  let existing = null;
+    try {
+      let existing = null;
 
-  if (project.projectId) {
-    const { data, error } = await supabase
-      .from('projects')
-      .select('projectId')
-      .eq('projectId', project.projectId)
-      .maybeSingle(); 
+      if (project.projectId) {
+        const { data, error } = await supabase
+          .from('projects')
+          .select('projectId, createdAt, createdBy')
+          .eq('projectId', project.projectId)
+          .single();
 
-    if (error) {
+        if (error && error.code !== 'PGRST116') {
+          toast.error(ProjectMessages.CHECK_EXISTING_PROJECT_ERROR);
+          return false;
+        }
+
+        existing = data;
+      }
+
+      const payload: any = {
+        ...project,
+        updatedAt: new Date().toISOString(),
+        updatedBy: project.userId,
+      };
+
+      if (!existing) {
+        payload.createdAt = new Date().toISOString();
+        payload.createdBy = project.userId;
+      } else {
+        payload.createdAt = existing.createdAt;
+        payload.createdBy = existing.createdBy;
+      }
+
+      const { error } = await supabase.from('projects').upsert(payload, {
+        onConflict: 'projectId',
+      });
+
+      if (error) {
+        toast.error(ProjectMessages.SAVE_PROJECT_ERROR);
+        return false;
+      }
+
+      toast.success(ProjectMessages.SAVE_PROJECT_SUCCESS);
+      return true;
+    } catch {
       toast.error(ProjectMessages.CHECK_EXISTING_PROJECT_ERROR);
       return false;
     }
-
-    existing = data;
   }
-
-  const { error } = await supabase
-    .from('projects')
-    .upsert({
-      ...project,
-      updatedAt: new Date().toISOString(),
-      updatedBy: project.userId,
-      createdAt: existing ? undefined : new Date().toISOString(),
-      createdBy: existing ? undefined : project.userId,
-    });
-
-  if (error) {
-    toast.error(ProjectMessages.SAVE_PROJECT_ERROR);
-    return false;
-  }
-
-  toast.success(ProjectMessages.SAVE_PROJECT_SUCCESS);
-  return true;
-}
 
   static async uploadProjectImage(userId: string, file: File): Promise<string | null> {
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error(ProjectMessages.FILE_SIZE_EXCEEDED);
+      return null;
+    }
+
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}-${Date.now()}.${fileExt}`;
-    const filePath = `project-images/${fileName}`;
+    const filePath = `${userId}/${fileName}`; // 👈 store in folder named by userId
 
     const { error: uploadError } = await supabase.storage
-      .from('project-images')
+      .from("project-images") // bucket name
       .upload(filePath, file, { upsert: true });
 
     if (uploadError) {
+      console.error("Upload error:", uploadError.message);
       toast.error(ProjectMessages.UPLOAD_IMAGE_ERROR);
       return null;
     }
 
     const { data } = supabase.storage
-      .from('project-images')
+      .from("project-images")
       .getPublicUrl(filePath);
 
-    toast.success(ProjectMessages.UPLOAD_IMAGE_SUCCESS);
     return data.publicUrl;
   }
+
 
   static async deleteProject(projectId: string, userId: string): Promise<boolean> {
     const { error } = await supabase

@@ -78,7 +78,6 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
       if (selectedFile) {
         const result = await ProfileService.uploadProfileImage(userId, selectedFile);
         if (!result) {
-          toast.error(ProfileMessages.UPLOAD_ERROR);
           setSaving(false);
           return;
         }
@@ -94,7 +93,6 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
         toast.error(ProfileMessages.SAVE_ERROR);
       }
     } catch (err) {
-      console.error("Error saving profile:", err);
       toast.error(ProfileMessages.SAVE_ERROR);
     } finally {
       setSaving(false);
