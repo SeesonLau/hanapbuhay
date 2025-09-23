@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useReducer, useState } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -59,6 +59,22 @@ export const PostForm: React.FC<PostFormProps> = ({
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isAuthorized, setIsAuthorized] = useState(true); // Assume authorized until checked
+
+  useEffect(() => {
+    const checkAuthorization = async () => {
+      // Only check authorization for existing posts
+      if (post?.postId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.id !== post.userId) {
+          setIsAuthorized(false);
+        }
+      }
+    };
+
+    checkAuthorization();
+  }, [post]);
+
 
   // This function initializes the form state, handling cases where
   // the post's type or subtypes are custom values not in the enums.
@@ -210,6 +226,11 @@ export const PostForm: React.FC<PostFormProps> = ({
 
   return (
     <div className="max-w-2xl mx-auto">
+      {!isAuthorized && (
+        <div className="mb-4 p-3 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
+          This is a read-only view. You are not the author of this post.
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700">
@@ -222,7 +243,8 @@ export const PostForm: React.FC<PostFormProps> = ({
             value={formData.title}
             onChange={handleChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 border p-3 focus:border-blue-500 focus:ring-blue-500"
+            disabled={!isAuthorized}
+            className="mt-1 block w-full rounded-md border-gray-300 border p-3 focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100"
             placeholder="Enter post title"
           />
         </div>
@@ -238,7 +260,8 @@ export const PostForm: React.FC<PostFormProps> = ({
             onChange={handleChange}
             required
             rows={4}
-            className="mt-1 block w-full rounded-md border-gray-300 border p-3 focus:border-blue-500 focus:ring-blue-500"
+            disabled={!isAuthorized}
+            className="mt-1 block w-full rounded-md border-gray-300 border p-3 focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100"
             placeholder="Describe your service or job"
           />
         </div>
@@ -256,7 +279,8 @@ export const PostForm: React.FC<PostFormProps> = ({
             required
             min="0"
             step="0.01"
-            className="mt-1 block w-full rounded-md border-gray-300 border p-3 focus:border-blue-500 focus:ring-blue-500"
+            disabled={!isAuthorized}
+            className="mt-1 block w-full rounded-md border-gray-300 border p-3 focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100"
           />
         </div>
 
@@ -270,7 +294,8 @@ export const PostForm: React.FC<PostFormProps> = ({
             value={formData.type}
             onChange={handleChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 border p-3 focus:border-blue-500 focus:ring-blue-500"
+            disabled={!isAuthorized}
+            className="mt-1 block w-full rounded-md border-gray-300 border p-3 focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100"
           >
             <option value="">Select job type</option>
             {jobTypeOptions.map(option => (
@@ -293,7 +318,8 @@ export const PostForm: React.FC<PostFormProps> = ({
               value={formData.otherType}
               onChange={handleChange}
               required
-              className="mt-1 block w-full rounded-md border-gray-300 border p-3 focus:border-blue-500 focus:ring-blue-500"
+              disabled={!isAuthorized}
+              className="mt-1 block w-full rounded-md border-gray-300 border p-3 focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100"
             />
           </div>
         )}
@@ -314,7 +340,8 @@ export const PostForm: React.FC<PostFormProps> = ({
                       value={option.value}
                       checked={formData.subType.includes(option.value)}
                       onChange={handleSubTypeChange}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      disabled={!isAuthorized}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:cursor-not-allowed"
                     />
                     <label htmlFor={`subtype-${option.value}`} className="ml-3 text-sm text-gray-700">
                       {option.label}
@@ -333,7 +360,8 @@ export const PostForm: React.FC<PostFormProps> = ({
                   value="Other"
                   checked={formData.subType.includes('Other')}
                   onChange={handleSubTypeChange}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  disabled={!isAuthorized}
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:cursor-not-allowed"
                 />
                 <label htmlFor="subtype-other" className="ml-3 text-sm text-gray-700">
                   Other
@@ -349,7 +377,8 @@ export const PostForm: React.FC<PostFormProps> = ({
                     onChange={handleChange}
                     required={formData.subType.includes('Other')}
                     placeholder="Please specify"
-                    className="block w-full rounded-md border-gray-300 border p-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+                    disabled={!isAuthorized}
+                    className="block w-full rounded-md border-gray-300 border p-2 text-sm focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100"
                   />
                 </div>
               )}
@@ -368,7 +397,8 @@ export const PostForm: React.FC<PostFormProps> = ({
             value={formData.location}
             onChange={handleChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 border p-3 focus:border-blue-500 focus:ring-blue-500"
+            disabled={!isAuthorized}
+            className="mt-1 block w-full rounded-md border-gray-300 border p-3 focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100"
             placeholder="Enter your location"
           />
         </div>
@@ -382,7 +412,8 @@ export const PostForm: React.FC<PostFormProps> = ({
             id="image"
             accept="image/jpeg,image/png,image/gif"
             onChange={handleImageChange}
-            className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            disabled={!isAuthorized}
+            className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
           />
           {(imagePreview || formData.imageUrl) && (
             <div className="mt-2">
@@ -407,13 +438,15 @@ export const PostForm: React.FC<PostFormProps> = ({
               Cancel
             </button>
           )}
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-blue-300 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
-          >
-            {loading ? 'Saving...' : post?.postId ? 'Update Post' : 'Create Post'}
-          </button>
+          {isAuthorized && (
+            <button
+              type="submit"
+              disabled={loading || !isAuthorized}
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
+            >
+              {loading ? 'Saving...' : post?.postId ? 'Update Post' : 'Create Post'}
+            </button>
+          )}
         </div>
       </form>
     </div>
