@@ -153,7 +153,7 @@ export class ApplicationService {
 
       let query = supabase
         .from('applications')
-        .select('*, users!applications_userId_fkey (fullName, email)', { count: 'exact' })
+        .select('*, users!applications_userId_fkey (email)', { count: 'exact' })
         .eq('postId', postId)
         .is('deletedAt', null);
 
