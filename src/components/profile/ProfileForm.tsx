@@ -8,9 +8,10 @@ import { ProfileMessages } from "@/resources/messages/profile";
 
 interface ProfileFormProps {
   userId: string;
+  className?: string;
 }
 
-export default function ProfileForm({ userId }: ProfileFormProps) {
+export default function ProfileForm({ userId, className }: ProfileFormProps) {
   const [profile, setProfile] = useState<Profile & { email?: string | null } | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -102,8 +103,10 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
   if (loading) return <p className="text-black">{ProfileMessages.LOADING}</p>;
 
   return (
-    <div className="p-6 bg-white shadow rounded-2xl w-full max-w-3xl mx-auto text-black space-y-6">
-      <h2 className="text-2xl font-semibold text-left">Personal Details</h2>
+    <div className={`${className} flex-1 text-black space-y-6`}>
+      <h2 className="font-inter font-bold text-[20px] sm:text-[24px] md:text-[28px] lg:text-[30px] leading-[1.2] text-black">
+          Personal Details
+        </h2>
 
       {/* Profile Picture Upload */}
       <div className="flex flex-col items-center space-y-3">

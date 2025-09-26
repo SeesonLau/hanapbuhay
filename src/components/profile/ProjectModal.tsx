@@ -7,7 +7,8 @@ import { toast } from 'react-hot-toast';
 import { ProjectMessages } from '@/resources/messages/project';
 import { GeneralMessages } from '@/resources/messages/general';
 import upload from "@/assets/upload.png";
-import { inter } from '@/styles/fonts';
+import { getNeutral400Color } from '@/styles/colors';
+import { fontClasses } from '@/styles/fonts';
 
 interface ProjectAddModalProps {
   userId: string;
@@ -79,7 +80,7 @@ export default function ProjectAddModal({
         className="bg-white rounded-2xl w-[90%] max-w-[800px] max-h-[90vh] p-6 overflow-y-auto flex flex-col items-center"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className={`${inter.className} font-bold text-[25px] leading-normal text-black mb-6 text-center`}>
+        <h3 className={`${fontClasses.body}  font-bold text-[25px] leading-normal text-black mb-6 text-center`}>
           Add Work Experience
         </h3>
 
@@ -110,7 +111,7 @@ export default function ProjectAddModal({
         <div className="w-full max-w-[620px] flex flex-col gap-4">
           {/* Title */}
           <div>
-            <label className={`${inter.className} block text-black text-2xl font-semibold mb-2`}>
+            <label className={`${fontClasses.body}  block text-black text-2xl font-semibold mb-2`}>
               Title
             </label>
             <input
@@ -124,7 +125,7 @@ export default function ProjectAddModal({
 
           {/* Description */}
           <div>
-            <label className={`${inter.className} block text-black text-2xl font-semibold mb-2`}>
+            <label className={`${fontClasses.body}  block text-black text-2xl font-semibold mb-2`}>
               Description
             </label>
             <textarea
