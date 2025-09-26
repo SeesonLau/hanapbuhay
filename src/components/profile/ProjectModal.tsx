@@ -32,9 +32,11 @@ export default function ProjectAddModal({
     }
 
     try {
+      const projectId = project?.projectId || crypto.randomUUID();
+
       let imageUrl = project?.projectPictureUrl || null;
       if (imageFile) {
-        const uploadedUrl = await ProjectService.uploadProjectImage(userId, imageFile);
+        const uploadedUrl = await ProjectService.uploadProjectImage(userId, projectId, imageFile);
         if (!uploadedUrl) {
           setLoading(false);
           return;
@@ -43,7 +45,7 @@ export default function ProjectAddModal({
       }
 
       const newProject: Project = {
-        projectId: project?.projectId, 
+        projectId,
         userId,
         title,
         description,
