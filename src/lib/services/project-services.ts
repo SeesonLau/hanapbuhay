@@ -84,7 +84,7 @@ export class ProjectService {
     }
   }
 
-  static async uploadProjectImage(userId: string, file: File): Promise<string | null> {
+  static async uploadProjectImage(userId: string, projectId: string, file: File): Promise<string | null> {
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
     if (file.size > MAX_FILE_SIZE) {
@@ -93,15 +93,14 @@ export class ProjectService {
     }
 
     const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}-${Date.now()}.${fileExt}`;
-    const filePath = `${userId}/${fileName}`; // 👈 store in folder named by userId
+    const fileName = `${userId}-${projectId}-${Date.now()}.${fileExt}`; 
+    const filePath = `${userId}/${projectId}/${fileName}`; 
 
     const { error: uploadError } = await supabase.storage
-      .from("project-images") // bucket name
+      .from("project-images")
       .upload(filePath, file, { upsert: true });
 
     if (uploadError) {
-      console.error("Upload error:", uploadError.message);
       toast.error(ProjectMessages.UPLOAD_IMAGE_ERROR);
       return null;
     }
@@ -112,7 +111,6 @@ export class ProjectService {
 
     return data.publicUrl;
   }
-
 
   static async deleteProject(projectId: string, userId: string): Promise<boolean> {
     const { error } = await supabase

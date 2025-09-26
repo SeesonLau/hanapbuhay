@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react';
 import { Project } from '@/lib/models/profile';
 import { ProjectService } from '@/lib/services/project-services';
 import ProjectAddModal from './ProjectModal';
+import ProjectCard from './ProjectCard'; 
 
 interface ProjectsSectionProps {
   userId: string;
+  className?: string;
 }
 
-export default function ProjectsSection({ userId }: ProjectsSectionProps) {
+export default function ProjectsSection({ userId, className }: ProjectsSectionProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -33,9 +35,11 @@ export default function ProjectsSection({ userId }: ProjectsSectionProps) {
   };
 
   return (
-    <div className="w-1/2 flex flex-col gap-4">
+    <div className={`${className} flex flex-col gap-4 `}>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Projects</h2>
+        <h2 className="font-inter font-bold text-[20px] sm:text-[24px] md:text-[28px] lg:text-[30px] leading-[1.2] text-black">
+          Add Work Experience
+        </h2>
         <button
           onClick={() => { setEditingProject(null); setShowModal(true); }}
           className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700"
@@ -44,26 +48,20 @@ export default function ProjectsSection({ userId }: ProjectsSectionProps) {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        {projects.map((project) => (
-          <div
-            key={project.projectId}
-            onClick={() => handleCardClick(project)}
-            className="bg-white shadow rounded-lg p-4 cursor-pointer hover:shadow-md transition"
-          >
-            {project.projectPictureUrl && (
-              <img
-                src={project.projectPictureUrl}
-                alt={project.title}
-                className="w-full h-32 object-cover rounded-md mb-2"
-              />
-            )}
-            <h3 className="font-semibold text-lg">{project.title}</h3>
-            {project.description && <p className="text-gray-500">{project.description}</p>}
-          </div>
-        ))}
+      {/* Projects List */}
+      <div className="overflow-y-auto max-h-[600px] pr-2 scrollbar-hide">
+        <div className="flex flex-col gap-4">
+          {projects.map((project) => (
+            <ProjectCard
+              key={project.projectId}
+              project={project}
+              onClick={() => handleCardClick(project)}
+            />
+          ))}
+        </div>
       </div>
 
+      {/* Project Add Modal */}
       {showModal && (
         <ProjectAddModal
           userId={userId}

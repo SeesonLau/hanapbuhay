@@ -8,9 +8,10 @@ import { ProfileMessages } from "@/resources/messages/profile";
 
 interface ProfileFormProps {
   userId: string;
+  className?: string;
 }
 
-export default function ProfileForm({ userId }: ProfileFormProps) {
+export default function ProfileForm({ userId, className }: ProfileFormProps) {
   const [profile, setProfile] = useState<Profile & { email?: string | null } | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -102,102 +103,129 @@ export default function ProfileForm({ userId }: ProfileFormProps) {
   if (loading) return <p className="text-black">{ProfileMessages.LOADING}</p>;
 
   return (
-    <div className="p-4 bg-white shadow rounded-lg w-1/2 text-black">
-      <h2 className="text-lg font-semibold mb-4">Profile Information</h2>
+    <div className={`${className} flex-1 text-black space-y-6`}>
+      <h2 className="font-inter font-bold text-[20px] sm:text-[24px] md:text-[28px] lg:text-[30px] leading-[1.2] text-black">
+          Personal Details
+        </h2>
 
       {/* Profile Picture Upload */}
-      <label className="block mb-2">Profile Picture</label>
-      {previewUrl && (
-        <img src={previewUrl} alt="Profile" className="w-24 h-24 object-cover mb-2 rounded-full border" />
-      )}
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="mb-4"
-      />
+      <div className="flex flex-col items-center space-y-3">
+        {previewUrl ? (
+          <img
+            src={previewUrl}
+            alt="Profile"
+            className="w-28 h-28 object-cover rounded-full border"
+          />
+        ) : (
+          <div className="w-28 h-28 flex items-center justify-center rounded-full border border-dashed border-gray-400 text-gray-400">
+            Upload
+          </div>
+        )}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="text-sm"
+        />
+      </div>
 
-      {/* First Name */}
-      <label className="block mb-1">First Name</label>
-      <input
-        type="text"
-        value={firstName}
-        onChange={(e) => setFirstName(e.target.value)}
-        className="border p-2 w-full mb-2"
-      />
+      {/* First & Last Name */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">First Name</label>
+          <input
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            className="border rounded-md p-2 w-full"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Last Name</label>
+          <input
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            className="border rounded-md p-2 w-full"
+          />
+        </div>
+      </div>
 
-      {/* Last Name */}
-      <label className="block mb-1">Last Name</label>
-      <input
-        type="text"
-        value={lastName}
-        onChange={(e) => setLastName(e.target.value)}
-        className="border p-2 w-full mb-2"
-      />
+      {/* Address & Email */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Address</label>
+          <input
+            type="text"
+            value={profile?.address ?? ""}
+            onChange={(e) => handleChange("address", e.target.value)}
+            className="border rounded-md p-2 w-full"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Email</label>
+          <input
+            type="email"
+            value={email}
+            readOnly
+            className="border rounded-md p-2 w-full bg-gray-100"
+          />
+        </div>
+      </div>
 
-      {/* Address */}
-      <label className="block mb-1">Address</label>
-      <input
-        type="text"
-        value={profile?.address ?? ""}
-        onChange={(e) => handleChange("address", e.target.value)}
-        className="border p-2 w-full mb-2"
-      />
+      {/* Phone Number & Birthdate */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Phone Number</label>
+          <input
+            type="tel"
+            value={profile?.phoneNumber ?? ""}
+            onChange={(e) => handleChange("phoneNumber", e.target.value)}
+            className="border rounded-md p-2 w-full"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Birthdate</label>
+          <input
+            type="date"
+            value={profile?.birthdate ?? ""}
+            onChange={(e) => handleBirthdateChange(e.target.value)}
+            className="border rounded-md p-2 w-full"
+          />
+        </div>
+      </div>
 
-      {/* Email */}
-      <label className="block mb-1">Email</label>
-      <input
-        type="email"
-        value={email}
-        readOnly
-        className="border p-2 w-full mb-2 bg-gray-100"
-      />
-
-      {/* Phone Number */}
-      <label className="block mb-1">Phone Number</label>
-      <input
-        type="tel"
-        value={profile?.phoneNumber ?? ""}
-        onChange={(e) => handleChange("phoneNumber", e.target.value)}
-        className="border p-2 w-full mb-2"
-      />
-
-      {/* Birthdate */}
-      <label className="block mb-1">Birthdate</label>
-      <input
-        type="date"
-        value={profile?.birthdate ?? ""}
-        onChange={(e) => handleBirthdateChange(e.target.value)}
-        className="border p-2 w-full mb-2"
-      />
-
-      {/* Age  */}
-      <label className="block mb-1">Age</label>
-      <input
-        type="number"
-        value={profile?.age ?? ""}
-        readOnly
-        className="border p-2 w-full mb-2 bg-gray-100"
-      />
-
-      {/* Sex */}
-      <label className="block mb-1">Sex</label>
-      <select
-        value={profile?.sex ?? ""}
-        onChange={(e) => handleChange("sex", e.target.value)}
-        className="border p-2 w-full mb-4"
-      >
-        <option value="">Select Sex</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-        <option value="Other">Other</option>
-      </select>
+      {/* Age & Sex */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Age</label>
+          <input
+            type="number"
+            value={profile?.age ?? ""}
+            readOnly
+            className="border rounded-md p-2 w-full bg-gray-100"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Sex</label>
+          <select
+            value={profile?.sex ?? ""}
+            onChange={(e) => handleChange("sex", e.target.value)}
+            className="border rounded-md p-2 w-full"
+          >
+            <option value="">Select Sex</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
 
       {/* Save Button */}
       <button
         onClick={handleSave}
         disabled={saving}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
       >
         {saving ? "Saving..." : "Save"}
       </button>

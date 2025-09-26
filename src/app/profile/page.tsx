@@ -49,18 +49,19 @@ export default function ProfilePage() {
         <HeaderDashboard />
       </header>
 
+      {/* User ID Display 
       {user && (
         <div className="text-center mt-6">
           <p className="text-lg font-semibold text-black">
             User ID: <span className="font-mono">{user.userId}</span>
           </p>
         </div>
-      )}
+      )} */}
 
       <main className="flex-grow flex items-center justify-center p-6">
         <div className="max-w-5xl w-full flex gap-6">
-          {user && <ProfileForm userId={user.userId} />}
-          {user && <ProjectsSection userId={user.userId} />}
+          {user && <ProfileForm userId={user.userId} className="flex-1" />}
+          {user && <ProjectsSection userId={user.userId} className="flex-1" />}
         </div>
       </main>
     </div>
