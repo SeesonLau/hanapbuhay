@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { PostForm } from '@/components/posts/PostForm';
-import { PostList } from '@/components/posts/PostList';
+import { PostForm } from '@/components/mock/posts/PostForm';
+import { PostList } from '@/components/mock/posts/PostList';
 import { supabase } from '@/lib/services/supabase/client';
 import { Toaster } from 'react-hot-toast';
 import { Post } from '@/lib/models/posts';

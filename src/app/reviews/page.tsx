@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Toaster } from 'react-hot-toast';
-import { ReviewComponent } from '@/components/reviews/ReviewComponent';
-import { ReviewsComponent } from '@/components/reviews/ReviewsComponent';
+import { ReviewComponent } from '@/components/mock/reviews/ReviewComponent';
+import { ReviewsComponent } from '@/components/mock/reviews/ReviewsComponent';
 import { supabase } from '@/lib/services/supabase/client';
 
 export default function ReviewsPage() {
