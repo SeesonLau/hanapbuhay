@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Toaster } from 'react-hot-toast';
-import { ApplyComponent } from '@/components/applications/ApplyComponent';
-import { ApplicationsComponent } from '@/components/applications/ApplicationsComponent';
+import { ApplyComponent } from '@/components/mock/applications/ApplyComponent';
+import { ApplicationsComponent } from '@/components/mock/applications/ApplicationsComponent';
 import { supabase } from '@/lib/services/supabase/client';
 
 export default function ApplicationsPage() {
