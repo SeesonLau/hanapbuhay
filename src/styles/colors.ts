@@ -10,6 +10,7 @@ interface GrayShades extends ColorShades {
   neutral300: string;
   neutral400: string;
   neutral600: string;
+  neutral700: string;
 }
 
 // Define the main COLORS object
@@ -23,8 +24,12 @@ export const COLORS = {
     hover: '#1C6AF4',
   },
   red: {
-    default: '#ED4A4A',
-    hover: '#DA2727',
+    neutral100: '#FFE3E3', // For gradient
+    neutral200: '#FECACA', // Icon background
+    neutral500: '#EE4546', // Primary danger color
+    neutral600: '#F99292', // For gradient
+    default: '#EE4546',
+    hover: '#DA2727', // Kept existing hover for buttons
   },
   green: {
     default: '#6DCC4A', // Added green color
@@ -42,6 +47,7 @@ export const COLORS = {
     neutral300: '#AEB2B1',
     neutral400: '#858B8A',
     neutral600: '#5A605F',
+    neutral700: '#444645', // Modal description text
   },
   white: '#ffffff',
   black: '#000000',
@@ -139,3 +145,6 @@ export const getNeutral400Color = (opacity: number = 1): string =>
 
 export const getNeutral600Color = (opacity: number = 1): string => 
   getColor('gray', 'neutral600', opacity);
+
+export const getNeutral700Color = (opacity: number = 1): string =>
+  getColor('gray', 'neutral700', opacity);

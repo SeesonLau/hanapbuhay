@@ -60,6 +60,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     else if (pathname === ROUTES.MANAGEJOBPOSTS) setActiveLink('manage-posts');
     else if (pathname === ROUTES.APPLIEDJOBS) setActiveLink('applied-jobs');
     else if (pathname === ROUTES.CHAT) setActiveLink('chat');
+    else if (pathname === ROUTES.MOCK) setActiveLink('mock');
     else setActiveLink('find-jobs');
   }, [pathname]);
 
@@ -127,6 +128,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     { id: 'manage-posts', label: 'Manage Job Posts', route: ROUTES.MANAGEJOBPOSTS },
     { id: 'applied-jobs', label: 'Applied Jobs', route: ROUTES.APPLIEDJOBS },
     { id: 'chat', label: 'Chat', route: ROUTES.CHAT },
+    { id: 'mock', label: 'Mock', route: ROUTES.MOCK },
   ];
 
   const userData = {
