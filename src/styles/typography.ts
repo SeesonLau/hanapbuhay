@@ -14,7 +14,9 @@ export const TYPOGRAPHY = {
     h3: { fontSize: '26px', fontFamily: 'var(--font-alexandria)', fontWeight: '600', lineHeight: '1.4', }, 
     lead: { fontSize: '20px', fontFamily: 'var(--font-inter)', fontWeight: '400', lineHeight: '1.5', }, 
     body: { fontSize: '16px', fontFamily: 'var(--font-inter)', fontWeight: '400', lineHeight: '1.6', }, 
-    small: { fontSize: '13px', fontFamily: 'var(--font-inter)', fontWeight: '400', lineHeight: '1.4', }, };
+    small: { fontSize: '13px', fontFamily: 'var(--font-inter)', fontWeight: '400', lineHeight: '1.4', },
+    tiny: { fontSize: '10px', fontFamily: 'var(--font-inter)', fontWeight: '400', lineHeight: '1.3', }, 
+  };
 
 // Helper to apply typography styles
 export const getTypographyStyle = (variant: keyof typeof TYPOGRAPHY) => {

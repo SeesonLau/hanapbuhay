@@ -9,7 +9,7 @@ import { User } from '@/lib/models';
 import { ROUTES } from '@/lib/constants';
 import ProfileForm from '@/components/profile/ProfileForm';
 import ProjectsSection from '@/components/profile/ProjectSection';
-import HeaderDashboard from '@/components/ui/HeaderDashboard';
+import Banner from '@/components/ui/Banner';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -44,10 +44,11 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Replace the nav with HeaderDashboard */}
-      <header className="w-full flex justify-center pt-8 px-4">
-        <HeaderDashboard />
-      </header>
+      {/* Banner Section with Header */}
+      <Banner
+        variant="profile"
+        showSearchBar={false}
+      />
 
       {/* User ID Display 
       {user && (
