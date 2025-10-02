@@ -220,8 +220,6 @@ export class PostService {
 
       return data.publicUrl;
     } catch (error) {
-      // Log the specific Supabase error to the console for debugging
-      console.error('Supabase upload error:', error);
       toast.error(PostMessages.UPLOAD_IMAGE_ERROR);
       return null;
     }

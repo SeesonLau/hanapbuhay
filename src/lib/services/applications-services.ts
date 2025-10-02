@@ -222,7 +222,6 @@ export class ApplicationService {
   // Get total applications count by user ID
   static async getTotalApplicationsByUserIdCount(userId: string): Promise<number> {
     try {
-      console.log('Fetching count for user:', userId);
       const { count, error } = await supabase
         .from('applications')
         .select('*', { count: 'exact', head: true })
@@ -230,14 +229,11 @@ export class ApplicationService {
         .is('deletedAt', null);
 
       if (error) {
-        console.error('Error fetching count:', error);
         throw error;
       }
 
-      console.log('Count result:', count);
       return count || 0;
     } catch (error) {
-      console.error('Error in getTotalApplicationsByUserIdCount:', error);
       toast.error(ApplicationMessages.FETCH_APPLICATIONS_ERROR);
       throw error;
     }
