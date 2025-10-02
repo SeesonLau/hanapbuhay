@@ -1,7 +1,7 @@
 // src/app/chat/page.tsx
 'use client';
 import { useState } from 'react';
-import HeaderDashboard from '@/components/ui/HeaderDashboard';
+import Banner from '@/components/ui/Banner';
 
 interface Message {
   id: number;
@@ -130,10 +130,11 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#141515' }}>
-      {/* Header Section */}
-      <header className="w-full flex justify-center pt-8 px-4">
-        <HeaderDashboard />
-      </header>
+      {/* Banner Section with Header */}
+      <Banner
+        variant="chat"
+        showSearchBar={false}
+      />
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 mt-8">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
