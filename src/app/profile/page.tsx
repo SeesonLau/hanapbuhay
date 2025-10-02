@@ -9,7 +9,7 @@ import { User } from '@/lib/models';
 import { ROUTES } from '@/lib/constants';
 import ProfileForm from '@/components/profile/ProfileForm';
 import ProjectsSection from '@/components/profile/ProjectSection';
-import HeaderDashboard from '@/components/ui/HeaderDashboard';
+import Banner from '@/components/ui/Banner';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -44,23 +44,25 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Replace the nav with HeaderDashboard */}
-      <header className="w-full flex justify-center pt-8 px-4">
-        <HeaderDashboard />
-      </header>
+      {/* Banner Section with Header */}
+      <Banner
+        variant="profile"
+        showSearchBar={false}
+      />
 
+      {/* User ID Display 
       {user && (
         <div className="text-center mt-6">
           <p className="text-lg font-semibold text-black">
             User ID: <span className="font-mono">{user.userId}</span>
           </p>
         </div>
-      )}
+      )} */}
 
       <main className="flex-grow flex items-center justify-center p-6">
         <div className="max-w-5xl w-full flex gap-6">
-          {user && <ProfileForm userId={user.userId} />}
-          {user && <ProjectsSection userId={user.userId} />}
+          {user && <ProfileForm userId={user.userId} className="flex-1" />}
+          {user && <ProjectsSection userId={user.userId} className="flex-1" />}
         </div>
       </main>
     </div>

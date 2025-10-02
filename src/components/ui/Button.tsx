@@ -33,9 +33,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const sizes = {
-      sm: "h-8 px-3 text-sm",
-      md: "h-10 py-2 px-4",
-      lg: "h-12 px-6 text-lg"
+      sm: "h-8 px-3 text-small min-w-[100px]",
+      md: "h-10 py-2 px-4 min-w-[100px]",
+      lg: "h-12 px-6 text-lg min-w-[100px]"
     };
 
     const roundedClass = fullRounded ? "rounded-[40px]" : "rounded-md";
