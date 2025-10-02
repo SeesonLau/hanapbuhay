@@ -181,13 +181,13 @@ export class PostService {
   }
 
   // Soft delete post
-  static async deletePost(postId: string): Promise<boolean> {
+  static async deletePost(postId: string, deletedBy: string): Promise<boolean> {
     try {
       const { error } = await supabase
         .from('posts')
         .update({
           deletedAt: new Date().toISOString(),
-          deletedBy: (await supabase.auth.getUser()).data.user?.id
+          deletedBy: deletedBy
         })
         .eq('postId', postId);
 

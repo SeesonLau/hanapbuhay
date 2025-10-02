@@ -182,7 +182,7 @@ export class ApplicationService {
   }
 
   // Soft delete application
-  static async softDeleteApplication(applicationId: string, userId: string): Promise<boolean> {
+  static async deleteApplication(applicationId: string, userId: string): Promise<boolean> {
     try {
       const { error } = await supabase
         .from('applications')
