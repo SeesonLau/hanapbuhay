@@ -5,6 +5,8 @@ import { Profile } from "@/lib/models/profile";
 import { ProfileService } from "@/lib/services/profile-services";
 import { toast } from "react-hot-toast";
 import { ProfileMessages } from "@/resources/messages/profile";
+import upload2 from "@/assets/upload2.svg";
+import { FaUserCircle } from 'react-icons/fa';
 
 interface ProfileFormProps {
   userId: string;
@@ -20,30 +22,38 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [email, setEmail] = useState<string>("");
+  const [displayName, setDisplayName] = useState<string>("");
 
   useEffect(() => {
     const fetchProfileAndEmail = async () => {
-    try {
-      const profileData = await ProfileService.getProfileByUserId(userId);
-      const userEmail = await ProfileService.getEmailByUserId(userId);
+      try {
+        const [profileData, userEmail, userName] = await Promise.all([
+          ProfileService.getProfileByUserId(userId),
+          ProfileService.getEmailByUserId(userId),
+          ProfileService.getNameByUserId(userId)
+        ]);
 
-      if (profileData) {
-        setProfile(profileData);
-        const [f, ...l] = (profileData.name ?? "").split(" ");
-        setFirstName(f ?? "");
-        setLastName(l.join(" ") ?? "");
-        setPreviewUrl(profileData.profilePictureUrl ?? null);
-      }
+        if (profileData) {
+          setProfile(profileData);
+          const [f, ...l] = (profileData.name ?? "").split(" ");
+          setFirstName(f ?? "");
+          setLastName(l.join(" ") ?? "");
+          setPreviewUrl(profileData.profilePictureUrl ?? null);
+        }
 
-      if (userEmail) {
-        setEmail(userEmail); 
+        if (userEmail) {
+          setEmail(userEmail); 
+        }
+
+        if (userName) {
+          setDisplayName(userName);
+        }
+      } catch (err) {
+        toast.error(ProfileMessages.LOAD_ERROR);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      toast.error(ProfileMessages.LOAD_ERROR);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   fetchProfileAndEmail();
 }, [userId]);
@@ -74,7 +84,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
     if (!profile) return;
     setSaving(true);
 
-     try {
+    try {
       let uploadedUrl = profile.profilePictureUrl ?? null;
       if (selectedFile) {
         const result = await ProfileService.uploadProfileImage(userId, selectedFile);
@@ -89,6 +99,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
       const success = await ProfileService.upsertProfile({ ...profile, name: fullName, profilePictureUrl: uploadedUrl });
       
       if (success) {
+        setDisplayName(fullName);
         toast.success(ProfileMessages.SAVE_SUCCESS);
       } else {
         toast.error(ProfileMessages.SAVE_ERROR);
@@ -103,30 +114,45 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
   if (loading) return <p className="text-black">{ProfileMessages.LOADING}</p>;
 
   return (
-    <div className={`${className} flex-1 text-black space-y-6`}>
-      <h2 className="font-inter font-bold text-[20px] sm:text-[24px] md:text-[28px] lg:text-[30px] leading-[1.2] text-black">
-          Personal Details
-        </h2>
+    <div className={`${className} py-12 px-5 bg-white rounded-xl shadow-md flex flex-col gap-10`}>
 
       {/* Profile Picture Upload */}
-      <div className="flex flex-col items-center space-y-3">
-        {previewUrl ? (
-          <img
-            src={previewUrl}
-            alt="Profile"
-            className="w-28 h-28 object-cover rounded-full border"
-          />
-        ) : (
-          <div className="w-28 h-28 flex items-center justify-center rounded-full border border-dashed border-gray-400 text-gray-400">
-            Upload
+      <div className="flex items-center justify-center gap-6">
+        <div className="relative flex-shrink-0">
+          {previewUrl ? (
+            <img
+              src={previewUrl}
+              alt="Profile"
+              className="w-28 h-28 object-cover rounded-full border"
+            />
+          ) : (
+            <div className="w-28 h-28 flex items-center justify-center rounded-full bg-gray-100">
+              <FaUserCircle className="w-28 h-28 text-gray-400" />
+            </div>
+          )}
+          
+          {/* Edit / Upload Icon */}
+          <label className="absolute bottom-0 right-0 p-2 rounded-full cursor-pointer flex items-center justify-center">
+            <img src={upload2.src} alt="Upload" className="w-5 h-5" />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+          </label>
+        </div>
+
+        {displayName && (
+          <div className="flex flex-col gap-1">
+            <p className="font-alexandria font-bold text-gray-neutral700 text-lead">
+              {displayName}
+            </p>
+            <p className="font-alexandria text-gray-neutral400 text-body">
+              {email}
+            </p>
           </div>
         )}
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileSelect}
-          className="text-sm"
-        />
       </div>
 
       {/* First & Last Name */}

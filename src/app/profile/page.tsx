@@ -58,9 +58,8 @@ export default function ProfilePage() {
           </p>
         </div>
       )} */}
-
-      <main className="flex-grow flex items-center justify-center p-6">
-        <div className="max-w-5xl w-full flex gap-6">
+      <main className="flex-grow flex p-6">
+        <div className="w-full flex gap-6">
           {user && <ProfileSection userId={user.userId} className="flex-1" />}
           {user && <ProjectsSection userId={user.userId} className="flex-1" />}
         </div>

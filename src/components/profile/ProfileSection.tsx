@@ -9,8 +9,11 @@ interface ProfileSectionProps {
 
 export default function ProfileSection({ userId, className }: ProfileSectionProps) {
   return (
-    <section className={`${className} p-6 bg-white rounded-lg shadow-md`}>
+    <div className={`${className} flex flex-col gap-4 `}>
+      <h3 className="font-inter font-bold text-gray-neutral700">
+          Personal Details
+      </h3>
       <ProfileForm userId={userId} className="w-full" />
-    </section>
+    </div>
   );
 }

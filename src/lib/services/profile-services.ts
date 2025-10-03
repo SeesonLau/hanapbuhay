@@ -34,6 +34,23 @@ export class ProfileService {
     return data as Profile;
   }
 
+   static async getNameByUserId(userId: string): Promise<string | null> {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('userId', userId)
+      .single();
+
+    if (error) {
+      if (error.code !== 'PGRST116') {
+        toast.error(ProfileMessages.FETCH_NAME_ERROR);
+      }
+      return null;
+    }
+
+    return data?.name ?? null;
+  }
+
   static async upsertProfile(profile: Profile): Promise<boolean> {
     try {
       const { data: existing, error: fetchError } = await supabase
