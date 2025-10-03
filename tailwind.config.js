@@ -9,14 +9,14 @@ module.exports = {
         inter: ['var(--font-inter)', 'sans-serif'],
         alexandria: ['var(--font-alexandria)', 'serif'],
       },
-      fontSize: {
-        'hero': '50px',
-        'h1': '40px',
-        'h2': '32px',
-        'h3': '26px',
-        'lead': '20px',
-        'body': '16px',
-        'small': '13px',
+      fontSize: { // Changed to rem for responsiveness 
+        hero: '3.125rem',   // 50px
+        h1: '2.5rem',       // 40px
+        h2: '2rem',         // 32px
+        h3: '1.625rem',     // 26px
+        lead: '1.25rem',    // 20px
+        body: '1rem',       // 16px
+        small: '0.8125rem', // 13px
       },
       colors: {
         blue: {
