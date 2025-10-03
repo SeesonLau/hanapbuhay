@@ -13,7 +13,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
       onClick={onClick}
       className="flex w-full max-w-[873px] h-[250px] p-[15px] gap-x-10 gap-y-20 bg-white shadow rounded-lg cursor-pointer hover:shadow-md transition"
     >
-      {/* Image on the left */}
+
       {project.projectPictureUrl ? (
         <img
           src={project.projectPictureUrl}
@@ -26,7 +26,6 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
         </div>
       )}
 
-      {/* Title + Description on the right */}
       <div className="flex flex-col justify-center flex-1">
         <h3 className="font-semibold text-xl mb-2">{project.title}</h3>
         {project.description && (

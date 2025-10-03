@@ -37,9 +37,9 @@ export default function ProjectsSection({ userId, className }: ProjectsSectionPr
   return (
     <div className={`${className} flex flex-col gap-4 `}>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="font-inter font-bold text-[20px] sm:text-[24px] md:text-[28px] lg:text-[30px] leading-[1.2] text-black">
+        <h3 className="font-inter font-bold text-gray-neutral700">
           Add Work Experience
-        </h2>
+        </h3>
         <button
           onClick={() => { setEditingProject(null); setShowModal(true); }}
           className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700"

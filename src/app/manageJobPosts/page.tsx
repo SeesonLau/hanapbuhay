@@ -13,7 +13,7 @@ export default function ManageJobPostsPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#141515' }}>
+    <div className="min-h-screen">
       {/* Banner Section with Header and Search */}
       <Banner
         variant="manageJobPosts"

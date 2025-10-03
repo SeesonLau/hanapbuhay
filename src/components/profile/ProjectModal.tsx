@@ -6,8 +6,7 @@ import { ProjectService } from '@/lib/services/project-services';
 import { toast } from 'react-hot-toast';
 import { ProjectMessages } from '@/resources/messages/project';
 import { GeneralMessages } from '@/resources/messages/general';
-import upload from "@/assets/upload.png";
-import { getNeutral400Color } from '@/styles/colors';
+import upload from "@/assets/upload.svg";
 import { fontClasses } from '@/styles/fonts';
 
 interface ProjectAddModalProps {
