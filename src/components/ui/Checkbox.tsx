@@ -1,5 +1,5 @@
 import React, { forwardRef, useId, useState, useEffect } from 'react';
-import { getGrayColor, getBlueDarkColor, getWhiteColor, getNeutral400Color } from '@/styles';
+import { getGrayColor, getBlueDarkColor, getWhiteColor, getNeutral400Color, getTypographyClass, getTypographyStyle } from '@/styles';
 
 export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size'> {
   label?: string;
@@ -92,7 +92,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
         </div>
 
     {/* Text label */}
-    <span className={`${s.text} font-normal`} style={{ color: getGrayColor('neutral600') }}>{label}</span>
+    <span className={`${s.text} font-normal ${getTypographyClass('small')}`} style={{ color: getGrayColor('neutral600') }}>{label}</span>
 
         {/* Hidden native checkbox for accessibility */}
         <input
