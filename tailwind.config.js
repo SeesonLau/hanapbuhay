@@ -9,14 +9,18 @@ module.exports = {
         inter: ['var(--font-inter)', 'sans-serif'],
         alexandria: ['var(--font-alexandria)', 'serif'],
       },
-      fontSize: { // Changed to rem for responsiveness 
-        hero: '3.125rem',   // 50px
-        h1: '2.5rem',       // 40px
-        h2: '2rem',         // 32px
-        h3: '1.625rem',     // 26px
-        lead: '1.25rem',    // 20px
-        body: '1rem',       // 16px
-        small: '0.8125rem', // 13px
+      fontSize: { 
+        hero: '3.125rem',       // 50px
+        h1: '2.5rem',           // 40px
+        h2: '2rem',             // 32px
+        h3: '1.625rem',         // 26px
+        lead: '1.25rem',        // 20px
+        title: '1.875rem',      // 30px
+        description: '1.25rem', // 20px
+        body: '1rem',           // 16px
+        small: '0.8125rem',     // 13px
+        tiny: '0.75rem',        // 12px
+        popup: '1.125rem',      // 18px
       },
       colors: {
         blue: {
