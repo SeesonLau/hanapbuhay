@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
+import { TrashIcon } from '@/components/ui/DeleteModal'; // Import TrashIcon
 import { toast } from 'react-hot-toast';
 import { PostService } from '@/lib/services/posts-services';
 import { Post } from '@/lib/models/posts';
@@ -10,6 +11,7 @@ import { PostMessages } from '@/resources/messages/posts';
 interface PostListProps {
   initialPosts?: Post[];
   onPostClick?: (post: Post) => void;
+  onDelete?: (postId: string) => void;
   showFilters?: boolean;
   userId?: string;
 }
@@ -17,6 +19,7 @@ interface PostListProps {
 export const PostList: React.FC<PostListProps> = ({
   initialPosts,
   onPostClick,
+  onDelete,
   showFilters = true,
   userId
 }) => {
@@ -126,11 +129,12 @@ export const PostList: React.FC<PostListProps> = ({
         {posts.map(post => (
           <div
             key={post.postId}
-            className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => onPostClick?.(post)}
+            className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col"
           >
             {post.imageUrl && (
-              <div className="relative h-48">
+              <div
+                className="relative h-48 cursor-pointer"
+                onClick={() => onPostClick?.(post)}>
                 <Image
                   src={post.imageUrl}
                   alt={post.title}
@@ -139,30 +143,50 @@ export const PostList: React.FC<PostListProps> = ({
                 />
               </div>
             )}
-            <div className="p-4">
-              <h3 className="font-semibold text-lg mb-2">{post.title}</h3>
+            <div
+              className="p-4 flex flex-col flex-grow"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h3
+                  className="font-semibold text-lg cursor-pointer"
+                  onClick={() => onPostClick?.(post)}
+                >
+                  {post.title}
+                </h3>
+                {onDelete && userId && (
+                  <button
+                    onClick={() => onDelete(post.postId)}
+                    className="text-gray-400 hover:text-red-500 transition-colors p-1 ml-2"
+                    aria-label="Delete post"
+                  >
+                    <TrashIcon className="w-[18px] h-[18px]" />
+                  </button>
+                )}
+              </div>
               <p className="text-gray-600 text-sm mb-2 line-clamp-2">
                 {post.description.length > 100 
                   ? `${post.description.substring(0, 100)}...`
                   : post.description
                 }
               </p>
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-bold text-lg">₱{post.price.toLocaleString()}</span>
-                <span className="text-sm text-gray-500">{post.location}</span>
-              </div>
-              {post.subType && post.subType.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {post.subType.map((type, index) => (
-                    <span
-                      key={index}
-                      className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full"
-                    >
-                      {type}
-                    </span>
-                  ))}
+              <div className="mt-auto">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-bold text-lg">₱{post.price.toLocaleString()}</span>
+                  <span className="text-sm text-gray-500">{post.location}</span>
                 </div>
-              )}
+                {post.subType && post.subType.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {post.subType.map((type, index) => (
+                      <span
+                        key={index}
+                        className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full"
+                      >
+                        {type}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ))}

@@ -2,13 +2,18 @@
 
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { TrashIcon } from '@/components/ui/DeleteModal'; // Import TrashIcon
 import { ReviewService } from '@/lib/services/reviews-services';
 import type { Review } from '@/lib/models/review';
 import { supabase } from '@/lib/services/supabase/client';
 
 type RatingDistribution = Record<1 | 2 | 3 | 4 | 5, number>;
 
-export const ReviewsComponent: React.FC = () => {
+interface ReviewsComponentProps {
+  onDelete: (reviewId: string) => void;
+}
+
+export const ReviewsComponent: React.FC<ReviewsComponentProps> = ({ onDelete }) => {
   const [receivedReviews, setReceivedReviews] = useState<Review[]>([]);
   const [averageRating, setAverageRating] = useState<number>(0);
   const [distribution, setDistribution] = useState<RatingDistribution>({
@@ -107,7 +112,7 @@ export const ReviewsComponent: React.FC = () => {
           <div className="space-y-4">
             {receivedReviews.map(review => (
               <div key={review.reviewId} className="bg-white rounded-lg p-4 shadow-sm">
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex justify-between items-start">
                   <div>
                     <div className="flex items-center space-x-2">
                       <span className="font-medium">{review.createdBy}</span>
@@ -119,9 +124,18 @@ export const ReviewsComponent: React.FC = () => {
                       Post ID: {review.postId}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <span className="font-bold text-blue-600">{review.rating}</span>
-                    <span className="text-gray-500">/5</span>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center space-x-1">
+                      <span className="font-bold text-blue-600">{review.rating}</span>
+                      <span className="text-gray-500">/5</span>
+                    </div>
+                    <button
+                      onClick={() => onDelete(review.reviewId)}
+                      className="text-gray-400 hover:text-red-500 transition-colors"
+                      aria-label="Delete review"
+                    >
+                      <TrashIcon className="w-[18px] h-[18px]" /> {/* Use TrashIcon */}
+                    </button>
                   </div>
                 </div>
                 {review.comment && (

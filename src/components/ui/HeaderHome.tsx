@@ -20,6 +20,7 @@ export default function HeaderHome({
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isAtTop, setIsAtTop] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -51,6 +52,7 @@ export default function HeaderHome({
           // Show header when scrolling up, hide when scrolling down
           if (currentScrollY > lastScrollY && currentScrollY > 100) {
             setIsVisible(false); // Scrolling down
+            setIsMobileMenuOpen(false); // Close mobile menu when scrolling down
           } else {
             setIsVisible(true); // Scrolling up or at top
           }
@@ -73,45 +75,66 @@ export default function HeaderHome({
     }
   }, [lastScrollY, isHomePage]);
 
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMobileMenuOpen) {
+        const target = event.target as Element;
+        if (!target.closest('.mobile-menu-container') && !target.closest('.mobile-menu-button')) {
+          setIsMobileMenuOpen(false);
+        }
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isMobileMenuOpen]);
+
   return (
-    <div 
-      className={`w-[1820px] min-w-[1320px] px-4 py-3 rounded-xl backdrop-blur-sm inline-flex justify-start items-center gap-80 fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-500 ease-out ${
+    <header 
+      className={`w-full px-4 sm:px-6 md:px-8 lg:px-12 py-2 sm:py-3 flex items-center justify-between fixed top-2 sm:top-4 left-0 right-0 z-50 transition-all duration-500 ease-out ${
         isVisible 
           ? 'translate-y-0 opacity-100' 
           : '-translate-y-full opacity-0 pointer-events-none'
       }`}
       style={{ 
-        backgroundColor: whiteWithOpacity,
         // Add a subtle scale effect when at top (only on homepage)
         transform: isAtTop && isHomePage
-          ? `translate(-50%, 0) scale(1)` 
-          : `translate(-50%, 0) scale(0.98)`,
+          ? `scale(1)` 
+          : `scale(0.98)`,
         transition: 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease-out'
       }}
     >
       {/* Logo - Clickable to home or scroll to top */}
-      <button 
-        onClick={handleLogoClick}
-        className="w-48 h-16 relative cursor-pointer transition-transform duration-300 hover:scale-105"
-      >
-        <Image
-          className="w-48 h-16"
-          src="/image/hanapbuhay-logo.svg"
-          alt="HanapBuhat Logo"
-          width={187}
-          height={68}
-          priority
-        />
-      </button>
+      <div className="flex-shrink-0">
+        <button 
+          onClick={handleLogoClick}
+          className="cursor-pointer transition-transform duration-300 hover:scale-105"
+        >
+          <Image
+            className="w-32 h-10 sm:w-40 sm:h-12 md:w-44 md:h-14 lg:w-48 lg:h-16"
+            src="/image/hanapbuhay-logo.svg"
+            alt="HanapBuhat Logo"
+            width={187}
+            height={68}
+            priority
+          />
+        </button>
+      </div>
 
-      <div className="w-[800px] flex justify-center items-center gap-12">
+      {/* Desktop Navigation - Centered */}
+      <nav className="hidden md:flex items-center gap-6 lg:gap-8 xl:gap-12 absolute left-1/2 transform -translate-x-1/2">
         {/* Benefits */}
         <button
           onClick={() => onNavigateToSection('benefits')}
-          className="flex justify-center items-center gap-2.5 cursor-pointer transition-all duration-300 hover:opacity-80 hover:scale-105"
+          className="flex justify-center items-center cursor-pointer transition-all duration-300 hover:scale-105"
         >
           <div 
-            className="w-24 h-9 text-center justify-center text-neutral-200"
+            className="text-center text-neutral-200 hover:text-blue-default px-2 py-2 text-sm md:text-base whitespace-nowrap transition-colors duration-300"
             style={{
               fontSize: TYPOGRAPHY.body.fontSize,
               fontWeight: TYPOGRAPHY.body.fontWeight,
@@ -126,10 +149,10 @@ export default function HeaderHome({
         {/* How it Works */}
         <button
           onClick={() => onNavigateToSection('how-it-works')}
-          className="flex justify-center items-center gap-2.5 cursor-pointer transition-all duration-300 hover:opacity-80 hover:scale-105"
+          className="flex justify-center items-center cursor-pointer transition-all duration-300 hover:scale-105"
         >
           <div 
-            className="w-40 h-9 text-center justify-center text-neutral-200"
+            className="text-center text-neutral-200 hover:text-blue-default px-2 py-2 text-sm md:text-base whitespace-nowrap transition-colors duration-300"
             style={{
               fontSize: TYPOGRAPHY.body.fontSize,
               fontWeight: TYPOGRAPHY.body.fontWeight,
@@ -144,10 +167,10 @@ export default function HeaderHome({
         {/* Testimonials */}
         <button
           onClick={() => onNavigateToSection('testimonials')}
-          className="flex justify-center items-center gap-2.5 cursor-pointer transition-all duration-300 hover:opacity-80 hover:scale-105"
+          className="flex justify-center items-center cursor-pointer transition-all duration-300 hover:scale-105"
         >
           <div 
-            className="w-28 h-9 text-center justify-center text-neutral-200"
+            className="text-center text-neutral-200 hover:text-blue-default px-2 py-2 text-sm md:text-base whitespace-nowrap transition-colors duration-300"
             style={{
               fontSize: TYPOGRAPHY.body.fontSize,
               fontWeight: TYPOGRAPHY.body.fontWeight,
@@ -162,10 +185,10 @@ export default function HeaderHome({
         {/* Contact Us */}
         <button
           onClick={onNavigateToFooter}
-          className="flex justify-center items-center gap-2.5 cursor-pointer transition-all duration-300 hover:opacity-80 hover:scale-105"
+          className="flex justify-center items-center cursor-pointer transition-all duration-300 hover:scale-105"
         >
           <div 
-            className="w-32 h-9 text-center justify-center text-neutral-200"
+            className="text-center text-neutral-200 hover:text-blue-default px-2 py-2 text-sm md:text-base whitespace-nowrap transition-colors duration-300"
             style={{
               fontSize: TYPOGRAPHY.body.fontSize,
               fontWeight: TYPOGRAPHY.body.fontWeight,
@@ -176,7 +199,101 @@ export default function HeaderHome({
             Contact Us
           </div>
         </button>
+      </nav>
+
+      {/* Mobile Menu Button */}
+      <div className="flex-shrink-0">
+        <button
+          className="mobile-menu-button md:hidden flex flex-col items-center justify-center w-8 h-8 space-y-1.5 cursor-pointer"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+        <span 
+          className={`w-6 h-0.5 bg-neutral-200 transition-all duration-300 ${
+            isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''
+          }`}
+        />
+        <span 
+          className={`w-6 h-0.5 bg-neutral-200 transition-all duration-300 ${
+            isMobileMenuOpen ? 'opacity-0' : ''
+          }`}
+        />
+        <span 
+          className={`w-6 h-0.5 bg-neutral-200 transition-all duration-300 ${
+            isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''
+          }`}
+        />
+      </button>
       </div>
-    </div>
+
+      {/* Mobile Navigation Menu */}
+      {isMobileMenuOpen && (
+        <div 
+          className="mobile-menu-container md:hidden absolute top-full right-4 mt-2 rounded-xl bg-gray-900 bg-opacity-95 min-w-48"
+        >
+          <nav className="flex flex-col space-y-2 p-4">
+            <button
+              onClick={() => {
+                onNavigateToSection('benefits');
+                setIsMobileMenuOpen(false);
+              }}
+              className="text-left text-neutral-200 py-3 px-2 hover:bg-blue-default hover:text-white rounded-lg transition-all duration-300"
+              style={{
+                fontSize: TYPOGRAPHY.body.fontSize,
+                fontWeight: TYPOGRAPHY.body.fontWeight,
+                lineHeight: TYPOGRAPHY.body.lineHeight,
+                fontFamily: TYPOGRAPHY.body.fontFamily
+              }}
+            >
+              Benefits
+            </button>
+            <button
+              onClick={() => {
+                onNavigateToSection('how-it-works');
+                setIsMobileMenuOpen(false);
+              }}
+              className="text-left text-neutral-200 py-3 px-2 hover:bg-blue-default hover:text-white rounded-lg transition-all duration-300"
+              style={{
+                fontSize: TYPOGRAPHY.body.fontSize,
+                fontWeight: TYPOGRAPHY.body.fontWeight,
+                lineHeight: TYPOGRAPHY.body.lineHeight,
+                fontFamily: TYPOGRAPHY.body.fontFamily
+              }}
+            >
+              How it Works
+            </button>
+            <button
+              onClick={() => {
+                onNavigateToSection('testimonials');
+                setIsMobileMenuOpen(false);
+              }}
+              className="text-left text-neutral-200 py-3 px-2 hover:bg-blue-default hover:text-white rounded-lg transition-all duration-300"
+              style={{
+                fontSize: TYPOGRAPHY.body.fontSize,
+                fontWeight: TYPOGRAPHY.body.fontWeight,
+                lineHeight: TYPOGRAPHY.body.lineHeight,
+                fontFamily: TYPOGRAPHY.body.fontFamily
+              }}
+            >
+              Testimonials
+            </button>
+            <button
+              onClick={() => {
+                onNavigateToFooter();
+                setIsMobileMenuOpen(false);
+              }}
+              className="text-left text-neutral-200 py-3 px-2 hover:bg-blue-default hover:text-white rounded-lg transition-all duration-300"
+              style={{
+                fontSize: TYPOGRAPHY.body.fontSize,
+                fontWeight: TYPOGRAPHY.body.fontWeight,
+                lineHeight: TYPOGRAPHY.body.lineHeight,
+                fontFamily: TYPOGRAPHY.body.fontFamily
+              }}
+            >
+              Contact Us
+            </button>
+          </nav>
+        </div>
+      )}
+    </header>
   );
 }

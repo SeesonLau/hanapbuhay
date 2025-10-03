@@ -181,7 +181,7 @@ export class ReviewService {
   }
 
   // Soft delete review
-  static async softDeleteReview(reviewId: string, deletedBy: string): Promise<boolean> {
+  static async deleteReview(reviewId: string, deletedBy: string): Promise<boolean> {
     try {
       const { error } = await supabase
         .from('reviews')

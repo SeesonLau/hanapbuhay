@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { TrashIcon } from '@/components/ui/DeleteModal'; // Import TrashIcon
 import { ApplicationService } from '@/lib/services/applications-services';
 import { ApplicationStatus, ApplicationStatusLabels, ApplicationStatusColors } from '@/lib/constants/application-status';
 import { supabase } from '@/lib/services/supabase/client';
@@ -18,7 +19,11 @@ interface Application {
   };
 }
 
-export const ApplicationsComponent: React.FC = () => {
+interface ApplicationsComponentProps {
+  onDelete: (applicationId: string) => void;
+}
+
+export const ApplicationsComponent: React.FC<ApplicationsComponentProps> = ({ onDelete }) => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
@@ -136,9 +141,18 @@ export const ApplicationsComponent: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-sm ${ApplicationStatusColors[application.status]}`}>
-                  {ApplicationStatusLabels[application.status]}
-                </span>
+                <div className="flex flex-col items-end gap-2">
+                  <span className={`px-3 py-1 rounded-full text-sm ${ApplicationStatusColors[application.status]}`}>
+                    {ApplicationStatusLabels[application.status]}
+                  </span>
+                  <button
+                    onClick={() => onDelete(application.applicationId)}
+                    className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                    aria-label="Withdraw application"
+                  >
+                    <TrashIcon className="w-[18px] h-[18px]" /> {/* Use TrashIcon */}
+                  </button>
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
