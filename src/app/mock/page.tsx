@@ -144,7 +144,7 @@ export default function MockPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#141515' }}>
+    <div className="min-h-screen">
       <Toaster />
       {modalType && (
         <DeleteModal

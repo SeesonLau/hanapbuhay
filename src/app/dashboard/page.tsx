@@ -59,7 +59,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#141515' }}>
+    <div className="min-h-screen">
       {/* Header Section */}
       <header className="w-full flex justify-center pt-4 px-4">
         <HeaderDashboard />
