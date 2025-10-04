@@ -122,4 +122,85 @@ export class ProfileService {
 
     return data.publicUrl;
   }
+
+  static async getProfileContact(userId: string): Promise<{
+    profilePicUrl: string | null;
+    name: string | null;
+    sex: string | null;
+    age: number | null;
+    email: string | null;
+    phoneNumber: string | null;
+    address: string | null;
+  } | null> {
+    try {
+      // Fetch profile details
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('profilePicUrl, name, sex, age, phoneNumber, address')
+        .eq('userId', userId)
+        .single();
+
+      if (profileError) {
+        if (profileError.code !== 'PGRST116') {
+          toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
+        }
+        return null;
+      }
+
+      // Fetch email separately from users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('email')
+        .eq('userId', userId)
+        .single();
+
+      if (userError) {
+        if (userError.code !== 'PGRST116') {
+          toast.error(ProfileMessages.FETCH_EMAIL_ERROR);
+        }
+        return null;
+      }
+
+      return {
+        profilePicUrl: profileData?.profilePicUrl ?? null,
+        name: profileData?.name ?? null,
+        sex: profileData?.sex ?? null,
+        age: profileData?.age ?? null,
+        email: userData?.email ?? null,
+        phoneNumber: profileData?.phoneNumber ?? null,
+        address: profileData?.address ?? null,
+      };
+    } catch {
+      toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
+      return null;
+    }
+  }
+  
+  static async getNameProfilePic(userId: string): Promise<{
+    name: string | null;
+    profilePicUrl: string | null;
+  } | null> {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('name, profilePicUrl')
+        .eq('userId', userId)
+        .single();
+
+      if (error) {
+        if (error.code !== 'PGRST116') {
+          toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
+        }
+        return null;
+      }
+
+      return {
+        name: data?.name ?? null,
+        profilePicUrl: data?.profilePicUrl ?? null,
+      };
+    } catch {
+      toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
+      return null;
+    }
+  }
 }
