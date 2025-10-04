@@ -10,45 +10,62 @@ import { ROUTES } from '@/lib/constants';
 import ProfileSection from '@/components/profile/ProfileSection';
 import ProjectsSection from '@/components/profile/ProjectSection';
 import Banner from '@/components/ui/Banner';
+import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
-  
   const [loading, setLoading] = useState(true);
+  const [contentReady, setContentReady] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
-      const currentUser = await AuthService.getCurrentUser();
+      setLoading(true);
 
-      if (!currentUser) {
-        router.push(ROUTES.HOME);
-        return;
+      try {
+        const currentUser = await AuthService.getCurrentUser();
+
+        if (!currentUser) {
+          setLoading(false);
+          router.push(ROUTES.HOME);
+          return;
+        }
+
+        const userData = await UserService.getUserById(currentUser.id);
+        setUser(userData);
+      } finally {
+        setLoading(false);
       }
-
-      const userData = await UserService.getUserById(currentUser.id);
-      setUser(userData);
-      setLoading(false);
     };
 
     fetchUser();
   }, [router]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading Profile...</div>
-      </div>
-    );
-  }
+  // Wait for both user data and content to be ready
+  useEffect(() => {
+    if (!loading && user) {
+      // Small delay to ensure components have mounted
+      const timer = setTimeout(() => {
+        setContentReady(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, user]);
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Toast Preloader - covers full screen */}
+      <Preloader 
+        message={PreloaderMessages.LOADING_PROFILE} 
+        isVisible={!contentReady} 
+      />
+
       {/* Banner Section with Header */}
       <Banner
         variant="profile"
         showSearchBar={false}
       />
+      
       <main className="flex-grow flex p-3">
         <div className="w-full flex flex-col md:flex-row gap-10 md:gap-0">
           {user && <ProfileSection userId={user.userId} className="flex-1" />}

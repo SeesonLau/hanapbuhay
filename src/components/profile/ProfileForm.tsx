@@ -114,8 +114,6 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
     }
   };
 
-  if (loading) return <p className="text-black">{ProfileMessages.LOADING}</p>;
-
   return (
     <div className={`${className}  py-7 px-10 bg-white rounded-xl shadow-md flex flex-col gap-6`}>
 
