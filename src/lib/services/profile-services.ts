@@ -176,4 +176,31 @@ export class ProfileService {
     }
   }
   
+  static async getNameProfilePic(userId: string): Promise<{
+    name: string | null;
+    profilePicUrl: string | null;
+  } | null> {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('name, profilePicUrl')
+        .eq('userId', userId)
+        .single();
+
+      if (error) {
+        if (error.code !== 'PGRST116') {
+          toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
+        }
+        return null;
+      }
+
+      return {
+        name: data?.name ?? null,
+        profilePicUrl: data?.profilePicUrl ?? null,
+      };
+    } catch {
+      toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
+      return null;
+    }
+  }
 }
