@@ -41,7 +41,6 @@ export default function ProfilePage() {
     fetchUser();
   }, [router]);
 
-  // Wait for both user data and content to be ready
   useEffect(() => {
     if (!loading && user) {
       // Small delay to ensure components have mounted
@@ -54,25 +53,28 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Toast Preloader - covers full screen */}
       <Preloader 
         message={PreloaderMessages.LOADING_PROFILE} 
         isVisible={!contentReady} 
       />
 
-      {/* Banner Section with Header */}
-      <Banner
-        variant="profile"
-        showSearchBar={false}
-      />
-      
-      <main className="flex-grow flex p-3">
-        <div className="w-full flex flex-col md:flex-row gap-10 md:gap-0">
-          {user && <ProfileSection userId={user.userId} className="flex-1" />}
-          <div className="hidden md:block w-px bg-gray-neutral300 md:-my-3"></div>
-          {user && <ProjectsSection userId={user.userId} className="flex-1" />}
-        </div>
-      </main>
+      {contentReady && (
+        <>
+          {/* Banner Section with Header */}
+          <Banner
+            variant="profile"
+            showSearchBar={false}
+          />
+          
+          <main className="flex-grow flex p-3">
+            <div className="w-full flex flex-col md:flex-row gap-10 md:gap-0">
+              {user && <ProfileSection userId={user.userId} className="flex-1" />}
+              <div className="hidden md:block w-px bg-gray-neutral300 md:-my-3"></div>
+              {user && <ProjectsSection userId={user.userId} className="flex-1" />}
+            </div>
+          </main>
+        </>
+      )}
     </div>
   );
 }
