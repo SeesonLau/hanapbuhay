@@ -21,6 +21,7 @@ import { AuthService } from '@/lib/services/auth-services';
 import { ROUTES } from '@/lib/constants';
 import SettingsModal from '@/components/modals/SettingsModal';
 import NotificationPopUp from './NotificationPopUp';
+import { Preloader, PreloaderMessages } from "./Preloader";
 
 interface HeaderDashboardProps {
   userName?: string;
@@ -49,6 +50,9 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const [showNotifications, setShowNotifications] = useState(false); // New state for notifications TEMPORARY
   const [activeLink, setActiveLink] = useState('');
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
+
+  //Logout animation state
+  const [showGoodbye, setShowGoodbye] = useState(false);
   
   const menuRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -87,8 +91,12 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   };
 
   const handleSignOut = async () => {
-    await AuthService.signOut();
-    router.push(ROUTES.HOME);
+    setIsProfileOpen(false);
+    setShowGoodbye(true);
+    setTimeout(async () => {
+      await AuthService.signOut();
+      router.push(ROUTES.HOME);
+    }, 2500);
   };
 
   useEffect(() => {
@@ -400,6 +408,16 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
         onClose={closeSettings} 
         user={userData}
       />
+
+       {/* Goodbye Preloader */}
+      {showGoodbye && (
+        <Preloader
+          message={PreloaderMessages.GOODBYE}
+          isVisible={true}
+          variant="goodbye"
+        />
+      )}
+      
     </>
   );
 };

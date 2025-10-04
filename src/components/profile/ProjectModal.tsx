@@ -6,8 +6,10 @@ import { ProjectService } from '@/lib/services/project-services';
 import { toast } from 'react-hot-toast';
 import { ProjectMessages } from '@/resources/messages/project';
 import { GeneralMessages } from '@/resources/messages/general';
-import upload from "@/assets/upload.svg";
-import { fontClasses } from '@/styles/fonts';
+import UploadIcon from "@/assets/upload.svg";
+import TextBox from "../ui/TextBox";
+import TextArea from "../ui/TextArea";
+import Button from "../ui/Button";
 
 interface ProjectAddModalProps {
   userId: string;
@@ -76,26 +78,36 @@ export default function ProjectAddModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-[90%] max-w-[800px] max-h-[90vh] p-6 overflow-y-auto flex flex-col items-center"
+        className="bg-white rounded-2xl w-[90%] max-w-[750px] max-h-[90vh] p-10 overflow-y-auto flex flex-col items-center"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className={`${fontClasses.body}  font-bold text-[25px] leading-normal text-black mb-6 text-center`}>
-          Add Work Experience
+        <h3 className="font-inter font-bold mb-3">
+          {project ? 'Edit Work Experience' : 'Add Work Experience'}
         </h3>
 
         {/* Upload Image */}
-        <label className="w-full max-w-[620px] h-[255px] rounded-2xl border border-dashed border-gray-400 flex flex-col justify-center items-center overflow-hidden mb-6 cursor-pointer">
+        <label className="w-full max-w-[620px] h-[255px] rounded-2xl border border-dashed border-gray-neutral400 flex flex-col justify-center items-center overflow-hidden mb-6 cursor-pointer transition-all duration-300 hover:border-blue-400 hover:bg-blue-50/50 group">
           {imageFile ? (
             <img
               src={URL.createObjectURL(imageFile)}
               alt="Preview"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : project?.projectPictureUrl ? (
+            <img
+              src={project.projectPictureUrl}
+              alt="Current project image"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
-            <div className="flex flex-col items-center gap-5">
-              <img src={upload.src} alt="Upload icon" />
+            <div className="flex flex-col items-center gap-5 transition-transform duration-300 group-hover:scale-105">
+              <img 
+                src={UploadIcon.src} 
+                alt="Upload" 
+                className="transition-all duration-300 group-hover:[filter:brightness(0)_saturate(100%)_invert(42%)_sepia(93%)_saturate(1352%)_hue-rotate(200deg)_brightness(103%)_contrast(101%)]" 
+              />
               <div className="w-[78px] h-[15px] flex items-center justify-center">
-                <p className="text-gray-400 text-xs font-medium">Upload Photo</p>
+                <p className="text-gray-neutral400 text-xs font-medium transition-colors duration-300 group-hover:text-blue-500">Upload Photo</p>
               </div>
             </div>
           )}
@@ -110,42 +122,41 @@ export default function ProjectAddModal({
         <div className="w-full max-w-[620px] flex flex-col gap-4">
           {/* Title */}
           <div>
-            <label className={`${fontClasses.body}  block text-black text-2xl font-semibold mb-2`}>
-              Title
-            </label>
-            <input
+            <TextBox
+              label="Title"
               type="text"
               placeholder="Add title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full h-11 rounded-[10px] outline outline-1 outline-gray-400 px-4 text-base font-light placeholder-gray-400"
+              className="w-full"
             />
           </div>
-
           {/* Description */}
           <div>
-            <label className={`${fontClasses.body}  block text-black text-2xl font-semibold mb-2`}>
-              Description
-            </label>
-            <textarea
+            <TextArea
+              label="Description"
               placeholder="Add description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full h-32 rounded-[10px] outline outline-1 outline-gray-400 px-4 py-3 text-base font-light placeholder-gray-400 resize-none"
+              className="w-full"
+              height="11.125rem"
+              showCharCount={true}
+              maxLength={500}
             />
           </div>
 
           {/* Apply Button */}
-          <button
+          <Button
             onClick={handleApply}
             disabled={loading}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 self-center"
+            isLoading={loading}
+            variant="primary"
+            size="md"
           >
-            {loading ? 'Applying...' : 'Apply'}
-          </button>
+            Apply
+          </Button>
         </div>
       </div>
     </div>
-
   );
 }

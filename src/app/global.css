@@ -34,6 +34,7 @@ h3 { @apply text-h3; }
 .tiny { @apply text-tiny; }
 .popup { @apply text-popup; }
 .hero { @apply text-hero; }
+.mini { @apply text-mini; }
 
 /* Apply typography styles as CSS classes */
 .hero-text {

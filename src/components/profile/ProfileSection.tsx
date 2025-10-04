@@ -9,7 +9,7 @@ interface ProfileSectionProps {
 
 export default function ProfileSection({ userId, className }: ProfileSectionProps) {
   return (
-    <div className={`${className} flex flex-col gap-4 `}>
+    <div className={`${className} flex flex-col gap-2 px-5`}>
       <h3 className="font-inter font-bold text-gray-neutral700">
           Personal Details
       </h3>
