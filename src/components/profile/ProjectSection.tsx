@@ -5,6 +5,7 @@ import { Project } from '@/lib/models/profile';
 import { ProjectService } from '@/lib/services/project-services';
 import ProjectAddModal from './ProjectModal';
 import ProjectCard from './ProjectCard'; 
+import AddButton from "@/assets/add.svg";
 
 interface ProjectsSectionProps {
   userId: string;
@@ -35,28 +36,35 @@ export default function ProjectsSection({ userId, className }: ProjectsSectionPr
   };
 
   return (
-    <div className={`${className} flex flex-col gap-4 `}>
-      <div className="flex justify-between items-center mb-4">
+    <div className={`${className} flex flex-col gap-2 px-5`}>
+      <div className="flex items-center gap-2">
         <h3 className="font-inter font-bold text-gray-neutral700">
           Add Work Experience
         </h3>
         <button
           onClick={() => { setEditingProject(null); setShowModal(true); }}
-          className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700"
+          className="hover:opacity-70 transition"
         >
-          Add Project
+          <img src={AddButton.src} alt="Add Project" className="w-8 h-8" />
         </button>
       </div>
 
       {/* Projects List */}
-      <div className="overflow-y-auto max-h-[600px] pr-2 scrollbar-hide">
+      <div 
+        className="overflow-y-auto pr-2 scrollbar-hide" 
+        style={{ height: 'calc(100vh - 280px)' }}
+      >
         <div className="flex flex-col gap-4">
           {projects.map((project) => (
             <ProjectCard
-              key={project.projectId}
-              project={project}
-              onClick={() => handleCardClick(project)}
-            />
+          key={project.projectId}
+          project={project}
+          userId={userId}
+          onClick={() => handleCardClick(project)}
+          onDeleteSuccess={() => {
+            fetchProjects();
+          }}
+        />
           ))}
         </div>
       </div>
@@ -68,7 +76,7 @@ export default function ProjectsSection({ userId, className }: ProjectsSectionPr
           project={editingProject || undefined}
           onClose={() => setShowModal(false)}
           onProjectAdded={handleProjectAddedOrUpdated}
-        />
+        />  
       )}
     </div>
   );

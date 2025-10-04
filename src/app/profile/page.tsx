@@ -49,18 +49,10 @@ export default function ProfilePage() {
         variant="profile"
         showSearchBar={false}
       />
-
-      {/* User ID Display 
-      {user && (
-        <div className="text-center mt-6">
-          <p className="text-lg font-semibold text-black">
-            User ID: <span className="font-mono">{user.userId}</span>
-          </p>
-        </div>
-      )} */}
-      <main className="flex-grow flex p-6">
-        <div className="w-full flex gap-6">
+      <main className="flex-grow flex p-3">
+        <div className="w-full flex flex-col md:flex-row gap-10 md:gap-0">
           {user && <ProfileSection userId={user.userId} className="flex-1" />}
+          <div className="hidden md:block w-px bg-gray-neutral300 md:-my-3"></div>
           {user && <ProjectsSection userId={user.userId} className="flex-1" />}
         </div>
       </main>

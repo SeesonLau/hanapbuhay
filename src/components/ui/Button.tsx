@@ -3,8 +3,8 @@ import React from 'react';
 import { getBlueDarkColor, getWhiteColor, getNeutral400Color, TYPOGRAPHY, fontClasses } from '@/styles';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'primary' | 'primary400' | 'secondary' | 'danger' | 'ghost';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   isLoading?: boolean;
   children: React.ReactNode;
   useCustomHover?: boolean;
@@ -27,6 +27,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     
     const variants = {
       primary: `bg-[#3289FF] text-white ${!useCustomHover ? 'hover:bg-[#1C6AF4] active:bg-[#1C6AF4]' : ''}`,
+      primary400: `bg-[#59ACFF] text-white ${!useCustomHover ? 'hover:bg-[#3289FF] active:bg-[#3289FF]' : ''}`,
       secondary: "bg-[#e6e7e7] text-[#3B3E3E] border border-[#3B3E3E] hover:bg-[#858b8a] hover:text-white active:bg-[#858b8a]",
       danger: "bg-[#ED4A4A] text-white hover:bg-[#DA2727] active:bg-[#DA2727]",
       ghost: "bg-transparent text-gray-700 hover:bg-gray-100 active:bg-gray-200 border border-gray-300"
@@ -35,7 +36,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const sizes = {
       sm: "h-8 px-3 text-small min-w-[100px]",
       md: "h-10 py-2 px-4 min-w-[100px]",
-      lg: "h-12 px-6 text-lg min-w-[100px]"
+      lg: "h-12 px-6 text-lg min-w-[100px]",
+      xl: "h-[2.1875rem] w-[25rem] px-5 text-base" // 400x35
     };
 
     const roundedClass = fullRounded ? "rounded-[40px]" : "rounded-md";
