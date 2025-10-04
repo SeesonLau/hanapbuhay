@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Lottie from "lottie-react";
-import loaderCat from "@/assets/loader cat.json";
-import rocketBye from "@/assets/Rocket bye.json";
+import loaderCat from "@/assets/loadercat.json";
+import rocketBye from "@/assets/Rocketbye.json";
 
 // Preloader message variants
 export const PreloaderMessages = {
@@ -19,7 +19,7 @@ export const PreloaderMessages = {
 interface PreloaderProps {
   message: string;
   isVisible: boolean;
-  variant?: "default" | "goodbye"; // add new variant
+  variant?: "default" | "goodbye";
 }
 
 export const Preloader: React.FC<PreloaderProps> = ({
@@ -51,7 +51,7 @@ export const Preloader: React.FC<PreloaderProps> = ({
       <div className="w-64 h-64 md:w-96 md:h-96">
         <Lottie
           animationData={variant === "goodbye" ? rocketBye : loaderCat}
-          loop={variant !== "goodbye"} // goodbye animation usually plays once
+          loop={variant !== "goodbye"} 
           autoplay
         />
       </div>
