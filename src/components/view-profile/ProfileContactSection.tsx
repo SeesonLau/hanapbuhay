@@ -2,8 +2,20 @@
 
 import ProfileContactForm from "./cards/ProfileContactForm";
 
+interface Profile {
+  userId: string;
+  profilePictureUrl?: string;
+  name: string;
+  gender: string;
+  age: number;
+  email: string;
+  phoneNumber: string;
+  address: string;
+}
+
 export default function ProfileContactSection() {
-  const profile = {
+  const profile: Profile = {
+    userId: "1",
     profilePictureUrl: "",
     name: "John Doe",
     gender: "Male",
@@ -16,6 +28,7 @@ export default function ProfileContactSection() {
   return (
     <div className="p-4">
       <ProfileContactForm
+        userId={profile.userId}
         profilePictureUrl={profile.profilePictureUrl}
         name={profile.name}
         gender={profile.gender}

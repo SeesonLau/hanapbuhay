@@ -5,6 +5,7 @@ import { HiArrowDown } from 'react-icons/hi';
 import ApplicantStatusCard from './cards/ApplicantStatusCard';
 
 interface Applicant {
+  userId: string;
   name: string;
   status: 'Accepted' | 'Denied';
   rating: number;
@@ -13,10 +14,10 @@ interface Applicant {
 
 export default function AllApplicantsSection() {
   const applicants: Applicant[] = [
-    { name: 'Maria Santos', status: 'Accepted', rating: 4.5, dateApplied: 'Oct 5, 2025' },
-    { name: 'Juan Dela Cruz', status: 'Denied', rating: 4.5, dateApplied: 'Oct 5, 2025' },
-    { name: 'Ana Lopez', status: 'Denied', rating: 4.5, dateApplied: 'Oct 5, 2025' },
-    { name: 'Carlos Reyes', status: 'Accepted', rating: 4.5, dateApplied: 'Oct 5, 2025' },
+    { userId: '1', name: 'Maria Santos', status: 'Accepted', rating: 4.5, dateApplied: 'Oct 5, 2025' },
+    { userId: '2', name: 'Juan Dela Cruz', status: 'Denied', rating: 4.5, dateApplied: 'Oct 5, 2025' },
+    { userId: '3', name: 'Ana Lopez', status: 'Denied', rating: 4.5, dateApplied: 'Oct 5, 2025' },
+    { userId: '4', name: 'Carlos Reyes', status: 'Accepted', rating: 4.5, dateApplied: 'Oct 5, 2025' },
   ];
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -48,6 +49,7 @@ export default function AllApplicantsSection() {
         {applicants.map((applicant, index) => (
           <ApplicantStatusCard
             key={index}
+            userId={applicant.userId}
             name={applicant.name}
             rating={applicant.rating}
             dateApplied={applicant.dateApplied}

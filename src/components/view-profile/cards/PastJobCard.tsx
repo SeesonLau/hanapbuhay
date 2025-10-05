@@ -2,13 +2,14 @@ import React from 'react';
 import { HiLocationMarker } from 'react-icons/hi';
 
 interface PastJobCardProps {
+  postId: string;
   title: string;
   address: string;
   hiredDate: string | Date;
   className?: string;
 }
 
-export default function PastJobCard({ title, address, hiredDate, className = '' }: PastJobCardProps) {
+export default function PastJobCard({ postId, title, address, hiredDate, className = '' }: PastJobCardProps) {
   const dateString =
     hiredDate instanceof Date ? hiredDate.toLocaleDateString() : new Date(hiredDate).toLocaleDateString();
 

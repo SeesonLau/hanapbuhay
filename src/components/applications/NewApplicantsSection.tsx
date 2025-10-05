@@ -5,6 +5,7 @@ import { HiArrowDown } from 'react-icons/hi';
 import ApplicantCard from './cards/ApplicantCard';
 
 interface Applicant {
+  userId: string;
   name: string;
   rating: number;
   dateApplied: string;
@@ -12,13 +13,13 @@ interface Applicant {
 
 export default function NewApplicantsSection() {
   const applicants: Applicant[] = [
-    { name: 'Maria Santos', rating: 4.7, dateApplied: 'Oct 5, 2025' },
-    { name: 'Juan Dela Cruz', rating: 4.3, dateApplied: 'Oct 5, 2025' },
-    { name: 'Ana Lopez', rating: 3.2, dateApplied: 'Oct 5, 2025' },
-    { name: 'Carlos Reyes', rating: 5, dateApplied: 'Oct 5, 2025' },
-    { name: 'Maria Santos', rating: 4.1, dateApplied: 'Oct 5, 2025' },
-    { name: 'Juan Dela Cruz', rating: 4.0, dateApplied: 'Oct 5, 2025' },
-    { name: 'Ana Lopez', rating: 4.5, dateApplied: 'Oct 5, 2025' },
+    { userId: '1', name: 'Maria Santos', rating: 4.7, dateApplied: 'Oct 5, 2025' },
+    { userId: '2', name: 'Juan Dela Cruz', rating: 4.3, dateApplied: 'Oct 5, 2025' },
+    { userId: '3', name: 'Ana Lopez', rating: 3.2, dateApplied: 'Oct 5, 2025' },
+    { userId: '4', name: 'Carlos Reyes', rating: 5, dateApplied: 'Oct 5, 2025' },
+    { userId: '5', name: 'Maria Santos', rating: 4.1, dateApplied: 'Oct 5, 2025' },
+    { userId: '6', name: 'Juan Dela Cruz', rating: 4.0, dateApplied: 'Oct 5, 2025' },
+    { userId: '7', name: 'Ana Lopez', rating: 4.5, dateApplied: 'Oct 5, 2025' },
   ];
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -55,6 +56,7 @@ export default function NewApplicantsSection() {
           {applicants.map((applicant, index) => (
             <div key={index} className="snap-start">
               <ApplicantCard
+                userId={applicant.userId}
                 name={applicant.name}
                 rating={applicant.rating}
                 dateApplied={applicant.dateApplied}

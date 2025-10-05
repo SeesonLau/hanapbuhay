@@ -25,7 +25,7 @@ export default function ViewProfileModal({ isOpen, onClose }: ViewProfileModalPr
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-white rounded-lg shadow-lg p-6 w-full max-w-6xl"
+        className="bg-white rounded-lg shadow-lg p-2 w-full max-w-6xl"
         onClick={(e) => e.stopPropagation()}
       >
         

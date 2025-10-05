@@ -6,6 +6,7 @@ import Image from 'next/image';
 import ChatIcon from '@/assets/chat.svg';
 
 interface ApplicantStatusCardProps {
+  userId: string;
   name: string;
   rating?: number;
   dateApplied: string;

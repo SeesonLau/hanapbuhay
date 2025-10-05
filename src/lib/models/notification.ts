@@ -1,7 +1,7 @@
 import { NotificationType } from "@/lib/constants/notification-types"
 
 export interface Notification {
-  notificationId: number;
+  notificationId: string;
   name: string;
   type: NotificationType;
   message: string;

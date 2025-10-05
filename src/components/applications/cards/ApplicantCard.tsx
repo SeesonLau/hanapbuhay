@@ -7,6 +7,7 @@ import ChatIcon from '@/assets/chat.svg';
 import Button from '@/components/ui/Button';
 
 interface ApplicantCardProps {
+  userId: string;
   name: string;
   rating: number;
   dateApplied: string;
