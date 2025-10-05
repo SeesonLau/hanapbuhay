@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { FaUserCircle, FaStar } from 'react-icons/fa';
-import Image from 'next/image'
+import Image from 'next/image';
 import ChatIcon from '@/assets/chat.svg';
 import Button from '@/components/ui/Button';
 

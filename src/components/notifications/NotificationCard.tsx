@@ -2,7 +2,7 @@
 
 import React from "react";
 import { HiOutlineUser } from "react-icons/hi";
-import { Notification } from "@/lib/models/notification"
+import { Notification } from "@/lib/models/notification";
 
 interface NotificationCardProps {
   notif: Notification;

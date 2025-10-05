@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import NotificationCard from "./NotificationCard";
-import { Notification } from "@/lib/models/notification"
+import { Notification } from "@/lib/models/notification";
 import { NotificationType } from "@/lib/constants/notification-types";
 import { HiBell } from "react-icons/hi";
 import Button from "@/components/ui/Button";

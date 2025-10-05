@@ -6,11 +6,11 @@ import AllApplicantsSection from '@/components/applications/AllApplicantsSection
 import SearchBar from '@/components/ui/SearchBar';
 
 interface ApplicantsModalProps {
-  postId: string;
+  postId?: string;
   isOpen: boolean;
   onClose: () => void;
-  title: string;
-  applicantCount: number;
+  title?: string;
+  applicantCount?: number;
 }
 
 export default function ApplicantsModal({ 

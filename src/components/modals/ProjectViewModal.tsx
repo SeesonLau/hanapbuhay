@@ -1,6 +1,7 @@
 "use client";
 
 interface ProjectViewModalProps {
+  projectId: string;
   title: string;
   description?: string;
   projectPictureUrl?: string;
