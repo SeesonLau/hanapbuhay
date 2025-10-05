@@ -18,7 +18,6 @@ export default function ApplicantStatusCard({
   dateApplied,
   status,
 }: ApplicantStatusCardProps) {
-  // ✅ Updated to border + text style
   const statusClasses =
     status === 'Accepted'
       ? 'text-[#71D852] border border-[#71D852]'

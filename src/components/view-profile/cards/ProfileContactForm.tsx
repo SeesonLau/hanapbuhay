@@ -38,7 +38,7 @@ export default function ProfileContactForm({
         <div>
           <p className="font-alexandria font-medium description">{name}</p>
           {gender && age && (
-            <p className="text-primary-primary400 tiny">{gender} ⋅ {age} years old</p>
+            <p className="text-primary-primary400 tiny">{gender} • {age} years old</p>
           )}
         </div>
       </div>

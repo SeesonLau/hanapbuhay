@@ -8,12 +8,11 @@ import Button from '@/components/ui/Button';
 
 interface ApplicantCardProps {
   name: string;
-  position?: string;
-  rating?: number;
+  rating: number;
   dateApplied: string;
 }
 
-export default function ApplicantCard({ name, rating = 4.5, dateApplied }: ApplicantCardProps) {
+export default function ApplicantCard({ name, rating, dateApplied }: ApplicantCardProps) {
   return (
     <div className="bg-white rounded-xl shadow-md p-4 w-full max-w-[300px] aspect-[300/172] flex flex-col justify-between border border-gray-neutral200 hover:scale-[1.02] transition-transform">
       {/* Profile + Chat */}
@@ -46,7 +45,7 @@ export default function ApplicantCard({ name, rating = 4.5, dateApplied }: Appli
       <hr className="mt-2 border-t border-gray-neutral200" />
 
       {/* Approve / Deny Buttons */}
-      <div className="flex justify-between gap 3 mt-3">
+      <div className="flex justify-between gap-3 mt-3">
         <Button variant="approve" size="approveDeny">
           Approve
         </Button>
