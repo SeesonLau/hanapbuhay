@@ -6,7 +6,7 @@ import ProjectViewCard from "./cards/ProjectViewCard";
 import ProjectViewModal from "@/components/modals/ProjectViewModal";
 
 interface Project {
-  projectId: number;
+  projectId: string;
   title: string;
   description?: string;
   projectPictureUrl?: string;
@@ -14,12 +14,12 @@ interface Project {
 
 export default function ProjectListSection() {
   const [projects] = useState<Project[]>([
-    { projectId: 1, title: "E-commerce Website", description: "Full-stack e-commerce platform workworkworkworkworkworkworkworkworkworkworkworkworkworkworkworkworkworkworkworkwork" },
-    { projectId: 2, title: "Portfolio Website", description: "Personal portfolio website" },
-    { projectId: 3, title: "Mobile Chat App", description: "Real-time chat app" },
-    { projectId: 4, title: "Blog Platform", description: "Modern blogging platform" },
-    { projectId: 5, title: "Task Manager", description: "Productivity app for tasks" },
-    { projectId: 6, title: "Social Media Dashboard", description: "Analytics dashboard" },
+    { projectId: "1", title: "E-commerce Website", description: "Full-stack e-commerce platform workworkworkworkworkworkworkworkworkworkworkworkworkworkworkworkworkworkworkworkwork" },
+    { projectId: "2", title: "Portfolio Website", description: "Personal portfolio website" },
+    { projectId: "3", title: "Mobile Chat App", description: "Real-time chat app" },
+    { projectId: "4", title: "Blog Platform", description: "Modern blogging platform" },
+    { projectId: "5", title: "Task Manager", description: "Productivity app for tasks" },
+    { projectId: "6", title: "Social Media Dashboard", description: "Analytics dashboard" },
   ]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -80,6 +80,7 @@ export default function ProjectListSection() {
 
       {selectedProject && (
         <ProjectViewModal
+          projectId={selectedProject.projectId}
           isOpen={!!selectedProject}
           onClose={() => setSelectedProject(null)}
           title={selectedProject.title}

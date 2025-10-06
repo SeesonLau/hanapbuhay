@@ -23,7 +23,7 @@ export default function ProjectViewCard({
   return (
     <div
       onClick={onClick}
-      className="flex-shrink-0 w-[165px] h-[252px] bg-white border border-gray-neutral200 rounded-[10px] shadow-md cursor-pointer 
+      className="flex-shrink-0 w-[173px] h-[252px] bg-white border border-gray-neutral200 rounded-[10px] shadow-md cursor-pointer 
                  hover:shadow-xl hover:scale-[1.03] transition-transform duration-200"
     >
       {projectPictureUrl ? (

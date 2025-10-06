@@ -1,9 +1,13 @@
 // src/app/manage-job-posts/page.tsx
 'use client';
 
+import { useState } from 'react';
 import Banner from '@/components/ui/Banner';
+import ApplicantsModal from '@/components/modals/ApplicantsModal';
 
 export default function ManageJobPostsPage() {
+   const [isModalOpen, setIsModalOpen] = useState(false);
+   
   const handleSearch = (query: string, location?: string) => {
     console.log('Search query:', query);
     if (location) {
@@ -11,6 +15,9 @@ export default function ManageJobPostsPage() {
     }
     // Add your search logic here
   };
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   return (
     <div className="min-h-screen">
@@ -27,6 +34,16 @@ export default function ManageJobPostsPage() {
             <h1 className="text-3xl font-bold text-white mb-6">Manage Job Posts</h1>
             <p className="text-lg text-gray-300">Create and manage your job postings</p>
           </div>
+
+          {/* PLACEHOLDER */}
+            <button
+              onClick={openModal}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              View Applicants
+            </button>
+            <ApplicantsModal isOpen={isModalOpen} onClose={closeModal} />
+          {/* PLACEHOLDER */}
 
           {/* Job Posts Content */}
           <div className="space-y-4">

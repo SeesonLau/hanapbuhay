@@ -22,7 +22,6 @@ module.exports = {
         tiny: '0.75rem',        // 12px
         popup: '1.125rem',      // 18px
         mini: '0.6875rem',      // 10px
-
       },
       colors: {
         blue: {

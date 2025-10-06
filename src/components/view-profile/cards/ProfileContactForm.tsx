@@ -1,18 +1,22 @@
 "use client";
 
 import { HiOutlineMail, HiOutlinePhone, HiOutlineLocationMarker } from "react-icons/hi";
+import Image from "next/image";
+import ChatIcon from "@/assets/chat.svg"
 
 interface ProfileContactFormProps {
+  userId: string;
   profilePictureUrl?: string;
   name: string;
-  gender?: string;
-  age?: number;
+  gender: string;
+  age: number;
   email: string;
-  phoneNumber?: string;
-  address?: string;
+  phoneNumber: string;
+  address: string;
 }
 
 export default function ProfileContactForm({
+  userId = "1",
   profilePictureUrl,
   name,
   gender,
@@ -31,16 +35,24 @@ export default function ProfileContactForm({
             className="w-20 h-20 rounded-[10px] object-cover"
           />
         ) : (
-          <div className="w-20 h-20 bg-gray-200 rounded-[10px] flex items-center justify-center text-gray-neutral500">
+          <div className="w-20 h-20 bg-gray-neutral200 rounded-[10px] flex items-center justify-center text-gray-neutral500">
             No Image
           </div>
         )}
         <div>
           <p className="font-alexandria font-medium description">{name}</p>
           {gender && age && (
-            <p className="text-primary-primary400 tiny">{gender} ⋅ {age} years old</p>
+            <p className="text-primary-primary400 tiny">{gender} • {age} years old</p>
           )}
         </div>
+        {/* Chat */}
+        <Image
+          src={ChatIcon}
+          alt="Chat"
+          width={24}
+          height={24}
+          className="cursor-pointer hover:opacity-80 transition-opacity"
+        />
       </div>
       
       <div className="flex flex-col gap-3">
