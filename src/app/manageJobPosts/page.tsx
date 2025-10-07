@@ -6,6 +6,9 @@ import HeaderDashboard from '@/components/ui/HeaderDashboard';
 import { ManageJobPostCard } from '@/components/ui/ManageJobPostCard';
 import { ManageJobPostList } from '@/components/ui/ManageJobPostList';
 import { ViewToggle } from '@/components/ui/ViewToggle';
+import { JobType } from '@/lib/constants/job-types';
+import { Gender } from '@/lib/constants/gender';
+import { ExperienceLevel } from '@/lib/constants/experience-level';
 
 // Sample job post data
 const sampleJobPosts = [
@@ -18,9 +21,9 @@ const sampleJobPosts = [
     salaryPeriod: "month",
     postedDate: "August 20, 2025",
     applicantCount: 7,
-    genderTags: ["Female"],
-    experienceTags: ["Entry level"],
-    jobTypeTags: ["Baby Sitter"]
+    genderTags: [Gender.FEMALE],
+    experienceTags: [ExperienceLevel.ENTRY],
+    jobTypeTags: [JobType.SERVICE, "Baby Sitter"]
   },
   {
     id: "2",
@@ -31,9 +34,9 @@ const sampleJobPosts = [
     salaryPeriod: "month",
     postedDate: "August 18, 2025",
     applicantCount: 3,
-    genderTags: ["Male", "Female"],
-    experienceTags: ["Entry level", "Experienced"],
-    jobTypeTags: ["Service"]
+    genderTags: [Gender.MALE, Gender.FEMALE],
+    experienceTags: [ExperienceLevel.ENTRY, ExperienceLevel.EXPERIENCED],
+    jobTypeTags: [JobType.SERVICE, "House Helper"]
   },
   {
     id: "3",
@@ -44,9 +47,9 @@ const sampleJobPosts = [
     salaryPeriod: "month",
     postedDate: "August 15, 2025",
     applicantCount: 2,
-    genderTags: ["Male"],
-    experienceTags: ["Experienced"],
-    jobTypeTags: ["Construction"]
+    genderTags: [Gender.MALE],
+    experienceTags: [ExperienceLevel.EXPERIENCED],
+    jobTypeTags: [JobType.CONSTRUCTION, "Construction Helper"]
   },
   {
     id: "4",
@@ -57,9 +60,9 @@ const sampleJobPosts = [
     salaryPeriod: "month",
     postedDate: "August 20, 2025",
     applicantCount: 1,
-    genderTags: ["Any"],
-    experienceTags: ["Expert"],
-    jobTypeTags: ["Website Builder"]
+    genderTags: [Gender.ANY],
+    experienceTags: [ExperienceLevel.EXPERT],
+    jobTypeTags: [JobType.IT, "Website Builder"]
   }
 ];
 

@@ -5,6 +5,9 @@ import { getBlackColor, getNeutral600Color, getNeutral100Color, getNeutral400Col
 import { fontClasses } from '@/styles/fonts';
 // Use public assets for icons
 import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticLocationTag, StaticSalaryTag } from './Tags';
+import { JobType, SubTypes } from '@/lib/constants/job-types';
+import { Gender } from '@/lib/constants/gender';
+import { ExperienceLevel } from '@/lib/constants/experience-level';
 
 interface JobPostData {
   id: string;
@@ -43,10 +46,36 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
   } = jobData;
 
   // Combine tags and cap visible to 5, show overflow as n+
+  const normalizeJobType = (label: string): string | null => {
+    // Only allow subtypes; exclude top-level JobType enums from display
+    const isSubType = Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(label));
+    return isSubType ? label : null;
+  };
+
+  const normalizedJobTypes = jobTypeTags
+    .map((label) => normalizeJobType(label))
+    .filter((t): t is string => Boolean(t));
+
+  const normalizeGender = (label: string): string | null => {
+    return Object.values(Gender).includes(label as Gender) ? label : null;
+  };
+
+  const normalizedGenders = genderTags
+    .map((label) => normalizeGender(label))
+    .filter((t): t is string => Boolean(t));
+
+  const normalizeExperience = (label: string): string | null => {
+    return Object.values(ExperienceLevel).includes(label as ExperienceLevel) ? label : null;
+  };
+
+  const normalizedExperiences = experienceTags
+    .map((label) => normalizeExperience(label))
+    .filter((t): t is string => Boolean(t));
+
   const allTags = [
-    ...jobTypeTags.map((label) => ({ type: 'jobtype' as const, label })),
-    ...experienceTags.map((label) => ({ type: 'experience' as const, label })),
-    ...genderTags.map((label) => ({ type: 'gender' as const, label })),
+    ...normalizedJobTypes.map((label) => ({ type: 'jobtype' as const, label })),
+    ...normalizedExperiences.map((label) => ({ type: 'experience' as const, label })),
+    ...normalizedGenders.map((label) => ({ type: 'gender' as const, label })),
   ];
   const MAX_TAGS = 4;
   const visibleTags = allTags.slice(0, MAX_TAGS);
