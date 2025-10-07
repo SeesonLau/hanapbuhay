@@ -1,6 +1,8 @@
 "use client";
 
 import React from 'react';
+import { getBlackColor, getNeutral600Color, getNeutral100Color, getNeutral400Color } from '@/styles/colors';
+import { fontClasses } from '@/styles/fonts';
 // Use public assets for icons
 import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticLocationTag, StaticSalaryTag } from './Tags';
 
@@ -61,10 +63,10 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
       <div className="flex flex-row items-center justify-between h-full gap-3">
         {/* Title + Description (horizontal alignment) */}
         <div className="min-w-0 flex items-center gap-3">
-          <h3 className="font-inter font-semibold text-[15px] text-gray-900 whitespace-nowrap">
+          <h3 className={`${fontClasses.heading} font-semibold text-[15px] whitespace-nowrap`} style={{ color: getBlackColor() }}>
             {shortTitle}
           </h3>
-          <p className="font-alexandria font-light text-[12px] text-gray-600 whitespace-nowrap">
+          <p className={`${fontClasses.body} font-light text-[12px] whitespace-nowrap`} style={{ color: getNeutral600Color() }}>
             {shortDescription}
           </p>
         </div>
@@ -81,7 +83,10 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
             )
           ))}
           {extraCount > 0 && (
-            <div className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-200 text-gray-700">
+            <div
+              className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
+              style={{ backgroundColor: getNeutral100Color(), color: getNeutral400Color() }}
+            >
               {extraCount}+
             </div>
           )}
@@ -95,7 +100,7 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
 
         {/* Posted Date */}
         <div className="flex-shrink-0">
-          <span className="font-inter text-[10px] text-[#595959]">Posted on: {postedDate}</span>
+          <span className={`${fontClasses.body} text-[10px]`} style={{ color: getNeutral600Color() }}>Posted on: {postedDate}</span>
         </div>
 
         {/* Action Buttons */}

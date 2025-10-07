@@ -1,6 +1,8 @@
 "use client";
 
 import React from 'react';
+import { getBlackColor, getNeutral600Color, getNeutral100Color, getNeutral400Color } from '@/styles/colors';
+import { fontClasses } from '@/styles/fonts';
 // Use public assets for icons
 import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticLocationTag, StaticSalaryTag } from './Tags';
 
@@ -56,8 +58,8 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
     >
       {/* Header */}
       <div className="flex-shrink-0 mb-[15px]">
-        <h3 className="font-inter font-semibold text-[20px] text-gray-900 mb-2 truncate">{title}</h3>
-        <p className="font-alexandria font-light text-[12px] text-gray-600 line-clamp-2">{description}</p>
+        <h3 className={`${fontClasses.heading} font-semibold text-[20px] mb-2 truncate`} style={{ color: getBlackColor() }}>{title}</h3>
+        <p className={`${fontClasses.body} font-light text-[12px] line-clamp-2`} style={{ color: getNeutral600Color() }}>{description}</p>
       </div>
 
       {/* Tags Section - Horizontally Aligned with overflow count */}
@@ -73,7 +75,10 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
             )
           ))}
           {extraCount > 0 && (
-            <div className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-200 text-gray-700">
+            <div
+              className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
+              style={{ backgroundColor: getNeutral100Color(), color: getNeutral400Color() }}
+            >
               {extraCount}+
             </div>
           )}
@@ -90,7 +95,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
 
         {/* Posted Date */}
         <div className="flex justify-start">
-          <span className="font-inter font-medium text-[10px] text-[#595959]">Posted on: {postedDate}</span>
+          <span className={`${fontClasses.body} font-medium text-[10px]`} style={{ color: getNeutral600Color() }}>Posted on: {postedDate}</span>
         </div>
         
         {/* Action Buttons - Full Width */}
