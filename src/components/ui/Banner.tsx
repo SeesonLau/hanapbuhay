@@ -124,7 +124,7 @@ const Banner: React.FC<BannerProps> = ({
       />
 
       {/* Banner Content Container - Left-aligned structure */}
-      <div className="flex flex-col pt-4 sm:pt-6 pb-6 sm:pb-8 px-32 sm:px-24 md:px-28 lg:px-32 w-full min-h-[230px]">
+      <div className="flex flex-col pt-4 sm:pt-6 pb-6 sm:pb-8 px-12 sm:px-12 md:px-16 lg:px-32 w-full min-h-[230px]">
         {/* Banner Text Section - Left-aligned typography and spacing */}
         <div className={`text-start mb-4 sm:mb-5 w-full ${variant === 'profile' || variant === 'chat' ? 'mt-24' : 'mt-16'}`}>
           <h1 className="text-body sm:text-body md:text-description lg:text-lead font-bold font-alexandria text-white leading-tight mb-2">
