@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
+import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
+import { CgSortAz, CgSortZa } from "react-icons/cg";
 
 export type DropdownOption = {
   id: string;
@@ -21,27 +23,27 @@ type Props = {
   renderOption?: (opt: DropdownOption, isSelected: boolean) => React.ReactNode;
 };
 
-function CaretIcon({ className = '' }: { className?: string }) {
-  return (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+function CaretIcon({ className = '', isOpen = false }: { className?: string; isOpen?: boolean }) {
+  return isOpen ? (
+    <IoIosArrowUp className={className} />
+  ) : (
+    <IoIosArrowDown className={className} />
   );
 }
 
 function SortIcon({ flipped = false, className = '' }: { flipped?: boolean; className?: string }) {
-  return (
-    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <path d="M3 6h18M6 12h12M10 18h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" transform={flipped ? 'scale(1,-1) translate(0,-24)' : undefined} />
-    </svg>
+  return flipped ? (
+    <CgSortZa className={className} />
+  ) : (
+    <CgSortAz className={className} />
   );
 }
 
 // named exports for compatibility
-export const IconSortAsc = (props: { className?: string }) => <SortIcon flipped={false} className={props.className} />;
-export const IconSortDesc = (props: { className?: string }) => <SortIcon flipped={true} className={props.className} />;
+export const IconSortAsc = (props: { className?: string }) => <CgSortAz className={props.className} />;
+export const IconSortDesc = (props: { className?: string }) => <CgSortZa className={props.className} />;
 
-export default function Dropdown({ options, value = null, onChange, placeholder = 'Sort', className = '', fullWidth = false, renderOption, }: Props) {
+const Dropdown = memo(function Dropdown({ options, value = null, onChange, placeholder = 'Sort', className = '', fullWidth = false, renderOption, }: Props) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<DropdownOption | null>(() => {
     if (value == null) return null;
@@ -66,12 +68,16 @@ export default function Dropdown({ options, value = null, onChange, placeholder 
   // reset active index when opening
   useEffect(() => {
     if (open) {
-      const idx = selected ? options.findIndex((o) => o.id === selected.id) : -1;
-      setActiveIndex(idx >= 0 ? idx : 0);
+      if (selected) {
+        const idx = options.findIndex((o) => o.id === selected.id);
+        setActiveIndex(idx >= 0 ? idx : 0);
+      } else {
+        setActiveIndex(0);
+      }
     } else {
       setActiveIndex(-1);
     }
-  }, [open, selected, options]);
+  }, [open, selected?.id]); // Only depend on selected.id, not entire objects
 
   // measure trigger width so the menu can be at least as wide as the trigger
   useEffect(() => {
@@ -92,23 +98,26 @@ export default function Dropdown({ options, value = null, onChange, placeholder 
 
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
-  }, [selected, open, options, fullWidth]);
+  }, [fullWidth]); // Removed unnecessary dependencies
 
   useEffect(() => {
-    if (value == null) return;
+    if (value == null) {
+      setSelected(null);
+      return;
+    }
     const found = options.find((o) => o.value === value || o.id === String(value)) ?? null;
     setSelected(found);
   }, [value, options]);
 
-  function handleSelect(opt: DropdownOption) {
+  const handleSelect = useCallback((opt: DropdownOption) => {
     setSelected(opt);
     setOpen(false);
     onChange?.(opt);
     // return focus to trigger
     triggerRef.current?.focus();
-  }
+  }, [onChange]);
 
-  function onTriggerKeyDown(e: React.KeyboardEvent) {
+  const onTriggerKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       setOpen(true);
@@ -117,9 +126,9 @@ export default function Dropdown({ options, value = null, onChange, placeholder 
         listRef.current?.focus();
       }, 0);
     }
-  }
+  }, []);
 
-  function onListKeyDown(e: React.KeyboardEvent) {
+  const onListKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       setOpen(false);
       triggerRef.current?.focus();
@@ -139,7 +148,9 @@ export default function Dropdown({ options, value = null, onChange, placeholder 
       e.preventDefault();
       handleSelect(options[activeIndex]);
     }
-  }
+  }, [options.length, activeIndex, handleSelect]);
+
+  const toggleOpen = useCallback(() => setOpen((s) => !s), []);
 
   return (
     <div ref={rootRef} className={`relative inline-block text-left ${className}`}>
@@ -148,13 +159,13 @@ export default function Dropdown({ options, value = null, onChange, placeholder 
         type="button"
         aria-haspopup="true"
         aria-expanded={open}
-        onClick={() => setOpen((s) => !s)}
+        onClick={toggleOpen}
         onKeyDown={onTriggerKeyDown}
-  className={`flex items-center justify-between ${fullWidth ? 'w-full' : 'w-auto'} px-3 py-2 bg-white shadow rounded-md text-sm font-medium text-black`}
+        className={`flex items-center justify-between ${fullWidth ? 'w-full' : 'w-auto'} px-3 py-2 bg-white hover:bg-gray-neutral50 shadow rounded-md text-body font-medium text-gray-neutral900 border border-gray-neutral200 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent`}
       >
-        <span className="truncate">{selected ? selected.label : placeholder}</span>
-        <span className="ml-2">
-          <CaretIcon className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+        <span className="truncate text-small font-inter">{selected ? selected.label : placeholder}</span>
+        <span className="ml-4">
+          <CaretIcon className="w-3 h-3 text-gray-neutral600 transition-colors duration-150" isOpen={open} />
         </span>
       </button>
 
@@ -166,7 +177,7 @@ export default function Dropdown({ options, value = null, onChange, placeholder 
           role="menu"
           aria-orientation="vertical"
           style={triggerWidth && !fullWidth ? { minWidth: `${triggerWidth}px` } : undefined}
-          className={`absolute mt-2 ${fullWidth ? 'left-0 right-0' : ''} ${fullWidth ? 'w-full' : ''} bg-white shadow-lg rounded-lg z-50 focus:outline-none`}
+          className={`absolute mt-2 ${fullWidth ? 'left-0 right-0' : ''} ${fullWidth ? 'w-full' : ''} bg-white shadow-lg rounded-lg z-50 focus:outline-none border border-gray-neutral200`}
         >
           <div className="flex flex-col py-2">
             {options.map((opt, idx) => {
@@ -180,7 +191,7 @@ export default function Dropdown({ options, value = null, onChange, placeholder 
                   aria-current={isSelected || undefined}
                   onClick={() => handleSelect(opt)}
                   onMouseEnter={() => setActiveIndex(idx)}
-                  className={`flex items-center gap-3 px-3 py-2 text-sm font-medium text-black hover:bg-gray-50 text-left w-full ${isSelected ? 'bg-gray-100' : ''} ${isActive ? 'ring-2 ring-indigo-300' : ''}`}
+                  className={`flex items-center gap-3 px-3 py-2 text-small font-medium font-inter text-gray-neutral900 hover:bg-gray-neutral50 hover:text-primary-600 text-left w-full transition-colors duration-150 ${isSelected ? 'bg-primary-50 text-primary-700' : ''} ${isActive ? 'ring-2 ring-primary-300' : ''}`}
                 >
                   {renderOption ? (
                     <div className="w-full">
@@ -188,9 +199,9 @@ export default function Dropdown({ options, value = null, onChange, placeholder 
                     </div>
                   ) : (
                     <>
-                      {opt.icon ? <span className="w-5 h-5 flex-shrink-0">{opt.icon}</span> : null}
-                      <span className="flex-1">{opt.label}</span>
-                      {opt.id.includes('salary') && <SortIcon flipped={opt.id.includes('desc')} className="w-4 h-4 text-black" />}
+                      {opt.icon ? <span className="w-5 h-5 flex-shrink-0 text-gray-neutral600">{opt.icon}</span> : null}
+                      <span className="flex-1 text-small font-inter">{opt.label}</span>
+                      {opt.id.includes('salary') && <SortIcon flipped={opt.id.includes('desc')} className="w-6 h-6 text-gray-neutral600" />}
                     </>
                   )}
                 </button>
@@ -201,4 +212,6 @@ export default function Dropdown({ options, value = null, onChange, placeholder 
       )}
     </div>
   );
-}
+});
+
+export default Dropdown;

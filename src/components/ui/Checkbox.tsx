@@ -1,5 +1,5 @@
 import React, { forwardRef, useId, useState, useEffect } from 'react';
-import { getGrayColor, getBlueDarkColor, getWhiteColor, getNeutral400Color, getTypographyClass, getTypographyStyle } from '@/styles';
+import { ImCheckboxChecked, ImCheckboxUnchecked } from "react-icons/im";
 
 export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size'> {
   label?: string;
@@ -12,9 +12,9 @@ export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputE
 }
 
 const sizeMap = {
-  sm: { box: 'w-4 h-4', text: 'text-sm px-3 py-1' },
-  md: { box: 'w-5 h-5', text: 'text-sm px-4 py-1' },
-  lg: { box: 'w-6 h-6', text: 'text-base px-4 py-2' }
+  sm: { icon: 'w-4 h-4', text: 'text-small font-inter px-3 py-1' },
+  md: { icon: 'w-5 h-5', text: 'text-small font-inter px-4 py-1' },
+  lg: { icon: 'w-6 h-6', text: 'text-body font-inter px-4 py-2' }
 };
 
 const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
@@ -49,6 +49,8 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
     const newChecked = e.target.checked;
     if (!isControlled) setInternalChecked(newChecked);
     onChange?.(newChecked, e);
+    // Reset hover state after change to prevent sticky hover
+    setIsHover(false);
   };
 
   const s = sizeMap[size] || sizeMap.md;
@@ -58,12 +60,16 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
   return (
     <label
       htmlFor={inputId}
-      className={`inline-flex items-center gap-3 select-none ${responsive ? 'w-full sm:w-auto' : ''} ${className}`}
+      className={`inline-flex items-center gap-1 select-none ${responsive ? 'w-full sm:w-auto' : ''} ${className}`}
     >
       <div
-        onMouseEnter={() => setIsHover(true)}
+        onMouseEnter={() => !disabled && setIsHover(true)}
         onMouseLeave={() => setIsHover(false)}
-        className={`flex items-center w-full px-5 py-1 gap-3 transition-colors duration-150 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        onClick={() => {
+          // Reset hover state on click to prevent sticky hover
+          setTimeout(() => setIsHover(false), 0);
+        }}
+        className={`flex items-center w-full px-5 py-1 gap-1 transition-colors duration-150 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         style={{
           transform: isHover || isFocus ? 'scale(1.06)' : 'scale(1)',
           transitionProperty: 'transform, background-color, border-color',
@@ -73,26 +79,33 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
         {/* Visual checkbox */}
         <div
           aria-hidden
-          className={`flex items-center justify-center transition-colors duration-150 ${s.box} rounded-sm`}
-          style={{
-            background: disabled ? getGrayColor('neutral100') : (checked ? getBlueDarkColor('default') : (isHover ? getGrayColor('default') : getWhiteColor())),
-            border: `1px solid ${disabled ? getGrayColor('neutral100') : (checked ? getBlueDarkColor('default') : getNeutral400Color())}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
+          className={`flex items-center justify-center transition-all duration-150 ${s.icon}`}
         >
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[14px] h-[14px] text-white" style={{
-            opacity: checked ? 1 : 0,
-            transform: checked ? 'scale(1)' : 'scale(0.8)',
-            transition: 'opacity 150ms, transform 150ms'
-          }}>
-            <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          {checked ? (
+            <ImCheckboxChecked 
+              className={`${s.icon} transition-all duration-150 ${
+                disabled 
+                  ? 'text-gray-neutral300' 
+                  : isHover 
+                    ? 'text-primary-primary600' 
+                    : 'text-primary-primary500'
+              }`}
+            />
+          ) : (
+            <ImCheckboxUnchecked 
+              className={`${s.icon} transition-all duration-150 ${
+                disabled 
+                  ? 'text-gray-neutral300' 
+                  : isHover 
+                    ? 'text-gray-neutral500' 
+                    : 'text-gray-neutral400'
+              }`}
+            />
+          )}
         </div>
 
     {/* Text label */}
-    <span className={`${s.text} font-normal ${getTypographyClass('small')}`} style={{ color: getGrayColor('neutral600') }}>{label}</span>
+    <span className={`${s.text} font-normal text-gray-neutral600 ${disabled ? 'text-gray-neutral400' : ''}`}>{label}</span>
 
         {/* Hidden native checkbox for accessibility */}
         <input
