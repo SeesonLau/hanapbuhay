@@ -57,7 +57,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={placeholder}
-              className="text-gray-neutral800 placeholder:text-gray-neutral400 text-small font-inter font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full focus:placeholder:text-gray-neutral300 transition-colors duration-150"
+              className="text-gray-neutral800 placeholder:text-gray-neutral400 text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-150"
             />
           </div>
 
@@ -93,7 +93,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={placeholder}
-              className="text-gray-neutral800 placeholder:text-gray-neutral400 text-small font-inter font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full focus:placeholder:text-gray-neutral300 transition-colors duration-150"
+              className="text-gray-neutral800 placeholder:text-gray-neutral400 text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-150"
             />
           </div>
 
@@ -111,7 +111,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               onChange={(e) => setLocation(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={locationPlaceholder}
-              className="text-gray-neutral800 placeholder:text-gray-neutral400 text-small font-inter font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full focus:placeholder:text-gray-neutral300 transition-colors duration-150"
+              className="text-gray-neutral800 placeholder:text-gray-neutral400 text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-150"
             />
           </div>
         </div>
