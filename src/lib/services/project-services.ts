@@ -9,6 +9,7 @@ export class ProjectService {
       .from('projects')
       .select('*')
       .eq('userId', userId)
+      .is('deletedAt', null) 
       .order('createdAt', { ascending: false });
 
     if (error) {
@@ -24,6 +25,7 @@ export class ProjectService {
       .from('projects')
       .select('*')
       .eq('projectId', projectId)
+      .is('deletedAt', null)
       .single();
 
     if (error) {
@@ -43,6 +45,7 @@ export class ProjectService {
           .from('projects')
           .select('projectId, createdAt, createdBy')
           .eq('projectId', project.projectId)
+          .is('deletedAt', null) 
           .single();
 
         if (error && error.code !== 'PGRST116') {
@@ -57,6 +60,8 @@ export class ProjectService {
         ...project,
         updatedAt: new Date().toISOString(),
         updatedBy: project.userId,
+        deletedAt: null, 
+        deletedBy: null, 
       };
 
       if (!existing) {
@@ -119,7 +124,8 @@ export class ProjectService {
         deletedBy: userId,
         deletedAt: new Date().toISOString(),
       })
-      .eq('projectId', projectId);
+      .eq('projectId', projectId)
+      .is('deletedAt', null); 
 
     if (error) {
       toast.error(ProjectMessages.DELETE_PROJECT_ERROR);

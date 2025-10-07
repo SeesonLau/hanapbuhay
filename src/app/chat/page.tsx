@@ -129,7 +129,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#141515' }}>
+    <div className="min-h-screen">
       {/* Banner Section with Header */}
       <Banner
         variant="chat"

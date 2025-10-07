@@ -19,10 +19,22 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  @apply bg-gray-neutral100;
   font-family: var(--font-inter);
 }
+
+h1 { @apply text-h1; }
+h2 { @apply text-h2; }
+h3 { @apply text-h3; }
+.lead { @apply text-lead; }
+.title { @apply text-title; }
+.description { @apply text-description; }
+.body { @apply text-body; }
+.small { @apply text-small; }
+.tiny { @apply text-tiny; }
+.popup { @apply text-popup; }
+.hero { @apply text-hero; }
+.mini { @apply text-mini; }
 
 /* Apply typography styles as CSS classes */
 .hero-text {
