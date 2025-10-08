@@ -16,4 +16,5 @@ export const ProjectMessages = {
   APPLYING_PROJECT: 'Applying project...',
   LOADING_PROJECTS: 'Loading projects...',
   PROJECT_MODAL_CLOSE: 'Project modal closed',
+  MISSING_PROJECT_INFO: 'Unable to delete project. Missing required information.',
 };

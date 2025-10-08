@@ -49,7 +49,7 @@ const sampleJobPosts = [
     applicantCount: 2,
     genderTags: [Gender.MALE],
     experienceTags: [ExperienceLevel.EXPERIENCED],
-    jobTypeTags: [JobType.CONSTRUCTION, "Construction Helper"]
+    jobTypeTags: [JobType.CONSTRUCTION, "Construction Worker"]
   },
   {
     id: "4",

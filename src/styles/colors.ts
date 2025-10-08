@@ -1,3 +1,5 @@
+import { error } from "console";
+
 // Define interfaces for our color structure
 interface ColorShades {
   default: string;
@@ -10,6 +12,7 @@ interface GrayShades extends ColorShades {
   neutral300: string;
   neutral400: string;
   neutral600: string;
+  neutral700: string;
 }
 
 // Define the main COLORS object
@@ -23,8 +26,12 @@ export const COLORS = {
     hover: '#1C6AF4',
   },
   red: {
-    default: '#ED4A4A',
-    hover: '#DA2727',
+    neutral100: '#FFE3E3', // For gradient
+    neutral200: '#FECACA', // Icon background
+    neutral500: '#EE4546', // Primary danger color
+    neutral600: '#F99292', // For gradient
+    default: '#EE4546',
+    hover: '#DA2727', // Kept existing hover for buttons
   },
   green: {
     default: '#6DCC4A', // Added green color
@@ -34,14 +41,82 @@ export const COLORS = {
     default: '#FFDE26', // Added yellow color
     hover: '#E5C522',   // Added a slightly darker shade for hover
   },
-  gray: {
+  gray: { // Neutral Colors
     default: '#e6e7e7',
     hover: '#858b8a',
     border: '#3B3E3E',
-    neutral100: '#F5F5F5',
+    neutral50: '#FAFAFA',
+    neutral100: '#E6E7E7',
+    neutral200: '#CFD2D1',
     neutral300: '#AEB2B1',
     neutral400: '#858B8A',
+    neutral500: '#6A706F',
     neutral600: '#5A605F',
+    neutral700: '#4D5151',
+    neutral800: '#444645',
+    neutral900: '#3B3E3E',
+  },
+  primary: {
+    primary50: '#EEF7FF',
+    primary100: '#D9ECFF',
+    primary200: '#BCDEFF',
+    primary300: '#8ECAFF',
+    primary400: '#59ACFF',
+    primary500: '#3289FF',
+    primary600: '#1C6AF4',
+    primary700: '#1453E1',
+    primary800: '#1743B6',
+    primary900: '#193D8F',
+  },
+  primary500: '#3289FF',
+  primary700: '#1453E1',
+  secondary: {
+    secondary50: '#ECF0FF',
+    secondary100: '#DDE4FF',
+    secondary200: '#C2CCFF',
+    secondary300: '#9CAAFF',
+    secondary400: '#757CFF',
+    secondary500: '#4A46FF',
+    secondary600: '#4936F5',
+    secondary700: '#3E2AD8',
+    secondary800: '#3325AE',
+    secondary900: '#2D2689',
+  },
+  success: {
+    success50: '#EFFCE9',
+    success100: '#DBF7D0',
+    success200: '#B9F0A6',
+    success300: '#8DE571',
+    success400: '#71D852',
+    success500: '#46BB27',
+    success600: '#33951B',
+    success700: '#297219',
+    success800: '#255A1A',
+    success900: '#224D1A',
+  },
+  warning: {
+    warning50: '#FFFAEB',
+    warning100: '#FDEFC8',
+    warning200: '#FBE39F',
+    warning300: '#F8C751',
+    warning400: '#F6B129',
+    warning500: '#EF8F11',
+    warning600: '#D46B0B',
+    warning700: '#B04A0D',
+    warning800: '#8F3911',
+    warning900: '#753012',
+  },
+  error: {
+    error50: '#FEF2F2',
+    error100: '#FEE2E2',
+    error200: '#FECACA',
+    error300: '#FCA5A6',
+    error400: '#F87172',
+    error500: '#EE4546',
+    error600: '#DD3031',
+    error700: '#B91C1D',
+    error800: '#991B1C',
+    error900: '#7F1D1E',
   },
   // Tag-specific colors (centralized from UI components)
   tag: {
@@ -59,8 +134,7 @@ export const COLORS = {
   },
   white: '#ffffff',
   black: '#000000',
-  primary500: '#3289FF',
-  primary700: '#1453E1',
+  
 };
 
 // Type definitions for better type safety
@@ -153,3 +227,6 @@ export const getNeutral400Color = (opacity: number = 1): string =>
 
 export const getNeutral600Color = (opacity: number = 1): string => 
   getColor('gray', 'neutral600', opacity);
+
+export const getNeutral700Color = (opacity: number = 1): string =>
+  getColor('gray', 'neutral700', opacity);

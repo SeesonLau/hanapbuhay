@@ -20,7 +20,8 @@ import { TYPOGRAPHY } from '@/styles/typography';
 import { AuthService } from '@/lib/services/auth-services';
 import { ROUTES } from '@/lib/constants';
 import SettingsModal from '@/components/modals/SettingsModal';
-import NotificationPopUp from './NotificationPopUp';
+import NotificationPopUp from '../notifications/NotificationPopUp';
+import { Preloader, PreloaderMessages } from "./Preloader";
 
 interface HeaderDashboardProps {
   userName?: string;
@@ -49,6 +50,9 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const [showNotifications, setShowNotifications] = useState(false); // New state for notifications TEMPORARY
   const [activeLink, setActiveLink] = useState('');
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
+
+  //Logout animation state
+  const [showGoodbye, setShowGoodbye] = useState(false);
   
   const menuRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -87,8 +91,12 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   };
 
   const handleSignOut = async () => {
-    await AuthService.signOut();
-    router.push(ROUTES.HOME);
+    setIsProfileOpen(false);
+    setShowGoodbye(true);
+    setTimeout(async () => {
+      await AuthService.signOut();
+      router.push(ROUTES.HOME);
+    }, 2500);
   };
 
   useEffect(() => {
@@ -142,22 +150,20 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     <>
       {/* Header Section */}
       <header 
-        className={`${fontClasses.body} w-full shadow-lg`}
-        style={{ backgroundColor: getGrayColor('neutral600') }}
+        className={`${fontClasses.body} w-full`}
       >
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 w-full p-10">
+        <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 py-3 sm:py-4 flex items-center justify-between fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out">
             {/* Left Section - Brand/Logo */}
-            <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
+            <div className="flex-shrink-0">
+              <div className="flex items-center">
                 {/* Logo */}
-                <Link href={ROUTES.DASHBOARD} className="cursor-pointer">
+                <Link href={ROUTES.DASHBOARD} className="cursor-pointer transition-transform duration-300 hover:scale-105">
                   <Image
                     src="/image/hanapbuhay-logo.svg"
                     alt="HanapBuhay Logo"
                     width={187}
                     height={68}
-                    className="h-14 w-auto mr-3"
+                    className="w-32 h-10 sm:w-40 sm:h-12 md:w-44 md:h-14 lg:w-48 lg:h-16"
                     priority
                   />
                 </Link>
@@ -165,32 +171,29 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
             </div>
 
             {/* Center Section - Navigation Links (Desktop) */}
-            <div className="hidden md:flex items-center space-x-8">
+            <nav className="hidden md:flex items-center gap-6 lg:gap-8 xl:gap-12 absolute left-1/2 transform -translate-x-1/2">
               {navigationLinks.map((link) => (
                 <Link key={link.id} href={link.route}>
                   <button
-                    className="group relative px-3 pt-4 pb-2 text-sm font-medium transition-all duration-300 focus:outline-none"
-                    style={{
-                      color: activeLink === link.id || hoveredLink === link.id ? 
-                        getBlueColor() : getWhiteColor(),
-                      transition: 'color 0.3s ease-in-out'
-                    }}
+                    className={`group relative px-3 pt-4 pb-2 text-small md:text-body font-medium transition-all duration-300 focus:outline-none whitespace-nowrap ${
+                      activeLink === link.id
+                        ? 'text-blue-default'
+                        : 'text-neutral-200 hover:text-blue-default'
+                    }`}
                     onMouseEnter={() => setHoveredLink(link.id)}
                     onMouseLeave={() => setHoveredLink(null)}
                   >
                     {link.label}
-                    {/* Animated underline */}
+                    {/* Animated underline - only shows when active */}
                     <span 
-                      className="absolute top-2 left-0 h-0.5 transition-all duration-300 ease-in-out"
-                      style={{
-                        width: activeLink === link.id || hoveredLink === link.id ? '100%' : '0%',
-                        backgroundColor: getBlueColor(),
-                      }}
+                      className={`absolute top-2 left-0 h-0.5 bg-blue-default transition-all duration-300 ease-in-out ${
+                        activeLink === link.id ? 'w-full' : 'w-0'
+                      }`}
                     />
                   </button>
                 </Link>
               ))}
-            </div>
+            </nav>
 
             {/* Right Section - Notifications & Profile */}
             <div className="flex items-center space-x-4">
@@ -256,7 +259,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                     )}
                   </div>
                   <span 
-                    className="hidden sm:block text-sm font-medium"
+                    className="hidden sm:block text-body font-medium"
                   >
                     {userName}
                   </span>
@@ -351,33 +354,24 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                 )}
               </button>
             </div>
-          </div>
         </div>
 
         {/* Mobile Menu Dropdown */}
         {isMenuOpen && (
           <div
             ref={menuRef}
-            className="md:hidden border-t transition-all duration-300 ease-in-out"
-            style={{ 
-              backgroundColor: getGrayColor('neutral600'),
-              borderColor: getGrayColor('border')
-            }}
+            className="md:hidden absolute top-full right-4 mt-2 rounded-xl bg-gray-900 bg-opacity-95 min-w-48 transition-all duration-300 ease-in-out"
           >
-            <div className="px-2 pt-2 pb-3 space-y-1">
+            <div className="flex flex-col space-y-2 p-4">
               {navigationLinks.map((link) => (
                 <Link key={link.id} href={link.route}>
                   <button
                     onClick={() => setIsMenuOpen(false)}
-                    className={`w-full text-left px-3 py-2 text-base font-medium transition-all duration-300 focus:outline-none ${
+                    className={`w-full text-left px-3 py-2 text-base font-medium transition-all duration-300 focus:outline-none rounded-lg ${
                       activeLink === link.id
-                        ? 'bg-gray-700'
-                        : 'hover:bg-gray-700 focus:bg-gray-700'
+                        ? 'bg-blue-default text-white'
+                        : 'text-neutral-200 hover:bg-blue-default hover:text-white'
                     }`}
-                    style={{
-                      color: activeLink === link.id ? 
-                        getBlueColor() : getWhiteColor(),
-                    }}
                   >
                     {link.label}
                   </button>
@@ -389,10 +383,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                   openSettings();
                   setIsMenuOpen(false);
                 }}
-                className="w-full text-left px-3 py-2 text-base font-medium transition-all duration-300 focus:outline-none hover:bg-gray-700 focus:bg-gray-700"
-                style={{
-                  color: getWhiteColor(),
-                }}
+                className="w-full text-left px-3 py-2 text-base font-medium transition-all duration-300 focus:outline-none text-neutral-200 hover:bg-blue-default hover:text-white rounded-lg"
               >
                 Settings
               </button>
@@ -402,10 +393,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                   handleSignOut();
                   setIsMenuOpen(false);
                 }}
-                className="w-full text-left px-3 py-2 text-base font-medium transition-all duration-300 focus:outline-none hover:bg-gray-700 focus:bg-gray-700"
-                style={{
-                  color: getWhiteColor(),
-                }}
+                className="w-full text-left px-3 py-2 text-base font-medium transition-all duration-300 focus:outline-none text-neutral-200 hover:bg-red-default hover:text-white rounded-lg"
               >
                 Sign Out
               </button>
@@ -420,6 +408,16 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
         onClose={closeSettings} 
         user={userData}
       />
+
+       {/* Goodbye Preloader */}
+      {showGoodbye && (
+        <Preloader
+          message={PreloaderMessages.GOODBYE}
+          isVisible={true}
+          variant="goodbye"
+        />
+      )}
+      
     </>
   );
 };

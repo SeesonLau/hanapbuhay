@@ -5,16 +5,24 @@ export const TYPOGRAPHY_CLASSES = {
   h3: 'text-h3 font-alexandria font-semibold leading-[1.4]',
   lead: 'text-lead font-inter font-normal leading-[1.5]',
   body: 'text-body font-inter font-normal leading-[1.6]',
+  title: 'text-[30px] font-inter font-semibold leading-[1.2]',
+  description: 'text-lead font-alexandria font-light leading-[1.2]',
   small: 'text-small font-inter font-normal leading-[1.4]',
 };
+
 export const TYPOGRAPHY = { 
     hero: { fontSize: '50px', fontFamily: 'var(--font-alexandria)', fontWeight: '700', lineHeight: '1.2', }, 
     h1: { fontSize: '40px', fontFamily: 'var(--font-alexandria)', fontWeight: '700', lineHeight: '1.3', }, 
     h2: { fontSize: '32px', fontFamily: 'var(--font-alexandria)', fontWeight: '600', lineHeight: '1.4', }, 
     h3: { fontSize: '26px', fontFamily: 'var(--font-alexandria)', fontWeight: '600', lineHeight: '1.4', }, 
     lead: { fontSize: '20px', fontFamily: 'var(--font-inter)', fontWeight: '400', lineHeight: '1.5', }, 
+    title: { fontSize: '30px', fontFamily: 'var(--font-inter)', fontWeight: '600', lineHeight: '1.2' },
+    description: { fontSize: '20px', fontFamily: 'var(--font-alexandria)', fontWeight: '300', lineHeight: '1.2' },
     body: { fontSize: '16px', fontFamily: 'var(--font-inter)', fontWeight: '400', lineHeight: '1.6', }, 
-    small: { fontSize: '13px', fontFamily: 'var(--font-inter)', fontWeight: '400', lineHeight: '1.4', }, };
+    small: { fontSize: '13px', fontFamily: 'var(--font-inter)', fontWeight: '400', lineHeight: '1.4', },
+    tiny: { fontSize: '10px', fontFamily: 'var(--font-inter)', fontWeight: '400', lineHeight: '1.3', }, 
+    popups: { fontSize: '18px', fontFamily: 'var(--font-inter)', fontWeight: '500', lineHeight: '22px', },
+  };
 
 // Helper to apply typography styles
 export const getTypographyStyle = (variant: keyof typeof TYPOGRAPHY) => {

@@ -9,6 +9,7 @@ import { User } from '@/lib/models';
 import { ROUTES } from '@/lib/constants';
 import SettingsModal from '@/components/modals/SettingsModal';
 import HeaderDashboard from '@/components/ui/HeaderDashboard';
+import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -52,16 +53,17 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#141515' }}>
-        <div className="text-lg text-white">Loading...</div>
-      </div>
+      <Preloader 
+        message={PreloaderMessages.LOADING} 
+        isVisible={true} 
+      />
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#141515' }}>
+    <div className="min-h-screen">
       {/* Header Section */}
-      <header className="w-full flex justify-center pt-8 px-4">
+      <header className="w-full flex justify-center pt-4 px-4">
         <HeaderDashboard />
       </header>
 
