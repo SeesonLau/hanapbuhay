@@ -8,6 +8,7 @@ import StarRating from '@/components/ui/StarRating';
 import SearchBar from '@/components/ui/SearchBar';
 import AppliedJobCard, { AppliedJob } from '@/components/applications/cards/AppliedJobCard';
 import Button from '@/components/ui/Button';
+import Sort from '@/components/ui/Sort';
 
 // Simple mock API to simulate username availability check
 const mockCheckUsername = (username: string) => {
@@ -64,48 +65,42 @@ export default function TextBoxPlayground() {
         <h1 className="text-2xl font-bold">TextBox Component Playground</h1>
 
         <section className="space-y-3">
-          <h2 className="font-semibold">Dropdown demo (Sort)</h2>
-          <Dropdown
-            options={[
-              { id: 'latest', label: 'Latest', value: 'latest' },
-              { id: 'oldest', label: 'Oldest', value: 'oldest' },
-              { id: 'salary-asc', label: 'Salary (asc)', value: 'salary-asc' },
-              { id: 'salary-desc', label: 'Salary (desc)', value: 'salary-desc' },
-              { id: 'nearby', label: 'Nearby', value: 'nearby' },
-            ] as DropdownOption[]}
-            placeholder="Sort"
-            onChange={(o) => console.log('dropdown select', o)}
-          />
-
-          <div className="mt-4">
-            <h3 className="text-sm font-medium">With icons (text + icon)</h3>
-            <Dropdown
-              options={[
-                { id: 'latest', label: 'Latest', value: 'latest'},
-                { id: 'oldest', label: 'Oldest', value: 'oldest'},
-                { id: 'salary-asc', label: 'Salary (asc)', value: 'salary-asc', },
-                { id: 'salary-desc', label: 'Salary (desc)', value: 'salary-desc', },
-                { id: 'nearby', label: 'Nearby', value: 'nearby',  },
-              ] as DropdownOption[]}
-              placeholder="Sort"
-              onChange={(o) => console.log('dropdown icon select', o)}
+          <h2 className="font-semibold">Sort Component Demo</h2>
+          
+          <div>
+            <h3 className="text-sm font-medium mb-2">Find Jobs Variant (5 options)</h3>
+            <Sort
+              variant="findJobs"
+              onChange={(o) => console.log('Find Jobs sort:', o)}
             />
           </div>
 
           <div className="mt-4">
-            <h3 className="text-sm font-medium">Full width (responsive)</h3>
+            <h3 className="text-sm font-medium mb-2">Manage Jobs / Applied Jobs Variant (2 options)</h3>
+            <Sort
+              variant="manageJobs"
+              onChange={(o) => console.log('Manage Jobs sort:', o)}
+            />
+          </div>
+
+          <div className="mt-4">
+            <h3 className="text-sm font-medium mb-2">Full Width Example</h3>
             <div className="w-full max-w-md">
-              <Dropdown
+              <Sort
+                variant="findJobs"
                 fullWidth
-                options={[
-                  { id: 'latest', label: 'Latest', value: 'latest' },
-                  { id: 'oldest', label: 'Oldest', value: 'oldest' },
-                  { id: 'nearby', label: 'Nearby', value: 'nearby' },
-                ] as DropdownOption[]}
-                placeholder="Sort"
-                onChange={(o) => console.log('dropdown fullwidth select', o)}
+                onChange={(o) => console.log('Full width sort:', o)}
               />
             </div>
+          </div>
+
+          <div className="mt-4">
+            <h3 className="text-sm font-medium mb-2">Without Auto-selection</h3>
+            <Sort
+              variant="manageJobs"
+              defaultToFirst={false}
+              onChange={(o) => console.log('Manual selection sort:', o)}
+            />
           </div>
         </section>
 

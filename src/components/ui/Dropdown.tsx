@@ -19,6 +19,7 @@ type Props = {
   className?: string;
   fullWidth?: boolean;
   renderOption?: (opt: DropdownOption, isSelected: boolean) => React.ReactNode;
+  defaultToFirst?: boolean; // New prop to control auto-selection of first option
 };
 
 function CaretIcon({ className = '', isOpen = false }: { className?: string; isOpen?: boolean }) {
@@ -40,11 +41,14 @@ function SortIcon({ flipped = false, className = '' }: { flipped?: boolean; clas
 export const IconSortAsc = (props: { className?: string }) => <CgSortAz className={props.className} />;
 export const IconSortDesc = (props: { className?: string }) => <CgSortZa className={props.className} />;
 
-const Dropdown = memo(function Dropdown({ options, value = null, onChange, placeholder = 'Sort', className = '', fullWidth = false, renderOption, }: Props) {
+const Dropdown = memo(function Dropdown({ options, value = null, onChange, placeholder = 'Sort', className = '', fullWidth = false, renderOption, defaultToFirst = true }: Props) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<DropdownOption | null>(() => {
-    if (value == null) return null;
-    return options.find((o) => o.value === value || o.id === String(value)) ?? null;
+    if (value != null) {
+      return options.find((o) => o.value === value || o.id === String(value)) ?? null;
+    }
+    // If no value provided and defaultToFirst is true, select the first option
+    return defaultToFirst && options.length > 0 ? options[0] : null;
   });
   const [activeIndex, setActiveIndex] = useState<number>(-1);
 
@@ -95,13 +99,25 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
   }, [fullWidth]); 
 
   useEffect(() => {
-    if (value == null) {
-      setSelected(null);
+    if (value != null) {
+      const found = options.find((o) => o.value === value || o.id === String(value)) ?? null;
+      setSelected(found);
       return;
     }
-    const found = options.find((o) => o.value === value || o.id === String(value)) ?? null;
-    setSelected(found);
-  }, [value, options]);
+    // If no value provided and defaultToFirst is true, select the first option
+    if (defaultToFirst && options.length > 0) {
+      setSelected(options[0]);
+    } else {
+      setSelected(null);
+    }
+  }, [value, options, defaultToFirst]);
+
+  // Auto-call onChange when first option is selected by default
+  useEffect(() => {
+    if (value == null && defaultToFirst && options.length > 0 && selected === options[0]) {
+      onChange?.(options[0]);
+    }
+  }, [options, selected, defaultToFirst, value, onChange]);
 
   const handleSelect = useCallback((opt: DropdownOption) => {
     setSelected(opt);
@@ -114,9 +130,8 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
     if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       setOpen(true);
-      setTimeout(() => {
-        listRef.current?.focus();
-      }, 0);
+      // Remove setTimeout to make it more responsive
+      listRef.current?.focus();
     }
   }, []);
 
@@ -153,10 +168,24 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
         aria-expanded={open}
         onClick={toggleOpen}
         onKeyDown={onTriggerKeyDown}
-        className={`flex items-center justify-between ${fullWidth ? 'w-full' : 'w-auto'} px-3 py-2 bg-white hover:bg-gray-neutral50 shadow rounded-md text-body font-medium text-gray-neutral900 border border-gray-neutral200 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent`}
+        className={`flex items-center justify-start ${fullWidth ? 'w-full' : 'w-auto'} px-2 py-2 bg-white hover:bg-gray-neutral50 shadow rounded-md text-body font-medium text-gray-neutral900 border border-gray-neutral200 transition-all duration-150 focus:outline-none focus:border-gray-neutral400 focus:shadow-md ${open ? 'border-gray-neutral400 shadow-md' : ''}`}
       >
-        <span className="truncate text-small font-inter">{selected ? selected.label : placeholder}</span>
-        <span className="ml-4">
+        <div className="flex items-center gap-2 truncate">
+          {selected ? (
+            <>
+              {selected.icon && (
+                <span className="w-5 h-5 flex-shrink-0 text-gray-neutral600">{selected.icon}</span>
+              )}
+              <span className="truncate text-small font-inter">{selected.label}</span>
+              {selected.id.includes('salary') && (
+                <SortIcon flipped={selected.id.includes('desc')} className="w-5 h-5 text-gray-neutral600" />
+              )}
+            </>
+          ) : (
+            <span className="truncate text-small font-inter">{placeholder}</span>
+          )}
+        </div>
+        <span className="ml-2">
           <CaretIcon className="w-3 h-3 text-gray-neutral600 transition-colors duration-150" isOpen={open} />
         </span>
       </button>
@@ -166,6 +195,15 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
           ref={listRef}
           tabIndex={0}
           onKeyDown={onListKeyDown}
+          onMouseLeave={() => {
+            // When mouse leaves the dropdown, reset active index to selected item
+            if (selected) {
+              const selectedIndex = options.findIndex(opt => opt.id === selected.id);
+              setActiveIndex(selectedIndex >= 0 ? selectedIndex : -1);
+            } else {
+              setActiveIndex(-1);
+            }
+          }}
           role="menu"
           aria-orientation="vertical"
           style={triggerWidth && !fullWidth ? { minWidth: `${triggerWidth}px` } : undefined}
@@ -183,7 +221,13 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
                   aria-current={isSelected || undefined}
                   onClick={() => handleSelect(opt)}
                   onMouseEnter={() => setActiveIndex(idx)}
-                  className={`flex items-center gap-3 px-3 py-2 text-small font-medium font-inter text-gray-neutral900 hover:bg-gray-neutral50 hover:text-primary-600 text-left w-full transition-colors duration-150 ${isSelected ? 'bg-primary-50 text-primary-700' : ''} ${isActive ? 'ring-2 ring-primary-300' : ''}`}
+                  className={`flex items-center gap-2 px-3 py-1 text-tiny font-medium font-inter text-gray-neutral900 text-left w-full transition-colors duration-150 ${
+                    isActive 
+                      ? 'bg-gray-neutral100' 
+                      : isSelected 
+                        ? 'bg-gray-neutral50 font-semibold' 
+                        : 'hover:bg-gray-neutral100'
+                  }`}
                 >
                   {renderOption ? (
                     <div className="w-full">
