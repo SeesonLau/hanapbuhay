@@ -1,11 +1,12 @@
 // src/app/manage-job-posts/page.tsx
 "use client";
 
-import React, { useState } from 'react';
-import HeaderDashboard from '@/components/ui/HeaderDashboard';
+import { useState } from 'react';
+import Banner from '@/components/ui/Banner';
+import ApplicantsModal from '@/components/modals/ApplicantsModal';
+import { ViewToggle } from '@/components/ui/ViewToggle';
 import { ManageJobPostCard } from '@/components/cards/ManageJobPostCard';
 import { ManageJobPostList } from '@/components/cards/ManageJobPostList';
-import { ViewToggle } from '@/components/ui/ViewToggle';
 import { JobType } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
@@ -49,7 +50,7 @@ const sampleJobPosts = [
     applicantCount: 2,
     genderTags: [Gender.MALE],
     experienceTags: [ExperienceLevel.EXPERIENCED],
-    jobTypeTags: [JobType.CONSTRUCTION, "Construction Worker"]
+    jobTypeTags: [JobType.CONSTRUCTION, "Construction Helper"]
   },
   {
     id: "4",
@@ -67,37 +68,55 @@ const sampleJobPosts = [
 ];
 
 export default function ManageJobPostsPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
 
-  return (
-    <div className="min-h-screen" style={{ backgroundColor: '#141515' }}>
-      {/* Header Section */}
-      <header className="w-full flex justify-center pt-8 px-4">
-        <HeaderDashboard />
-      </header>
+  const handleSearch = (query: string, location?: string) => {
+    console.log('Search query:', query);
+    if (location) {
+      console.log('Location:', location);
+    }
+    // Add your search logic here
+  };
 
-      <main className="p-8">
-        <div className="max-w-[1840px] mx-auto">
-          {/* Page Header */}
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Manage Job Posts</h1>
-                <p className="text-lg text-gray-600">View and manage your job postings</p>
-              </div>
-              
-              {/* View Toggle */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">View:</span>
-                <ViewToggle value={viewMode} onChange={setViewMode} />
-              </div>
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  return (
+    <div className="min-h-screen">
+      {/* Banner Section with Header and Search */}
+      <Banner variant="manageJobPosts" onSearch={handleSearch} />
+
+      <main className="p-4 sm:p-8">
+        <div className="max-w-7xl mx-auto space-y-12">
+          {/* Page Content */}
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-white mb-6">Manage Job Posts</h1>
+            <p className="text-lg text-gray-300">Create and manage your job postings</p>
+          </div>
+
+          {/* PLACEHOLDER */}
+          <button
+            onClick={openModal}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            View Applicants
+          </button>
+          <ApplicantsModal isOpen={isModalOpen} onClose={closeModal} />
+          {/* PLACEHOLDER */}
+
+          {/* Controls */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">View:</span>
+              <ViewToggle value={viewMode} onChange={setViewMode} />
             </div>
           </div>
 
-          {/* Job Posts Display - centered containers that hug content */}
+          {/* Job Posts Display */}
           {viewMode === 'card' ? (
             <div className="w-full flex justify-center">
-              <div className="flex flex-wrap items-start justify-between w-[1840px] gap-y-[20px]">
+              <div className="flex flex-wrap items-start justify-between w-full gap-y-5">
                 {sampleJobPosts.map((jobPost) => (
                   <ManageJobPostCard key={jobPost.id} jobData={jobPost} />
                 ))}
@@ -105,15 +124,13 @@ export default function ManageJobPostsPage() {
             </div>
           ) : (
             <div className="w-full overflow-x-auto">
-              <div className="flex flex-col items-start gap-[20px] w-[1840px]">
+              <div className="flex flex-col items-start gap-5 w-full">
                 {sampleJobPosts.map((jobPost) => (
                   <ManageJobPostList key={jobPost.id} jobData={jobPost} />
                 ))}
               </div>
             </div>
           )}
-
-          
         </div>
       </main>
     </div>
