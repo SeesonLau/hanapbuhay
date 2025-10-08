@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React from 'react';
 import { getBlackColor, getNeutral600Color, getNeutral100Color, getNeutral400Color } from '@/styles/colors';
 import { fontClasses } from '@/styles/fonts';
-// Use public assets for icons
 import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticLocationTag, StaticSalaryTag } from '@/components/ui/TagItem';
 import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
@@ -23,18 +22,16 @@ interface JobPostData {
   jobTypeTags?: string[];
 }
 
-interface ManageJobPostCardProps {
+interface JobPostCardProps {
   jobData: JobPostData;
   className?: string;
+  onApply?: (id: string) => void;
   onOpen?: (data: JobPostData) => void;
 }
 
-export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({ 
-  jobData, 
-  className = '',
-  onOpen,
-}) => {
+export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '', onApply, onOpen }) => {
   const {
+    id,
     title,
     description,
     location,
@@ -47,9 +44,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
     jobTypeTags = []
   } = jobData;
 
-  // Combine tags and cap visible to 5, show overflow as n+
   const normalizeJobType = (label: string): string | null => {
-    // Only allow subtypes; exclude top-level JobType enums from display
     const isSubType = Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(label));
     return isSubType ? label : null;
   };
@@ -80,12 +75,12 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
     ...normalizedGenders.map((label) => ({ type: 'gender' as const, label })),
   ];
   // Dynamically determine how many tags fit on a single row
-  const [visibleCount, setVisibleCount] = useState<number>(Math.min(allTags.length, 4));
-  const measureRef = useRef<HTMLDivElement | null>(null);
-  const overflowMeasureRef = useRef<HTMLDivElement | null>(null);
-  const tagsRowRef = useRef<HTMLDivElement | null>(null);
+  const [visibleCount, setVisibleCount] = React.useState<number>(Math.min(allTags.length, 4));
+  const measureRef = React.useRef<HTMLDivElement | null>(null);
+  const overflowMeasureRef = React.useRef<HTMLDivElement | null>(null);
+  const tagsRowRef = React.useRef<HTMLDivElement | null>(null);
 
-  const recomputeVisibleCount = () => {
+  const recomputeVisibleCount = React.useCallback(() => {
     const container = tagsRowRef.current;
     const measure = measureRef.current;
     const overflowMeasure = overflowMeasureRef.current;
@@ -104,7 +99,6 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
     let count = 0;
     for (let i = 0; i < widths.length; i++) {
       const w = widths[i] + (i > 0 ? gapPx : 0);
-      // If adding this tag means there will still be hidden tags, reserve space for overflow indicator
       const willHideSome = (i + 1) < widths.length;
       const reserve = willHideSome ? (overflowWidth + gapPx) : 0;
 
@@ -117,18 +111,18 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
     }
 
     setVisibleCount(count);
-  };
+  }, [allTags.length]);
 
-  useLayoutEffect(() => {
+  React.useLayoutEffect(() => {
     recomputeVisibleCount();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobData.title, jobData.description, jobData.location, jobData.salary, jobData.salaryPeriod, jobData.postedDate, allTags.length]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const onResize = () => recomputeVisibleCount();
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const visibleTags = allTags.slice(0, Math.max(0, visibleCount));
@@ -136,17 +130,17 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
 
   return (
     <div 
-      className={`w-[420px] bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-300 cursor-pointer ${className}`}
+      className={`w-[480px] h-[300px] bg-white rounded-lg border border-gray-200 shadow-sm p-[30px] flex flex-col transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-300 cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
       {/* Header */}
-      <div className="flex-shrink-0 mb-[15px]">
-        <h3 className={`${fontClasses.heading} font-semibold text-[20px] mb-2 truncate`} style={{ color: getBlackColor() }}>{title}</h3>
-        <p className={`${fontClasses.body} font-light text-[12px] line-clamp-2`} style={{ color: getNeutral600Color() }}>{description}</p>
+      <div className="flex-shrink-0 mb-[20px]">
+        <h3 className={`${fontClasses.heading} font-semibold text-[20px] mb-2`} style={{ color: getBlackColor() }}>{title}</h3>
+        <p className={`${fontClasses.body} font-light text-[12px] line-clamp-3`} style={{ color: getNeutral600Color() }}>{description}</p>
       </div>
 
       {/* Tags Section - Single row that adapts to fit */}
-      <div className="mb-[15px]">
+      <div className="mb-[20px]">
         {/* Hidden measurers to calculate widths without wrapping */}
         <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
           {allTags.map((tag, index) => (
@@ -186,31 +180,25 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="flex-shrink-0 space-y-[15px]">
+      <div className="mt-auto space-y-[20px]">
         {/* Location and Salary */}
         <div className="flex items-center gap-2">
           <StaticLocationTag label={location} />
           <StaticSalaryTag label={`${salary} /${salaryPeriod}`} />
         </div>
 
-        {/* Posted Date */}
-        <div className="flex justify-start">
-          <span className={`${fontClasses.body} font-medium text-[10px]`} style={{ color: getNeutral600Color() }}>Posted on: {postedDate}</span>
-        </div>
-        
-        {/* Action Buttons - Full Width */}
-        <div className="flex gap-0 w-full">
-          <button className="flex items-center justify-center flex-1 h-[30px] bg-white border border-gray-300 rounded-l-[10px] text-xs font-medium hover:bg-gray-50 transition-colors">
-            <span className="text-blue-600 mr-1">{applicantCount}</span>
-            <img src="/icons/profile.svg" alt="Applicants" className="w-[15px] h-[15px]" />
-          </button>
-          
-          <button className="flex items-center justify-center flex-1 h-[30px] bg-white border-t border-b border-gray-300 hover:bg-gray-50 transition-colors">
-            <img src="/icons/edit.svg" alt="Edit" className="w-[15px] h-[15px]" />
-          </button>
-          
-          <button className="flex items-center justify-center flex-1 h-[30px] bg-white border border-gray-300 rounded-r-[10px] hover:bg-gray-50 transition-colors">
-            <img src="/icons/delete.svg" alt="Delete" className="w-[15px] h-[15px]" />
+        {/* Posted Date + Applicants + Apply Button (single row) */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className={`${fontClasses.body} font-medium text-[10px]`} style={{ color: getNeutral600Color() }}>Posted on: {postedDate}</span>
+            <span className="text-gray-400">•</span>
+            <span className={`${fontClasses.body} text-[10px]`} style={{ color: getNeutral600Color() }}>{applicantCount} Applicants</span>
+          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); onApply?.(id); }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+          >
+            Apply Now
           </button>
         </div>
       </div>

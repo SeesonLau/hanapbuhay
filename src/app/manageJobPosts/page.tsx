@@ -4,72 +4,84 @@
 import { useState } from 'react';
 import Banner from '@/components/ui/Banner';
 import ApplicantsModal from '@/components/modals/ApplicantsModal';
+import JobPostViewModal, { JobPostViewData } from '@/components/modals/JobPostViewModal';
 import { ViewToggle } from '@/components/ui/ViewToggle';
 import { ManageJobPostCard } from '@/components/cards/ManageJobPostCard';
 import { ManageJobPostList } from '@/components/cards/ManageJobPostList';
 import { JobType } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
+// Removed toggle and card/list for simplified page per request
 
-// Sample job post data
+// Sample job posts removed with card/list views
+
+// Sample job post data for Manage Job Posts
 const sampleJobPosts = [
   {
-    id: "1",
-    title: "LF: Babysitter",
-    description: "As parents, we just want someone we can trust with our children. We need help looking after them while we're away or busy.",
-    location: "Casuntingan, Mandaue City",
-    salary: "5,000.00",
-    salaryPeriod: "month",
-    postedDate: "August 20, 2025",
-    applicantCount: 7,
+    id: 'm1',
+    title: 'Construction Worker Needed',
+    description:
+      "Looking for a reliable construction worker to assist with ongoing projects. Must be physically fit and able to work with a team.",
+    location: 'Banilad, Cebu City',
+    salary: '15,000.00',
+    salaryPeriod: 'month',
+    postedDate: 'August 22, 2025',
+    applicantCount: 8,
+    genderTags: [Gender.MALE],
+    experienceTags: [ExperienceLevel.INTERMEDIATE],
+    jobTypeTags: [JobType.CONSTRUCTION, 'Construction Helper'],
+  },
+  {
+    id: 'm2',
+    title: 'LF: Babysitter (Weekends)',
+    description:
+      'We need a trustworthy babysitter for weekend schedules. Experience with toddlers preferred.',
+    location: 'Casuntingan, Mandaue City',
+    salary: '10,000.00',
+    salaryPeriod: 'month',
+    postedDate: 'August 20, 2025',
+    applicantCount: 2,
     genderTags: [Gender.FEMALE],
     experienceTags: [ExperienceLevel.ENTRY],
-    jobTypeTags: [JobType.SERVICE, "Baby Sitter"]
+    jobTypeTags: [JobType.SERVICE, 'Baby Sitter'],
+  },
+  // Additional posts with extended tags set
+  {
+    id: 'm3',
+    title: 'Skilled Welder for Small Projects',
+    description:
+      'Seeking an experienced welder for small fabrication jobs. Bonus if you can assist with basic mechanical tasks.',
+    location: 'Lapu-Lapu City',
+    salary: '18,000.00',
+    salaryPeriod: 'month',
+    postedDate: 'September 2, 2025',
+    applicantCount: 5,
+    genderTags: [Gender.MALE, Gender.ANY],
+    experienceTags: [ExperienceLevel.INTERMEDIATE, ExperienceLevel.EXPERT],
+    // Use valid subtypes from job-types constants
+    jobTypeTags: ['Welder', 'Electrician', 'Mechanic', 'Tailor/Seamstress', 'Shoemaker/Cobbler'],
   },
   {
-    id: "2",
-    title: "Seeking House Cleaner",
-    description: "Looking for a reliable house cleaner to help maintain our home. Must be detail-oriented and trustworthy.",
-    location: "Lahug, Cebu City",
-    salary: "3,500.00",
-    salaryPeriod: "month",
-    postedDate: "August 18, 2025",
-    applicantCount: 3,
-    genderTags: [Gender.MALE, Gender.FEMALE],
-    experienceTags: [ExperienceLevel.ENTRY, ExperienceLevel.EXPERIENCED],
-    jobTypeTags: [JobType.SERVICE, "House Helper"]
+    id: 'm4',
+    title: 'Digital Content Creator / Social Media',
+    description:
+      'Looking for a creative content creator to manage short-form videos and posts across platforms.',
+    location: 'Cebu City',
+    salary: '20,000.00',
+    salaryPeriod: 'month',
+    postedDate: 'September 5, 2025',
+    applicantCount: 12,
+    genderTags: [Gender.ANY, Gender.FEMALE],
+    experienceTags: [ExperienceLevel.ENTRY, ExperienceLevel.INTERMEDIATE],
+    jobTypeTags: ['Content Creator', 'Social Media Manager', 'Graphic Designer', 'Online Seller', 'Online Tutor'],
   },
-  {
-    id: "3",
-    title: "Construction Worker Needed",
-    description: "We are looking for skilled construction workers for our upcoming project. Experience in concrete work preferred.",
-    location: "Talisay City, Cebu",
-    salary: "8,000.00",
-    salaryPeriod: "month",
-    postedDate: "August 15, 2025",
-    applicantCount: 2,
-    genderTags: [Gender.MALE],
-    experienceTags: [ExperienceLevel.EXPERIENCED],
-    jobTypeTags: [JobType.CONSTRUCTION, "Construction Helper"]
-  },
-  {
-    id: "4",
-    title: "LF: Website builder for a clothing brand",
-    description: "I need someone to build me a website for my clothing brand that I just started. Preferably with experience and attention to detail.",
-    location: "Mabolo, Cebu City",
-    salary: "20,000.00",
-    salaryPeriod: "month",
-    postedDate: "August 20, 2025",
-    applicantCount: 1,
-    genderTags: [Gender.ANY],
-    experienceTags: [ExperienceLevel.EXPERT],
-    jobTypeTags: [JobType.IT, "Website Builder"]
-  }
 ];
 
 export default function ManageJobPostsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [isJobViewOpen, setIsJobViewOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
 
   const handleSearch = (query: string, location?: string) => {
     console.log('Search query:', query);
@@ -87,51 +99,69 @@ export default function ManageJobPostsPage() {
       {/* Banner Section with Header and Search */}
       <Banner variant="manageJobPosts" onSearch={handleSearch} />
 
-      <main className="p-4 sm:p-8">
-        <div className="max-w-7xl mx-auto space-y-12">
-          {/* Page Content */}
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-white mb-6">Manage Job Posts</h1>
-            <p className="text-lg text-gray-300">Create and manage your job postings</p>
-          </div>
+      <main className="pl-4 pr-4 pb-8 pt-8">
+        {/* Container matching Find Jobs layout */}
+        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">Manage Job Posts</h1>
+          <p className="text-lg text-gray-600 mb-6">
+            This is the Manage Job Posts page. Content coming soon...
+          </p>
 
-          {/* PLACEHOLDER */}
+          {/* View Applicants Button */}
           <button
             onClick={openModal}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700"
           >
             View Applicants
           </button>
-          <ApplicantsModal isOpen={isModalOpen} onClose={closeModal} />
-          {/* PLACEHOLDER */}
+        </div>
 
+        {/* Job Posts Section */}
+        <div className="mt-8 space-y-6">
           {/* Controls */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-4">
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600">View:</span>
               <ViewToggle value={viewMode} onChange={setViewMode} />
             </div>
           </div>
 
-          {/* Job Posts Display */}
+          {/* Display */}
           {viewMode === 'card' ? (
             <div className="w-full flex justify-center">
-              <div className="flex flex-wrap items-start justify-between w-full gap-y-5">
+              <div className="flex flex-wrap items-start justify-center gap-5">
                 {sampleJobPosts.map((jobPost) => (
-                  <ManageJobPostCard key={jobPost.id} jobData={jobPost} />
+                  <ManageJobPostCard 
+                    key={jobPost.id} 
+                    jobData={jobPost} 
+                    onOpen={(data) => { setSelectedJob(data); setIsJobViewOpen(true); }}
+                  />
                 ))}
               </div>
             </div>
           ) : (
             <div className="w-full overflow-x-auto">
-              <div className="flex flex-col items-start gap-5 w-full">
+              <div className="flex flex-col items-start gap-4 w-[1840px] mx-auto">
                 {sampleJobPosts.map((jobPost) => (
-                  <ManageJobPostList key={jobPost.id} jobData={jobPost} />
+                  <ManageJobPostList 
+                    key={jobPost.id} 
+                    jobData={jobPost} 
+                    onOpen={(data) => { setSelectedJob(data); setIsJobViewOpen(true); }}
+                  />
                 ))}
               </div>
             </div>
           )}
         </div>
+
+        {/* Modal */}
+        <ApplicantsModal isOpen={isModalOpen} onClose={closeModal} />
+        <JobPostViewModal 
+          isOpen={isJobViewOpen} 
+          onClose={() => setIsJobViewOpen(false)} 
+          job={selectedJob}
+          onApply={(id) => console.log('apply', id)}
+        />
       </main>
     </div>
   );

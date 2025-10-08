@@ -1,6 +1,6 @@
 export enum ExperienceLevel {
   ENTRY = 'Entry level',
-  EXPERIENCED = 'Experienced',
+  INTERMEDIATE = 'Intermediate',
   EXPERT = 'Expert'
 }
 
