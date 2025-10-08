@@ -7,7 +7,11 @@ import { NotificationType } from "@/lib/constants/notification-types";
 import { HiBell } from "react-icons/hi";
 import Button from "@/components/ui/Button";
 
-const NotificationPopUp: React.FC = () => {
+interface NotificationPopUpProps {
+  isScrolled?: boolean;
+}
+
+const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = false }) => {
   const [showAll, setShowAll] = useState(false);
 
   const notifications: Notification[] = [
@@ -23,7 +27,16 @@ const NotificationPopUp: React.FC = () => {
   const displayedNotifications = showAll ? notifications : notifications.slice(0, 6);
 
   return (
-    <div className="fixed right-4 top-16 w-[500px] max-w-[calc(100vw-2rem)] bg-white shadow-lg rounded-2xl border border-gray-neutral200 z-50 overflow-hidden">
+    <div 
+      className={`fixed right-4 w-[500px] max-w-[calc(100vw-2rem)] bg-white shadow-lg rounded-2xl border border-gray-neutral200 z-50 overflow-hidden transition-all duration-300 ${
+        isScrolled ? 'top-14' : 'top-16'
+      }`}
+      style={{
+        backdropFilter: 'blur(10px)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
+      }}
+    >
       <div className="p-3 border-b border-gray-neutral200 flex items-center justify-center gap-2">
         <HiBell className="w-5 h-5 text-gray-neutral700" />
         <span className="font-semibold text-gray-700">Notifications</span>

@@ -6,6 +6,10 @@ import Checkbox from '@/components/ui/Checkbox';
 import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 import StarRating from '@/components/ui/StarRating';
 import SearchBar from '@/components/ui/SearchBar';
+import AppliedJobCard, { AppliedJob } from '@/components/applications/cards/AppliedJobCard';
+import Button from '@/components/ui/Button';
+import Sort from '@/components/ui/Sort';
+import ReviewCard from '@/components/ui/ReviewCard';
 
 // Simple mock API to simulate username availability check
 const mockCheckUsername = (username: string) => {
@@ -62,48 +66,42 @@ export default function TextBoxPlayground() {
         <h1 className="text-2xl font-bold">TextBox Component Playground</h1>
 
         <section className="space-y-3">
-          <h2 className="font-semibold">Dropdown demo (Sort)</h2>
-          <Dropdown
-            options={[
-              { id: 'latest', label: 'Latest', value: 'latest' },
-              { id: 'oldest', label: 'Oldest', value: 'oldest' },
-              { id: 'salary-asc', label: 'Salary (asc)', value: 'salary-asc' },
-              { id: 'salary-desc', label: 'Salary (desc)', value: 'salary-desc' },
-              { id: 'nearby', label: 'Nearby', value: 'nearby' },
-            ] as DropdownOption[]}
-            placeholder="Sort"
-            onChange={(o) => console.log('dropdown select', o)}
-          />
-
-          <div className="mt-4">
-            <h3 className="text-sm font-medium">With icons (text + icon)</h3>
-            <Dropdown
-              options={[
-                { id: 'latest', label: 'Latest', value: 'latest'},
-                { id: 'oldest', label: 'Oldest', value: 'oldest'},
-                { id: 'salary-asc', label: 'Salary (asc)', value: 'salary-asc', },
-                { id: 'salary-desc', label: 'Salary (desc)', value: 'salary-desc', },
-                { id: 'nearby', label: 'Nearby', value: 'nearby',  },
-              ] as DropdownOption[]}
-              placeholder="Sort"
-              onChange={(o) => console.log('dropdown icon select', o)}
+          <h2 className="font-semibold">Sort Component Demo</h2>
+          
+          <div>
+            <h3 className="text-sm font-medium mb-2">Find Jobs Variant (5 options)</h3>
+            <Sort
+              variant="findJobs"
+              onChange={(o) => console.log('Find Jobs sort:', o)}
             />
           </div>
 
           <div className="mt-4">
-            <h3 className="text-sm font-medium">Full width (responsive)</h3>
+            <h3 className="text-sm font-medium mb-2">Manage Jobs / Applied Jobs Variant (2 options)</h3>
+            <Sort
+              variant="manageJobs"
+              onChange={(o) => console.log('Manage Jobs sort:', o)}
+            />
+          </div>
+
+          <div className="mt-4">
+            <h3 className="text-sm font-medium mb-2">Full Width Example</h3>
             <div className="w-full max-w-md">
-              <Dropdown
+              <Sort
+                variant="findJobs"
                 fullWidth
-                options={[
-                  { id: 'latest', label: 'Latest', value: 'latest' },
-                  { id: 'oldest', label: 'Oldest', value: 'oldest' },
-                  { id: 'nearby', label: 'Nearby', value: 'nearby' },
-                ] as DropdownOption[]}
-                placeholder="Sort"
-                onChange={(o) => console.log('dropdown fullwidth select', o)}
+                onChange={(o) => console.log('Full width sort:', o)}
               />
             </div>
+          </div>
+
+          <div className="mt-4">
+            <h3 className="text-sm font-medium mb-2">Without Auto-selection</h3>
+            <Sort
+              variant="manageJobs"
+              defaultToFirst={false}
+              onChange={(o) => console.log('Manual selection sort:', o)}
+            />
           </div>
         </section>
 
@@ -185,14 +183,126 @@ export default function TextBoxPlayground() {
 
         <section className="space-y-3">
           <h2 className="font-semibold">Star rating (display)</h2>
-          <div>
-            <StarRating variant="display" value={4.2} max={5} />
+          
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium mb-2">Average Label (Default)</h3>
+              <StarRating variant="display" value={4.7} max={5} />
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium mb-2">Rating Count Label</h3>
+              <StarRating 
+                variant="display" 
+                value={4.0} 
+                max={5} 
+                labelVariant="count" 
+                ratingCount={10} 
+              />
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium mb-2">No Label</h3>
+              <StarRating 
+                variant="display"
+                value={3.5} 
+                max={5} 
+                labelVariant="none" 
+              />
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium mb-2">Different Sizes</h3>
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-center gap-1">
+                  <StarRating variant="display" value={4.2} max={5} size="sm" labelVariant="count" ratingCount={25} />
+                  <span className="text-xs text-gray-500">Small</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <StarRating variant="display" value={4.2} max={5} size="md" labelVariant="count" ratingCount={25} />
+                  <span className="text-xs text-gray-500">Medium</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <StarRating variant="display" value={4.2} max={5} size="lg" labelVariant="count" ratingCount={25} />
+                  <span className="text-xs text-gray-500">Large</span>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
         <section className="space-y-3">
           <h2 className="font-semibold">Star rating (interactive)</h2>
           <InteractiveRatingDemo />
+        </section>
+
+        {/* ReviewCard Examples */}
+        <section className="space-y-6">
+          <h2 className="font-semibold">ReviewCard Component</h2>
+          
+          <div>
+            <h3 className="text-sm font-medium mb-4 text-gray-600">Responsive Grid Layout</h3>
+            <div className="flex flex-col justify-between gap-4">
+              <ReviewCard
+                rating={5.0}
+                reviewText="Very professional and polite. Will hire again for future repairs."
+                reviewerName="Christopher Bahng"
+              />
+              
+              <ReviewCard
+                rating={4.5}
+                reviewText="Excellent service! The team was professional and delivered everything on time. Highly recommend for future projects."
+                reviewerName="Sarah Johnson"
+              />
+              
+              <ReviewCard
+                rating={5.0}
+                reviewText="Outstanding quality work. Communication was clear throughout the project and the final result exceeded expectations."
+                reviewerName="Mike Chen"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-sm font-medium mb-3 text-gray-600">Short Review</h3>
+              <ReviewCard
+                rating={5.0}
+                reviewText="Perfect! Exactly what I needed."
+                reviewerName="John Doe"
+              />
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium mb-3 text-gray-600">Long Review (Text Wrapping Test)</h3>
+              <ReviewCard
+                rating={4.2}
+                reviewText="This was an incredibly detailed and complex project that required a lot of back-and-forth communication. The freelancer was patient and professional throughout the entire process. They took the time to understand our requirements and delivered a solution that not only met but exceeded our expectations."
+                reviewerName="Jennifer Adams"
+              />
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium mb-3 text-gray-600">With Avatar Image</h3>
+              <ReviewCard
+                rating={4.8}
+                reviewText="Great communication and excellent results. Highly recommended!"
+                reviewerName="Maria Garcia"
+                avatarUrl="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face"
+              />
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium mb-3 text-gray-600">Mobile Responsive Test</h3>
+              <div className="max-w-sm">
+                <ReviewCard
+                  rating={4.6}
+                  reviewText="Mobile responsive design looks great! The card adapts well to smaller screens while maintaining readability."
+                  reviewerName="Alex Mobile"
+                />
+              </div>
+            </div>
+          </div>
         </section>
       </div>
     </div>

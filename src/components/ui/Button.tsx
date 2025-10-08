@@ -1,6 +1,5 @@
 // src/components/ui/button.tsx
 import React from 'react';
-import { getBlueDarkColor, getWhiteColor, getNeutral400Color, TYPOGRAPHY, fontClasses } from '@/styles';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'primary400' | 'secondary' | 'danger' | 'ghost' | 'neutral300' | 'approve' | 'deny';
@@ -23,26 +22,26 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     disabled = false,
     ...props 
   }, ref) => {
-    const baseClasses = "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+    const baseClasses = "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-primary400 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
     
     const variants = {
-      primary: `bg-[#3289FF] text-white ${!useCustomHover ? 'hover:bg-[#1C6AF4] active:bg-[#1C6AF4]' : ''}`,
-      primary400: `bg-[#59ACFF] text-white ${!useCustomHover ? 'hover:bg-[#3289FF] active:bg-[#3289FF]' : ''}`,
-      secondary: "bg-[#e6e7e7] text-[#3B3E3E] border border-[#3B3E3E] hover:bg-[#858b8a] hover:text-white active:bg-[#858b8a]",
-      danger: "bg-[#ED4A4A] text-white hover:bg-[#DA2727] active:bg-[#DA2727]",
-      ghost: "bg-transparent text-gray-700 hover:bg-gray-100 active:bg-gray-200 border border-gray-300",
-      neutral300: "bg-[#CFD2D1] text-[#3B3E3E] hover:bg-[#AEB2B1] active:bg-[#858b8a]",
-      approve: "bg-[#71D852] text-white hover:bg-[#5EC844] active:bg-[#4EB636]",
-      deny: "bg-[#F87172] text-white hover:bg-[#F15151] active:bg-[#E03A3A]"
+      primary: `bg-primary-primary500 text-white ${!useCustomHover ? 'hover:bg-primary-primary600 active:bg-primary-primary700' : ''}`,
+      primary400: `bg-primary-primary400 text-white ${!useCustomHover ? 'hover:bg-primary-primary500 active:bg-primary-primary600' : ''}`,
+      secondary: "bg-gray-neutral100 text-gray-neutral900 border border-gray-neutral900 hover:bg-gray-neutral400 hover:text-white active:bg-gray-neutral500",
+      danger: "bg-error-error500 text-white hover:bg-error-error600 active:bg-error-error700",
+      ghost: "bg-transparent text-gray-neutral700 hover:bg-gray-neutral50 active:bg-gray-neutral100 border border-gray-neutral300",
+      neutral300: "bg-gray-neutral200 text-gray-neutral900 hover:bg-gray-neutral300 active:bg-gray-neutral400",
+      approve: "bg-success-success400 text-white hover:bg-success-success500 active:bg-success-success600",
+      deny: "bg-error-error400 text-white hover:bg-error-error500 active:bg-error-error600"
     };
 
     const sizes = {
-      tiny: "h-10 py-2 px-4 min-w-[100px] text-xs",
-      sm: "h-8 px-3 text-small min-w-[100px]",
-      md: "h-10 py-2 px-4 min-w-[100px]",
-      lg: "h-12 px-6 text-lg min-w-[100px]",
-      xl: "h-[2.1875rem] w-[25rem] px-5 text-base", // 400x35
-      approveDeny: "h-[25px] w-[100px] text-tiny rounded-[5px]"
+      tiny: "h-10 py-2 px-4 min-w-[100px] text-tiny font-inter",
+      sm: "h-8 px-3 text-small min-w-[100px] font-inter",
+      md: "h-10 py-2 px-4 min-w-[100px] text-body font-inter",
+      lg: "h-12 px-6 text-lead min-w-[100px] font-inter",
+      xl: "h-[2.1875rem] w-[25rem] px-5 text-body font-inter", // 400x35
+      approveDeny: "h-[25px] w-[100px] text-mini rounded-[5px] font-inter"
     };
 
     const roundedClass = fullRounded ? "rounded-[40px]" : "rounded-md";
@@ -52,14 +51,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // Handle custom hover for primary variant
     const handleMouseOver = (e: React.MouseEvent<HTMLButtonElement>) => {
       if (useCustomHover && variant === 'primary' && !disabled) {
-        e.currentTarget.style.backgroundColor = '#1453E1';
+        e.currentTarget.style.backgroundColor = '#1453E1'; // primary-700
       }
       props.onMouseOver?.(e);
     };
 
     const handleMouseOut = (e: React.MouseEvent<HTMLButtonElement>) => {
       if (useCustomHover && variant === 'primary' && !disabled) {
-        e.currentTarget.style.backgroundColor = getBlueDarkColor('default');
+        e.currentTarget.style.backgroundColor = '#3289FF'; // primary-500
       }
       props.onMouseOut?.(e);
     };
@@ -71,8 +70,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={isLoading || disabled}
         style={{
           ...(useCustomHover && variant === 'primary' && {
-            backgroundColor: disabled ? getNeutral400Color() : getBlueDarkColor('default'),
-            color: getWhiteColor()
+            backgroundColor: disabled ? '#858B8A' : '#3289FF', // gray-neutral400 : primary-500
+            color: '#FFFFFF'
           })
         }}
         onMouseOver={handleMouseOver}
@@ -85,15 +84,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
         )}
-        <span 
-          className="text-center justify-center"
-          style={{
-            //fontSize: TYPOGRAPHY.body.fontSize, -- Commented to allow customized font size
-            fontWeight: TYPOGRAPHY.body.fontWeight,
-            //lineHeight: TYPOGRAPHY.body.lineHeight, -- Commented to allow customized font size
-            fontFamily: TYPOGRAPHY.body.fontFamily
-          }}
-        >
+        <span className="text-center justify-center font-medium font-inter">
           {children}
         </span>
       </button>
