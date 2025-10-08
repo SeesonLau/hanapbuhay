@@ -6,6 +6,8 @@ import Checkbox from '@/components/ui/Checkbox';
 import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 import StarRating from '@/components/ui/StarRating';
 import SearchBar from '@/components/ui/SearchBar';
+import AppliedJobCard, { AppliedJob } from '@/components/applications/cards/AppliedJobCard';
+import Button from '@/components/ui/Button';
 
 // Simple mock API to simulate username availability check
 const mockCheckUsername = (username: string) => {
@@ -194,6 +196,11 @@ export default function TextBoxPlayground() {
           <h2 className="font-semibold">Star rating (interactive)</h2>
           <InteractiveRatingDemo />
         </section>
+
+        <section className="space-y-6">
+          <h2 className="font-semibold">Applied Job Card Components</h2>
+          <AppliedJobCardDemo />
+        </section>
       </div>
     </div>
   );
@@ -225,4 +232,128 @@ function InteractiveRatingDemo() {
       <div className="text-sm text-gray-600">Selected: {rating} / 5</div>
     </div>
   )
+}
+
+function AppliedJobCardDemo() {
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [jobs, setJobs] = useState<AppliedJob[]>([
+    {
+      id: '1',
+      title: 'Wanted! Caretaker for my lolo',
+      description: "We're looking for someone caring and patient to help take care of a bedridden loved one at home. We want someone who can treat our family member with kindness and respect.",
+      location: 'Basak, Cebu City',
+      salary: 12000,
+      salaryType: 'monthly',
+      appliedOn: 'August 27, 2025',
+      status: 'pending',
+      tags: ['Caretaker', 'Entry level', 'Female'],
+      genderPreference: 'Female'
+    },
+    {
+      id: '2',
+      title: 'LF: Plumber! NOW!',
+      description: "When the sink clogs or a faucet leaks, it can really disrupt the whole household. We're looking for someone reliable who can help us fix these small but important problems.",
+      location: 'Banilad, Cebu City',
+      salary: 5000,
+      salaryType: 'fixed',
+      appliedOn: 'August 27, 2025',
+      status: 'approved',
+      tags: ['Plumber', 'Expert', 'Male']
+    },
+    {
+      id: '3',
+      title: 'Need a Driver ASAP',
+      description: "Looking for a reliable driver with a clean driving record. Must be available for flexible hours and comfortable with city driving.",
+      location: 'Banawa, Cebu City',
+      salary: 15000,
+      salaryType: 'monthly',
+      appliedOn: 'August 27, 2025',
+      status: 'rejected',
+      tags: ['Driver', 'Entry level', 'Male']
+    }
+  ]);
+
+  const handleDeleteJob = (jobId: string) => {
+    setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
+    console.log('Deleted job:', jobId);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* View Mode Toggle */}
+      <div className="flex items-center gap-2 bg-white p-1 rounded-lg shadow-sm border border-gray-300">
+        <Button
+          variant={viewMode === 'card' ? 'primary' : 'ghost'}
+          size="sm"
+          onClick={() => setViewMode('card')}
+        >
+          Card View
+        </Button>
+        <Button
+          variant={viewMode === 'list' ? 'primary' : 'ghost'}
+          size="sm"
+          onClick={() => setViewMode('list')}
+        >
+          List View
+        </Button>
+      </div>
+
+      {/* Status Examples */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">Different Status Examples</h3>
+        <div className={`
+          ${viewMode === 'card' 
+            ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' 
+            : 'flex flex-col gap-3'
+          }
+        `}>
+          {jobs.map((job) => (
+            <AppliedJobCard
+              key={job.id}
+              job={job}
+              variant={viewMode}
+              onDelete={handleDeleteJob}
+              className={viewMode === 'card' ? 'max-w-sm' : ''}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Single Card Examples */}
+      <div>
+        <h3 className="text-sm font-medium mb-3">Individual Examples</h3>
+        
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-xs font-medium text-gray-600 mb-2">Pending Status (Card)</h4>
+            <AppliedJobCard
+              job={jobs[0]}
+              variant="card"
+              onDelete={handleDeleteJob}
+              className="max-w-sm"
+            />
+          </div>
+          
+          <div>
+            <h4 className="text-xs font-medium text-gray-600 mb-2">Approved Status (List)</h4>
+            <AppliedJobCard
+              job={jobs[1]}
+              variant="list"
+              onDelete={handleDeleteJob}
+            />
+          </div>
+          
+          <div>
+            <h4 className="text-xs font-medium text-gray-600 mb-2">Rejected Status (Card)</h4>
+            <AppliedJobCard
+              job={jobs[2]}
+              variant="card"
+              onDelete={handleDeleteJob}
+              className="max-w-sm"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

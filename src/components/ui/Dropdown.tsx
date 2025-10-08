@@ -17,9 +17,7 @@ type Props = {
   onChange?: (option: DropdownOption) => void;
   placeholder?: string;
   className?: string;
-  // whether the dropdown should expand to the full width of its container
   fullWidth?: boolean;
-  // optional custom renderer for each option (useful for complex layouts)
   renderOption?: (opt: DropdownOption, isSelected: boolean) => React.ReactNode;
 };
 
@@ -39,7 +37,6 @@ function SortIcon({ flipped = false, className = '' }: { flipped?: boolean; clas
   );
 }
 
-// named exports for compatibility
 export const IconSortAsc = (props: { className?: string }) => <CgSortAz className={props.className} />;
 export const IconSortDesc = (props: { className?: string }) => <CgSortZa className={props.className} />;
 
@@ -65,7 +62,6 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
     return () => document.removeEventListener('click', onDocClick);
   }, []);
 
-  // reset active index when opening
   useEffect(() => {
     if (open) {
       if (selected) {
@@ -77,9 +73,8 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
     } else {
       setActiveIndex(-1);
     }
-  }, [open, selected?.id]); // Only depend on selected.id, not entire objects
+  }, [open, selected?.id]); 
 
-  // measure trigger width so the menu can be at least as wide as the trigger
   useEffect(() => {
     function measure() {
       const w = triggerRef.current?.offsetWidth;
@@ -88,7 +83,6 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
 
     measure();
 
-    // prefer ResizeObserver when available (handles font/zoom/layout changes)
     const RO = (window as any).ResizeObserver;
     if (triggerRef.current && RO) {
       const ro = new RO(() => measure());
@@ -98,7 +92,7 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
 
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
-  }, [fullWidth]); // Removed unnecessary dependencies
+  }, [fullWidth]); 
 
   useEffect(() => {
     if (value == null) {
@@ -113,7 +107,6 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
     setSelected(opt);
     setOpen(false);
     onChange?.(opt);
-    // return focus to trigger
     triggerRef.current?.focus();
   }, [onChange]);
 
@@ -121,7 +114,6 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
     if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       setOpen(true);
-      // focus list
       setTimeout(() => {
         listRef.current?.focus();
       }, 0);
