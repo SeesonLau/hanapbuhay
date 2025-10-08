@@ -3,8 +3,8 @@
 
 import React, { useState } from 'react';
 import HeaderDashboard from '@/components/ui/HeaderDashboard';
-import { ManageJobPostCard } from '@/components/ui/ManageJobPostCard';
-import { ManageJobPostList } from '@/components/ui/ManageJobPostList';
+import { ManageJobPostCard } from '@/components/cards/ManageJobPostCard';
+import { ManageJobPostList } from '@/components/cards/ManageJobPostList';
 import { ViewToggle } from '@/components/ui/ViewToggle';
 import { JobType } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';

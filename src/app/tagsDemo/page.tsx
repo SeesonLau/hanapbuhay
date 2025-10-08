@@ -2,7 +2,7 @@
 
 import React from 'react';
 import HeaderDashboard from '@/components/ui/HeaderDashboard';
-import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticLocationTag, StaticSalaryTag, GenderTag, ExperienceLevelTag, JobTypeTag } from '@/components/ui/Tags';
+import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticLocationTag, StaticSalaryTag, GenderTag, ExperienceLevelTag, JobTypeTag } from '@/components/ui/TagItem';
 import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
