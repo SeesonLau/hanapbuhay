@@ -182,8 +182,52 @@ export default function TextBoxPlayground() {
 
         <section className="space-y-3">
           <h2 className="font-semibold">Star rating (display)</h2>
-          <div>
-            <StarRating variant="display" value={4.2} max={5} />
+          
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium mb-2">Average Label (Default)</h3>
+              <StarRating variant="display" value={4.7} max={5} />
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium mb-2">Rating Count Label</h3>
+              <StarRating 
+                variant="display" 
+                value={4.0} 
+                max={5} 
+                labelVariant="count" 
+                ratingCount={10} 
+              />
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium mb-2">No Label</h3>
+              <StarRating 
+                variant="display"
+                appearance='large' 
+                value={3.5} 
+                max={5} 
+                labelVariant="none" 
+              />
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium mb-2">Different Sizes</h3>
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-center gap-1">
+                  <StarRating variant="display" value={4.2} max={5} size="sm" labelVariant="count" ratingCount={25} />
+                  <span className="text-xs text-gray-500">Small</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <StarRating variant="display" value={4.2} max={5} size="md" labelVariant="count" ratingCount={25} />
+                  <span className="text-xs text-gray-500">Medium</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <StarRating variant="display" value={4.2} max={5} size="lg" labelVariant="count" ratingCount={25} />
+                  <span className="text-xs text-gray-500">Large</span>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
