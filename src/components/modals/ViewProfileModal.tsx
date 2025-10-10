@@ -25,18 +25,19 @@ export default function ViewProfileModal({ isOpen, onClose }: ViewProfileModalPr
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-white rounded-lg shadow-lg p-2 w-full max-w-6xl"
+        className="bg-white rounded-lg shadow-lg w-full max-w-6xl"
         onClick={(e) => e.stopPropagation()}
       >
-        
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex flex-col gap-6 flex-shrink-0">
+        <div className="flex flex-col md:flex-row">
+          <div className="flex flex-col flex-shrink-0 border-r border-gray-neutral200">
             <ProfileContactSection />
+            <div className="border-t border-gray-neutral200 my-2"></div>
             <ReviewListSection />
           </div>
 
           <div className="flex flex-col flex-1 min-w-0">
             <ProjectListSection />
+            <div className="border-t border-gray-neutral200 my-2"></div>
             <JobListSection />
           </div>
         </div>

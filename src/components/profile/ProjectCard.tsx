@@ -76,7 +76,7 @@ export default function ProjectCard({
           </div>
         )}
 
-        <div className="flex flex-col flex-1 min-w-0 min-h-0 gap-2 pr-4 justify-center">
+        <div className="flex flex-col flex-1 min-w-0 min-h-0 gap-2 pr-2 justify-center">
           <div className="flex-shrink-0">
             <p className="font-inter font-bold text-xl line-clamp-2 break-words">
               {truncateChars(project.title ?? '', titleCharLimit)}
@@ -96,7 +96,7 @@ export default function ProjectCard({
               src={DeleteIcon.src}
               alt="Delete"
               onClick={handleDeleteClick}
-              className="w-6 h-6 cursor-pointer transition hover:opacity-70" 
+              className="p-1 text-error-error500 hover:text-error-error600 hover:bg-error-error50 rounded transition-colors flex-shrink-0" 
             />
           </div>
         </div>
