@@ -25,11 +25,12 @@ export default function ApplicantsModal({
 }: ApplicantsModalProps) {
   const [newApplicantsSort, setNewApplicantsSort] = useState<SortOrder>('newest');
   const [allApplicantsSort, setAllApplicantsSort] = useState<SortOrder>('newest');
+  const [searchQuery, setSearchQuery] = useState('');
 
   if (!isOpen) return null;
 
   const handleSearch = (query: string) => {
-    console.log('Search query:', query);
+    setSearchQuery(query);
   };
 
   const truncateTitle = (text: string, maxLength: number = 30) => {
@@ -52,7 +53,6 @@ export default function ApplicantsModal({
     setAllApplicantsSort(mapSortValue(String(option.value ?? 'latest')));
   };
 
-  // ✅ handle click outside modal
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -62,11 +62,11 @@ export default function ApplicantsModal({
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-      onClick={handleOverlayClick} // 🟢 added here
+      onClick={handleOverlayClick}
     >
       <div
         className="bg-white rounded-lg shadow-lg w-full max-w-6xl p-4 relative"
-        onClick={(e) => e.stopPropagation()} // 🛑 prevents closing when clicking inside modal
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b pb-3 gap-4 mb-3">
@@ -97,7 +97,7 @@ export default function ApplicantsModal({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 overflow-y-auto max-h-[70vh]">
+        <div className="grid grid-cols-1 md:grid-cols-2 overflow-y-auto max-h-[70vh] min-h-[60vh]">
           <section className="border-r border-gray-neutral200 pr-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-inter text-lead font-semibold text-gray-neutral800">
@@ -118,7 +118,10 @@ export default function ApplicantsModal({
               </div>
             </div>
 
-            <NewApplicantsSection sortOrder={newApplicantsSort} />
+            <NewApplicantsSection 
+              sortOrder={newApplicantsSort} 
+              searchQuery={searchQuery}
+            />
           </section>
 
           <section className="pl-4">
@@ -141,7 +144,10 @@ export default function ApplicantsModal({
               </div>
             </div>
 
-            <AllApplicantsSection sortOrder={allApplicantsSort} />
+            <AllApplicantsSection 
+              sortOrder={allApplicantsSort}
+              searchQuery={searchQuery}
+            />
           </section>
         </div>
       </div>

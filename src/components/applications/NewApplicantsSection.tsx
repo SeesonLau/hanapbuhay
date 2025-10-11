@@ -15,9 +15,13 @@ type SortOrder = 'newest' | 'oldest';
 
 interface NewApplicantsSectionProps {
   sortOrder?: SortOrder;
+  searchQuery?: string;
 }
 
-export default function NewApplicantsSection({ sortOrder = 'newest' }: NewApplicantsSectionProps) {
+export default function NewApplicantsSection({ 
+  sortOrder = 'newest',
+  searchQuery = ''
+}: NewApplicantsSectionProps) {
   const applicants: Applicant[] = [
     { userId: '1', name: 'Maria Santos', rating: 4.7, dateApplied: 'Oct 5, 2025' },
     { userId: '2', name: 'Juan Dela Cruz', rating: 4.3, dateApplied: 'Oct 7, 2025' },
@@ -28,17 +32,26 @@ export default function NewApplicantsSection({ sortOrder = 'newest' }: NewApplic
     { userId: '7', name: 'Ana Lopez', rating: 4.5, dateApplied: 'Oct 4, 2025' },
   ];
 
-  // Sort applicants based on sortOrder
-  const sortedApplicants = useMemo(() => {
-    return [...applicants].sort((a, b) => {
+  // Filter and sort applicants
+  const filteredAndSortedApplicants = useMemo(() => {
+    // Filter by search query
+    let filtered = applicants;
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = applicants.filter(applicant => 
+        applicant.name.toLowerCase().includes(query) ||
+        applicant.userId.toLowerCase().includes(query)
+      );
+    }
+
+    // Sort by date
+    return [...filtered].sort((a, b) => {
       const dateA = new Date(a.dateApplied).getTime();
       const dateB = new Date(b.dateApplied).getTime();
       
-      // If sortOrder is 'newest', sort descending (newest first)
-      // If sortOrder is 'oldest', sort ascending (oldest first)
       return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
-  }, [sortOrder]);
+  }, [sortOrder, searchQuery]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isScrollable, setIsScrollable] = useState(false);
@@ -57,7 +70,7 @@ export default function NewApplicantsSection({ sortOrder = 'newest' }: NewApplic
 
     el.addEventListener("scroll", handleScroll);
     return () => el.removeEventListener("scroll", handleScroll);
-  }, [sortedApplicants]);
+  }, [filteredAndSortedApplicants]);
 
   return (
     <div className="relative">
@@ -69,21 +82,27 @@ export default function NewApplicantsSection({ sortOrder = 'newest' }: NewApplic
           scrollPaddingBottom: '0.5rem' 
         }}
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4 justify-items-center">
-          {sortedApplicants.map((applicant, index) => (
-            <div key={index} className="snap-start">
-              <ApplicantCard
-                userId={applicant.userId}
-                name={applicant.name}
-                rating={applicant.rating}
-                dateApplied={applicant.dateApplied}
-              />
-            </div>
-          ))}
-        </div>
+        {filteredAndSortedApplicants.length === 0 ? (
+          <div className="text-center py-8 text-gray-neutral400">
+            No applicants found matching "{searchQuery}"
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4 justify-items-center">
+            {filteredAndSortedApplicants.map((applicant, index) => (
+              <div key={`${applicant.userId}-${index}`} className="snap-start">
+                <ApplicantCard
+                  userId={applicant.userId}
+                  name={applicant.name}
+                  rating={applicant.rating}
+                  dateApplied={applicant.dateApplied}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {isScrollable && !isAtBottom && (
+      {isScrollable && !isAtBottom && filteredAndSortedApplicants.length > 0 && (
         <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 bg-gradient-to-t from-white/95 to-transparent text-sm text-gray-neutral500">
           <HiArrowDown className="w-4 h-4 animate-bounce" />
         </div>
