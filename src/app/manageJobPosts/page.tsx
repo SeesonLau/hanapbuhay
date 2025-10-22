@@ -174,7 +174,6 @@ export default function ManageJobPostsPage() {
           isOpen={isJobViewOpen} 
           onClose={() => setIsJobViewOpen(false)} 
           job={selectedJob}
-          onApply={(id) => console.log('apply', id)}
         />
       </main>
     </div>

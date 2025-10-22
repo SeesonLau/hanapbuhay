@@ -204,7 +204,7 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
 
         {/* Footer: posted date + applicants + Apply */}
         <div className="px-6 py-6">
-          <div className="flex items-center justify-between">
+          <div className={`flex items-center ${onApply ? 'justify-between' : 'justify-start'}`}>
             <div className="flex items-center gap-2">
               <span className="text-[12px] font-medium" style={{ color: getNeutral600Color() }}>
                 Posted on: {postedDate}
@@ -214,15 +214,17 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
                 {applicantCount} Applicants
               </span>
             </div>
-            <button
-              onClick={() => onApply?.(id)}
-              className="px-4 py-2 rounded-lg text-white text-sm"
-              style={{ backgroundColor: getPrimary500Color() }}
-              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = getPrimary500Color(0.9))}
-              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = getPrimary500Color())}
-            >
-              Apply Now
-            </button>
+            {onApply && (
+              <button
+                onClick={() => onApply(id)}
+                className="px-4 py-2 rounded-lg text-white text-sm"
+                style={{ backgroundColor: getPrimary500Color() }}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = getPrimary500Color(0.9))}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = getPrimary500Color())}
+              >
+                Apply Now
+              </button>
+            )}
           </div>
         </div>
 
