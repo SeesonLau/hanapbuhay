@@ -54,6 +54,11 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   //Logout animation state
   const [showGoodbye, setShowGoodbye] = useState(false);
   
+  // Scroll behavior states
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
+  
   const menuRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -67,6 +72,38 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     else if (pathname === ROUTES.MOCK) setActiveLink('mock');
     else setActiveLink('find-jobs');
   }, [pathname]);
+
+  // Scroll behavior effect
+  useEffect(() => {
+    const controlHeader = () => {
+      if (typeof window !== 'undefined') {
+        const currentScrollY = window.scrollY;
+        
+        // Check if scrolled past threshold
+        setIsScrolled(currentScrollY > 50);
+        
+        // Show header when scrolling up, hide when scrolling down
+        if (currentScrollY > lastScrollY && currentScrollY > 100) {
+          setIsVisible(false); // Scrolling down
+          setIsMenuOpen(false); // Close mobile menu when scrolling down
+          setIsProfileOpen(false); // Close profile dropdown when scrolling down
+          setShowNotifications(false); // Close notifications when scrolling down
+        } else {
+          setIsVisible(true); // Scrolling up or at top
+        }
+        
+        setLastScrollY(currentScrollY);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', controlHeader);
+      
+      return () => {
+        window.removeEventListener('scroll', controlHeader);
+      };
+    }
+  }, [lastScrollY]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -152,18 +189,40 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
       <header 
         className={`${fontClasses.body} w-full`}
       >
-        <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 py-3 sm:py-4 flex items-center justify-between fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out">
+        <div 
+          className={`w-full px-4 sm:px-6 md:px-8 lg:px-12 py-3 sm:py-4 flex items-center justify-between fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
+            isVisible 
+              ? 'translate-y-0 opacity-100' 
+              : '-translate-y-full opacity-0 pointer-events-none'
+          }`}
+          style={{
+            backdropFilter: isScrolled ? 'blur(10px)' : 'none',
+            backgroundColor: isScrolled 
+              ? 'rgba(0, 0, 0, 0.8)' 
+              : 'transparent',
+            borderBottom: isScrolled ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+            transform: isScrolled ? 'scale(0.98)' : 'scale(1)',
+            transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
+          }}
+        >
             {/* Left Section - Brand/Logo */}
             <div className="flex-shrink-0">
               <div className="flex items-center">
                 {/* Logo */}
-                <Link href={ROUTES.DASHBOARD} className="cursor-pointer transition-transform duration-300 hover:scale-105">
+                <Link href={ROUTES.DASHBOARD} className="cursor-pointer transition-all duration-500 hover:scale-105">
                   <Image
                     src="/image/hanapbuhay-logo.svg"
                     alt="HanapBuhay Logo"
                     width={187}
                     height={68}
-                    className="w-32 h-10 sm:w-40 sm:h-12 md:w-44 md:h-14 lg:w-48 lg:h-16"
+                    className={`transition-all duration-500 ${
+                      isScrolled 
+                        ? 'w-28 h-8 sm:w-32 sm:h-10 md:w-36 md:h-11 lg:w-40 lg:h-12' 
+                        : 'w-32 h-10 sm:w-40 sm:h-12 md:w-44 md:h-14 lg:w-48 lg:h-16'
+                    }`}
+                    style={{
+                      filter: isScrolled ? 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' : 'none'
+                    }}
                     priority
                   />
                 </Link>
@@ -175,13 +234,16 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
               {navigationLinks.map((link) => (
                 <Link key={link.id} href={link.route}>
                   <button
-                    className={`group relative px-3 pt-4 pb-2 text-small md:text-body font-medium transition-all duration-300 focus:outline-none whitespace-nowrap ${
+                    className={`group relative px-3 pt-4 pb-2 text-small md:text-body font-medium transition-all duration-300 focus:outline-none whitespace-nowrap transform hover:scale-105 ${
                       activeLink === link.id
                         ? 'text-blue-default'
                         : 'text-neutral-200 hover:text-blue-default'
                     }`}
                     onMouseEnter={() => setHoveredLink(link.id)}
                     onMouseLeave={() => setHoveredLink(null)}
+                    style={{
+                      textShadow: isScrolled ? '0 1px 2px rgba(0, 0, 0, 0.3)' : 'none'
+                    }}
                   >
                     {link.label}
                     {/* Animated underline - only shows when active */}
@@ -218,7 +280,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                   )}
                 </button>
 
-                {showNotifications && <NotificationPopUp />}
+                {showNotifications && <NotificationPopUp isScrolled={isScrolled} />}
               </div>
 
               {/* User Profile */}
@@ -236,9 +298,10 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                 >
                   {/* Avatar */}
                   <div 
-                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300"
                     style={{ 
-                      background: 'linear-gradient(to bottom right, #FF9F40, #FFD700)'
+                      background: 'linear-gradient(to bottom right, #FF9F40, #FFD700)',
+                      boxShadow: isScrolled ? '0 2px 4px rgba(0, 0, 0, 0.2)' : 'none'
                     }}
                   >
                     {userAvatar ? (
@@ -259,7 +322,10 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                     )}
                   </div>
                   <span 
-                    className="hidden sm:block text-body font-medium"
+                    className="hidden sm:block text-body font-medium transition-all duration-300"
+                    style={{
+                      textShadow: isScrolled ? '0 1px 2px rgba(0, 0, 0, 0.3)' : 'none'
+                    }}
                   >
                     {userName}
                   </span>
@@ -274,7 +340,9 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                     className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 z-50 transition-all duration-300 ease-in-out"
                     style={{ 
                       backgroundColor: getWhiteColor(),
-                      border: `1px solid ${getGrayColor('border')}`
+                      border: `1px solid ${getGrayColor('border')}`,
+                      backdropFilter: 'blur(10px)',
+                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
                     }}
                   >
                     <Link
@@ -360,7 +428,13 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
         {isMenuOpen && (
           <div
             ref={menuRef}
-            className="md:hidden absolute top-full right-4 mt-2 rounded-xl bg-gray-900 bg-opacity-95 min-w-48 transition-all duration-300 ease-in-out"
+            className={`md:hidden fixed right-4 rounded-xl bg-gray-900 bg-opacity-95 min-w-48 transition-all duration-300 ease-in-out z-50 shadow-lg border border-gray-700 ${
+              isScrolled ? 'top-14' : 'top-16'
+            }`}
+            style={{
+              backdropFilter: 'blur(10px)',
+              backgroundColor: 'rgba(17, 24, 39, 0.95)'
+            }}
           >
             <div className="flex flex-col space-y-2 p-4">
               {navigationLinks.map((link) => (

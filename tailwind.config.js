@@ -50,6 +50,7 @@ module.exports = {
           neutral700: '#4D5151',
           neutral800: '#444645',
           neutral900: '#3B3E3E',
+          neutral950: '#141515',
         },
         primary: {
           primary50: '#EEF7FF',

@@ -1,13 +1,20 @@
-// src/app/applied-jobs/page.tsx
 'use client';
 
+import { useState } from 'react';
 import Banner from '@/components/ui/Banner';
 import StatCardAppliedJobs from '@/components/cards/StatCardAppliedJobs';
 
 export default function AppliedJobsPage() {
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [jobs, setJobs] = useState<AppliedJob[]>(sampleJobs);
+
   const handleSearch = (query: string) => {
-    console.log('Search query:', query);
     // Add your search logic here
+    console.log('Searching for:', query);
+  };
+
+  const handleDeleteJob = (jobId: string) => {
+    setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
   };
 
   const handleStatFilter = (type: 'total' | 'pending' | 'approved' | 'rejected') => {
@@ -16,7 +23,7 @@ export default function AppliedJobsPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-neutral50">
       {/* Banner Section with Header and Search */}
       <Banner
         variant="appliedJobs"
