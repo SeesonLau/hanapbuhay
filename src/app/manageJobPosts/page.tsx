@@ -1,87 +1,88 @@
 // src/app/manage-job-posts/page.tsx
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Banner from '@/components/ui/Banner';
 import ApplicantsModal from '@/components/modals/ApplicantsModal';
 import JobPostViewModal, { JobPostViewData } from '@/components/modals/JobPostViewModal';
 import { ViewToggle } from '@/components/ui/ViewToggle';
 import { ManageJobPostCard } from '@/components/cards/ManageJobPostCard';
 import { ManageJobPostList } from '@/components/cards/ManageJobPostList';
-import { JobType } from '@/lib/constants/job-types';
-import { Gender } from '@/lib/constants/gender';
-import { ExperienceLevel } from '@/lib/constants/experience-level';
+import type { Post } from '@/lib/models/posts';
+import { PostService } from '@/lib/services/posts-services';
+import { ApplicationService } from '@/lib/services/applications-services';
 // Removed toggle and card/list for simplified page per request
 
-// Sample job posts removed with card/list views
-
-// Sample job post data for Manage Job Posts
-const sampleJobPosts = [
-  {
-    id: 'm1',
-    title: 'Construction Worker Needed',
-    description:
-      "Looking for a reliable construction worker to assist with ongoing projects. Must be physically fit and able to work with a team.",
-    location: 'Banilad, Cebu City',
-    salary: '15,000.00',
-    salaryPeriod: 'month',
-    postedDate: 'August 22, 2025',
-    applicantCount: 8,
-    genderTags: [Gender.MALE],
-    experienceTags: [ExperienceLevel.INTERMEDIATE],
-    jobTypeTags: [JobType.CONSTRUCTION, 'Construction Helper'],
-  },
-  {
-    id: 'm2',
-    title: 'LF: Babysitter (Weekends)',
-    description:
-      'We need a trustworthy babysitter for weekend schedules. Experience with toddlers preferred.',
-    location: 'Casuntingan, Mandaue City',
-    salary: '10,000.00',
-    salaryPeriod: 'month',
-    postedDate: 'August 20, 2025',
-    applicantCount: 2,
-    genderTags: [Gender.FEMALE],
-    experienceTags: [ExperienceLevel.ENTRY],
-    jobTypeTags: [JobType.SERVICE, 'Baby Sitter'],
-  },
-  // Additional posts with extended tags set
-  {
-    id: 'm3',
-    title: 'Skilled Welder for Small Projects',
-    description:
-      'Seeking an experienced welder for small fabrication jobs. Bonus if you can assist with basic mechanical tasks.',
-    location: 'Lapu-Lapu City',
-    salary: '18,000.00',
-    salaryPeriod: 'month',
-    postedDate: 'September 2, 2025',
-    applicantCount: 5,
-    genderTags: [Gender.MALE, Gender.ANY],
-    experienceTags: [ExperienceLevel.INTERMEDIATE, ExperienceLevel.EXPERT],
-    // Use valid subtypes from job-types constants
-    jobTypeTags: ['Welder', 'Electrician', 'Mechanic', 'Tailor/Seamstress', 'Shoemaker/Cobbler'],
-  },
-  {
-    id: 'm4',
-    title: 'Digital Content Creator / Social Media',
-    description:
-      'Looking for a creative content creator to manage short-form videos and posts across platforms.',
-    location: 'Cebu City',
-    salary: '20,000.00',
-    salaryPeriod: 'month',
-    postedDate: 'September 5, 2025',
-    applicantCount: 12,
-    genderTags: [Gender.ANY, Gender.FEMALE],
-    experienceTags: [ExperienceLevel.ENTRY, ExperienceLevel.INTERMEDIATE],
-    jobTypeTags: ['Content Creator', 'Social Media Manager', 'Graphic Designer', 'Online Seller', 'Online Tutor'],
-  },
-];
-
 export default function ManageJobPostsPage() {
+  type ManageJobData = {
+    id: string;
+    title: string;
+    description: string;
+    location: string;
+    salary: string;
+    salaryPeriod: string;
+    postedDate: string;
+    applicantCount?: number;
+    genderTags?: string[];
+    experienceTags?: string[];
+    jobTypeTags?: string[];
+  };
+
+  const [posts, setPosts] = useState<ManageJobData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
+  const [selectedApplicants, setSelectedApplicants] = useState<{ title: string; applicantCount: number; postId: string } | null>(null);
+
+  const formatPeso = (amount: number): string => {
+    try {
+      return amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } catch {
+      return String(amount);
+    }
+  };
+
+  const formatPostedDate = (iso: string): string => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
+  const postToManageData = (post: Post, applicantCount = 0): ManageJobData => ({
+    id: post.postId,
+    title: post.title,
+    description: post.description,
+    location: post.location,
+    salary: formatPeso(post.price),
+    salaryPeriod: 'month',
+    postedDate: formatPostedDate(post.createdAt),
+    applicantCount,
+    genderTags: [],
+    experienceTags: [],
+    jobTypeTags: post.subType || [],
+  });
+
+  useEffect(() => {
+    const loadPosts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await PostService.getAllPosts();
+        const posts: Post[] = result?.posts || [];
+        const counts = await Promise.all(posts.map(p => ApplicationService.getTotalApplicationsByPostIdCount(p.postId).catch(() => 0)));
+        const mapped = posts.map((p, idx) => postToManageData(p, counts[idx] ?? 0));
+        setPosts(mapped);
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load posts');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadPosts();
+  }, []);
 
   const handleSearch = (query: string, location?: string) => {
     console.log('Search query:', query);
@@ -93,6 +94,11 @@ export default function ManageJobPostsPage() {
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+
+  const handleOpenApplicants = (data: { id: string; title: string; applicantCount?: number }) => {
+    setSelectedApplicants({ title: data.title, applicantCount: data.applicantCount ?? 0, postId: data.id });
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen">
@@ -127,14 +133,21 @@ export default function ManageJobPostsPage() {
           </div>
 
           {/* Display */}
-          {viewMode === 'card' ? (
+          {loading ? (
+            <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 text-center text-gray-600">Loading posts…</div>
+          ) : error ? (
+            <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 text-center text-red-600">{error}</div>
+          ) : posts.length === 0 ? (
+            <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 text-center text-gray-600">No posts yet.</div>
+          ) : viewMode === 'card' ? (
             <div className="w-full flex justify-center">
               <div className="flex flex-wrap items-start justify-center gap-5">
-                {sampleJobPosts.map((jobPost) => (
+                {posts.map((jobPost) => (
                   <ManageJobPostCard 
                     key={jobPost.id} 
                     jobData={jobPost} 
                     onOpen={(data) => { setSelectedJob(data); setIsJobViewOpen(true); }}
+                    onViewApplicants={handleOpenApplicants}
                   />
                 ))}
               </div>
@@ -142,11 +155,12 @@ export default function ManageJobPostsPage() {
           ) : (
             <div className="w-full overflow-x-auto">
               <div className="flex flex-col items-start gap-4 w-[1840px] mx-auto">
-                {sampleJobPosts.map((jobPost) => (
+                {posts.map((jobPost) => (
                   <ManageJobPostList 
                     key={jobPost.id} 
                     jobData={jobPost} 
                     onOpen={(data) => { setSelectedJob(data); setIsJobViewOpen(true); }}
+                    onViewApplicants={handleOpenApplicants}
                   />
                 ))}
               </div>
@@ -155,7 +169,7 @@ export default function ManageJobPostsPage() {
         </div>
 
         {/* Modal */}
-        <ApplicantsModal isOpen={isModalOpen} onClose={closeModal} />
+        <ApplicantsModal isOpen={isModalOpen} onClose={closeModal} title={selectedApplicants?.title ?? 'Applicants'} applicantCount={selectedApplicants?.applicantCount ?? 0} postId={selectedApplicants?.postId} />
         <JobPostViewModal 
           isOpen={isJobViewOpen} 
           onClose={() => setIsJobViewOpen(false)} 

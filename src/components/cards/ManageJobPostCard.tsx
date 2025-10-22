@@ -27,12 +27,14 @@ interface ManageJobPostCardProps {
   jobData: JobPostData;
   className?: string;
   onOpen?: (data: JobPostData) => void;
+  onViewApplicants?: (data: JobPostData) => void;
 }
 
 export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({ 
   jobData, 
   className = '',
   onOpen,
+  onViewApplicants,
 }) => {
   const {
     title,
@@ -200,7 +202,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
         
         {/* Action Buttons - Full Width */}
         <div className="flex gap-0 w-full">
-          <button className="flex items-center justify-center flex-1 h-[30px] bg-white border border-gray-300 rounded-l-[10px] text-xs font-medium hover:bg-gray-50 transition-colors">
+          <button className="flex items-center justify-center flex-1 h-[30px] bg-white border border-gray-300 rounded-l-[10px] text-xs font-medium hover:bg-gray-50 transition-colors" onClick={(e) => { e.stopPropagation(); onViewApplicants?.(jobData); }}>
             <span className="text-blue-600 mr-1">{applicantCount}</span>
             <img src="/icons/profile.svg" alt="Applicants" className="w-[15px] h-[15px]" />
           </button>

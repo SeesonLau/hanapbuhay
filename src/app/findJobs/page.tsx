@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Banner from "@/components/ui/Banner";
 import ViewProfileModal from "@/components/modals/ViewProfileModal";
 import JobPostViewModal, { JobPostViewData } from "@/components/modals/JobPostViewModal";
@@ -8,39 +8,9 @@ import { ViewToggle } from "@/components/ui/ViewToggle";
 import { JobPostCard } from "@/components/cards/JobPostCard";
 import { StatCardFindJobs } from "@/components/cards/StatCardFindJobs";
 import { JobPostList } from "@/components/cards/JobPostList";
-import { JobType } from "@/lib/constants/job-types";
-import { Gender } from "@/lib/constants/gender";
-import { ExperienceLevel } from "@/lib/constants/experience-level";
-
-// Sample job post data for Find Jobs
-const sampleJobPosts = [
-  {
-    id: "p1",
-    title: "LF: Plumber! NOW!",
-    description: "When the sink clogs or a faucet leaks, it can really disrupt the whole household. We’re looking for someone reliable who can help us fix these small but important problems.",
-    location: "Banilad, Cebu City",
-    salary: "5,000.00",
-    salaryPeriod: "month",
-    postedDate: "August 20, 2025",
-    applicantCount: 15,
-    genderTags: [Gender.MALE],
-    experienceTags: [ExperienceLevel.EXPERT],
-    jobTypeTags: [JobType.SKILLED, "Plumber"]
-  },
-  {
-    id: "p2",
-    title: "LF: Babysitter",
-    description: "As parents, we just want someone we can trust with our children. We need help looking after them while we're away or busy.",
-    location: "Casuntingan, Mandaue City",
-    salary: "10,000.00",
-    salaryPeriod: "month",
-    postedDate: "August 20, 2025",
-    applicantCount: 2,
-    genderTags: [Gender.FEMALE],
-    experienceTags: [ExperienceLevel.ENTRY],
-    jobTypeTags: [JobType.SERVICE, "Baby Sitter"]
-  }
-];
+import { PostService } from "@/lib/services/posts-services";
+import { ApplicationService } from "@/lib/services/applications-services";
+import { Post } from "@/lib/models/posts";
 
 export default function FindJobsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,12 +18,91 @@ export default function FindJobsPage() {
   const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
 
-  const handleSearch = (query: string, location?: string) => {
-    console.log("Search query:", query);
-    if (location) {
-      console.log("Location:", location);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [appCounts, setAppCounts] = useState<Record<string, number>>({});
+
+  const handleSearch = async (query: string, location?: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await PostService.getAllPosts({ searchTerm: query, location });
+      setPosts(result.posts);
+    } catch (err) {
+      setError("Failed to load posts");
+    } finally {
+      setLoading(false);
     }
-    // Add your search logic here
+  };
+
+  useEffect(() => {
+    const loadInitial = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const result = await PostService.getAllPosts();
+        setPosts(result.posts);
+      } catch (err) {
+        setError("Failed to load posts");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadInitial();
+  }, []);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const entries = await Promise.all(
+          posts.map(async (p) => {
+            try {
+              const count = await ApplicationService.getTotalApplicationsByPostIdCount(p.postId);
+              return [p.postId, count] as const;
+            } catch {
+              return [p.postId, 0] as const;
+            }
+          })
+        );
+        setAppCounts(Object.fromEntries(entries));
+      } catch {
+        // ignore count errors
+      }
+    };
+
+    if (posts.length) {
+      fetchCounts();
+    }
+  }, [posts]);
+
+  const formatPeso = (amount: number) => {
+    return amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  const formatPostedDate = (iso: string) => {
+    try {
+      const d = new Date(iso);
+      return d.toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' });
+    } catch {
+      return iso;
+    }
+  };
+
+  const postToJobData = (post: Post): JobPostViewData => {
+    return {
+      id: post.postId,
+      title: post.title,
+      description: post.description,
+      location: post.location,
+      salary: formatPeso(post.price),
+      salaryPeriod: 'month',
+      postedDate: formatPostedDate(post.createdAt),
+      applicantCount: appCounts[post.postId] || 0,
+      genderTags: [],
+      experienceTags: [],
+      jobTypeTags: [post.type, ...(post.subType || [])],
+    };
   };
 
   return (
@@ -63,12 +112,12 @@ export default function FindJobsPage() {
 
       <main className="pl-4 pr-4 pb-8 pt-8">
         {/* Stats Row */}
-        <div className="w-full overflow-x-auto mb-6">
-          <div className="flex items-stretch gap-4 w-[1520px] mx-auto">
-            <StatCardFindJobs title="Total Jobs" value={12} variant="blue" />
-            <StatCardFindJobs title="Completed" value={10} variant="green" />
-            <StatCardFindJobs title="Ratings" value={4.5} variant="yellow" />
-            <StatCardFindJobs title="Posted" value={5} variant="red" />
+        <div className="w-full mb-6">
+          <div className="max-w-screen-2xl mx-auto flex flex-wrap md:flex-nowrap items-stretch gap-4 justify-center md:justify-between">
+            <StatCardFindJobs title="Total Jobs" variant="blue" />
+            <StatCardFindJobs title="Completed" variant="green" />
+            <StatCardFindJobs title="Ratings" variant="yellow" />
+            <StatCardFindJobs title="Posted" variant="red" />
           </div>
         </div>
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
@@ -77,8 +126,7 @@ export default function FindJobsPage() {
             This is the Find Jobs page. Content coming soon...
           </p>
 
-          {/* PLACEHOLDER*/ }
-          {/* View Profile Button */ }
+          {/* View Profile Button */}
           <button
             onClick={() => setIsModalOpen(true)}
             className="px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700"
@@ -98,28 +146,42 @@ export default function FindJobsPage() {
           </div>
 
           {/* Display */}
-          {viewMode === 'card' ? (
+          {loading ? (
+            <div className="text-center py-8">Loading job posts...</div>
+          ) : error ? (
+            <div className="text-center py-8 text-red-600">{error}</div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No job posts available.</div>
+          ) : viewMode === 'card' ? (
             <div className="w-full flex justify-center">
               <div className="flex flex-wrap items-start justify-center gap-5">
-                {sampleJobPosts.map((jobPost) => (
-                  <JobPostCard 
-                    key={jobPost.id} 
-                    jobData={jobPost} 
-                    onOpen={(data) => { setSelectedJob(data); setIsJobViewOpen(true); }}
-                  />
-                ))}
+                {posts.map((post) => {
+                  const jd = postToJobData(post);
+                  return (
+                    <JobPostCard
+                      key={post.postId}
+                      jobData={jd as any}
+                      onOpen={(data) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
+                      onApply={(id) => console.log('apply', id)}
+                    />
+                  );
+                })}
               </div>
             </div>
           ) : (
             <div className="w-full overflow-x-auto">
               <div className="flex flex-col items-start gap-4 w-[1526px] mx-auto">
-                {sampleJobPosts.map((jobPost) => (
-                  <JobPostList 
-                    key={jobPost.id} 
-                    jobData={jobPost} 
-                    onOpen={(data) => { setSelectedJob(data); setIsJobViewOpen(true); }}
-                  />
-                ))}
+                {posts.map((post) => {
+                  const jd = postToJobData(post);
+                  return (
+                    <JobPostList
+                      key={post.postId}
+                      jobData={jd as any}
+                      onOpen={(data) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
+                      onApply={(id) => console.log('apply', id)}
+                    />
+                  );
+                })}
               </div>
             </div>
           )}
@@ -128,14 +190,12 @@ export default function FindJobsPage() {
 
       {/* Modal */}
       <ViewProfileModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-      <JobPostViewModal 
-        isOpen={isJobViewOpen} 
-        onClose={() => setIsJobViewOpen(false)} 
+      <JobPostViewModal
+        isOpen={isJobViewOpen}
+        onClose={() => setIsJobViewOpen(false)}
         job={selectedJob}
         onApply={(id) => console.log('apply', id)}
       />
-          {/* PLACEHOLDER*/ }
-
     </div>
   );
 }

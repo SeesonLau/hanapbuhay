@@ -8,7 +8,7 @@ type ColorVariant = "blue" | "green" | "yellow" | "red";
 
 interface StatCardFindJobsProps {
   title: string;
-  value: string | number;
+  value?: string | number; // optional, will be provided by DB later
   variant?: ColorVariant; // color of the icon background box
   className?: string;
 }
@@ -34,12 +34,8 @@ export const StatCardFindJobs: React.FC<StatCardFindJobsProps> = ({ title, value
 
   return (
     <div
-      className={`flex items-center justify-between px-4 ${className}`}
+      className={`flex items-center justify-between px-4 w-full sm:w-[340px] md:w-[370px] h-[87px] rounded-[10px] bg-white shadow ${className}`}
       style={{
-        width: "380px",
-        height: "87px",
-        borderRadius: "10px",
-        backgroundColor: getWhiteColor(),
         boxShadow: `0 4px 16px ${getBlackColor(0.12)}`,
       }}
     >
@@ -55,7 +51,7 @@ export const StatCardFindJobs: React.FC<StatCardFindJobsProps> = ({ title, value
         </span>
       </div>
       <span className={`${fontClasses.heading} text-sm`} style={{ color: getNeutral600Color() }}>
-        {value}
+        {value !== undefined && value !== null ? value : "—"}
       </span>
     </div>
   );
