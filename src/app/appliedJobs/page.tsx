@@ -1,21 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 import Banner from '@/components/ui/Banner';
 import StatCardAppliedJobs from '@/components/cards/StatCardAppliedJobs';
 
 export default function AppliedJobsPage() {
-  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
-  const [jobs, setJobs] = useState<AppliedJob[]>(sampleJobs);
-
   const handleSearch = (query: string) => {
     // Add your search logic here
     console.log('Searching for:', query);
   };
 
-  const handleDeleteJob = (jobId: string) => {
-    setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
-  };
+  // Removed mock types and data (AppliedJob, sampleJobs) and delete handler
 
   const handleStatFilter = (type: 'total' | 'pending' | 'approved' | 'rejected') => {
     console.log('Selected stat:', type);
