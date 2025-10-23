@@ -42,7 +42,7 @@ export default function JobListSection() {
 
   return (
     <div className="p-6 relative ">
-      <p className="font-inter font-semibold -mt-8 mb-2 body">
+      <p className="font-inter font-semibold -mt-6 body">
         Previous Jobs at{" "}
         <span className="font-inter font-extrabold text-primary-primary500 transition duration-200 ease-in-out hover:text-primary-600 hover:scale-105 inline-block cursor-pointer">
           HANAPBUHAY

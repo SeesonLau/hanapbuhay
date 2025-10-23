@@ -134,7 +134,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
           
           {/* Edit / Upload Icon */}
           <label className="absolute bottom-0 -right-5 p-2 rounded-full cursor-pointer flex items-center justify-center">
-            <img src={upload2.src} alt="Upload" className="w-5 h-5" />
+            <img src={upload2.src} alt="Upload" className="w-5 h-5 " />
             <input
               type="file"
               accept="image/*"
@@ -204,6 +204,8 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
           value={profile?.phoneNumber ?? ''}
           onChange={(e) => handleChange('phoneNumber', e.target.value)}
           width="100%"
+          enableValidation={true}
+          showSuccessIcon={true}
         />
 
         <TextBox
