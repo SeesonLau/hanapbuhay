@@ -136,7 +136,7 @@ export default function HomePage() {
               <div className="flex items-center mb-6">
                 <button 
                   onClick={handleBackToHome}
-                  className="mr-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                  className="mr-2 p-1 rounded-full hover:bg-primary-500 text-gray-neutral50 transition-colors"
                   aria-label="Back to home"
                 >
                   <FiArrowLeft size={24} className="text-gray-700" />
@@ -225,7 +225,7 @@ export default function HomePage() {
                 }}
                 onMouseOver={(e) => {
                   if (!e.currentTarget.disabled) {
-                    e.currentTarget.style.backgroundColor = getGrayColor('default');
+                    e.currentTarget.style.backgroundColor = getBlueDarkColor('default');
                   }
                 }}
                 onMouseOut={(e) => {
