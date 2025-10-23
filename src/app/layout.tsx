@@ -5,8 +5,12 @@ import '../app/global.css'
 import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
-  title: 'Your App',
-  description: 'Your app description',
+  title: 'Hanapbuhay',
+  description: 'Find jobs, get hired, and manage your career with Hanapbuhay.',
+  icons: {
+    icon: '/favicon.ico', 
+    shortcut: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
