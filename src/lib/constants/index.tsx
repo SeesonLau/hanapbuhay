@@ -9,7 +9,6 @@ export const passwordRequirements = [
 
 export const ROUTES = {
   HOME: '/',
-  DASHBOARD: '/dashboard',
   CHAT: '/chat',
   PROFILE: '/profile',
   MANAGEJOBPOSTS: '/manageJobPosts',
