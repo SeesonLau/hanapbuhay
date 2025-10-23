@@ -118,6 +118,20 @@ export const COLORS = {
     error800: '#991B1C',
     error900: '#7F1D1E',
   },
+  // Tag-specific colors (centralized from UI components)
+  tag: {
+    genderText: '#968825',
+    genderBg: '#FDF38E',
+    genderSelectedBg: '#F2E559',
+    genderUnselectedBg: '#F5F0B7',
+    experienceText: '#297219',
+    experienceBg: '#B9F0A6',
+    experienceSelectedBg: '#8DE571',
+    experienceUnselectedBg: '#DBF7D0',
+    jobText: '#3289FF',
+    jobBg: '#D9ECFF',
+    jobUnselectedBg: '#BCDEFF',
+  },
   white: '#ffffff',
   black: '#000000',
   

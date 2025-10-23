@@ -29,7 +29,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword }) => {
       const result = await AuthService.login(email, password);
 
       if (result.success) {
-        router.push(ROUTES.DASHBOARD);
+        router.push(ROUTES.FINDJOBS);
       } else if (result.needsConfirmation) {
         setNeedsConfirmation(true);
       } else {

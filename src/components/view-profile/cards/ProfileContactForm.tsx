@@ -26,7 +26,7 @@ export default function ProfileContactForm({
   address,
 }: ProfileContactFormProps) {
   return (
-    <div className="p-4 flex flex-col gap-4">
+    <div className="p-4 flex flex-col gap-4 -mb-6">
       <div className="flex items-center gap-4">
         {profilePictureUrl ? (
           <img
@@ -59,7 +59,7 @@ export default function ProfileContactForm({
         {/* Email */}
         <div className="flex items-center gap-2">
           <HiOutlineMail className="w-5 h-5 text-gray-neutral500 flex-shrink-0" />
-          <span className="flex gap-1">
+          <span className="flex gap-4">
             <span className="font-medium text-tiny text-gray-neutral500 w-16 flex-shrink-0">Email:</span>
             <span className="font-normal text-tiny text-gray-neutral400">{email}</span>
           </span>
@@ -69,7 +69,7 @@ export default function ProfileContactForm({
         {phoneNumber && (
           <div className="flex items-center gap-2">
             <HiOutlinePhone className="w-5 h-5 text-gray-neutral500 flex-shrink-0" />
-            <span className="flex gap-1">
+            <span className="flex gap-4">
               <span className="font-semibold text-tiny text-gray-neutral500 w-16 flex-shrink-0">Phone:</span>
               <span className="font-normal text-tiny text-gray-neutral400">{phoneNumber}</span>
             </span>
@@ -80,7 +80,7 @@ export default function ProfileContactForm({
         {address && (
           <div className="flex items-center gap-2">
             <HiOutlineLocationMarker className="w-5 h-5 text-gray-neutral500 flex-shrink-0" />
-            <span className="flex gap-1">
+            <span className="flex gap-4">
               <span className="font-semibold text-tiny text-gray-neutral500 w-16 flex-shrink-0">Address:</span>
               <span className="font-normal text-tiny text-gray-neutral400">{address}</span>
             </span>

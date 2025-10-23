@@ -1,10 +1,11 @@
-'use client';
+  'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUserCircle, FaStar } from 'react-icons/fa';
 import Image from 'next/image';
 import ChatIcon from '@/assets/chat.svg';
 import Button from '@/components/ui/Button';
+import StarRating from '@/components/ui/StarRating';
 
 interface ApplicantCardProps {
   userId: string;
@@ -14,18 +15,26 @@ interface ApplicantCardProps {
 }
 
 export default function ApplicantCard({ name, rating, dateApplied }: ApplicantCardProps) {
+
+  // mock backend values for now
+  const [averageRating, setAverageRating] = useState<number>(4.6);
+  const [reviewCount, setReviewCount] = useState<number>(12);
+
   return (
-    <div className="bg-white rounded-xl shadow-md p-4 w-full max-w-[300px] aspect-[300/172] flex flex-col justify-between border border-gray-neutral200 hover:scale-[1.02] transition-transform">
+    <div className="bg-white rounded-xl shadow-md p-4 w-full max-w-[300px] aspect-[300/172] flex flex-col justify-between border border-gray-neutral200 transition-transform duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg hover:bg-gray-50">
       {/* Profile + Chat */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <FaUserCircle className="text-gray-neutral400 w-[48px] h-[48px]" />
           <div className="flex flex-col">
             <span className="text-gray-neutral800 font-semibold text-small">{name}</span>
-            <div className="flex items-center text-yellow-400 text-mini">
-              <FaStar className="mr-1 w-3 h-3" />
-              <span className="text-gray-neutral400 text-mini">({rating.toFixed(1)})</span>
-            </div>
+            <StarRating
+              variant="display"
+              value={averageRating}
+              labelVariant="count"
+              ratingCount={reviewCount}
+              size="sm"
+            />
           </div>
         </div>
 
@@ -38,9 +47,12 @@ export default function ApplicantCard({ name, rating, dateApplied }: ApplicantCa
         />
       </div>
 
-      {/*  Date Applied */}
+      {/* Date Applied */}
       <div className="font-inter text-mini text-gray-neutral300 mt-2 text-center">
-        Applied On: <span className="font-inter text-mini font-medium text-gray-neutral500">{dateApplied}</span>
+        Applied On:{' '}
+        <span className="font-inter text-mini font-medium text-gray-neutral500">
+          {dateApplied}
+        </span>
       </div>
 
       <hr className="mt-2 border-t border-gray-neutral200" />

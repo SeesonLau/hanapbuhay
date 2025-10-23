@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUserCircle, FaStar } from 'react-icons/fa';
 import Image from 'next/image';
 import ChatIcon from '@/assets/chat.svg';
+import StarRating from '@/components/ui/StarRating';
 
 interface ApplicantStatusCardProps {
   userId: string;
@@ -19,6 +20,11 @@ export default function ApplicantStatusCard({
   dateApplied,
   status,
 }: ApplicantStatusCardProps) {
+
+  // mock backend values for now
+  const [averageRating, setAverageRating] = useState<number>(4.6);
+  const [reviewCount, setReviewCount] = useState<number>(12);
+
   const statusClasses =
     status === 'Accepted'
       ? 'text-[#71D852] border border-[#71D852]'
@@ -32,10 +38,13 @@ export default function ApplicantStatusCard({
           <FaUserCircle className="text-gray-neutral400 w-[48px] h-[48px]" />
           <div className="flex flex-col">
             <span className="text-gray-neutral800 font-semibold text-small">{name}</span>
-            <div className="flex items-center text-yellow-400 text-mini">
-              <FaStar className="mr-1 w-3 h-3" />
-              <span className="text-gray-neutral400 text-mini">({rating.toFixed(1)})</span>
-            </div>
+            <StarRating
+              variant="display"
+              value={averageRating}
+              labelVariant="count"
+              ratingCount={reviewCount}
+              size="sm"
+            />
           </div>
         </div>
 
