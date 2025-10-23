@@ -1,0 +1,338 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import TextBox from '@/components/ui/TextBox';
+import Checkbox from '@/components/ui/Checkbox';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
+import StarRating from '@/components/ui/StarRating';
+import SearchBar from '@/components/ui/SearchBar';
+import AppliedJobCard, { AppliedJob } from '@/components/applications/cards/AppliedJobCard';
+import Button from '@/components/ui/Button';
+import Sort from '@/components/ui/Sort';
+import ReviewCard from '@/components/ui/ReviewCard';
+
+// Simple mock API to simulate username availability check
+const mockCheckUsername = (username: string) => {
+  return new Promise<{ available: boolean }>((resolve) => {
+    // simulate network latency
+    setTimeout(() => {
+      // treat usernames shorter than 3 chars or equal to 'taken' as unavailable
+      if (!username || username.length < 3 || username.toLowerCase() === 'taken') {
+        resolve({ available: false });
+      } else {
+        resolve({ available: true });
+      }
+    }, 900);
+  });
+};
+
+export default function TextBoxPlayground() {
+  const [username, setUsername] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [available, setAvailable] = useState<boolean | null>(null);
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  // Debounce user input before checking availability
+  useEffect(() => {
+    if (!username) {
+      setAvailable(null);
+      setLoading(false);
+      setError(undefined);
+      return;
+    }
+
+    setLoading(true);
+    setAvailable(null);
+    setError(undefined);
+
+    const id = setTimeout(() => {
+      mockCheckUsername(username)
+        .then((res) => {
+          setAvailable(res.available);
+          setLoading(false);
+        })
+        .catch(() => {
+          setError('Unable to check username');
+          setLoading(false);
+        });
+    }, 450);
+
+    return () => clearTimeout(id);
+  }, [username]);
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-2xl mx-auto space-y-6">
+        <h1 className="text-2xl font-bold">TextBox Component Playground</h1>
+
+        <section className="space-y-3">
+          <h2 className="font-semibold">Sort Component Demo</h2>
+          
+          <div>
+            <h3 className="text-sm font-medium mb-2">Find Jobs Variant (5 options)</h3>
+            <Sort
+              variant="findJobs"
+              onChange={(o) => console.log('Find Jobs sort:', o)}
+            />
+          </div>
+
+          <div className="mt-4">
+            <h3 className="text-sm font-medium mb-2">Manage Jobs / Applied Jobs Variant (2 options)</h3>
+            <Sort
+              variant="manageJobs"
+              onChange={(o) => console.log('Manage Jobs sort:', o)}
+            />
+          </div>
+
+          <div className="mt-4">
+            <h3 className="text-sm font-medium mb-2">Full Width Example</h3>
+            <div className="w-full max-w-md">
+              <Sort
+                variant="findJobs"
+                fullWidth
+                onChange={(o) => console.log('Full width sort:', o)}
+              />
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <h3 className="text-sm font-medium mb-2">Without Auto-selection</h3>
+            <Sort
+              variant="manageJobs"
+              defaultToFirst={false}
+              onChange={(o) => console.log('Manual selection sort:', o)}
+            />
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-semibold">SearchBar Component Demo</h2>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-sm font-medium mb-2">Simple variant</h3>
+              <SearchBar 
+                variant="simple"
+                onSearch={(query) => console.log('Simple search:', query)}
+                placeholder="Search"
+              />
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium mb-2">Advanced variant (with location)</h3>
+              <SearchBar 
+                variant="advanced"
+                onSearch={(query, location) => console.log('Advanced search:', { query, location })}
+                placeholder="Job title or keyword"
+                locationPlaceholder="Location"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-semibold">Async username availability</h2>
+          <TextBox
+            label="Username"
+            placeholder="Type a username"
+            type="text"
+            value={username}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
+            showLoadingIcon={loading}
+            showSuccessIcon={available === true}
+            error={available === false ? 'Username is taken or too short' : undefined}
+            helperText={available === true ? 'Username looks good!' : undefined}
+          />
+          {error && <div className="text-red-600 text-sm">{error}</div>}
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-semibold">Password field</h2>
+          <TextBox
+            label="Password"
+            placeholder="Enter a password"
+            type="password"
+            minPasswordLength={8}
+            helperText="Min 8 characters"
+            iconSize="md"
+          />
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-semibold">Email validation</h2>
+          <TextBox
+            label="Email"
+            placeholder="user@example.com"
+            type="email"
+          />
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-semibold">Misc examples</h2>
+          <TextBox label="Phone" placeholder="+1 555 555 555" type="tel" />
+          <TextBox label="Number" placeholder="42" type="number" />
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-semibold">Checkbox examples</h2>
+          <Checkbox label="Welder" defaultChecked />
+          <Checkbox label="Carpenter" />
+          <Checkbox label="Disabled (Plumber)" disabled />
+          {/* Controlled example */}
+          <ControlledCheckboxDemo />
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-semibold">Star rating (display)</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium mb-2">Average Label (Default)</h3>
+              <StarRating variant="display" value={4.7} max={5} />
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium mb-2">Rating Count Label</h3>
+              <StarRating 
+                variant="display" 
+                value={4.0} 
+                max={5} 
+                labelVariant="count" 
+                ratingCount={10} 
+              />
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium mb-2">No Label</h3>
+              <StarRating 
+                variant="display"
+                value={3.5} 
+                max={5} 
+                labelVariant="none" 
+              />
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium mb-2">Different Sizes</h3>
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-center gap-1">
+                  <StarRating variant="display" value={4.2} max={5} size="sm" labelVariant="count" ratingCount={25} />
+                  <span className="text-xs text-gray-500">Small</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <StarRating variant="display" value={4.2} max={5} size="md" labelVariant="count" ratingCount={25} />
+                  <span className="text-xs text-gray-500">Medium</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <StarRating variant="display" value={4.2} max={5} size="lg" labelVariant="count" ratingCount={25} />
+                  <span className="text-xs text-gray-500">Large</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-semibold">Star rating (interactive)</h2>
+          <InteractiveRatingDemo />
+        </section>
+
+        {/* ReviewCard Examples */}
+        <section className="space-y-6">
+          <h2 className="font-semibold">ReviewCard Component</h2>
+          
+          <div>
+            <h3 className="text-sm font-medium mb-4 text-gray-600">Responsive Grid Layout</h3>
+            <div className="flex flex-col justify-between gap-4">
+              <ReviewCard
+                rating={5.0}
+                reviewText="Very professional and polite. Will hire again for future repairs."
+                reviewerName="Christopher Bahng"
+              />
+              
+              <ReviewCard
+                rating={4.5}
+                reviewText="Excellent service! The team was professional and delivered everything on time. Highly recommend for future projects."
+                reviewerName="Sarah Johnson"
+              />
+              
+              <ReviewCard
+                rating={5.0}
+                reviewText="Outstanding quality work. Communication was clear throughout the project and the final result exceeded expectations."
+                reviewerName="Mike Chen"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-sm font-medium mb-3 text-gray-600">Short Review</h3>
+              <ReviewCard
+                rating={5.0}
+                reviewText="Perfect! Exactly what I needed."
+                reviewerName="John Doe"
+              />
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium mb-3 text-gray-600">Long Review (Text Wrapping Test)</h3>
+              <ReviewCard
+                rating={4.2}
+                reviewText="This was an incredibly detailed and complex project that required a lot of back-and-forth communication. The freelancer was patient and professional throughout the entire process. They took the time to understand our requirements and delivered a solution that not only met but exceeded our expectations."
+                reviewerName="Jennifer Adams"
+              />
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium mb-3 text-gray-600">With Avatar Image</h3>
+              <ReviewCard
+                rating={4.8}
+                reviewText="Great communication and excellent results. Highly recommended!"
+                reviewerName="Maria Garcia"
+                avatarUrl="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face"
+              />
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium mb-3 text-gray-600">Mobile Responsive Test</h3>
+              <div className="max-w-sm">
+                <ReviewCard
+                  rating={4.6}
+                  reviewText="Mobile responsive design looks great! The card adapts well to smaller screens while maintaining readability."
+                  reviewerName="Alex Mobile"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function ControlledCheckboxDemo() {
+  const [checked, setChecked] = React.useState(false);
+
+  return (
+    <div className="space-y-2">
+      <Checkbox label={checked ? 'Selected: Electrician' : 'Electrician'} checked={checked} onChange={(c) => setChecked(c)} />
+      <button
+        type="button"
+        onClick={() => setChecked((s) => !s)}
+        className="inline-block mt-1 text-sm text-blue-600 underline"
+      >
+        Toggle from parent
+      </button>
+    </div>
+  );
+}
+
+function InteractiveRatingDemo() {
+  const [rating, setRating] = useState<number>(0)
+
+  return (
+    <div className="space-y-2">
+      <StarRating variant="rating" value={rating} onChange={setRating} />
+      <div className="text-sm text-gray-600">Selected: {rating} / 5</div>
+    </div>
+  )
+}

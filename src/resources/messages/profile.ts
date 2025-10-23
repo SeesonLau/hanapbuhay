@@ -10,6 +10,7 @@ export const ProfileMessages = {
   UPLOAD_IMAGE_ERROR: 'Error uploading profile image.',
   UPLOAD_IMAGE_SUCCESS: 'Profile image uploaded successfully.',
   FILE_SIZE_EXCEEDED: 'File size must be less than 5 MB.',
+  FETCH_NAME_ERROR: 'Error fetching name.',
 
   //UI messages
   LOADING: "Loading profile...",

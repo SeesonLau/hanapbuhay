@@ -1,0 +1,66 @@
+'use client';
+
+import React, { useState } from "react";
+import NotificationCard from "./NotificationCard";
+import { Notification } from "@/lib/models/notification";
+import { NotificationType } from "@/lib/constants/notification-types";
+import { HiBell } from "react-icons/hi";
+import Button from "@/components/ui/Button";
+
+interface NotificationPopUpProps {
+  isScrolled?: boolean;
+}
+
+const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = false }) => {
+  const [showAll, setShowAll] = useState(false);
+
+  const notifications: Notification[] = [
+    { notificationId: "1", name: "John Doe", type: NotificationType.NEW_MESSAGE, message: "sent you a message", time: "2m ago", isRead: false },
+    { notificationId: "2", name: "Jane Smith", type: NotificationType.JOB_APPLICATION, message: "applied to your job post", time: "10m ago", isRead: true },
+    { notificationId: "3", name: "Alex Johnson", type: NotificationType.APPLICATION_ACCEPTED, message: "accepted your application", time: "30m ago", isRead: false },
+    { notificationId: "4", name: "Chris Brown", type: NotificationType.NEW_MESSAGE, message: "sent you a message", time: "1h ago", isRead: true },
+    { notificationId: "5", name: "Emily Davis", type: NotificationType.JOB_APPLICATION, message: "applied to your job post", time: "2h ago", isRead: false },
+    { notificationId: "6", name: "Michael Wilson", type: NotificationType.APPLICATION_ACCEPTED, message: "accepted your application", time: "5h ago", isRead: true },
+    { notificationId: "7", name: "Sarah Lee", type: NotificationType.NEW_MESSAGE, message: "sent you a message", time: "1d ago", isRead: false },
+  ];
+
+  const displayedNotifications = showAll ? notifications : notifications.slice(0, 6);
+
+  return (
+    <div 
+      className={`fixed right-4 w-[500px] max-w-[calc(100vw-2rem)] bg-white shadow-lg rounded-2xl border border-gray-neutral200 z-50 overflow-hidden transition-all duration-300 ${
+        isScrolled ? 'top-14' : 'top-16'
+      }`}
+      style={{
+        backdropFilter: 'blur(10px)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
+      }}
+    >
+      <div className="p-3 border-b border-gray-neutral200 flex items-center justify-center gap-2">
+        <HiBell className="w-5 h-5 text-gray-neutral700" />
+        <span className="font-semibold text-gray-700">Notifications</span>
+      </div>
+      <div className={`overflow-y-auto overflow-x-hidden ${showAll ? 'max-h-[30.75rem]' : 'max-h-fit'}`}>
+        {displayedNotifications.map((notif) => (
+          <NotificationCard key={notif.notificationId} notif={notif} />
+        ))}
+      </div>
+
+      {notifications.length > 6 && !showAll && (
+        <div className="p-3 border-t border-gray-neutral200">
+          <Button
+            variant="neutral300"
+            size="tiny"
+            onClick={() => setShowAll(true)}
+            className="w-full"
+          >
+            See previous notifications
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default NotificationPopUp;
