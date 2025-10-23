@@ -18,20 +18,30 @@ import {
 import { fontClasses } from '@/styles/fonts';
 import { TYPOGRAPHY } from '@/styles/typography';
 import { AuthService } from '@/lib/services/auth-services';
-import { ProfileService } from '@/lib/services/profile-services';
-import { Profile } from '@/lib/models/profile';
 import { ROUTES } from '@/lib/constants';
 import SettingsModal from '@/components/modals/SettingsModal';
 import NotificationPopUp from '../notifications/NotificationPopUp';
 import { Preloader, PreloaderMessages } from "./Preloader";
 
+import { ProfileService } from "@/lib/services/profile-services";
+
 interface HeaderDashboardProps {
+  userName?: string;
+  userAvatar?: string;
+  userEmail?: string;
+  userRole?: string;
   userId?: string;
+  userCreatedAt?: string;
   notificationCount?: number;
 }
 
 const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
+  userName = '',
+  userAvatar = '',
+  userEmail = '',
+  userRole = 'Job Seeker',
   userId = '',
+  userCreatedAt = new Date().toISOString(),
   notificationCount = 1,
 }) => {
   const router = useRouter();
@@ -42,14 +52,15 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const [showNotifications, setShowNotifications] = useState(false);
   const [activeLink, setActiveLink] = useState('');
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
-
-  // User data states
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [userName, setUserName] = useState('');
-  const [userEmail, setUserEmail] = useState('');
-  const [userRole, setUserRole] = useState('Job Seeker');
-  const [userCreatedAt, setUserCreatedAt] = useState(new Date().toISOString());
-  const [loading, setLoading] = useState(true);
+  
+  // State for user data
+  const [userData, setUserData] = useState({
+    name: userName,
+    email: userEmail,
+    profilePicUrl: userAvatar,
+    userId: userId
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
   //Logout animation state
   const [showGoodbye, setShowGoodbye] = useState(false);
@@ -63,69 +74,47 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const profileRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // Fetch user profile data - Fixed implementation
+  // Fetch user data from profile services
   useEffect(() => {
     const fetchUserData = async () => {
-      if (!userId) {
-        console.log('No userId provided');
-        setLoading(false);
-        return;
-      }
-      
       try {
-        setLoading(true);
-        console.log('Fetching data for userId:', userId);
+        setIsLoading(true);
         
-        // Use the same pattern as ProfileForm
-        const [profileData, emailData, nameData] = await Promise.all([
-          ProfileService.getProfileByUserId(userId),
-          ProfileService.getEmailByUserId(userId),
-          ProfileService.getNameByUserId(userId)
-        ]);
-
-        console.log('Fetched data:', { profileData, emailData, nameData });
-
-        // Set profile data
-        if (profileData) {
-          setProfile(profileData);
-          console.log('Profile picture URL:', profileData.profilePictureUrl);
-        } else {
-          console.log('No profile data found');
+        // Get current user from AuthService
+        const currentUser = await AuthService.getCurrentUser();
+        
+        if (currentUser) {
+          const userId = currentUser.id;
+          
+          // Fetch name and profile picture using ProfileService
+          const profileData = await ProfileService.getNameProfilePic(userId);
+          
+          // Fetch email using ProfileService
+          const userEmail = await ProfileService.getEmailByUserId(userId);
+          
+          setUserData({
+            name: profileData?.name || 'User',
+            email: userEmail || '',
+            profilePicUrl: profileData?.profilePicUrl || '',
+            userId: userId
+          });
         }
-
-        // Set user name
-        if (nameData) {
-          setUserName(nameData);
-          console.log('User name set to:', nameData);
-        } else if (profileData?.name) {
-          setUserName(profileData.name);
-          console.log('User name from profile:', profileData.name);
-        } else {
-          setUserName('');
-          console.log('No user name found');
-        }
-
-        // Set user email
-        if (emailData) {
-          setUserEmail(emailData);
-          console.log('User email set to:', emailData);
-        } else {
-          setUserEmail('');
-          console.log('No email found');
-        }
-
-      } catch (err) {
-        console.error('Failed to fetch user data:', err);
-        setUserName('');
-        setUserEmail('');
-        setProfile(null);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        // Fallback to props if available
+        setUserData({
+          name: userName || 'User',
+          email: userEmail || '',
+          profilePicUrl: userAvatar || '',
+          userId: userId || ''
+        });
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchUserData();
-  }, [userId]);
+  }, [userName, userEmail, userAvatar, userId]);
 
   // Determine active link based on current path
   useEffect(() => {
@@ -240,22 +229,28 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     { id: 'mock', label: 'Mock', route: ROUTES.MOCK },
   ];
 
-  const userData = {
-    email: userEmail,
+  const settingsUserData = {
+    email: userData.email,
     role: userRole,
-    userId: userId,
+    userId: userData.userId,
     createdAt: userCreatedAt
   };
 
-  // Get user initial for avatar fallback
-  const getUserInitial = () => {
-    if (!userName) return '?';
-    return userName.charAt(0).toUpperCase();
+  // Get display name (first name only or fallback)
+  const getDisplayName = () => {
+    if (isLoading) return 'Loading...';
+    if (!userData.name) return 'User';
+    
+    // Return only first name if available
+    const firstName = userData.name.split(' ')[0];
+    return firstName || userData.name;
   };
 
-  // Get profile picture URL from profile data
-  const getProfilePictureUrl = () => {
-    return profile?.profilePictureUrl || null;
+  // Get avatar fallback initial
+  const getAvatarInitial = () => {
+    if (isLoading) return '...';
+    if (!userData.name) return 'U';
+    return userData.name.charAt(0).toUpperCase();
   };
 
   return (
@@ -371,45 +366,40 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                     e.currentTarget.style.color = getWhiteColor();
                   }}
                 >
-                  {/* Avatar - Using actual profile picture from profile data */}
+                  {/* Avatar */}
                   <div 
-                    className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 overflow-hidden"
+                    className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300"
                     style={{ 
-                      background: getProfilePictureUrl() ? 'transparent' : 'linear-gradient(to bottom right, #FF9F40, #FFD700)',
+                      background: userData.profilePicUrl 
+                        ? 'transparent' 
+                        : 'linear-gradient(to bottom right, #FF9F40, #FFD700)',
                       boxShadow: isScrolled ? '0 2px 4px rgba(0, 0, 0, 0.2)' : 'none'
                     }}
                   >
-                    {getProfilePictureUrl() ? (
+                    {userData.profilePicUrl ? (
                       <Image
-                        src={getProfilePictureUrl()!}
-                        alt={userName || 'User'}
+                        src={userData.profilePicUrl}
+                        alt={userData.name}
                         width={32}
                         height={32}
                         className="w-8 h-8 rounded-full object-cover"
-                        onError={(e) => {
-                          // Fallback if image fails to load
-                          console.error('Failed to load profile image:', getProfilePictureUrl());
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                        }}
                       />
                     ) : (
                       <span 
                         className="text-sm font-medium"
                         style={{ color: getWhiteColor() }}
                       >
-                        {getUserInitial()}
+                        {getAvatarInitial()}
                       </span>
                     )}
                   </div>
-                  {/* User Name - Displaying actual user name */}
                   <span 
                     className="hidden sm:block text-body font-medium transition-all duration-300"
                     style={{
                       textShadow: isScrolled ? '0 1px 2px rgba(0, 0, 0, 0.3)' : 'none'
                     }}
                   >
-                    {userName || 'Loading...'}
+                    {getDisplayName()}
                   </span>
                   <HiChevronDown className="w-4 h-4 transition-transform duration-300" 
                     style={{ transform: isProfileOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} 
@@ -562,7 +552,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
       <SettingsModal 
         isOpen={isSettingsOpen} 
         onClose={closeSettings} 
-        user={userData}
+        user={settingsUserData}
       />
 
        {/* Goodbye Preloader */}
