@@ -1,7 +1,8 @@
 // src/app/chat/page.tsx
-'use client';
-import { useState } from 'react';
+ 'use client';
+import { useState, useEffect } from 'react';
 import Banner from '@/components/ui/Banner';
+import { AuthService } from '@/lib/services/auth-services';
 
 interface Message {
   id: number;
@@ -21,6 +22,15 @@ interface Chat {
 }
 
 export default function ChatPage() {
+  const [user, setUser] = useState<any | null>(null);
+
+  useEffect(() => {
+    const init = async () => {
+      const current = await AuthService.getCurrentUser();
+      setUser(current ?? null);
+    };
+    init();
+  }, []);
   const [activeChat, setActiveChat] = useState<number | null>(null);
   const [message, setMessage] = useState('');
   const [chats, setChats] = useState<Chat[]>([
@@ -134,6 +144,7 @@ export default function ChatPage() {
       <Banner
         variant="chat"
         showSearchBar={false}
+        userName={user?.name ?? user?.email ?? user?.id}
       />
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 mt-8">

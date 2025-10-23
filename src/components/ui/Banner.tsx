@@ -6,7 +6,7 @@ import SearchBar from './SearchBar';
 import Button from './Button';
 
 interface BannerProps {
-  variant: 'findJobs' | 'manageJobPosts' | 'appliedJobs' | 'chat' | 'profile' | 'settings';
+  variant: 'findJobs' | 'manageJobPosts' | 'appliedJobs' | 'chat' | 'profile' | 'settings' | 'dashboard';
   userName?: string;
   userAvatar?: string;
   userEmail?: string;
@@ -41,6 +41,13 @@ const Banner: React.FC<BannerProps> = ({
 
   const getBannerContent = () => {
     switch (variant) {
+      case 'dashboard':
+        return {
+          title: 'Welcome back,',
+          highlight: userName || 'User',
+          searchVariant: 'simple' as const,
+          showSearchBar: false,
+        };
       case 'findJobs':
         return {
           title: 'Find your Ideal Job at',

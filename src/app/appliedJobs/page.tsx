@@ -1,19 +1,32 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Banner from '@/components/ui/Banner';
-import StatCardAppliedJobs from '@/components/cards/StatCardAppliedJobs';
+import StatsSection from '@/components/sections/StatsSection';
+import { useStats } from '@/hooks/useStats';
+import { AuthService } from '@/lib/services/auth-services';
 
 export default function AppliedJobsPage() {
+  const [user, setUser] = useState<any | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const { stats, loading, error } = useStats({ variant: 'appliedJobs', userId });
+
+  useEffect(() => {
+    const getUser = async () => {
+      const current = await AuthService.getCurrentUser();
+      setUser(current ?? null);
+      setUserId(current?.id ?? null);
+    };
+    getUser();
+  }, []);
+
   const handleSearch = (query: string) => {
-    // Add your search logic here
     console.log('Searching for:', query);
   };
 
-  // Removed mock types and data (AppliedJob, sampleJobs) and delete handler
-
   const handleStatFilter = (type: 'total' | 'pending' | 'approved' | 'rejected') => {
     console.log('Selected stat:', type);
-    // TODO: Filter applied jobs list by selected status (not implemented yet)
+    // TODO: filter applied jobs by status
   };
 
   return (
@@ -22,6 +35,7 @@ export default function AppliedJobsPage() {
       <Banner
         variant="appliedJobs"
         onSearch={handleSearch}
+        userName={user?.name ?? user?.email ?? user?.id}
       />
 
       <main className="p-8">
@@ -29,10 +43,7 @@ export default function AppliedJobsPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
           {/* Left Stats Sidebar */}
           <div className="flex flex-col gap-4 md:sticky md:top-6">
-            <StatCardAppliedJobs type="total" onClick={handleStatFilter} />
-            <StatCardAppliedJobs type="pending" onClick={handleStatFilter} />
-            <StatCardAppliedJobs type="approved" onClick={handleStatFilter} />
-            <StatCardAppliedJobs type="rejected" onClick={handleStatFilter} />
+            <StatsSection stats={stats} variant="appliedJobs" loading={loading} error={error} onStatClick={handleStatFilter} />
           </div>
 
           {/* Right Main Content Container */}

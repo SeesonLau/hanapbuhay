@@ -8,7 +8,7 @@ import { UserService } from '@/lib/services/user-services';
 import { User } from '@/lib/models';
 import { ROUTES } from '@/lib/constants';
 import SettingsModal from '@/components/modals/SettingsModal';
-import HeaderDashboard from '@/components/ui/HeaderDashboard';
+import Banner from '@/components/ui/Banner';
 import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 
 export default function DashboardPage() {
@@ -62,10 +62,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header Section */}
-      <header className="w-full flex justify-center pt-4 px-4">
-        <HeaderDashboard />
-      </header>
+      <Banner variant="dashboard" userName={user?.email ?? user?.userId} />
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 mt-8">
         <div className="px-4 py-6 sm:px-0">
