@@ -5,6 +5,7 @@ import Banner from '@/components/ui/Banner';
 import StatsSection from '@/components/sections/StatsSection';
 import { useStats } from '@/hooks/useStats';
 import { AuthService } from '@/lib/services/auth-services';
+import { ApplicationsComponent } from '@/components/mock/applications/ApplicationsComponent';
 
 export default function AppliedJobsPage() {
   const [user, setUser] = useState<any | null>(null);
@@ -49,7 +50,11 @@ export default function AppliedJobsPage() {
           {/* Right Main Content Container */}
           <div className="flex-1 bg-white rounded-lg shadow-md p-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-6">Applied Jobs</h1>
-            <p className="text-lg text-gray-600">Track your job applications here. Content coming soon...</p>
+            {userId ? (
+              <ApplicationsComponent readOnly />
+            ) : (
+              <p className="text-lg text-gray-600">Please log in to view your applications.</p>
+            )}
           </div>
         </div>
       </main>

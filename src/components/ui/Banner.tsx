@@ -15,6 +15,7 @@ interface BannerProps {
   userCreatedAt?: string;
   notificationCount?: number;
   onSearch?: (query: string, location?: string) => void;
+  onPostClick?: () => void;
   searchPlaceholder?: string;
   locationPlaceholder?: string;
   showSearchBar?: boolean;
@@ -32,6 +33,7 @@ const Banner: React.FC<BannerProps> = ({
   userCreatedAt,
   notificationCount,
   onSearch,
+  onPostClick,
   searchPlaceholder,
   locationPlaceholder,
   showSearchBar = true,
@@ -160,6 +162,7 @@ const Banner: React.FC<BannerProps> = ({
                   size="sm"
                   fullRounded={true}
                   className="px-4 py-1 text-sm"
+                  onClick={onPostClick}
                 >
                   Post
                 </Button>

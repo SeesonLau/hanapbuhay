@@ -28,6 +28,8 @@ interface ManageJobPostCardProps {
   className?: string;
   onOpen?: (data: JobPostData) => void;
   onViewApplicants?: (data: JobPostData) => void;
+  onEdit?: (data: JobPostData) => void;
+  onDelete?: (data: JobPostData) => void;
 }
 
 export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({ 
@@ -35,6 +37,8 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
   className = '',
   onOpen,
   onViewApplicants,
+  onEdit,
+  onDelete,
 }) => {
   const {
     title,
@@ -207,11 +211,17 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
             <img src="/icons/profile.svg" alt="Applicants" className="w-[15px] h-[15px]" />
           </button>
           
-          <button className="flex items-center justify-center flex-1 h-[30px] bg-white border-t border-b border-gray-300 hover:bg-gray-50 transition-colors">
+          <button 
+            className="flex items-center justify-center flex-1 h-[30px] bg-white border-t border-b border-gray-300 hover:bg-gray-50 transition-colors"
+            onClick={(e) => { e.stopPropagation(); onEdit?.(jobData); }}
+          >
             <img src="/icons/edit.svg" alt="Edit" className="w-[15px] h-[15px]" />
           </button>
           
-          <button className="flex items-center justify-center flex-1 h-[30px] bg-white border border-gray-300 rounded-r-[10px] hover:bg-gray-50 transition-colors">
+          <button 
+            className="flex items-center justify-center flex-1 h-[30px] bg-white border border-gray-300 rounded-r-[10px] hover:bg-gray-50 transition-colors"
+            onClick={(e) => { e.stopPropagation(); onDelete?.(jobData); }}
+          >
             <img src="/icons/delete.svg" alt="Delete" className="w-[15px] h-[15px]" />
           </button>
         </div>

@@ -14,6 +14,7 @@ interface PostQueryParams {
   sortBy?: 'createdAt' | 'price' | 'title';
   sortOrder?: 'asc' | 'desc';
   userId?: string;
+  excludeUserId?: string;
 }
 
 interface PaginatedPosts {
@@ -38,7 +39,8 @@ export class PostService {
         location,
         priceRange,
         sortBy = 'createdAt',
-        sortOrder = 'desc'
+        sortOrder = 'desc',
+        excludeUserId
       } = params;
 
       let query = supabase
@@ -58,6 +60,9 @@ export class PostService {
       }
       if (location) {
         query = query.eq('location', location);
+      }
+      if (excludeUserId) {
+        query = query.neq('userId', excludeUserId);
       }
       if (priceRange) {
         query = query

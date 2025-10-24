@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { PostService } from "@/lib/services/posts-services";
 import { ApplicationService } from "@/lib/services/applications-services";
+import { supabase } from "@/lib/services/supabase/client";
 
 type JobPostData = {
   id: string;
@@ -18,10 +19,23 @@ type JobPostData = {
   jobTypeTags?: string[];
 };
 
+interface LoadParams {
+  searchTerm?: string;
+  location?: string;
+  isLoadMore?: boolean;
+  page?: number;
+  pageSize?: number;
+}
+
+const PAGE_SIZE = 10;
+
 export function useJobPosts(userId?: string | null) {
   const [jobs, setJobs] = useState<JobPostData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [hasMoreData, setHasMoreData] = useState<boolean>(true);
 
   const formatPeso = (amount: number) => {
     try {
@@ -54,24 +68,71 @@ export function useJobPosts(userId?: string | null) {
     jobTypeTags: post.subType || [post.type].filter(Boolean),
   });
 
-  const load = useCallback(async (params: { searchTerm?: string; location?: string } = {}) => {
-    setLoading(true);
+  const load = useCallback(async (params: LoadParams = {}) => {
+    if (!userId && typeof userId !== 'undefined') {
+      setJobs([]);
+      setError("User not authenticated");
+      return;
+    }
+
+    if (params.isLoadMore) {
+      if (!hasMoreData || isLoadingMore) return;
+      setIsLoadingMore(true);
+    } else {
+      setLoading(true);
+      setCurrentPage(1);
+      setJobs([]);
+    }
     setError(null);
+
     try {
-      const svcResult = userId
-        ? await (PostService as any).getPostsByUserId(userId, params)
-        : await PostService.getAllPosts(params);
+      const requestParams = {
+        ...params,
+        page: params.isLoadMore ? currentPage : 1,
+        pageSize: PAGE_SIZE
+      };
+      delete requestParams.isLoadMore;
+
+      // Get the current user's ID from the session
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUserId = session?.user?.id;
+
+      // If userId is provided, we're in manage mode, so show only that user's posts
+      // Otherwise, in find mode, show all posts except current user's posts
+      let svcResult;
+      if (userId) {
+        svcResult = await PostService.getPostsByUserId(userId, requestParams);
+      } else {
+        // In find mode, exclude current user's posts
+        svcResult = await PostService.getAllPosts({
+          ...requestParams,
+          excludeUserId: currentUserId
+        });
+      }
 
       const posts = svcResult?.posts || [];
       const counts = await Promise.all(posts.map((p: any) => ApplicationService.getTotalApplicationsByPostIdCount(p.postId).catch(() => 0)));
       const mapped = posts.map((p: any, idx: number) => mapPost(p, counts[idx] ?? 0));
-      setJobs(mapped);
+
+      if (params.isLoadMore) {
+        setJobs(prev => [...prev, ...mapped]);
+        setCurrentPage(prev => prev + 1);
+      } else {
+        setJobs(mapped);
+      }
+
+      setHasMoreData(svcResult.hasMore);
     } catch (err) {
       setError("Failed to load posts");
+      console.error("Error loading posts:", err);
     } finally {
-      setLoading(false);
+      if (params.isLoadMore) {
+        setIsLoadingMore(false);
+      } else {
+        setLoading(false);
+      }
     }
-  }, [userId]);
+  }, [userId, currentPage, hasMoreData, isLoadingMore]);
 
   useEffect(() => {
     load();
@@ -81,7 +142,20 @@ export function useJobPosts(userId?: string | null) {
     await load({ searchTerm: query, location });
   };
 
-  return { jobs, loading, error, handleSearch, refresh: () => load() };
+  const loadMore = useCallback(() => {
+    return load({ isLoadMore: true });
+  }, [load]);
+
+  return {
+    jobs,
+    loading,
+    isLoadingMore,
+    error,
+    hasMore: hasMoreData,
+    handleSearch,
+    loadMore,
+    refresh: () => load()
+  };
 }
 
 export type { JobPostData };

@@ -83,7 +83,7 @@ export const PostForm: React.FC<PostFormProps> = ({
     const isCustomType = post?.type && !jobTypes.includes(post.type as JobType);
 
     const predefSubTypes = post?.type && !isCustomType ? getSubTypeOptions(post.type as JobType).map(o => o.value) : [];
-    const customSubTypes = post?.subType.filter(st => !predefSubTypes.includes(st)) || [];
+    const customSubTypes = post?.subType ? post.subType.filter(st => !predefSubTypes.includes(st)) : [];
 
     return {
       title: post?.title || '',

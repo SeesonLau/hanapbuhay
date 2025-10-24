@@ -14,16 +14,57 @@ interface Props {
   jobs: JobPostData[];
   variant?: Variant;
   loading?: boolean;
+  isLoadingMore?: boolean;
   error?: string | null;
+  hasMore?: boolean;
   viewMode: "card" | "list";
   onViewModeChange: (v: "card" | "list") => void;
+  onLoadMore?: () => void;
   onOpen?: (data: any) => void;
   onApply?: (id: string) => void;
   onViewApplicants?: (data: any) => void;
+  onEdit?: (data: any) => void;
+  onDelete?: (data: any) => void;
 }
 
-const PostsSection: React.FC<Props> = ({ jobs, variant = "find", loading, error, viewMode, onViewModeChange, onOpen, onApply, onViewApplicants }) => {
-  if (loading) return <div className="text-center py-8">Loading job posts...</div>;
+const PostsSection: React.FC<Props> = ({
+  jobs,
+  variant = "find",
+  loading,
+  isLoadingMore,
+  error,
+  hasMore,
+  viewMode,
+  onViewModeChange,
+  onLoadMore,
+  onOpen,
+  onApply,
+  onViewApplicants,
+  onEdit,
+  onDelete
+}) => {
+  const observerTarget = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!onLoadMore || !hasMore || loading || isLoadingMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onLoadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [onLoadMore, hasMore, loading, isLoadingMore]);
+
+  if (loading && (!jobs || jobs.length === 0)) return <div className="text-center py-8">Loading job posts...</div>;
   if (error) return <div className="text-center py-8 text-red-600">{error}</div>;
   if (!jobs || jobs.length === 0) return <div className="text-center py-8 text-gray-500">No job posts available.</div>;
 
@@ -45,7 +86,7 @@ const PostsSection: React.FC<Props> = ({ jobs, variant = "find", loading, error,
           <div className="flex flex-wrap items-start justify-center gap-5">
             {jobs.map((job) => (
               isManage ? (
-                <ManageJobPostCard key={job.id} jobData={job as any} onOpen={onOpen} onViewApplicants={onViewApplicants} />
+                <ManageJobPostCard key={job.id} jobData={job as any} onOpen={onOpen} onViewApplicants={onViewApplicants} onEdit={onEdit} onDelete={onDelete} />
               ) : (
                 <JobPostCard key={job.id} jobData={job as any} onOpen={onOpen} onApply={onApply} />
               )
@@ -57,12 +98,26 @@ const PostsSection: React.FC<Props> = ({ jobs, variant = "find", loading, error,
           <div className={`flex flex-col items-start gap-4 mx-auto ${viewMode === 'list' ? 'w-[1526px]' : ''}`}>
             {jobs.map((job) => (
               isManage ? (
-                <ManageJobPostList key={job.id} jobData={job as any} onOpen={onOpen} onViewApplicants={onViewApplicants} />
+                <ManageJobPostList key={job.id} jobData={job as any} onOpen={onOpen} onViewApplicants={onViewApplicants} onEdit={onEdit} onDelete={onDelete} />
               ) : (
                 <JobPostList key={job.id} jobData={job as any} onOpen={onOpen} onApply={onApply} />
               )
             ))}
           </div>
+          {hasMore && (
+            <div ref={observerTarget} className="w-full text-center py-4">
+              {isLoadingMore ? (
+                <div className="text-gray-600">Loading more job posts...</div>
+              ) : (
+                <div className="text-gray-400">Scroll for more</div>
+              )}
+            </div>
+          )}
+          {!hasMore && jobs.length > 0 && (
+            <div className="w-full text-center py-4 text-gray-500">
+              You&apos;ve reached the end
+            </div>
+          )}
         </div>
       )}
     </div>
