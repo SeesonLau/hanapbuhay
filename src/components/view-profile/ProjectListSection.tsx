@@ -51,8 +51,8 @@ export default function ProjectListSection() {
   };
 
   return (
-    <div className="p-6 relative">
-      <p className="font-inter font-semibold mb-2 body">Work Experiences</p>
+    <div className="p-6 relative -mb-4">
+      <p className="font-inter font-semibold body">Work Experiences</p>
 
       <div
         ref={scrollRef}

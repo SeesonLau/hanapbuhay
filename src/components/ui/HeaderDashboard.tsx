@@ -23,6 +23,8 @@ import SettingsModal from '@/components/modals/SettingsModal';
 import NotificationPopUp from '../notifications/NotificationPopUp';
 import { Preloader, PreloaderMessages } from "./Preloader";
 
+import { ProfileService } from "@/lib/services/profile-services";
+
 interface HeaderDashboardProps {
   userName?: string;
   userAvatar?: string;
@@ -34,11 +36,11 @@ interface HeaderDashboardProps {
 }
 
 const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
-  userName = 'Han Cruz',
-  userAvatar,
-  userEmail = 'user@example.com',
+  userName = '',
+  userAvatar = '',
+  userEmail = '',
   userRole = 'Job Seeker',
-  userId = '12345',
+  userId = '',
   userCreatedAt = new Date().toISOString(),
   notificationCount = 1,
 }) => {
@@ -47,9 +49,18 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false); // New state for notifications TEMPORARY
+  const [showNotifications, setShowNotifications] = useState(false);
   const [activeLink, setActiveLink] = useState('');
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
+  
+  // State for user data
+  const [userData, setUserData] = useState({
+    name: userName,
+    email: userEmail,
+    profilePicUrl: userAvatar,
+    userId: userId
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
   //Logout animation state
   const [showGoodbye, setShowGoodbye] = useState(false);
@@ -62,6 +73,48 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Fetch user data from profile services
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Get current user from AuthService
+        const currentUser = await AuthService.getCurrentUser();
+        
+        if (currentUser) {
+          const userId = currentUser.id;
+          
+          // Fetch name and profile picture using ProfileService
+          const profileData = await ProfileService.getNameProfilePic(userId);
+          
+          // Fetch email using ProfileService
+          const userEmail = await ProfileService.getEmailByUserId(userId);
+          
+          setUserData({
+            name: profileData?.name || 'User',
+            email: userEmail || '',
+            profilePicUrl: profileData?.profilePicUrl || '',
+            userId: userId
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        // Fallback to props if available
+        setUserData({
+          name: userName || 'User',
+          email: userEmail || '',
+          profilePicUrl: userAvatar || '',
+          userId: userId || ''
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [userName, userEmail, userAvatar, userId]);
 
   // Determine active link based on current path
   useEffect(() => {
@@ -174,11 +227,28 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     { id: 'chat', label: 'Chat', route: ROUTES.CHAT },
   ];
 
-  const userData = {
-    email: userEmail,
+  const settingsUserData = {
+    email: userData.email,
     role: userRole,
-    userId: userId,
+    userId: userData.userId,
     createdAt: userCreatedAt
+  };
+
+  // Get display name (first name only or fallback)
+  const getDisplayName = () => {
+    if (isLoading) return 'Loading...';
+    if (!userData.name) return 'User';
+    
+    // Return only first name if available
+    const firstName = userData.name.split(' ')[0];
+    return firstName || userData.name;
+  };
+
+  // Get avatar fallback initial
+  const getAvatarInitial = () => {
+    if (isLoading) return '...';
+    if (!userData.name) return 'U';
+    return userData.name.charAt(0).toUpperCase();
   };
 
   return (
@@ -207,7 +277,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
             <div className="flex-shrink-0">
               <div className="flex items-center">
                 {/* Logo */}
-                <Link href={ROUTES.DASHBOARD} className="cursor-pointer transition-all duration-500 hover:scale-105">
+                <Link href={ROUTES.FINDJOBS} className="cursor-pointer transition-all duration-500 hover:scale-105">
                   <Image
                     src="/image/hanapbuhay-logo.svg"
                     alt="HanapBuhay Logo"
@@ -298,14 +368,16 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                   <div 
                     className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300"
                     style={{ 
-                      background: 'linear-gradient(to bottom right, #FF9F40, #FFD700)',
+                      background: userData.profilePicUrl 
+                        ? 'transparent' 
+                        : 'linear-gradient(to bottom right, #FF9F40, #FFD700)',
                       boxShadow: isScrolled ? '0 2px 4px rgba(0, 0, 0, 0.2)' : 'none'
                     }}
                   >
-                    {userAvatar ? (
+                    {userData.profilePicUrl ? (
                       <Image
-                        src={userAvatar}
-                        alt={userName}
+                        src={userData.profilePicUrl}
+                        alt={userData.name}
                         width={32}
                         height={32}
                         className="w-8 h-8 rounded-full object-cover"
@@ -315,7 +387,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                         className="text-sm font-medium"
                         style={{ color: getWhiteColor() }}
                       >
-                        {userName.charAt(0)}
+                        {getAvatarInitial()}
                       </span>
                     )}
                   </div>
@@ -325,7 +397,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                       textShadow: isScrolled ? '0 1px 2px rgba(0, 0, 0, 0.3)' : 'none'
                     }}
                   >
-                    {userName}
+                    {getDisplayName()}
                   </span>
                   <HiChevronDown className="w-4 h-4 transition-transform duration-300" 
                     style={{ transform: isProfileOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} 
@@ -478,7 +550,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
       <SettingsModal 
         isOpen={isSettingsOpen} 
         onClose={closeSettings} 
-        user={userData}
+        user={settingsUserData}
       />
 
        {/* Goodbye Preloader */}

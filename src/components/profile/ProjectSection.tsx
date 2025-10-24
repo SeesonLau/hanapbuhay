@@ -56,7 +56,7 @@ export default function ProjectsSection({ userId, className }: ProjectsSectionPr
 
   return (
     <div className={`${className} flex flex-col gap-2 px-5 relative`}>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         <h3 className="font-inter font-bold text-gray-neutral700">
           Add Work Experience
         </h3>

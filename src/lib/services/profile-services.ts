@@ -183,7 +183,8 @@ export class ProfileService {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('name, profilePicUrl')
+        //.select('name, profilePicUrl')
+        .select('name, profilePictureUrl')
         .eq('userId', userId)
         .single();
 
@@ -196,11 +197,13 @@ export class ProfileService {
 
       return {
         name: data?.name ?? null,
-        profilePicUrl: data?.profilePicUrl ?? null,
+        //profilePicUrl: data?.profilePicUrl ?? null,
+        profilePicUrl: data?.profilePictureUrl ?? null,
       };
     } catch {
       toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
       return null;
     }
   }
+ 
 }
