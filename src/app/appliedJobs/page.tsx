@@ -51,7 +51,10 @@ export default function AppliedJobsPage() {
           <div className="flex-1 bg-white rounded-lg shadow-md p-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-6">Applied Jobs</h1>
             {userId ? (
-              <ApplicationsComponent readOnly />
+              <ApplicationsComponent 
+                applications={[]} // The component fetches its own data
+                readOnly 
+              />
             ) : (
               <p className="text-lg text-gray-600">Please log in to view your applications.</p>
             )}

@@ -23,8 +23,6 @@ interface Props {
   onOpen?: (data: any) => void;
   onApply?: (id: string) => void;
   onViewApplicants?: (data: any) => void;
-  onEdit?: (data: any) => void;
-  onDelete?: (data: any) => void;
 }
 
 const PostsSection: React.FC<Props> = ({
@@ -40,8 +38,6 @@ const PostsSection: React.FC<Props> = ({
   onOpen,
   onApply,
   onViewApplicants,
-  onEdit,
-  onDelete
 }) => {
   const observerTarget = React.useRef<HTMLDivElement>(null);
 
@@ -86,7 +82,7 @@ const PostsSection: React.FC<Props> = ({
           <div className="flex flex-wrap items-start justify-center gap-5">
             {jobs.map((job) => (
               isManage ? (
-                <ManageJobPostCard key={job.id} jobData={job as any} onOpen={onOpen} onViewApplicants={onViewApplicants} onEdit={onEdit} onDelete={onDelete} />
+                <ManageJobPostCard key={job.id} jobData={job as any} onOpen={onOpen} onViewApplicants={onViewApplicants} />
               ) : (
                 <JobPostCard key={job.id} jobData={job as any} onOpen={onOpen} onApply={onApply} />
               )
@@ -98,7 +94,7 @@ const PostsSection: React.FC<Props> = ({
           <div className={`flex flex-col items-start gap-4 mx-auto ${viewMode === 'list' ? 'w-[1526px]' : ''}`}>
             {jobs.map((job) => (
               isManage ? (
-                <ManageJobPostList key={job.id} jobData={job as any} onOpen={onOpen} onViewApplicants={onViewApplicants} onEdit={onEdit} onDelete={onDelete} />
+                <ManageJobPostList key={job.id} jobData={job as any} onOpen={onOpen} onViewApplicants={onViewApplicants} />
               ) : (
                 <JobPostList key={job.id} jobData={job as any} onOpen={onOpen} onApply={onApply} />
               )

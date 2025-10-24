@@ -1,7 +1,7 @@
 // src/app/manage-job-posts/page.tsx
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import Banner from '@/components/ui/Banner';
 import ApplicantsModal from '@/components/modals/ApplicantsModal';
@@ -11,52 +11,19 @@ import { PostForm } from '@/components/mock/posts/PostForm';
 import { useJobPosts } from '@/hooks/useJobPosts';
 import { AuthService } from '@/lib/services/auth-services';
 import { Post } from '@/lib/models/posts';
-import { PostService } from '@/lib/services/posts-services';
-import { DeleteModal } from '@/components/ui/DeleteModal';
-// Removed toggle and card/list for simplified page per request
 
 export default function ManageJobPostsPage() {
-  type ManageJobData = {
-    id: string;
-    title: string;
-    description: string;
-    location: string;
-    salary: string;
-    salaryPeriod: string;
-    postedDate: string;
-    applicantCount?: number;
-    genderTags?: string[];
-    experienceTags?: string[];
-    jobTypeTags?: string[];
-  };
-
   const [user, setUser] = useState<any | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, loadMore, refresh } = useJobPosts(userId);
   
   const [showPostForm, setShowPostForm] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [postToDelete, setPostToDelete] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
   const [selectedApplicants, setSelectedApplicants] = useState<{ title: string; applicantCount: number; postId: string } | null>(null);
-  const [isProcessingDelete, setIsProcessingDelete] = useState(false);
-
-  const formatPeso = (amount: number): string => {
-    try {
-      return amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    } catch {
-      return String(amount);
-    }
-  };
-
-  const formatPostedDate = (iso: string): string => {
-    const d = new Date(iso);
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  };
-
 
   useEffect(() => {
     const init = async () => {
@@ -72,9 +39,6 @@ export default function ManageJobPostsPage() {
     init();
   }, []);
 
-  // handleSearch from hook will handle fetching
-
-  const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
   const handleOpenApplicants = (data: { id: string; title: string; applicantCount?: number }) => {
@@ -87,10 +51,7 @@ export default function ManageJobPostsPage() {
     setShowPostForm(true);
   };
 
-  const handleEditPost = (post: Post) => {
-    /*setSelectedPost(post);
-    setShowPostForm(true);*/
-  };
+  // Placeholder for edit handler
 
   const handlePostSaved = () => {
     setShowPostForm(false);
@@ -101,22 +62,6 @@ export default function ManageJobPostsPage() {
   const handleFormCancel = () => {
     setShowPostForm(false);
     setSelectedPost(null);
-  };
-
-  const handleDeletePost = async (post: Post) => {
-    /*if (!userId) return;
-    
-    setIsProcessingDelete(true);
-    try {
-      await PostService.deletePost(post.postId, userId);
-      toast.success('Post deleted successfully');
-      refresh(); // Refresh the posts list
-    } catch (error) {
-      console.error('Error deleting post:', error);
-      toast.error('Failed to delete post');
-    } finally {
-      setIsProcessingDelete(false);
-    }*/
   };
 
   if (showPostForm) {
@@ -153,25 +98,8 @@ export default function ManageJobPostsPage() {
   />
 
       <main className="pl-4 pr-4 pb-8 pt-8">
-        {/* Delete Modal */}
-        <DeleteModal
-          isOpen={!!postToDelete}
-          title="Delete Post"
-          description="Are you sure you want to delete this post? This action cannot be undone."
-          confirmText="Delete"
-          variant="trash"
-          isProcessing={isProcessingDelete}
-          onConfirm={() => {
-            if (postToDelete) {
-              handleDeletePost(postToDelete);
-              setPostToDelete(null);
-            }
-          }}
-          onClose={() => !isProcessingDelete && setPostToDelete(null)}
-        />
-
-        <PostsSection
-          jobs={jobs as any}
+        {/* Placeholder for delete modal */}        <PostsSection
+          jobs={jobs}
           variant="manage"
           loading={loading}
           isLoadingMore={isLoadingMore}
@@ -179,11 +107,9 @@ export default function ManageJobPostsPage() {
           hasMore={hasMore}
           viewMode={viewMode}
           onViewModeChange={(v) => setViewMode(v)}
-          onLoadMore={loadMore}
+          onLoadMore={loadMore as () => void}
           onOpen={(data) => { setSelectedJob(data); setIsJobViewOpen(true); }}
           onViewApplicants={handleOpenApplicants}
-          onEdit={handleEditPost}
-          onDelete={(post: Post) => setPostToDelete(post)}
         />
 
         {/* Modal */}
