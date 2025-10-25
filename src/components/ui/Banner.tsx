@@ -6,7 +6,7 @@ import SearchBar from './SearchBar';
 import Button from './Button';
 
 interface BannerProps {
-  variant: 'findJobs' | 'manageJobPosts' | 'appliedJobs' | 'chat' | 'profile' | 'settings';
+  variant: 'findJobs' | 'manageJobPosts' | 'appliedJobs' | 'chat' | 'profile' | 'settings' | 'dashboard';
   userName?: string;
   userAvatar?: string;
   userEmail?: string;
@@ -15,6 +15,7 @@ interface BannerProps {
   userCreatedAt?: string;
   notificationCount?: number;
   onSearch?: (query: string, location?: string) => void;
+  onPostClick?: () => void;
   searchPlaceholder?: string;
   locationPlaceholder?: string;
   showSearchBar?: boolean;
@@ -32,6 +33,7 @@ const Banner: React.FC<BannerProps> = ({
   userCreatedAt,
   notificationCount,
   onSearch,
+  onPostClick,
   searchPlaceholder,
   locationPlaceholder,
   showSearchBar = true,
@@ -41,6 +43,13 @@ const Banner: React.FC<BannerProps> = ({
 
   const getBannerContent = () => {
     switch (variant) {
+      case 'dashboard':
+        return {
+          title: 'Welcome back,',
+          highlight: userName || 'User',
+          searchVariant: 'simple' as const,
+          showSearchBar: false,
+        };
       case 'findJobs':
         return {
           title: 'Find your Ideal Job at',
@@ -153,6 +162,7 @@ const Banner: React.FC<BannerProps> = ({
                   size="sm"
                   fullRounded={true}
                   className="px-4 py-1 text-sm"
+                  onClick={onPostClick}
                 >
                   Post
                 </Button>

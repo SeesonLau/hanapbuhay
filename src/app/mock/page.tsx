@@ -167,7 +167,10 @@ export default function MockPage() {
           <section>
             <h2 className="text-3xl font-bold mb-8 text-yellow-300">Applications</h2>
             <div className="space-y-12">
-              <ApplicationsComponent onDelete={(id) => openDeleteModal(id, 'withdrawApplication')} />
+              <ApplicationsComponent 
+                applications={[]} // The component fetches its own data
+                onDelete={(id) => openDeleteModal(id, 'withdrawApplication')} 
+              />
               <div className="border-t pt-8">
                 <ApplyComponent />
               </div>

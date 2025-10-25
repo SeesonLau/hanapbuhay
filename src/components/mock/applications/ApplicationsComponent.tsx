@@ -19,11 +19,15 @@ interface Application {
   };
 }
 
-interface ApplicationsComponentProps {
-  onDelete: (applicationId: string) => void;
-}
+type ApplicationsComponentProps = {
+  applications: Application[];
+  onDelete?: (applicationId: string) => void;
+  onStatusUpdate?: (applicationId: string, newStatus: ApplicationStatus) => void;
+  className?: string;
+  readOnly?: boolean;
+};
 
-export const ApplicationsComponent: React.FC<ApplicationsComponentProps> = ({ onDelete }) => {
+export const ApplicationsComponent: React.FC<ApplicationsComponentProps> = ({ onDelete, onStatusUpdate, readOnly = false, className = '' }) => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
@@ -81,10 +85,11 @@ export const ApplicationsComponent: React.FC<ApplicationsComponentProps> = ({ on
   };
 
   const handleStatusUpdate = async (applicationId: string, newStatus: ApplicationStatus) => {
-    if (!userId) return;
+    if (!userId || !onStatusUpdate) return;
  
     try {
       await ApplicationService.updateApplicationStatus(applicationId, newStatus, userId);
+      onStatusUpdate(applicationId, newStatus);
       // Optimistic update for better UX
       setApplications(prev =>
         prev.map(app =>
@@ -145,32 +150,36 @@ export const ApplicationsComponent: React.FC<ApplicationsComponentProps> = ({ on
                   <span className={`px-3 py-1 rounded-full text-sm ${ApplicationStatusColors[application.status]}`}>
                     {ApplicationStatusLabels[application.status]}
                   </span>
-                  <button
-                    onClick={() => onDelete(application.applicationId)}
-                    className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                    aria-label="Withdraw application"
-                  >
-                    <TrashIcon className="w-[18px] h-[18px]" /> {/* Use TrashIcon */}
-                  </button>
+                  {!readOnly && onDelete && (
+                    <button
+                      onClick={() => onDelete(application.applicationId)}
+                      className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                      aria-label="Withdraw application"
+                    >
+                      <TrashIcon className="w-[18px] h-[18px]" />
+                    </button>
+                  )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                {Object.values(ApplicationStatus).map((status) => (
-                  <button
-                    key={status}
-                    onClick={() => handleStatusUpdate(application.applicationId, status)}
-                    disabled={application.status === status}
-                    className={`px-3 py-1 rounded-md text-sm ${
-                      application.status === status
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
-                    }`}
-                  >
-                    {ApplicationStatusLabels[status]}
-                  </button>
-                ))}
-              </div>
+              {!readOnly && (
+                <div className="flex items-center gap-2">
+                  {Object.values(ApplicationStatus).map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => handleStatusUpdate(application.applicationId, status)}
+                      disabled={application.status === status}
+                      className={`px-3 py-1 rounded-md text-sm ${
+                        application.status === status
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                      }`}
+                    >
+                      {ApplicationStatusLabels[status]}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
