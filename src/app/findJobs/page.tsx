@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Banner from "@/components/ui/Banner";
 import ViewProfileModal from "@/components/modals/ViewProfileModal";
 import JobPostViewModal, { JobPostViewData } from "@/components/modals/JobPostViewModal";
@@ -11,6 +11,7 @@ import { JobPostList } from "@/components/cards/JobPostList";
 import { PostService } from "@/lib/services/posts-services";
 import { ApplicationService } from "@/lib/services/applications-services";
 import { Post } from "@/lib/models/posts";
+import Sort from "@/components/ui/Sort";
 
 export default function FindJobsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,6 +23,36 @@ export default function FindJobsPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [appCounts, setAppCounts] = useState<Record<string, number>>({});
+  const [sortValue, setSortValue] = useState<string>('latest');
+
+  // Derived posts based on sort selection
+  const displayPosts = useMemo(() => {
+    const sorted = [...posts];
+    switch (sortValue) {
+      case 'latest':
+        sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      case 'oldest':
+        sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case 'salary-asc':
+        sorted.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+        break;
+      case 'salary-desc':
+        sorted.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+        break;
+      case 'nearby':
+        sorted.sort((a, b) => String(a.location).localeCompare(String(b.location)));
+        break;
+      default:
+        break;
+    }
+    return sorted;
+  }, [posts, sortValue]);
+
+  const handleSortChange = (opt: any) => {
+    setSortValue(String(opt?.value ?? 'latest'));
+  };
 
   const handleSearch = async (query: string, location?: string) => {
     try {
@@ -120,28 +151,18 @@ export default function FindJobsPage() {
             <StatCardFindJobs title="Posted" variant="red" />
           </div>
         </div>
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-h2 font-alexandria font-bold text-black mb-6">Find Jobs</h1>
-          <p className="text-lead font-inter font-normal text-gray-neutral600 mb-6">
-            This is the Find Jobs page. Content coming soon...
-          </p>
-
-          {/* View Profile Button */}
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-6 py-2 bg-success-success500 text-white rounded-lg shadow hover:bg-success-success600"
-          >
-            View Profile
-          </button>
-        </div>
 
         {/* Job Posts Section */}
         <div className="mt-8 space-y-6">
           {/* Controls */}
-          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">View:</span>
-              <ViewToggle value={viewMode} onChange={setViewMode} />
+          <div className="max-w-screen-2xl mx-auto px-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Showing: {displayPosts.length}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-600">Sort by</span>
+                <Sort variant="findJobs" onChange={handleSortChange} />
+                <ViewToggle value={viewMode} onChange={setViewMode} />
+              </div>
             </div>
           </div>
 
@@ -150,12 +171,12 @@ export default function FindJobsPage() {
             <div className="text-center py-8">Loading job posts...</div>
           ) : error ? (
             <div className="text-center py-8 text-red-600">{error}</div>
-          ) : posts.length === 0 ? (
+          ) : displayPosts.length === 0 ? (
             <div className="text-center py-8 text-gray-500">No job posts available.</div>
           ) : viewMode === 'card' ? (
             <div className="w-full flex justify-center">
               <div className="flex flex-wrap items-start justify-center gap-5">
-                {posts.map((post) => {
+                {displayPosts.map((post) => {
                   const jd = postToJobData(post);
                   return (
                     <JobPostCard
@@ -171,7 +192,7 @@ export default function FindJobsPage() {
           ) : (
             <div className="w-full overflow-x-auto">
               <div className="flex flex-col items-start gap-4 w-[1526px] mx-auto">
-                {posts.map((post) => {
+                {displayPosts.map((post) => {
                   const jd = postToJobData(post);
                   return (
                     <JobPostList

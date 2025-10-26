@@ -20,6 +20,7 @@ interface BannerProps {
   showSearchBar?: boolean;
   className?: string;
   children?: React.ReactNode;
+  onPostClick?: () => void;
 }
 
 const Banner: React.FC<BannerProps> = ({
@@ -36,7 +37,8 @@ const Banner: React.FC<BannerProps> = ({
   locationPlaceholder,
   showSearchBar = true,
   className = '',
-  children
+  children,
+  onPostClick
 }) => {
 
   const getBannerContent = () => {
@@ -153,6 +155,7 @@ const Banner: React.FC<BannerProps> = ({
                   size="sm"
                   fullRounded={true}
                   className="px-4 py-1 text-sm"
+                  onClick={onPostClick}
                 >
                   Post
                 </Button>

@@ -213,7 +213,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
 
   const labelClasses = `
     ${responsive ? 'text-body sm:text-body' : 'text-body'}
-    font-semibold font-inter text-gray-neutral700
+    font-semibold font-inter text-black
     ${isInErrorState ? 'text-error-error600' : ''}
     ${required ? 'after:content-["*"] after:text-error-error500 after:ml-1' : ''}
   `.trim();
