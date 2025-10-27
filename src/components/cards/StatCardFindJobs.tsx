@@ -34,7 +34,7 @@ export const StatCardFindJobs: React.FC<StatCardFindJobsProps> = ({ title, value
 
   return (
     <div
-      className={`flex items-center justify-between px-4 w-full sm:w-[340px] md:w-[370px] h-[87px] rounded-[10px] bg-white shadow ${className}`}
+      className={`flex items-center justify-between px-4 w-full sm:w-[240px] md:w-[260px] h-[87px] rounded-[10px] bg-white shadow ${className}`}
       style={{
         boxShadow: `0 4px 16px ${getBlackColor(0.12)}`,
       }}

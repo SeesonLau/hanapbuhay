@@ -14,7 +14,6 @@ interface PostQueryParams {
   sortBy?: 'createdAt' | 'price' | 'title';
   sortOrder?: 'asc' | 'desc';
   userId?: string;
-  excludeUserId?: string;
 }
 
 interface PaginatedPosts {
@@ -39,8 +38,7 @@ export class PostService {
         location,
         priceRange,
         sortBy = 'createdAt',
-        sortOrder = 'desc',
-        excludeUserId
+        sortOrder = 'desc'
       } = params;
 
       let query = supabase
@@ -60,9 +58,6 @@ export class PostService {
       }
       if (location) {
         query = query.eq('location', location);
-      }
-      if (excludeUserId) {
-        query = query.neq('userId', excludeUserId);
       }
       if (priceRange) {
         query = query
@@ -247,11 +242,6 @@ export class PostService {
     }
   }
 
-  // Get total active posts count (alias of getTotalPostsCount for clarity)
-  static async getTotalActivePostsCount(): Promise<number> {
-    return this.getTotalPostsCount();
-  }
-
   // Get total posts count by user ID
   static async getTotalPostsByUserIdCount(userId: string): Promise<number> {
     try {
@@ -268,11 +258,6 @@ export class PostService {
       toast.error(PostMessages.FETCH_POSTS_ERROR);
       throw error;
     }
-  }
-
-  // Backwards-friendly alias used by stats hook
-  static async getPostCountByUserId(userId: string): Promise<number> {
-    return this.getTotalPostsByUserIdCount(userId);
   }
 
   // Helper method to validate image file

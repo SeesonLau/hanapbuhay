@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiArrowLeft } from 'react-icons/fi';
 import HeaderHome from '@/components/ui/HeaderHome';
 import BenefitsSection from '@/components/home/BenefitsSection';
@@ -104,75 +105,169 @@ export default function HomePage() {
     }
   };
 
-  const renderLeftContent = () => {
+  const renderAuthContent = () => {
+    const formVariants = {
+      hidden: { 
+        opacity: 0, 
+        x: authView === 'signup' ? -50 : 50,
+        scale: 0.95
+      },
+      visible: { 
+        opacity: 1, 
+        x: 0,
+        scale: 1,
+        transition: {
+          duration: 0.5,
+          ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
+        }
+      },
+      exit: { 
+        opacity: 0, 
+        x: authView === 'signup' ? 50 : -50,
+        scale: 0.95,
+        transition: {
+          duration: 0.3,
+          ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
+        }
+      }
+    };
+
+    const illustrationVariants = {
+      hidden: { 
+        opacity: 0, 
+        x: authView === 'signup' ? 50 : -50,
+        scale: 0.9
+      },
+      visible: { 
+        opacity: 1, 
+        x: 0,
+        scale: 1,
+        transition: {
+          duration: 0.6,
+          ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
+          delay: 0.1
+        }
+      },
+      exit: { 
+        opacity: 0, 
+        x: authView === 'signup' ? -50 : 50,
+        scale: 0.9,
+        transition: {
+          duration: 0.3,
+          ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
+        }
+      }
+    };
+
     switch (authView) {
       case 'signup':
         return (
-          <div className="flex-1 max-w-lg">
-            <div className="bg-white rounded-2xl p-8 shadow-xl">
-              <div className="flex items-center mb-6">
-                <button 
-                  onClick={handleBackToHome}
-                  className="mr-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
-                  aria-label="Back to home"
-                >
-                  <FiArrowLeft size={24} className="text-gray-700" />
-                </button>
-                <h2 
-                  className="text-2xl font-bold text-gray-800"
-                >
-                  Create Account
-                </h2>
+          <>
+            {/* Left side - Signup Form */}
+            <motion.div 
+              key="signup-form"
+              className="flex-1 flex items-center justify-center"
+              variants={formVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <div className="w-full max-w-md bg-white rounded-2xl px-8 py-3 shadow-xl">
+                <SignupForm 
+                  onBackClick={handleBackToHome}
+                  onSignInClick={() => setAuthView('login')}
+                />
               </div>
-              <SignupForm />
-            </div>
-          </div>
+            </motion.div>
+            
+            {/* Right side - Signup Illustration */}
+            <motion.div 
+              key="signup-illustration"
+              className="flex-1 flex items-center justify-center bg-transparent"
+              variants={illustrationVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <div className="relative w-full max-w-lg h-[32rem] flex items-center justify-center">
+                <Image
+                  src="/image/signup-illustration.svg"
+                  alt="Sign up illustration"
+                  width={500}
+                  height={500}
+                  priority
+                  className="object-contain"
+                />
+              </div>
+            </motion.div>
+          </>
         );
       
       case 'login':
-        return (
-          <div className="flex-1 max-w-lg">
-            <div className="bg-white rounded-2xl p-8 shadow-xl">
-              <div className="flex items-center mb-6">
-                <button 
-                  onClick={handleBackToHome}
-                  className="mr-2 p-1 rounded-full hover:bg-primary-500 text-gray-neutral50 transition-colors"
-                  aria-label="Back to home"
-                >
-                  <FiArrowLeft size={24} className="text-gray-700" />
-                </button>
-                <h2 
-                  className="text-2xl font-bold text-gray-800"
-                >
-                  Login
-                </h2>
-              </div>
-              <LoginForm onForgotPassword={() => setAuthView('forgot-password')} />
-            </div>
-          </div>
-        );
-      
       case 'forgot-password':
         return (
-          <div className="flex-1 max-w-lg">
-            <div className="bg-white rounded-2xl p-8 shadow-xl">
-              <div className="flex items-center mb-6">
-                <button 
-                  onClick={() => setAuthView('login')}
-                  className="mr-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
-                  aria-label="Back to login"
-                >
-                  <FiArrowLeft size={24} className="text-gray-700" />
-                </button>
-                <h2 
-                  className="text-2xl font-bold text-gray-800"
-                >
-                  Reset Password
-                </h2>
+          <>
+            {/* Left side - Login Illustration */}
+            <motion.div 
+              key="login-illustration"
+              className="flex-1 flex items-center justify-center bg-transparent"
+              variants={illustrationVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <div className="relative w-full max-w-lg h-[32rem] flex items-center justify-center">
+                <Image
+                  src="/image/login-illustration.svg"
+                  alt="Login illustration"
+                  width={500}
+                  height={500}
+                  priority
+                  className="object-contain"
+                />
               </div>
-              <ForgotPasswordForm onBackToLogin={() => setAuthView('login')} />
-            </div>
-          </div>
+            </motion.div>
+
+            {/* Right side - Login/Forgot Password Form */}
+            <motion.div 
+              key={authView} // Use authView as key to animate between login and forgot-password
+              className="flex-1 flex items-center justify-center"
+              variants={formVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              <div className="w-full max-w-md bg-white rounded-2xl p-8 shadow-xl">
+                <AnimatePresence mode="wait">
+                  {authView === 'login' ? (
+                    <motion.div
+                      key="login-form"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <LoginForm 
+                        onForgotPassword={() => setAuthView('forgot-password')}
+                        onBackClick={handleBackToHome}
+                        onSignUpClick={() => setAuthView('signup')}
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="forgot-password-form"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <ForgotPasswordForm onBackToLogin={() => setAuthView('login')} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          </>
         );
       
       default:
@@ -225,9 +320,9 @@ export default function HomePage() {
                 }}
                 onMouseOver={(e) => {
                   if (!e.currentTarget.disabled) {
-                    e.currentTarget.style.backgroundColor = getBlueDarkColor('default');
+                    e.currentTarget.style.backgroundColor = '#1453E1';
                     e.currentTarget.style.color = 'white';
-                    e.currentTarget.style.outlineColor = getBlueDarkColor('default');
+                    e.currentTarget.style.outlineColor = '#1453E1';
                   }
                 }}
                 onMouseOut={(e) => {
@@ -262,24 +357,134 @@ export default function HomePage() {
 
       {/* Hero Section with Text and Image */}
       <section className="min-h-screen flex items-center justify-center px-4 py-12 pt-24 relative z-10">
-        <div className="container mx-auto flex flex-col md:flex-row items-center justify-center gap-12 md:gap-16 lg:gap-24">
-          {/* Left side - Dynamic content based on authView */}
-          {renderLeftContent()}
-          
-          {/* Right side - Image - Made larger */}
-          <div className="flex-1 flex justify-center">
-            <div className="relative w-full max-w-xl h-[28rem] md:h-[32rem] lg:h-[36rem] rounded-lg overflow-hidden">
-              <Image
-                src="/image/home-image1.png"
-                alt="People connecting through HanapBuhay"
-                fill
-                style={{ objectFit: 'contain' }}
-                priority
-                className="scale-125"
-              />
-            </div>
-          </div>
-        </div>
+        <AnimatePresence mode="wait">
+          {authView === 'default' ? (
+            <motion.div 
+              key="landing-page"
+              className="container mx-auto flex flex-col md:flex-row items-center justify-center gap-12 md:gap-16 lg:gap-24"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ 
+                duration: 0.5, 
+                ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
+              }}
+            >
+              {/* Left side - Hero Text */}
+              <motion.div 
+                className="flex-1 text-white space-y-6 max-w-lg"
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: 0.2,
+                  ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
+                }}
+              >
+                <h1 
+                  className={fontClasses.heading}
+                  style={{
+                    fontSize: TYPOGRAPHY.hero.fontSize,
+                    fontWeight: TYPOGRAPHY.hero.fontWeight,
+                    lineHeight: TYPOGRAPHY.hero.lineHeight
+                  }}
+                >
+                  <span className="block">Connecting People,</span>
+                  <span className="block">Creating Opportunities</span>
+                </h1>
+                <p 
+                  className={`${fontClasses.body} text-gray-300`}
+                  style={{
+                    fontSize: TYPOGRAPHY.lead.fontSize,
+                    fontWeight: TYPOGRAPHY.lead.fontWeight,
+                    lineHeight: TYPOGRAPHY.lead.lineHeight
+                  }}
+                >
+                  HanapBuhay bridges people who need help with those who can offer it. Together, we make everyday life easier.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 mt-8">
+                  <Button 
+                    onClick={() => setAuthView('signup')}
+                    variant="primary"
+                    size="lg"
+                    useCustomHover={true}
+                    fullRounded={true}
+                    className="w-full sm:w-auto justify-center px-8 py-3 min-w-44"
+                  >
+                    Sign Up
+                  </Button>
+                  <Button 
+                    onClick={() => setAuthView('login')}
+                    variant="ghost"
+                    size="lg"
+                    fullRounded={true}
+                    className="w-full sm:w-auto justify-center px-8 py-3 min-w-44"
+                    style={{
+                      outlineColor: getBlueDarkColor('default'),
+                      color: getBlueDarkColor('default'),
+                      backgroundColor: 'transparent',
+                      outline: '2px solid',
+                      outlineOffset: '-2px'
+                    }}
+                    onMouseOver={(e) => {
+                      if (!e.currentTarget.disabled) {
+                        e.currentTarget.style.backgroundColor = '#1453E1';
+                        e.currentTarget.style.color = 'white';
+                        e.currentTarget.style.outlineColor = '#1453E1';
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (!e.currentTarget.disabled) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = getBlueDarkColor('default');
+                        e.currentTarget.style.outlineColor = getBlueDarkColor('default');
+                      }
+                    }}
+                  >
+                    Login
+                  </Button>
+                </div>
+              </motion.div>
+              
+              {/* Right side - Image */}
+              <motion.div 
+                className="flex-1 flex justify-center"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: 0.3,
+                  ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
+                }}
+              >
+                <div className="relative w-full max-w-xl h-[28rem] md:h-[32rem] lg:h-[36rem] rounded-lg overflow-hidden">
+                  <Image
+                    src="/image/home-image1.png"
+                    alt="People connecting through HanapBuhay"
+                    fill
+                    style={{ objectFit: 'contain' }}
+                    priority
+                    className="scale-125"
+                  />
+                </div>
+              </motion.div>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="auth-view"
+              className="w-full mt-4 max-w-7xl mx-auto flex flex-col md:flex-row min-h-[600px] bg-transparent rounded-3xl shadow-2xl overflow-hidden"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ 
+                duration: 0.5, 
+                ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
+              }}
+            >
+              {renderAuthContent()}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       {/* Other Sections - Only show when in default view */}

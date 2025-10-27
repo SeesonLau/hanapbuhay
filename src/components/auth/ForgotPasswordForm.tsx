@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { AuthService } from '@/lib/services/auth-services';
 import Button from '@/components/ui/Button';
+import TextBox from '@/components/ui/TextBox';
+import { IoArrowBack } from "react-icons/io5";
 
 interface ForgotPasswordFormProps {
   onBackToLogin?: () => void;
@@ -33,72 +35,68 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700">
-          Email Address
-        </label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          placeholder="Enter your email address"
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
+    <div className="w-full max-w-2xl mx-auto px-4">
+      {/* Title */}
+      <h2 className="text-h3 font-bold text-gray-neutral900 text-center mb-4 font-alexandria">
+        Forgot Password?
+      </h2>
 
-      {message && (
-        <div className={`p-3 rounded-md text-sm ${
-          message.includes('sent') 
-            ? 'bg-green-50 text-green-700 border border-green-200' 
-            : 'bg-red-50 text-red-700 border border-red-200'
-        }`}>
-          {message}
+      {/* Subtitle */}
+      <p className="text-body text-gray-neutral600 text-center mb-8 font-alexandria font-light">
+        Enter your email address and we'll send you reset instructions!
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {message && (
+          <div className={`p-3 rounded-lg text-small ${
+            message.includes('sent') 
+              ? 'bg-success-50 text-success-700 border border-success-200' 
+              : 'bg-error-50 text-error-700 border border-error-200'
+          }`}>
+            {message}
+          </div>
+        )}
+
+        {/* Email Input */}
+        <div>
+          <TextBox
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder="juan.delacruz@gmail.com"
+          />
         </div>
-      )}
 
-      <Button
-        type="submit"      
-        disabled={loading}
-        className="w-full justify-center"
-        isLoading={loading}
-        variant="primary"
-        size="lg"
-        fullRounded={true}
-        useCustomHover={true}
-      >
-        {loading ? 'Sending...' : 'Send Reset Instructions'}
-      </Button>
-
-      {onBackToLogin && (
+        {/* Send Code Button */}
         <Button
-          type="button"
-          onClick={onBackToLogin}
-          className="w-full justify-center"
-          variant="ghost"
-          style={{
-            outlineColor: '#1D4ED8',
-            color: '#1D4ED8',
-            backgroundColor: 'transparent',
-            outline: '2px solid',
-            outlineOffset: '-2px'
-          }}
-          onMouseOver={(e) => {
-            if (!e.currentTarget.disabled) {
-              e.currentTarget.style.backgroundColor = '#9CA3AF';
-            }
-          }}
-          onMouseOut={(e) => {
-            if (!e.currentTarget.disabled) {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }
-          }}
+          type="submit"      
+          disabled={loading}
+          className="w-full justify-center text-body font-semibold"
+          isLoading={loading}
+          variant="primary"
+          size="md"
+          fullRounded={true}
+          useCustomHover={true}
         >
-          Back to Login
+          {loading ? 'Sending...' : 'Send Reset Instructions'}
         </Button>
-      )}
-    </form>
+
+        {/* Back to Login Link */}
+        {onBackToLogin && (
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={onBackToLogin}
+              className="inline-flex items-center gap-2 font-alexandria font-light text-body text-primary-primary500 hover:text-primary-primary600 font-light hover:underline"
+            >
+              <IoArrowBack className="w-5 h-5 font-light" />
+              Back to login
+            </button>
+          </div>
+        )}
+      </form>
+    </div>
   );
 };
 

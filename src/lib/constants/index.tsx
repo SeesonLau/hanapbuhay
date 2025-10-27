@@ -13,5 +13,6 @@ export const ROUTES = {
   PROFILE: '/profile',
   MANAGEJOBPOSTS: '/manageJobPosts',
   APPLIEDJOBS: '/appliedJobs',
-  FINDJOBS: '/findJobs'
+  FINDJOBS: '/findJobs',
+  MOCK: '/mock'
 };

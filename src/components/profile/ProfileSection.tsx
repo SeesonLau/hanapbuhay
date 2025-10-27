@@ -9,8 +9,8 @@ interface ProfileSectionProps {
 
 export default function ProfileSection({ userId, className }: ProfileSectionProps) {
   return (
-    <div className={`${className} flex flex-col gap-2 px-5`}>
-      <h3 className="font-inter font-bold text-gray-neutral700">
+    <div className={`${className} flex flex-col gap-3 px-8`}>
+      <h3 className="text-description font-inter font-bold text-gray-neutral700">
           Personal Details
       </h3>
       <ProfileForm userId={userId} className="w-full" />
