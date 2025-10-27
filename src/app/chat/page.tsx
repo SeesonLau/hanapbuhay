@@ -1,4 +1,4 @@
-// src/app/chat/page.tsx
+// need to connect to db. make table, and fetch list of users for the chat list.
 'use client'
 
 import React, { useState, useEffect } from 'react';
