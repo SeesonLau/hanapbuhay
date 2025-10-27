@@ -130,17 +130,17 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
 
   return (
     <div 
-      className={`w-[480px] h-[300px] bg-white rounded-lg border border-gray-200 shadow-sm p-[30px] flex flex-col transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-300 cursor-pointer ${className}`}
+      className={`w-[480px] h-[250px] min-h-[250px] max-h-[250px] bg-white rounded-lg border border-gray-200 shadow-sm p-[30px] flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-300 cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
       {/* Header */}
-      <div className="flex-shrink-0 mb-[20px]">
-        <h3 className={`${fontClasses.heading} font-semibold text-[20px] mb-2`} style={{ color: getBlackColor() }}>{title}</h3>
-        <p className={`${fontClasses.body} font-light text-[12px] line-clamp-3`} style={{ color: getNeutral600Color() }}>{description}</p>
+      <div className="flex-shrink-0 mb-[16px]">
+        <h3 className={`${fontClasses.heading} font-semibold text-[20px] mb-2 truncate`} style={{ color: getBlackColor() }}>{title}</h3>
+        <p className={`${fontClasses.body} font-light text-[12px] line-clamp-2`} style={{ color: getNeutral600Color() }}>{description}</p>
       </div>
 
       {/* Tags Section - Single row that adapts to fit */}
-      <div className="mb-[20px]">
+      <div className="mb-[16px]">
         {/* Hidden measurers to calculate widths without wrapping */}
         <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
           {allTags.map((tag, index) => (
@@ -180,7 +180,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
       </div>
 
       {/* Footer */}
-      <div className="mt-auto space-y-[20px]">
+      <div className="mt-auto space-y-[16px]">
         {/* Location and Salary */}
         <div className="flex items-center gap-2">
           <StaticLocationTag label={location} />
