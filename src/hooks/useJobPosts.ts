@@ -38,7 +38,7 @@ function formatPostedDate(iso?: string) {
   }
 }
 
-export function useJobPosts(userId?: string | null) {
+export function useJobPosts(userId?: string | null, options: { skip?: boolean } = {}) {
   const [jobs, setJobs] = useState<JobPostData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
@@ -107,9 +107,12 @@ export function useJobPosts(userId?: string | null) {
   }, [userId]);
 
   useEffect(() => {
+    if (options.skip) {
+      return;
+    }
     // load first page when userId changes (or on mount)
     load({ page: 1 });
-  }, [load]);
+  }, [load, options.skip]);
 
   const handleSearch = useCallback(async (query: string, location?: string) => {
     await load({ page: 1, searchTerm: query, location });

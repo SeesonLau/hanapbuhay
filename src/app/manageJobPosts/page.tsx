@@ -17,7 +17,7 @@ import { Post } from '@/lib/models/posts';
 export default function ManageJobPostsPage() {
   const [user, setUser] = useState<any | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, loadMore, refresh, deletePost, updatePost, createPost } = useJobPosts(userId);
+  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, loadMore, refresh, deletePost, updatePost, createPost } = useJobPosts(userId, { skip: !userId });
   
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -134,7 +134,7 @@ export default function ManageJobPostsPage() {
         onPostClick={handleCreatePost}
       />
 
-      <main className="pl-4 pr-4 pb-8 pt-8">
+      <main className="pl-4 pr-4 pb-8 pt-[240px]">
         <PostsSection
           jobs={jobs}
           variant="manage"

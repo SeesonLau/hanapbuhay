@@ -66,7 +66,7 @@ export default function ProfilePage() {
             showSearchBar={false}
           />
           
-          <main className="flex-grow flex p-3">
+          <main className="pl-4 pr-4 pb-8 pt-[240px]">
             <div className="w-full h-full flex flex-col md:flex-row gap-10 md:gap-0">
               {user && <ProfileSection userId={user.userId} className="flex-1" />}
               <div className="hidden md:block w-px bg-gray-neutral300 md:-my-3"></div>
