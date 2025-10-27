@@ -175,7 +175,7 @@ export default function ChatPage() {
       <Banner
         variant="chat"
         showSearchBar={false}
-        userName={user?.name ?? user?.email ?? user?.id}
+        userName={user?.email ?? user?.id}
       />
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 mt-8">

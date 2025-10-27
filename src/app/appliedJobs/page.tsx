@@ -36,7 +36,6 @@ export default function AppliedJobsPage() {
       <Banner
         variant="appliedJobs"
         onSearch={handleSearch}
-        userName={user?.name ?? user?.email ?? user?.id}
       />
 
       <main className="p-8">

@@ -56,7 +56,7 @@ export default function FindJobsPage() {
   return (
     <div className="min-h-screen">
   {/* Banner Section with Header and Search */}
-  <Banner variant="findJobs" onSearch={handleSearch} userName={user?.name ?? user?.email ?? user?.id} />
+  <Banner variant="findJobs" onSearch={handleSearch} />
 
       <main className="pl-4 pr-4 pb-8 pt-8">
         {/* Stats Row */}

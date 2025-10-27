@@ -94,7 +94,6 @@ export default function ManageJobPostsPage() {
     variant="manageJobPosts" 
     onSearch={handleSearch} 
     onPostClick={handleCreatePost}
-    userName={user?.name ?? user?.email ?? user?.id} 
   />
 
       <main className="pl-4 pr-4 pb-8 pt-8">
