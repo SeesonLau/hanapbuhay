@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useState, useEffect } from "react";
+import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 import Banner from "@/components/ui/Banner";
 import ViewProfileModal from "@/components/modals/ViewProfileModal";
 import JobPostViewModal, { JobPostViewData } from "@/components/modals/JobPostViewModal";
-import { ViewToggle } from "@/components/ui/ViewToggle";
-import { JobPostCard } from "@/components/cards/JobPostCard";
 import { StatCardFindJobs } from "@/components/cards/StatCardFindJobs";
 import { JobPostList } from "@/components/cards/JobPostList";
 import { PostService } from "@/lib/services/posts-services";
@@ -17,6 +17,7 @@ import FilterButton from "@/components/ui/FilterButton";
 import FilterModal from "@/components/ui/FilterModal";
 
 export default function FindJobsPage() {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
@@ -183,72 +184,30 @@ export default function FindJobsPage() {
   };
 
   useEffect(() => {
-    const loadInitial = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const result = await PostService.getAllPosts();
-        setPosts(result.posts);
-      } catch (err) {
-        setError("Failed to load posts");
-      } finally {
-        setLoading(false);
+    const getUser = async () => {
+      const current = await AuthService.getCurrentUser();
+      if (current) {
+        setUser(current);
+        setUserId(current.id);
       }
     };
-    loadInitial();
+    getUser();
   }, []);
 
-  useEffect(() => {
-    const fetchCounts = async () => {
-      try {
-        const entries = await Promise.all(
-          posts.map(async (p) => {
-            try {
-              const count = await ApplicationService.getTotalApplicationsByPostIdCount(p.postId);
-              return [p.postId, count] as const;
-            } catch {
-              return [p.postId, 0] as const;
-            }
-          })
-        );
-        setAppCounts(Object.fromEntries(entries));
-      } catch {
-        // ignore count errors
-      }
-    };
-
-    if (posts.length) {
-      fetchCounts();
+  const handleApply = async (jobId: string) => {
+    if (!userId) {
+      toast.error('Please log in to apply for jobs');
+      router.push('/auth/login');
+      return;
     }
-  }, [posts]);
 
-  const formatPeso = (amount: number) => {
-    return amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  };
-
-  const formatPostedDate = (iso: string) => {
     try {
-      const d = new Date(iso);
-      return d.toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' });
-    } catch {
-      return iso;
+      await ApplicationService.createApplication(jobId, userId);
+      toast.success('Application submitted successfully!');
+      setIsJobViewOpen(false);
+    } catch (error) {
+      console.error('Error applying to job:', error);
     }
-  };
-
-  const postToJobData = (post: Post): JobPostViewData => {
-    return {
-      id: post.postId,
-      title: post.title,
-      description: post.description,
-      location: post.location,
-      salary: formatPeso(post.price),
-      salaryPeriod: 'month',
-      postedDate: formatPostedDate(post.createdAt),
-      applicantCount: appCounts[post.postId] || 0,
-      genderTags: [],
-      experienceTags: [],
-      jobTypeTags: [post.type, ...(post.subType || [])],
-    };
   };
 
   return (
@@ -356,7 +315,7 @@ export default function FindJobsPage() {
         isOpen={isJobViewOpen}
         onClose={() => setIsJobViewOpen(false)}
         job={selectedJob}
-        onApply={(id) => console.log('apply', id)}
+        onApply={handleApply}
       />
       
       {/* Filter Modal - Mobile Only */}
