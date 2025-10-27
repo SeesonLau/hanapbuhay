@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticLocationTag, StaticSalaryTag } from '@/components/ui/TagItem';
 import { getBlackColor, getNeutral600Color, getNeutral100Color, getNeutral400Color } from '@/styles/colors';
 import { fontClasses } from '@/styles/fonts';
-// Use public assets for icons
-import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticLocationTag, StaticSalaryTag } from '@/components/ui/TagItem';
+import ManageJobActionButtons from '@/components/posts/ManageJobActionButtons';
 import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
@@ -29,6 +29,7 @@ interface ManageJobPostCardProps {
   onOpen?: (data: JobPostData) => void;
   onViewApplicants?: (data: JobPostData) => void;
   onEdit?: (data: JobPostData) => void;
+  onDelete?: (data: JobPostData) => void;
 }
 
 export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({ 
@@ -37,6 +38,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
   onOpen,
   onViewApplicants,
   onEdit,
+  onDelete,
 }) => {
   const {
     title,
@@ -202,19 +204,15 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
           <span className={`${fontClasses.body} font-medium text-[10px]`} style={{ color: getNeutral600Color() }}>Posted on: {postedDate}</span>
         </div>
         
-        {/* Action Buttons - Full Width */}
-        <div className="flex gap-0 w-full">
-          <button className="flex items-center justify-center flex-1 h-[30px] bg-white border border-gray-300 rounded-l-[10px] text-xs font-medium hover:bg-gray-50 transition-colors" onClick={(e) => { e.stopPropagation(); onViewApplicants?.(jobData); }}>
-            <span className="text-blue-600 mr-1">{applicantCount}</span>
-            <img src="/icons/profile.svg" alt="Applicants" className="w-[15px] h-[15px]" />
-          </button>
-          <button className="flex items-center justify-center flex-1 h-[30px] bg-white border-t border-b border-gray-300 hover:bg-gray-50 transition-colors" onClick={(e) => { e.stopPropagation(); onEdit?.(jobData); }}>
-            <img src="/icons/edit.svg" alt="Edit" className="w-[15px] h-[15px]" />
-          </button>
-          <button className="flex items-center justify-center flex-1 h-[30px] bg-white border border-gray-300 rounded-r-[10px] hover:bg-gray-50 transition-colors">
-            <img src="/icons/delete.svg" alt="Delete" className="w-[15px] h-[15px]" />
-          </button>
-        </div>
+        {/* Action Buttons */}
+        <ManageJobActionButtons
+          applicantCount={applicantCount}
+          onViewApplicants={() => onViewApplicants?.(jobData)}
+          onEdit={() => onEdit?.(jobData)}
+          onDelete={() => onDelete?.(jobData)}
+          variant="horizontal"
+          className="w-full"
+        />
       </div>
     </div>
   );

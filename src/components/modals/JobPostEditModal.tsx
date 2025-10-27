@@ -9,69 +9,103 @@ import SelectBox from "@/components/ui/SelectBox";
 import Button from "@/components/ui/Button";
 import { getGenderOptions } from "@/lib/constants/gender";
 import { getExperienceOptions } from "@/lib/constants/experience-level";
-import { getJobTypeOptions, SubTypes } from "@/lib/constants/job-types";
-import type { JobType } from "@/lib/constants/job-types";
+import { JobType, getJobTypeOptions, SubTypes } from "@/lib/constants/job-types";
 import { GenderTag, ExperienceLevelTag, JobTypeTag } from "@/components/ui/TagItem";
 import type { JobPostAddFormData } from "./JobPostAddModal";
+import type { Post } from '@/lib/models/posts';
 
 interface JobPostEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialData?: Partial<JobPostAddFormData> & { subTypes?: string[] };
+  // Accept a Post directly (page was passing `post`) – we'll derive initialData from it if provided
+  post?: Post | null;
   onSubmit?: (data: JobPostAddFormData & { subTypes?: string[] }) => void;
 }
 
-export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmit }: JobPostEditModalProps) {
-  const [title, setTitle] = useState(initialData?.title ?? "");
-  const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>(initialData?.jobTypes ?? []);
-  const [selectedSubTypes, setSelectedSubTypes] = useState<string[]>(initialData?.subTypes ?? []);
-  const [selectedExperience, setSelectedExperience] = useState<string[]>(initialData?.experienceLevels ?? []);
-  const [selectedGenders, setSelectedGenders] = useState<string[]>(initialData?.genders ?? []);
-  const [country, setCountry] = useState(initialData?.country ?? "Philippines");
-  const [province, setProvince] = useState(initialData?.province ?? "Cebu");
-  const [city, setCity] = useState(initialData?.city ?? "Cebu City");
-  const [address, setAddress] = useState(initialData?.address ?? "");
-  const [salary, setSalary] = useState(initialData?.salary ?? "");
-  const [salaryPeriod, setSalaryPeriod] = useState<'day' | 'week' | 'month'>(initialData?.salaryPeriod ?? "day");
-  const [about, setAbout] = useState(initialData?.about ?? "");
-  const [qualifications, setQualifications] = useState(initialData?.qualifications ?? "");
+function mapPostToInitial(post: Post): Partial<JobPostAddFormData> & { subTypes?: string[] } {
+  return {
+    title: post.title ?? "",
+    jobTypes: post.type ? [post.type] : [],
+    experienceLevels: [],
+    genders: [],
+    country: "Philippines",
+    province: "",
+    city: post.location ?? "",
+    address: "",
+    salary: (typeof post.price === 'number') ? String(post.price) : (post.price ?? ""),
+    salaryPeriod: 'month',
+    about: post.description ?? "",
+    qualifications: "",
+    subTypes: post.subType ?? [],
+  };
+}
 
-  // Sync state when initialData changes (ensure first-open shows tags)
+export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmit, post }: JobPostEditModalProps) {
+  const resolvedInitial = initialData ?? (post ? mapPostToInitial(post) : undefined);
+  const [title, setTitle] = useState(resolvedInitial?.title ?? "");
+  const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>(resolvedInitial?.jobTypes ?? []);
+  const [selectedSubTypes, setSelectedSubTypes] = useState<string[]>(resolvedInitial?.subTypes ?? []);
+  const [selectedExperience, setSelectedExperience] = useState<string[]>(resolvedInitial?.experienceLevels ?? []);
+  const [selectedGenders, setSelectedGenders] = useState<string[]>(resolvedInitial?.genders ?? []);
+  const [country, setCountry] = useState(resolvedInitial?.country ?? "Philippines");
+  const [province, setProvince] = useState(resolvedInitial?.province ?? "Cebu");
+  const [city, setCity] = useState(resolvedInitial?.city ?? "Cebu City");
+  const [address, setAddress] = useState(resolvedInitial?.address ?? "");
+  const [salary, setSalary] = useState(resolvedInitial?.salary ?? "");
+  const [salaryPeriod, setSalaryPeriod] = useState<'day' | 'week' | 'month'>(resolvedInitial?.salaryPeriod ?? "day");
+  const [about, setAbout] = useState(resolvedInitial?.about ?? "");
+  const [qualifications, setQualifications] = useState(resolvedInitial?.qualifications ?? "");
+  const [otherJobTypeText, setOtherJobTypeText] = useState(() => {
+    const subs = resolvedInitial?.subTypes ?? [];
+    const unknown = subs.find((s) => !Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(s)));
+    return unknown ?? "";
+  });
+
+  // Sync state when `initialData` or `post` changes. Compute resolvedInitial locally
+  // to avoid object-identity changes causing repeated effects.
   useEffect(() => {
-    const nextJobTypes = initialData?.jobTypes ?? [];
-    const nextSubTypes = initialData?.subTypes ?? [];
+    const ri = initialData ?? (post ? mapPostToInitial(post) : undefined);
+    const nextJobTypes = ri?.jobTypes ?? [];
+    const nextSubTypes = ri?.subTypes ?? [];
+    const nextUnknown = nextSubTypes.find((s) => !Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(s)));
 
     // Fallback: derive job types from subTypes if jobTypes not provided
-    const derivedJobTypes = (nextJobTypes.length === 0 && nextSubTypes.length > 0)
+    let derivedJobTypes = (nextJobTypes.length === 0 && nextSubTypes.length > 0)
       ? Array.from(new Set(
           Object.entries(SubTypes)
             .filter(([, subs]) => nextSubTypes.some(s => subs.includes(s)))
             .map(([jt]) => jt)
         ))
       : nextJobTypes;
+    if (nextUnknown) {
+      derivedJobTypes = Array.from(new Set([...derivedJobTypes, JobType.OTHER]));
+    }
 
-    setTitle(initialData?.title ?? "");
+    setTitle(ri?.title ?? "");
     setSelectedJobTypes(derivedJobTypes);
     setSelectedSubTypes(nextSubTypes);
-    setSelectedExperience(initialData?.experienceLevels ?? []);
-    setSelectedGenders(initialData?.genders ?? []);
-    setCountry(initialData?.country ?? "Philippines");
-    setProvince(initialData?.province ?? "Cebu");
-    setCity(initialData?.city ?? "Cebu City");
-    setAddress(initialData?.address ?? "");
-    setSalary(initialData?.salary ?? "");
-    setSalaryPeriod(initialData?.salaryPeriod ?? "day");
-    setAbout(initialData?.about ?? "");
-    setQualifications(initialData?.qualifications ?? "");
-  }, [initialData]);
+    setSelectedExperience(ri?.experienceLevels ?? []);
+    setSelectedGenders(ri?.genders ?? []);
+    setCountry(ri?.country ?? "Philippines");
+    setProvince(ri?.province ?? "Cebu");
+    setCity(ri?.city ?? "Cebu City");
+    setAddress(ri?.address ?? "");
+    setSalary(ri?.salary ?? "");
+    setSalaryPeriod(ri?.salaryPeriod ?? "day");
+    setAbout(ri?.about ?? "");
+    setQualifications(ri?.qualifications ?? "");
+    setOtherJobTypeText(nextUnknown ?? "");
+  }, [initialData, post]);
 
   const jobTypeOptions = useMemo(() => getJobTypeOptions(), []);
   const experienceOptions = useMemo(() => getExperienceOptions(), []);
   const genderOptions = useMemo(() => getGenderOptions(), []);
 
   // Compute effective selections for first render before state sync
-  const initialSubTypes = initialData?.subTypes ?? [];
-  const initialJobTypes = initialData?.jobTypes ?? [];
+  const initialSubTypes = resolvedInitial?.subTypes ?? [];
+  const initialJobTypes = resolvedInitial?.jobTypes ?? [];
+  const initialUnknown = initialSubTypes.find((s) => !Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(s)));
   const derivedInitialJobTypes = (initialJobTypes.length === 0 && initialSubTypes.length > 0)
     ? Array.from(new Set(
         Object.entries(SubTypes)
@@ -79,10 +113,13 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
           .map(([jt]) => jt)
       ))
     : initialJobTypes;
-  const effectiveJobTypes = selectedJobTypes.length ? selectedJobTypes : derivedInitialJobTypes;
+  const derivedInitialWithOther = initialUnknown
+    ? Array.from(new Set([...derivedInitialJobTypes, JobType.OTHER]))
+    : derivedInitialJobTypes;
+  const effectiveJobTypes = selectedJobTypes.length ? selectedJobTypes : derivedInitialWithOther;
   const effectiveSubTypes = selectedSubTypes.length ? selectedSubTypes : initialSubTypes;
 
-  if (!isOpen || !initialData) return null;
+  if (!isOpen || !resolvedInitial) return null;
 
   const toggleArrayValue = (arr: string[], value: string) => {
     return arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value];
@@ -92,6 +129,11 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
   };
 
   const handleSubmit = () => {
+    const finalSubTypes = [...selectedSubTypes];
+    if (selectedJobTypes.includes(JobType.OTHER) && otherJobTypeText.trim().length > 0) {
+      const otherValue = otherJobTypeText.trim();
+      if (!finalSubTypes.includes(otherValue)) finalSubTypes.push(otherValue);
+    }
     const data: JobPostAddFormData & { subTypes?: string[] } = {
       title: title.trim(),
       jobTypes: selectedJobTypes,
@@ -105,7 +147,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
       salaryPeriod,
       about: about.trim(),
       qualifications: qualifications.trim(),
-      subTypes: selectedSubTypes,
+      subTypes: finalSubTypes,
     };
     onSubmit?.(data);
     onClose();
@@ -161,7 +203,9 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
               <div className="space-y-2">
                  {jobTypeOptions.map((opt) => {
                     const isSelected = effectiveJobTypes.includes(opt.value);
+                    const isOther = opt.value === JobType.OTHER;
                     const subList = SubTypes[opt.value as JobType] || [];
+                    const hasExpandableContent = isOther || subList.length > 0;
                     return (
                       <div key={opt.value} className="space-y-2">
                         <div
@@ -175,6 +219,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                             setSelectedJobTypes(prev => toggleArrayValue(prev, String(opt.value)));
                             if (isSelected) {
                               setSelectedSubTypes(prev => prev.filter(s => !subList.includes(s)));
+                              if (isOther) setOtherJobTypeText("");
                             }
                           }}
                           aria-expanded={isSelected}
@@ -185,24 +230,36 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                         <div
                           className="px-3"
                           style={{
-                            overflow: 'hidden',
-                            maxHeight: isSelected && subList.length > 0 ? '500px' : '0px',
-                            opacity: isSelected && subList.length > 0 ? 1 : 0,
+                            // Allow focus ring and rounded corners of the TextBox to render fully
+                            // when the "Other" input is visible. Keep hidden for chip lists.
+                            overflow: isSelected && isOther ? 'visible' : 'hidden',
+                            maxHeight: isSelected && hasExpandableContent ? '500px' : '0px',
+                            opacity: isSelected && hasExpandableContent ? 1 : 0,
                             transition: 'max-height 250ms ease, opacity 200ms ease',
-                            marginTop: isSelected && subList.length > 0 ? '8px' : '0px'
+                            marginTop: isSelected && hasExpandableContent ? '8px' : '0px'
                           }}
                         >
-                          <div className="flex flex-wrap gap-2">
-                            {subList.map((sub) => (
-                              <JobTypeTag
-                                key={`${opt.value}-${sub}`}
-                                label={sub}
-                                selected={effectiveSubTypes.includes(sub)}
-                                onClick={() => toggleSubType(sub)}
-                                categoryIcon={`/icons/${opt.value}.svg`}
+                          {isOther ? (
+                            <div className="pt-2">
+                              <TextBox
+                                placeholder="Enter custom job type"
+                                value={otherJobTypeText}
+                                onChange={(e) => setOtherJobTypeText(e.target.value)}
                               />
-                            ))}
-                          </div>
+                            </div>
+                          ) : (
+                            <div className="flex flex-wrap gap-2">
+                              {subList.map((sub) => (
+                                <JobTypeTag
+                                  key={`${opt.value}-${sub}`}
+                                  label={sub}
+                                  selected={effectiveSubTypes.includes(sub)}
+                                  onClick={() => toggleSubType(sub)}
+                                  categoryIcon={`/icons/${opt.value}.svg`}
+                                />
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
