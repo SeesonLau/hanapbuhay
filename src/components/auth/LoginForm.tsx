@@ -5,6 +5,7 @@ import { AuthService } from '@/lib/services/auth-services';
 import { ROUTES } from '@/lib/constants';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
+import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -56,6 +57,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword }) => {
   };
 
   return (
+    <>
+    <Preloader
+      isVisible={loading}
+      message={PreloaderMessages.PROCESSING}
+      variant="default"
+    />
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700">
@@ -146,5 +153,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword }) => {
         </button>
       </div>
     </form>
+    </>
   );
 };

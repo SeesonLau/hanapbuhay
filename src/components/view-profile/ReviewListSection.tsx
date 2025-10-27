@@ -14,7 +14,7 @@ interface Review {
 }
 
 export default function ReviewListSection() {
-  const MAX_REVIEW_LENGTH = 50;
+  const MAX_REVIEW_LENGTH = 75;
 
   const truncateText = (text: string, maxLength: number = MAX_REVIEW_LENGTH) =>
     text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
