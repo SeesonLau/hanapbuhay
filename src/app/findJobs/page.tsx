@@ -12,12 +12,36 @@ import { PostService } from "@/lib/services/posts-services";
 import { ApplicationService } from "@/lib/services/applications-services";
 import { Post } from "@/lib/models/posts";
 import Sort from "@/components/ui/Sort";
+import FilterSection, { FilterOptions } from "@/components/ui/FilterSection";
+import FilterButton from "@/components/ui/FilterButton";
+import FilterModal from "@/components/ui/FilterModal";
 
 export default function FindJobsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<FilterOptions>({
+    jobTypes: {},
+    salaryRange: {
+      lessThan5000: false,
+      range10to20: false,
+      moreThan20000: false,
+      custom: false,
+    },
+    experienceLevel: {
+      entryLevel: false,
+      intermediate: false,
+      professional: false,
+    },
+    preferredGender: {
+      any: false,
+      female: false,
+      male: false,
+      others: false,
+    },
+  });
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -25,9 +49,73 @@ export default function FindJobsPage() {
   const [appCounts, setAppCounts] = useState<Record<string, number>>({});
   const [sortValue, setSortValue] = useState<string>('latest');
 
+  // Count active filters
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    
+    // Count job types
+    const jobTypeCount = Object.values(activeFilters.jobTypes).filter(Boolean).length;
+    count += jobTypeCount;
+    
+    // Count salary ranges
+    const salaryCount = Object.values(activeFilters.salaryRange).filter(Boolean).length;
+    count += salaryCount;
+    
+    // Count experience levels
+    const experienceCount = Object.values(activeFilters.experienceLevel).filter(Boolean).length;
+    count += experienceCount;
+    
+    // Count preferred genders
+    const genderCount = Object.values(activeFilters.preferredGender).filter(Boolean).length;
+    count += genderCount;
+    
+    return count;
+  }, [activeFilters]);
+
+  // Apply filters to posts
+  const filteredPosts = useMemo(() => {
+    return posts.filter((post) => {
+      // Filter by job types
+      const jobTypeKeys = Object.keys(activeFilters.jobTypes).filter(
+        (key) => activeFilters.jobTypes[key]
+      );
+      if (jobTypeKeys.length > 0) {
+        const postType = post.type.toLowerCase();
+        const hasMatchingType = jobTypeKeys.some((key) => {
+          if (key.includes('-')) {
+            // It's a subtype like "cleaning-housekeeping"
+            const [parent, sub] = key.split('-');
+            return (
+              postType === parent.toLowerCase() &&
+              post.subType?.some((st) => st.toLowerCase() === sub.toLowerCase())
+            );
+          }
+          return postType === key.toLowerCase();
+        });
+        if (!hasMatchingType) return false;
+      }
+
+      // Filter by salary range
+      const { lessThan5000, range10to20, moreThan20000 } = activeFilters.salaryRange;
+      if (lessThan5000 || range10to20 || moreThan20000) {
+        const salary = post.price || 0;
+        const matchesSalary =
+          (lessThan5000 && salary < 5000) ||
+          (range10to20 && salary >= 10000 && salary <= 20000) ||
+          (moreThan20000 && salary > 20000);
+        if (!matchesSalary) return false;
+      }
+
+      // Note: Experience level and preferred gender filters can be added
+      // when the Post model includes these fields
+
+      return true;
+    });
+  }, [posts, activeFilters]);
+
   // Derived posts based on sort selection
   const displayPosts = useMemo(() => {
-    const sorted = [...posts];
+    const sorted = [...filteredPosts];
     switch (sortValue) {
       case 'latest':
         sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -48,10 +136,37 @@ export default function FindJobsPage() {
         break;
     }
     return sorted;
-  }, [posts, sortValue]);
+  }, [filteredPosts, sortValue]);
 
   const handleSortChange = (opt: any) => {
     setSortValue(String(opt?.value ?? 'latest'));
+  };
+
+  const handleApplyFilters = (filters: FilterOptions) => {
+    setActiveFilters(filters);
+  };
+
+  const handleClearFilters = () => {
+    setActiveFilters({
+      jobTypes: {},
+      salaryRange: {
+        lessThan5000: false,
+        range10to20: false,
+        moreThan20000: false,
+        custom: false,
+      },
+      experienceLevel: {
+        entryLevel: false,
+        intermediate: false,
+        professional: false,
+      },
+      preferredGender: {
+        any: false,
+        female: false,
+        male: false,
+        others: false,
+      },
+    });
   };
 
   const handleSearch = async (query: string, location?: string) => {
@@ -137,77 +252,103 @@ export default function FindJobsPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       {/* Banner Section with Header and Search */}
       <Banner variant="findJobs" onSearch={handleSearch} />
 
-      <main className="pl-4 pr-4 pb-8 pt-[240px]">
-        {/* Stats Row */}
-        <div className="w-full mb-6">
-          <div className="max-w-screen-2xl mx-auto flex flex-wrap md:flex-nowrap items-stretch gap-4 justify-center md:justify-between">
-            <StatCardFindJobs title="Total Jobs" variant="blue" />
-            <StatCardFindJobs title="Completed" variant="green" />
-            <StatCardFindJobs title="Ratings" variant="yellow" />
-            <StatCardFindJobs title="Posted" variant="red" />
-          </div>
-        </div>
+      {/* Main Container */}
+      <div className="pt-[214px]">
+        {/* Filter Section - Desktop Only (leftmost, no margin, full height) */}
+        <aside className="hidden lg:block fixed left-0 top-[214px] bottom-0 w-[240px] bg-white shadow-lg overflow-y-auto z-20">
+          <FilterSection
+            initialFilters={activeFilters}
+            onApply={handleApplyFilters}
+            onClearAll={handleClearFilters}
+            className="h-full"
+          />
+        </aside>
 
-        {/* Job Posts Section */}
-        <div className="mt-8 space-y-6">
-          {/* Controls */}
-          <div className="max-w-screen-2xl mx-auto px-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Showing: {displayPosts.length}</span>
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-600">Sort by</span>
-                <Sort variant="findJobs" onChange={handleSortChange} />
-                <ViewToggle value={viewMode} onChange={setViewMode} />
+        {/* Main Content Area */}
+        <main className="w-full lg:w-[calc(100%-240px)] lg:ml-[240px]">
+          <div className="px-4 md:px-6 lg:px-8 pb-8 max-w-full">
+            {/* Stats Row */}
+            <div className="w-full mb-4 mt-4">
+              <div className="flex items-stretch gap-4 justify-between">
+                <StatCardFindJobs title="Total Jobs" variant="blue" />
+                <StatCardFindJobs title="Completed" variant="green" />
+                <StatCardFindJobs title="Ratings" variant="yellow" />
+                <StatCardFindJobs title="Posted" variant="red" />
               </div>
+            </div>
+
+            {/* Job Posts Section */}
+            <div className="mt-8 space-y-6">
+              {/* Controls Row with Filter Button */}
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                {/* Left side - Filter Button (Mobile) & Showing count */}
+                <div className="flex items-center gap-3">
+                  {/* Filter Button - Mobile Only */}
+                  <div className="lg:hidden">
+                    <FilterButton
+                      onClick={() => setIsFilterModalOpen(true)}
+                      filterCount={activeFilterCount}
+                    />
+                  </div>
+                  <span className="text-small text-gray-neutral600 whitespace-nowrap">Showing: {displayPosts.length}</span>
+                </div>
+                
+                {/* Right side - Sort & View Toggle */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-small text-gray-neutral600 whitespace-nowrap">Sort by</span>
+                  <Sort variant="findJobs" onChange={handleSortChange} />
+                  <ViewToggle value={viewMode} onChange={setViewMode} />
+                </div>
+              </div>
+
+              {/* Display */}
+              {loading ? (
+                <div className="text-center py-8">Loading job posts...</div>
+              ) : error ? (
+                <div className="text-center py-8 text-error-error500">{error}</div>
+              ) : displayPosts.length === 0 ? (
+                <div className="text-center py-8 text-gray-neutral500">No job posts available.</div>
+              ) : viewMode === 'card' ? (
+                <div className="w-full mt-6">
+                  <div className="flex flex-wrap items-center justify-center gap-3">
+                    {displayPosts.map((post) => {
+                      const jd = postToJobData(post);
+                      return (
+                        <JobPostCard
+                          key={post.postId}
+                          jobData={jd as any}
+                          onOpen={(data) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
+                          onApply={(id) => console.log('apply', id)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="w-full overflow-x-auto mt-6">
+                  <div className="flex flex-col items-start gap-4 min-w-full">
+                    {displayPosts.map((post) => {
+                      const jd = postToJobData(post);
+                      return (
+                        <JobPostList
+                          key={post.postId}
+                          jobData={jd as any}
+                          onOpen={(data) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
+                          onApply={(id) => console.log('apply', id)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Display */}
-          {loading ? (
-            <div className="text-center py-8">Loading job posts...</div>
-          ) : error ? (
-            <div className="text-center py-8 text-red-600">{error}</div>
-          ) : displayPosts.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No job posts available.</div>
-          ) : viewMode === 'card' ? (
-            <div className="w-full flex justify-center">
-              <div className="flex flex-wrap items-start justify-center gap-5">
-                {displayPosts.map((post) => {
-                  const jd = postToJobData(post);
-                  return (
-                    <JobPostCard
-                      key={post.postId}
-                      jobData={jd as any}
-                      onOpen={(data) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
-                      onApply={(id) => console.log('apply', id)}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            <div className="w-full overflow-x-auto">
-              <div className="flex flex-col items-start gap-4 w-[1526px] mx-auto">
-                {displayPosts.map((post) => {
-                  const jd = postToJobData(post);
-                  return (
-                    <JobPostList
-                      key={post.postId}
-                      jobData={jd as any}
-                      onOpen={(data) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
-                      onApply={(id) => console.log('apply', id)}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
+        </main>
+      </div>
 
       {/* Modal */}
       <ViewProfileModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
@@ -216,6 +357,15 @@ export default function FindJobsPage() {
         onClose={() => setIsJobViewOpen(false)}
         job={selectedJob}
         onApply={(id) => console.log('apply', id)}
+      />
+      
+      {/* Filter Modal - Mobile Only */}
+      <FilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        onApply={handleApplyFilters}
+        onClearAll={handleClearFilters}
+        initialFilters={activeFilters}
       />
     </div>
   );
