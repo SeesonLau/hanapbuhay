@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import Banner from '@/components/ui/Banner';
-import ApplicantsModal from '@/components/modals/ApplicantsModal';
+import ApplicantsModal from '@/components/modals/ApplicantsViewModal';
 import JobPostViewModal, { JobPostViewData } from '@/components/modals/JobPostViewModal';
 import { ViewToggle } from '@/components/ui/ViewToggle';
 import { ManageJobPostCard } from '@/components/cards/ManageJobPostCard';

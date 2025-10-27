@@ -18,10 +18,11 @@ interface ApplicantsModalProps {
 type SortOrder = 'newest' | 'oldest';
 
 export default function ApplicantsModal({ 
+  postId,
   isOpen, 
   onClose, 
-  title = "Frontend Developer", 
-  applicantCount = 12 
+  title = "", 
+  applicantCount = 0 
 }: ApplicantsModalProps) {
   const [newApplicantsSort, setNewApplicantsSort] = useState<SortOrder>('newest');
   const [allApplicantsSort, setAllApplicantsSort] = useState<SortOrder>('newest');
@@ -58,6 +59,27 @@ export default function ApplicantsModal({
       onClose();
     }
   };
+
+  // Show error if postId is missing
+  if (!postId) {
+    return (
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+        onClick={handleOverlayClick}
+      >
+        <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+          <h2 className="text-xl font-semibold text-red-600 mb-4">Error</h2>
+          <p className="text-gray-600">Post ID is required to view applicants.</p>
+          <button
+            onClick={onClose}
+            className="mt-4 px-4 py-2 bg-primary-400 text-white rounded hover:bg-primary-500"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -119,6 +141,7 @@ export default function ApplicantsModal({
             </div>
 
             <NewApplicantsSection 
+              postId={postId}
               sortOrder={newApplicantsSort} 
               searchQuery={searchQuery}
             />
@@ -145,6 +168,7 @@ export default function ApplicantsModal({
             </div>
 
             <AllApplicantsSection 
+              postId={postId}
               sortOrder={allApplicantsSort}
               searchQuery={searchQuery}
             />

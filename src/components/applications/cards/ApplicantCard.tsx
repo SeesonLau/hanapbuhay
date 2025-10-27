@@ -1,24 +1,49 @@
-  'use client';
+'use client';
 
-import React, { useState, useEffect } from 'react';
-import { FaUserCircle, FaStar } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaUserCircle } from 'react-icons/fa';
 import Image from 'next/image';
 import ChatIcon from '@/assets/chat.svg';
 import Button from '@/components/ui/Button';
 import StarRating from '@/components/ui/StarRating';
+import { ApplicationService } from '@/lib/services/applications-services';
+import { ApplicationStatus } from '@/lib/constants/application-status';
+import { toast } from 'react-hot-toast';
 
 interface ApplicantCardProps {
+  applicationId: string; 
   userId: string;
   name: string;
   rating: number;
   dateApplied: string;
+  onStatusChange?: (status: ApplicationStatus) => void; 
 }
 
-export default function ApplicantCard({ name, rating, dateApplied }: ApplicantCardProps) {
-
-  // mock backend values for now
+export default function ApplicantCard({
+  applicationId,
+  userId,
+  name,
+  rating,
+  dateApplied,
+  onStatusChange
+}: ApplicantCardProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const [averageRating, setAverageRating] = useState<number>(4.6);
   const [reviewCount, setReviewCount] = useState<number>(12);
+
+  const handleStatusChange = async (newStatus: ApplicationStatus) => {
+    try {
+      setIsLoading(true);
+      await ApplicationService.updateApplicationStatus(applicationId, newStatus, userId);
+
+      if (onStatusChange) onStatusChange(newStatus);
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to update application status.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-md p-4 w-full max-w-[300px] aspect-[300/172] flex flex-col justify-between border border-gray-neutral200 transition-transform duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg hover:bg-gray-50">
@@ -59,10 +84,20 @@ export default function ApplicantCard({ name, rating, dateApplied }: ApplicantCa
 
       {/* Approve / Deny Buttons */}
       <div className="flex justify-between gap-3 mt-3">
-        <Button variant="approve" size="approveDeny">
+        <Button
+          variant="approve"
+          size="approveDeny"
+          disabled={isLoading}
+          onClick={() => handleStatusChange(ApplicationStatus.APPROVED)}
+        >
           Approve
         </Button>
-        <Button variant="deny" size="approveDeny">
+        <Button
+          variant="deny"
+          size="approveDeny"
+          disabled={isLoading}
+          onClick={() => handleStatusChange(ApplicationStatus.REJECTED)}
+        >
           Deny
         </Button>
       </div>
