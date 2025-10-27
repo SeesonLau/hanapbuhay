@@ -4,7 +4,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import Banner from '@/components/ui/Banner';
-import ApplicantsModal from '@/components/modals/ApplicantsViewModal';
+import ApplicantsModal from '@/components/modals/ApplicantsModal';
 import JobPostViewModal, { JobPostViewData } from '@/components/modals/JobPostViewModal';
 import JobPostAddModal from '@/components/modals/JobPostAddModal';
 import JobPostEditModal from '@/components/modals/JobPostEditModal';
