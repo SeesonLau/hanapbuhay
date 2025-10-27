@@ -126,7 +126,7 @@ const Footer = () => {
             {/* Gmail Icon */}
             <button
               onClick={copyEmailToClipboard}
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-neutral-800 transition-colors relative"
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-neutral-800 transition-colors"
               aria-label="Copy email to clipboard"
               style={{ color: getNeutral100Color() }}
             >

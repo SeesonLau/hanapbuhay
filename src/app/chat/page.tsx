@@ -172,7 +172,7 @@ export default function ChatPage() {
     <div className="min-h-screen bg-gray-50">
       <Banner variant="chat" showSearchBar={false} />
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 mt-8">
+      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 pt-[240px]">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="flex h-[600px]">
             {/* Chat List Sidebar */}

@@ -65,8 +65,8 @@ const SimpleJobTypeAccordion: React.FC<SimpleJobTypeAccordionProps> = ({
           <div key={jobType}>
             {/* Job Type Header */}
             <div
-              className="flex items-center justify-between px-4 py-3 border-b border-gray-200 cursor-pointer hover:bg-gray-50"
-              style={{borderColor: getGrayColor('neutral300'), ...getTypographyStyle('body')}}
+              className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50"
+              style={{...getTypographyStyle('body')}}
               onClick={() => subTypes.length > 0 && toggleSection(jobType as JobType)}
             >
               <span 
@@ -100,7 +100,7 @@ const SimpleJobTypeAccordion: React.FC<SimpleJobTypeAccordionProps> = ({
                   const isChecked = selectedJobTypes[jobType]?.includes(subType) || false;
                   
                   return (
-                    <div key={subType} className="px-4 py-1 border-b border-gray-100 last:border-b-0">
+                    <div key={subType} className="px-4 py-1">
                       <Checkbox
                         label={subType}
                         checked={isChecked}
