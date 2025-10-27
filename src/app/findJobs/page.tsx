@@ -58,7 +58,7 @@ export default function FindJobsPage() {
   {/* Banner Section with Header and Search */}
   <Banner variant="findJobs" onSearch={handleSearch} />
 
-      <main className="pl-4 pr-4 pb-8 pt-8">
+      <main className="pl-4 pr-4 pb-8 pt-[240px]">
         {/* Stats Row */}
         <StatsSection stats={stats} variant="findJobs" loading={statsLoading} error={statsError} />
 

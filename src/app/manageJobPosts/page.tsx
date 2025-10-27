@@ -7,7 +7,6 @@ import Banner from '@/components/ui/Banner';
 import ApplicantsModal from '@/components/modals/ApplicantsViewModal';
 import JobPostViewModal, { JobPostViewData } from '@/components/modals/JobPostViewModal';
 import PostsSection from '@/components/posts/PostsSection';
-import { PostForm } from '@/components/mock/posts/PostForm';
 import { useJobPosts } from '@/hooks/useJobPosts';
 import { AuthService } from '@/lib/services/auth-services';
 import { Post } from '@/lib/models/posts';
@@ -78,11 +77,6 @@ export default function ManageJobPostsPage() {
             Cancel
           </button>
         </div>
-        <PostForm
-          post={selectedPost}
-          onSubmit={handlePostSaved}
-          onCancel={handleFormCancel}
-        />
       </div>
     );
   }

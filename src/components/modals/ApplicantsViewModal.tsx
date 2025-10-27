@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import NewApplicantsSection from '@/components/applications/NewApplicantsSection';
 import AllApplicantsSection from '@/components/applications/AllApplicantsSection';
 import SearchBar from '@/components/ui/SearchBar';
@@ -27,11 +27,12 @@ export default function ApplicantsModal({
   const [newApplicantsSort, setNewApplicantsSort] = useState<SortOrder>('newest');
   const [allApplicantsSort, setAllApplicantsSort] = useState<SortOrder>('newest');
   const [searchQuery, setSearchQuery] = useState('');
-
-  if (!isOpen) return null;
+  
+  // Refresh triggers for both sections
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query);
+    setSearchQuery(query);  
   };
 
   const truncateTitle = (text: string, maxLength: number = 30) => {
@@ -59,6 +60,14 @@ export default function ApplicantsModal({
       onClose();
     }
   };
+
+   // ✅ Move all hooks before any return
+  const handleStatusChange = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
+
+  // ✅ Single early return after all hooks
+  if (!isOpen) return null;
 
   // Show error if postId is missing
   if (!postId) {
@@ -144,6 +153,8 @@ export default function ApplicantsModal({
               postId={postId}
               sortOrder={newApplicantsSort} 
               searchQuery={searchQuery}
+              refreshTrigger={refreshTrigger}
+              onStatusChange={handleStatusChange}
             />
           </section>
 
@@ -171,6 +182,7 @@ export default function ApplicantsModal({
               postId={postId}
               sortOrder={allApplicantsSort}
               searchQuery={searchQuery}
+              refreshTrigger={refreshTrigger}
             />
           </section>
         </div>

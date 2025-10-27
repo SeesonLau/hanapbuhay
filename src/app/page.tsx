@@ -226,11 +226,15 @@ export default function HomePage() {
                 onMouseOver={(e) => {
                   if (!e.currentTarget.disabled) {
                     e.currentTarget.style.backgroundColor = getBlueDarkColor('default');
+                    e.currentTarget.style.color = 'white';
+                    e.currentTarget.style.outlineColor = getBlueDarkColor('default');
                   }
                 }}
                 onMouseOut={(e) => {
                   if (!e.currentTarget.disabled) {
                     e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = getBlueDarkColor('default');
+                    e.currentTarget.style.outlineColor = getBlueDarkColor('default');
                   }
                 }}
               >

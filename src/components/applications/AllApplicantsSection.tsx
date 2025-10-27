@@ -23,6 +23,7 @@ interface AllApplicantsSectionProps {
   postId: string;
   sortOrder?: SortOrder;
   searchQuery?: string;
+  refreshTrigger?: number;
 }
 
 // Delimiter to remove from display names
@@ -31,7 +32,8 @@ const NAME_DELIMITER = " | ";
 export default function AllApplicantsSection({ 
   postId,
   sortOrder = 'newest',
-  searchQuery = ''
+  searchQuery = '',
+  refreshTrigger = 0
 }: AllApplicantsSectionProps) {
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +47,7 @@ export default function AllApplicantsSection({
           postId,
           {
             status: [ApplicationStatus.APPROVED, ApplicationStatus.REJECTED],
-            pageSize: 100, // Fetch a large number to get all
+            pageSize: 100,
             sortBy: 'createdAt',
             sortOrder: 'desc'
           }
@@ -56,11 +58,16 @@ export default function AllApplicantsSection({
             const profileData = await ProfileService.getNameProfilePic(app.userId);
             
             // Clean the name by removing delimiter
-            const cleanName = profileData?.name 
-              ? profileData.name.replace(NAME_DELIMITER, " ") 
-              : "Unknown User";
+            const cleanName = profileData?.name
+              ? (() => {
+                  const [firstPart, lastPart] = profileData.name.split(NAME_DELIMITER);
+                  const firstName = firstPart?.trim().split(' ')[0] || '';
+                  const lastName = lastPart?.trim() || '';
+                  return `${firstName} ${lastName}`.trim();
+                })()
+              : 'Unknown User';
 
-            const cardStatus: 'Approved' | 'Rejected' = 
+            const cardStatus: 'Approved' | 'Rejected' =
               app.status === ApplicationStatus.APPROVED ? 'Approved' : 'Rejected';
 
             return {
@@ -88,7 +95,7 @@ export default function AllApplicantsSection({
     };
 
     fetchApplicants();
-  }, [postId]);
+  }, [postId, refreshTrigger]); 
 
   // Filter and sort applicants
   const filteredAndSortedApplicants = useMemo(() => {

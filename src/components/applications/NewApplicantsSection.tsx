@@ -22,6 +22,8 @@ interface NewApplicantsSectionProps {
   postId: string;
   sortOrder?: SortOrder;
   searchQuery?: string;
+  refreshTrigger?: number;
+  onStatusChange?: () => void;
 }
 
 // Delimiter to remove from display names
@@ -31,6 +33,8 @@ export default function NewApplicantsSection({
   postId,
   sortOrder = 'newest',
   searchQuery = '',
+  refreshTrigger = 0,
+  onStatusChange,
 }: NewApplicantsSectionProps) {
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +59,12 @@ export default function NewApplicantsSection({
 
           // Clean the name by removing delimiter
           const cleanName = profileData?.name
-            ? profileData.name.replace(NAME_DELIMITER, ' ')
+            ? (() => {
+                const [firstPart, lastPart] = profileData.name.split(NAME_DELIMITER);
+                const firstName = firstPart?.trim().split(' ')[0] || '';
+                const lastName = lastPart?.trim() || '';
+                return `${firstName} ${lastName}`.trim();
+              })()
             : 'Unknown User';
 
           return {
@@ -83,7 +92,7 @@ export default function NewApplicantsSection({
 
   useEffect(() => {
     fetchApplicants();
-  }, [fetchApplicants]);
+  }, [fetchApplicants, refreshTrigger]);
 
   // Filter and sort applicants
   const filteredAndSortedApplicants = useMemo(() => {
@@ -104,7 +113,6 @@ export default function NewApplicantsSection({
     });
   }, [applicants, sortOrder, searchQuery]);
 
-  // ✅ Scroll logic
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isScrollable, setIsScrollable] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
@@ -124,9 +132,13 @@ export default function NewApplicantsSection({
     return () => el.removeEventListener('scroll', handleScroll);
   }, [filteredAndSortedApplicants]);
 
-  const handleStatusChange = async (status: ApplicationStatus) => {
-    await fetchApplicants();
-  };
+  const handleCardStatusChange = useCallback((status: ApplicationStatus) => {
+    console.log('Status changed to:', status); 
+    if (onStatusChange) {
+      console.log('Calling parent onStatusChange'); 
+      onStatusChange();
+    }
+  }, [onStatusChange]);
 
   if (loading) {
     return (
@@ -162,7 +174,7 @@ export default function NewApplicantsSection({
                   name={applicant.name}
                   rating={applicant.rating}
                   dateApplied={applicant.dateApplied}
-                  onStatusChange={handleStatusChange} 
+                  onStatusChange={handleCardStatusChange}
                 />
               </div>
             ))}
