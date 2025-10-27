@@ -239,6 +239,29 @@ export class ApplicationService {
     }
   }
 
+  // Get applications count by user ID with optional status filter
+  static async getApplicationsByUserIdCount(userId: string, options: { status?: string } = {}): Promise<number> {
+    try {
+      const { status } = options;
+      let query = supabase
+        .from('applications')
+        .select('*', { count: 'exact', head: true })
+        .eq('userId', userId)
+        .is('deletedAt', null);
+
+      if (status) {
+        query = query.eq('status', status);
+      }
+
+      const { count, error } = await query;
+      if (error) throw error;
+      return count || 0;
+    } catch (error) {
+      toast.error(ApplicationMessages.FETCH_APPLICATIONS_ERROR);
+      throw error;
+    }
+  }
+
   // Get total applications count by post ID
   static async getTotalApplicationsByPostIdCount(postId: string): Promise<number> {
     try {
