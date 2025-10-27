@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 import { PostService } from "@/lib/services/posts-services";
 import { ApplicationService } from "@/lib/services/applications-services";
-import { supabase } from "@/lib/services/supabase/client";
+import type { Post } from "@/lib/models/posts";
 
-type JobPostData = {
+const PAGE_SIZE = 10;
+
+export interface JobPostData {
   id: string;
   title: string;
   description: string;
@@ -17,133 +20,147 @@ type JobPostData = {
   genderTags?: string[];
   experienceTags?: string[];
   jobTypeTags?: string[];
-};
-
-interface LoadParams {
-  searchTerm?: string;
-  location?: string;
-  isLoadMore?: boolean;
-  page?: number;
-  pageSize?: number;
+  raw?: Post;
 }
 
-const PAGE_SIZE = 10;
+function formatPeso(value: any) {
+  const n = Number(value ?? 0);
+  return `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function formatPostedDate(iso?: string) {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString("en-PH", { month: "long", day: "numeric", year: "numeric" });
+  } catch {
+    return iso;
+  }
+}
 
 export function useJobPosts(userId?: string | null) {
   const [jobs, setJobs] = useState<JobPostData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
 
-  const formatPeso = (amount: number) => {
-    try {
-      return amount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    } catch {
-      return String(amount);
-    }
-  };
-
-  const formatPostedDate = (iso: string) => {
-    try {
-      const d = new Date(iso);
-      return d.toLocaleDateString("en-PH", { month: "long", day: "numeric", year: "numeric" });
-    } catch {
-      return iso;
-    }
-  };
-
-  const mapPost = (post: any, applicantCount = 0): JobPostData => ({
+  const mapPost = (post: Post, applicantCount = 0): JobPostData => ({
     id: post.postId,
     title: post.title,
-    description: post.description,
-    location: post.location,
-    salary: formatPeso(post.price),
+    description: post.description ?? "",
+    location: post.location ?? "",
+    salary: formatPeso((post as any).price),
     salaryPeriod: "month",
     postedDate: formatPostedDate(post.createdAt),
     applicantCount,
     genderTags: [],
     experienceTags: [],
-    jobTypeTags: post.subType || [post.type].filter(Boolean),
+    jobTypeTags: post.subType ?? (post.type ? [post.type] : []),
+    raw: post,
   });
 
-  const load = useCallback(async (params: LoadParams = {}) => {
-    if (!userId && typeof userId !== 'undefined') {
-      setJobs([]);
-      setError("User not authenticated");
-      return;
-    }
-
-    if (params.isLoadMore) {
-      if (!hasMoreData || isLoadingMore) return;
-      setIsLoadingMore(true);
-    } else {
-      setLoading(true);
-      setCurrentPage(1);
-      setJobs([]);
-    }
-    setError(null);
+  const load = useCallback(async (params: { page?: number; isLoadMore?: boolean; searchTerm?: string; location?: string } = {}) => {
+    const page = params.page ?? 1;
+    const isLoadMore = params.isLoadMore ?? false;
 
     try {
-      const requestParams = {
-        ...params,
-        page: params.isLoadMore ? currentPage : 1,
-        pageSize: PAGE_SIZE
+      if (isLoadMore) setIsLoadingMore(true);
+      else setLoading(true);
+
+      const requestParams: any = {
+        page,
+        pageSize: PAGE_SIZE,
+        ...(params.searchTerm ? { searchTerm: params.searchTerm } : {}),
+        ...(params.location ? { location: params.location } : {}),
       };
-      delete requestParams.isLoadMore;
 
-      // Get the current user's ID from the session
-      const { data: { session } } = await supabase.auth.getSession();
-      const currentUserId = session?.user?.id;
-
-      // If userId is provided, we're in manage mode, so show only that user's posts
-      // Otherwise, in find mode, show all posts except current user's posts
-      let svcResult;
+      let svcResult: any;
       if (userId) {
         svcResult = await PostService.getPostsByUserId(userId, requestParams);
       } else {
-        // In find mode, exclude current user's posts
-        svcResult = await PostService.getAllPosts({
-          ...requestParams,
-          excludeUserId: currentUserId
-        });
+        svcResult = await PostService.getAllPosts(requestParams);
       }
 
-      const posts = svcResult?.posts || [];
-      const counts = await Promise.all(posts.map((p: any) => ApplicationService.getTotalApplicationsByPostIdCount(p.postId).catch(() => 0)));
-      const mapped = posts.map((p: any, idx: number) => mapPost(p, counts[idx] ?? 0));
+      const posts: Post[] = svcResult?.posts ?? [];
+      const counts = await Promise.all(posts.map((p) => ApplicationService.getTotalApplicationsByPostIdCount(p.postId).catch(() => 0)));
+      const mapped = posts.map((p, idx) => mapPost(p, counts[idx] ?? 0));
 
-      if (params.isLoadMore) {
-        setJobs(prev => [...prev, ...mapped]);
-        setCurrentPage(prev => prev + 1);
+      if (isLoadMore) {
+        setJobs((prev) => [...prev, ...mapped]);
+        setCurrentPage(page);
       } else {
         setJobs(mapped);
+        setCurrentPage(page);
       }
 
-      setHasMoreData(svcResult.hasMore);
+      setHasMoreData(Boolean(svcResult?.hasMore));
+      setError(null);
     } catch (err) {
-      setError("Failed to load posts");
       console.error("Error loading posts:", err);
+      setError("Failed to load posts");
     } finally {
-      if (params.isLoadMore) {
-        setIsLoadingMore(false);
-      } else {
-        setLoading(false);
-      }
+      setLoading(false);
+      setIsLoadingMore(false);
     }
-  }, [userId, currentPage, hasMoreData, isLoadingMore]);
+  }, [userId]);
 
   useEffect(() => {
-    load();
+    // load first page when userId changes (or on mount)
+    load({ page: 1 });
   }, [load]);
 
-  const handleSearch = async (query: string, location?: string) => {
-    await load({ searchTerm: query, location });
-  };
+  const handleSearch = useCallback(async (query: string, location?: string) => {
+    await load({ page: 1, searchTerm: query, location });
+  }, [load]);
 
-  const loadMore = useCallback(() => {
-    return load({ isLoadMore: true });
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMoreData) return;
+    await load({ page: currentPage + 1, isLoadMore: true });
+  }, [isLoadingMore, hasMoreData, currentPage, load]);
+
+  const deletePost = useCallback(async (postId: string) => {
+    if (!userId) throw new Error("User not authenticated");
+    try {
+      await PostService.deletePost(postId, userId);
+      toast.success("Post deleted successfully");
+      // refresh
+      await load({ page: 1 });
+    } catch (err) {
+      toast.error("Failed to delete post");
+      throw err;
+    }
+  }, [userId, load]);
+
+  const updatePost = useCallback(async (postId: string, postData: Partial<Post> | any) => {
+    if (!userId) throw new Error("User not authenticated");
+    try {
+      const updated = await PostService.updatePost(postId, postData);
+      // After updating, refresh the list
+      await load({ page: 1 });
+      return updated;
+    } catch (err) {
+      console.error("Failed to update post:", err);
+      throw err;
+    }
+  }, [userId, load]);
+
+  const createPost = useCallback(async (postData: Omit<Post, 'postId' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'deletedBy'>) => {
+    if (!userId) throw new Error("User not authenticated");
+    try {
+      const created = await PostService.createPost(postData);
+      // After creating, refresh the list
+      await load({ page: 1 });
+      return created;
+    } catch (err) {
+      console.error("Failed to create post:", err);
+      throw err;
+    }
+  }, [userId, load]);
+
+  const refresh = useCallback(async () => {
+    await load({ page: 1 });
   }, [load]);
 
   return {
@@ -154,8 +171,9 @@ export function useJobPosts(userId?: string | null) {
     hasMore: hasMoreData,
     handleSearch,
     loadMore,
-    refresh: () => load()
+    refresh,
+    deletePost,
+    updatePost,
+    createPost,
   };
 }
-
-export type { JobPostData };

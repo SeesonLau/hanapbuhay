@@ -12,38 +12,62 @@ import { getExperienceOptions } from "@/lib/constants/experience-level";
 import { JobType, getJobTypeOptions, SubTypes } from "@/lib/constants/job-types";
 import { GenderTag, ExperienceLevelTag, JobTypeTag } from "@/components/ui/TagItem";
 import type { JobPostAddFormData } from "./JobPostAddModal";
+import type { Post } from '@/lib/models/posts';
 
 interface JobPostEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialData?: Partial<JobPostAddFormData> & { subTypes?: string[] };
+  // Accept a Post directly (page was passing `post`) – we'll derive initialData from it if provided
+  post?: Post | null;
   onSubmit?: (data: JobPostAddFormData & { subTypes?: string[] }) => void;
 }
 
-export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmit }: JobPostEditModalProps) {
-  const [title, setTitle] = useState(initialData?.title ?? "");
-  const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>(initialData?.jobTypes ?? []);
-  const [selectedSubTypes, setSelectedSubTypes] = useState<string[]>(initialData?.subTypes ?? []);
-  const [selectedExperience, setSelectedExperience] = useState<string[]>(initialData?.experienceLevels ?? []);
-  const [selectedGenders, setSelectedGenders] = useState<string[]>(initialData?.genders ?? []);
-  const [country, setCountry] = useState(initialData?.country ?? "Philippines");
-  const [province, setProvince] = useState(initialData?.province ?? "Cebu");
-  const [city, setCity] = useState(initialData?.city ?? "Cebu City");
-  const [address, setAddress] = useState(initialData?.address ?? "");
-  const [salary, setSalary] = useState(initialData?.salary ?? "");
-  const [salaryPeriod, setSalaryPeriod] = useState<'day' | 'week' | 'month'>(initialData?.salaryPeriod ?? "day");
-  const [about, setAbout] = useState(initialData?.about ?? "");
-  const [qualifications, setQualifications] = useState(initialData?.qualifications ?? "");
+function mapPostToInitial(post: Post): Partial<JobPostAddFormData> & { subTypes?: string[] } {
+  return {
+    title: post.title ?? "",
+    jobTypes: post.type ? [post.type] : [],
+    experienceLevels: [],
+    genders: [],
+    country: "Philippines",
+    province: "",
+    city: post.location ?? "",
+    address: "",
+    salary: (typeof post.price === 'number') ? String(post.price) : (post.price ?? ""),
+    salaryPeriod: 'month',
+    about: post.description ?? "",
+    qualifications: "",
+    subTypes: post.subType ?? [],
+  };
+}
+
+export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmit, post }: JobPostEditModalProps) {
+  const resolvedInitial = initialData ?? (post ? mapPostToInitial(post) : undefined);
+  const [title, setTitle] = useState(resolvedInitial?.title ?? "");
+  const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>(resolvedInitial?.jobTypes ?? []);
+  const [selectedSubTypes, setSelectedSubTypes] = useState<string[]>(resolvedInitial?.subTypes ?? []);
+  const [selectedExperience, setSelectedExperience] = useState<string[]>(resolvedInitial?.experienceLevels ?? []);
+  const [selectedGenders, setSelectedGenders] = useState<string[]>(resolvedInitial?.genders ?? []);
+  const [country, setCountry] = useState(resolvedInitial?.country ?? "Philippines");
+  const [province, setProvince] = useState(resolvedInitial?.province ?? "Cebu");
+  const [city, setCity] = useState(resolvedInitial?.city ?? "Cebu City");
+  const [address, setAddress] = useState(resolvedInitial?.address ?? "");
+  const [salary, setSalary] = useState(resolvedInitial?.salary ?? "");
+  const [salaryPeriod, setSalaryPeriod] = useState<'day' | 'week' | 'month'>(resolvedInitial?.salaryPeriod ?? "day");
+  const [about, setAbout] = useState(resolvedInitial?.about ?? "");
+  const [qualifications, setQualifications] = useState(resolvedInitial?.qualifications ?? "");
   const [otherJobTypeText, setOtherJobTypeText] = useState(() => {
-    const subs = initialData?.subTypes ?? [];
+    const subs = resolvedInitial?.subTypes ?? [];
     const unknown = subs.find((s) => !Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(s)));
     return unknown ?? "";
   });
 
-  // Sync state when initialData changes (ensure first-open shows tags)
+  // Sync state when `initialData` or `post` changes. Compute resolvedInitial locally
+  // to avoid object-identity changes causing repeated effects.
   useEffect(() => {
-    const nextJobTypes = initialData?.jobTypes ?? [];
-    const nextSubTypes = initialData?.subTypes ?? [];
+    const ri = initialData ?? (post ? mapPostToInitial(post) : undefined);
+    const nextJobTypes = ri?.jobTypes ?? [];
+    const nextSubTypes = ri?.subTypes ?? [];
     const nextUnknown = nextSubTypes.find((s) => !Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(s)));
 
     // Fallback: derive job types from subTypes if jobTypes not provided
@@ -58,29 +82,29 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
       derivedJobTypes = Array.from(new Set([...derivedJobTypes, JobType.OTHER]));
     }
 
-    setTitle(initialData?.title ?? "");
+    setTitle(ri?.title ?? "");
     setSelectedJobTypes(derivedJobTypes);
     setSelectedSubTypes(nextSubTypes);
-    setSelectedExperience(initialData?.experienceLevels ?? []);
-    setSelectedGenders(initialData?.genders ?? []);
-    setCountry(initialData?.country ?? "Philippines");
-    setProvince(initialData?.province ?? "Cebu");
-    setCity(initialData?.city ?? "Cebu City");
-    setAddress(initialData?.address ?? "");
-    setSalary(initialData?.salary ?? "");
-    setSalaryPeriod(initialData?.salaryPeriod ?? "day");
-    setAbout(initialData?.about ?? "");
-    setQualifications(initialData?.qualifications ?? "");
+    setSelectedExperience(ri?.experienceLevels ?? []);
+    setSelectedGenders(ri?.genders ?? []);
+    setCountry(ri?.country ?? "Philippines");
+    setProvince(ri?.province ?? "Cebu");
+    setCity(ri?.city ?? "Cebu City");
+    setAddress(ri?.address ?? "");
+    setSalary(ri?.salary ?? "");
+    setSalaryPeriod(ri?.salaryPeriod ?? "day");
+    setAbout(ri?.about ?? "");
+    setQualifications(ri?.qualifications ?? "");
     setOtherJobTypeText(nextUnknown ?? "");
-  }, [initialData]);
+  }, [initialData, post]);
 
   const jobTypeOptions = useMemo(() => getJobTypeOptions(), []);
   const experienceOptions = useMemo(() => getExperienceOptions(), []);
   const genderOptions = useMemo(() => getGenderOptions(), []);
 
   // Compute effective selections for first render before state sync
-  const initialSubTypes = initialData?.subTypes ?? [];
-  const initialJobTypes = initialData?.jobTypes ?? [];
+  const initialSubTypes = resolvedInitial?.subTypes ?? [];
+  const initialJobTypes = resolvedInitial?.jobTypes ?? [];
   const initialUnknown = initialSubTypes.find((s) => !Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(s)));
   const derivedInitialJobTypes = (initialJobTypes.length === 0 && initialSubTypes.length > 0)
     ? Array.from(new Set(
@@ -95,7 +119,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
   const effectiveJobTypes = selectedJobTypes.length ? selectedJobTypes : derivedInitialWithOther;
   const effectiveSubTypes = selectedSubTypes.length ? selectedSubTypes : initialSubTypes;
 
-  if (!isOpen || !initialData) return null;
+  if (!isOpen || !resolvedInitial) return null;
 
   const toggleArrayValue = (arr: string[], value: string) => {
     return arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value];
