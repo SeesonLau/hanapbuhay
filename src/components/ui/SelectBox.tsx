@@ -12,6 +12,7 @@ export interface SelectBoxProps extends React.SelectHTMLAttributes<HTMLSelectEle
   width?: string;
   className?: string;
   responsive?: boolean;
+  placeholder?: string;
 }
 
 const SelectBox = forwardRef<HTMLSelectElement, SelectBoxProps>(({
@@ -27,6 +28,7 @@ const SelectBox = forwardRef<HTMLSelectElement, SelectBoxProps>(({
   responsive = true,
   value,
   onChange,
+  placeholder,
   ...props
 }, ref) => {
 
@@ -65,13 +67,18 @@ const SelectBox = forwardRef<HTMLSelectElement, SelectBoxProps>(({
       <div className="relative w-full">
         <select
           ref={ref}
-          value={value}
+          value={value ?? ''}
           onChange={onChange}
           disabled={disabled}
           required={required}
           className={selectClasses}
           {...props}
         >
+          {placeholder && (
+            <option value="" disabled hidden>
+              {placeholder}
+            </option>
+          )}
           {options.map(opt => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}

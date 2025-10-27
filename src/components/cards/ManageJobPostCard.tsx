@@ -28,6 +28,7 @@ interface ManageJobPostCardProps {
   className?: string;
   onOpen?: (data: JobPostData) => void;
   onViewApplicants?: (data: JobPostData) => void;
+  onEdit?: (data: JobPostData) => void;
 }
 
 export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({ 
@@ -35,6 +36,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
   className = '',
   onOpen,
   onViewApplicants,
+  onEdit,
 }) => {
   const {
     title,
@@ -138,17 +140,17 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
 
   return (
     <div 
-      className={`w-[420px] bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-300 cursor-pointer ${className}`}
+      className={`w-[420px] h-[250px] min-h-[250px] max-h-[250px] bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-300 cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
       {/* Header */}
-      <div className="flex-shrink-0 mb-[15px]">
+      <div className="flex-shrink-0 mb-[16px]">
         <h3 className={`${fontClasses.heading} font-semibold text-[20px] mb-2 truncate`} style={{ color: getBlackColor() }}>{title}</h3>
-        <p className={`${fontClasses.body} font-light text-[12px] line-clamp-2`} style={{ color: getNeutral600Color() }}>{description}</p>
+        <p className={`${fontClasses.body} font-light text-[12px] line-clamp-1`} style={{ color: getNeutral600Color() }}>{description}</p>
       </div>
 
       {/* Tags Section - Single row that adapts to fit */}
-      <div className="mb-[15px]">
+      <div className="mb-[16px]">
         {/* Hidden measurers to calculate widths without wrapping */}
         <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
           {allTags.map((tag, index) => (
@@ -188,7 +190,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="flex-shrink-0 space-y-[15px]">
+      <div className="mt-auto space-y-[16px]">
         {/* Location and Salary */}
         <div className="flex items-center gap-2">
           <StaticLocationTag label={location} />
@@ -206,11 +208,9 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
             <span className="text-blue-600 mr-1">{applicantCount}</span>
             <img src="/icons/profile.svg" alt="Applicants" className="w-[15px] h-[15px]" />
           </button>
-          
-          <button className="flex items-center justify-center flex-1 h-[30px] bg-white border-t border-b border-gray-300 hover:bg-gray-50 transition-colors">
+          <button className="flex items-center justify-center flex-1 h-[30px] bg-white border-t border-b border-gray-300 hover:bg-gray-50 transition-colors" onClick={(e) => { e.stopPropagation(); onEdit?.(jobData); }}>
             <img src="/icons/edit.svg" alt="Edit" className="w-[15px] h-[15px]" />
           </button>
-          
           <button className="flex items-center justify-center flex-1 h-[30px] bg-white border border-gray-300 rounded-r-[10px] hover:bg-gray-50 transition-colors">
             <img src="/icons/delete.svg" alt="Delete" className="w-[15px] h-[15px]" />
           </button>
