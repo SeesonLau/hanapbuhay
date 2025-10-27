@@ -3,99 +3,32 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { HiArrowDown } from 'react-icons/hi';
 import ApplicantStatusCard from './cards/ApplicantStatusCard';
-import { ApplicationService } from '@/lib/services/applications-services';
-import { ProfileService } from '@/lib/services/profile-services';
-import { ApplicationStatus } from '@/lib/constants/application-status';
-import { toast } from 'react-hot-toast';
 
 interface Applicant {
   userId: string;
   name: string;
-  status: 'Approved' | 'Rejected';
+  status: 'Accepted' | 'Denied';
   rating: number;
   dateApplied: string;
-  applicationId: string;
 }
 
 type SortOrder = 'newest' | 'oldest';
 
 interface AllApplicantsSectionProps {
-  postId: string;
   sortOrder?: SortOrder;
   searchQuery?: string;
-  refreshTrigger?: number;
 }
 
-// Delimiter to remove from display names
-const NAME_DELIMITER = " | ";
-
 export default function AllApplicantsSection({ 
-  postId,
   sortOrder = 'newest',
-  searchQuery = '',
-  refreshTrigger = 0
+  searchQuery = ''
 }: AllApplicantsSectionProps) {
-  const [applicants, setApplicants] = useState<Applicant[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchApplicants = async () => {
-      try {
-        setLoading(true);
-        
-        const { applications } = await ApplicationService.getApplicationsByPostId(
-          postId,
-          {
-            status: [ApplicationStatus.APPROVED, ApplicationStatus.REJECTED],
-            pageSize: 100,
-            sortBy: 'createdAt',
-            sortOrder: 'desc'
-          }
-        );
-
-        const applicantsWithProfiles = await Promise.all(
-          applications.map(async (app) => {
-            const profileData = await ProfileService.getNameProfilePic(app.userId);
-            
-            // Clean the name by removing delimiter
-            const cleanName = profileData?.name
-              ? (() => {
-                  const [firstPart, lastPart] = profileData.name.split(NAME_DELIMITER);
-                  const firstName = firstPart?.trim().split(' ')[0] || '';
-                  const lastName = lastPart?.trim() || '';
-                  return `${firstName} ${lastName}`.trim();
-                })()
-              : 'Unknown User';
-
-            const cardStatus: 'Approved' | 'Rejected' =
-              app.status === ApplicationStatus.APPROVED ? 'Approved' : 'Rejected';
-
-            return {
-              userId: app.userId,
-              name: cleanName,
-              status: cardStatus,
-              rating: 0,
-              dateApplied: new Date(app.createdAt).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-              }),
-              applicationId: app.applicationId
-            };
-          })
-        );
-
-        setApplicants(applicantsWithProfiles);
-      } catch (error) {
-        console.error('Error fetching applicants:', error);
-        toast.error('Failed to load applicants');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchApplicants();
-  }, [postId, refreshTrigger]); 
+  const applicants: Applicant[] = [
+    { userId: '1', name: 'Maria Santos', status: 'Accepted', rating: 4.5, dateApplied: 'Oct 5, 2025' },
+    { userId: '2', name: 'Juan Dela Cruz', status: 'Denied', rating: 4.5, dateApplied: 'Oct 8, 2025' },
+    { userId: '3', name: 'Ana Lopez', status: 'Denied', rating: 4.5, dateApplied: 'Oct 2, 2025' },
+    { userId: '4', name: 'Carlos Reyes', status: 'Accepted', rating: 4.5, dateApplied: 'Oct 7, 2025' },
+  ];
 
   // Filter and sort applicants
   const filteredAndSortedApplicants = useMemo(() => {
@@ -117,7 +50,7 @@ export default function AllApplicantsSection({
       
       return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
-  }, [applicants, sortOrder, searchQuery]);
+  }, [sortOrder, searchQuery]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isScrollable, setIsScrollable] = useState(false);
@@ -138,14 +71,6 @@ export default function AllApplicantsSection({
     return () => el.removeEventListener("scroll", handleScroll);
   }, [filteredAndSortedApplicants]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative">
       <div
@@ -154,28 +79,25 @@ export default function AllApplicantsSection({
       >
         {filteredAndSortedApplicants.length === 0 ? (
           <div className="col-span-2 text-center py-8 text-gray-neutral400">
-            {searchQuery.trim() 
-              ? `No applicants found matching "${searchQuery}"`
-              : 'No accepted or denied applicants yet'
-            }
+            No applicants found matching "{searchQuery}"
           </div>
         ) : (
           filteredAndSortedApplicants.map((applicant, index) => (
             <ApplicantStatusCard
-              key={`${applicant.applicationId}-${index}`}
+              key={`${applicant.userId}-${index}`}
               userId={applicant.userId}
               name={applicant.name}
               rating={applicant.rating}
               dateApplied={applicant.dateApplied}
-              status={applicant.status === 'Approved' ? 'Accepted' : 'Denied'}
+              status={applicant.status}
             />
           ))
         )}
       </div>
 
       {isScrollable && !isAtBottom && filteredAndSortedApplicants.length > 0 && (
-        <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center">
-          <HiArrowDown className="w-4 h-4 animate-bounce text-gray-neutral500" />
+        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 bg-gradient-to-t from-white/95 to-transparent text-sm text-gray-neutral500">
+          <HiArrowDown className="w-4 h-4 animate-bounce" />
         </div>
       )}
     </div>

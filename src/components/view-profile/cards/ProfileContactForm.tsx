@@ -55,7 +55,7 @@ export default function ProfileContactForm({
         />
       </div>
       
-      <div className="flex flex-col gap-">
+      <div className="flex flex-col gap-3">
         {/* Email */}
         <div className="flex items-center gap-2">
           <HiOutlineMail className="w-5 h-5 text-gray-neutral500 flex-shrink-0" />

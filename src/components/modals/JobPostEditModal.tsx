@@ -9,7 +9,8 @@ import SelectBox from "@/components/ui/SelectBox";
 import Button from "@/components/ui/Button";
 import { getGenderOptions } from "@/lib/constants/gender";
 import { getExperienceOptions } from "@/lib/constants/experience-level";
-import { JobType, getJobTypeOptions, SubTypes } from "@/lib/constants/job-types";
+import { getJobTypeOptions, SubTypes } from "@/lib/constants/job-types";
+import type { JobType } from "@/lib/constants/job-types";
 import { GenderTag, ExperienceLevelTag, JobTypeTag } from "@/components/ui/TagItem";
 import type { JobPostAddFormData } from "./JobPostAddModal";
 
@@ -34,29 +35,20 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
   const [salaryPeriod, setSalaryPeriod] = useState<'day' | 'week' | 'month'>(initialData?.salaryPeriod ?? "day");
   const [about, setAbout] = useState(initialData?.about ?? "");
   const [qualifications, setQualifications] = useState(initialData?.qualifications ?? "");
-  const [otherJobTypeText, setOtherJobTypeText] = useState(() => {
-    const subs = initialData?.subTypes ?? [];
-    const unknown = subs.find((s) => !Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(s)));
-    return unknown ?? "";
-  });
 
   // Sync state when initialData changes (ensure first-open shows tags)
   useEffect(() => {
     const nextJobTypes = initialData?.jobTypes ?? [];
     const nextSubTypes = initialData?.subTypes ?? [];
-    const nextUnknown = nextSubTypes.find((s) => !Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(s)));
 
     // Fallback: derive job types from subTypes if jobTypes not provided
-    let derivedJobTypes = (nextJobTypes.length === 0 && nextSubTypes.length > 0)
+    const derivedJobTypes = (nextJobTypes.length === 0 && nextSubTypes.length > 0)
       ? Array.from(new Set(
           Object.entries(SubTypes)
             .filter(([, subs]) => nextSubTypes.some(s => subs.includes(s)))
             .map(([jt]) => jt)
         ))
       : nextJobTypes;
-    if (nextUnknown) {
-      derivedJobTypes = Array.from(new Set([...derivedJobTypes, JobType.OTHER]));
-    }
 
     setTitle(initialData?.title ?? "");
     setSelectedJobTypes(derivedJobTypes);
@@ -71,7 +63,6 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
     setSalaryPeriod(initialData?.salaryPeriod ?? "day");
     setAbout(initialData?.about ?? "");
     setQualifications(initialData?.qualifications ?? "");
-    setOtherJobTypeText(nextUnknown ?? "");
   }, [initialData]);
 
   const jobTypeOptions = useMemo(() => getJobTypeOptions(), []);
@@ -81,7 +72,6 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
   // Compute effective selections for first render before state sync
   const initialSubTypes = initialData?.subTypes ?? [];
   const initialJobTypes = initialData?.jobTypes ?? [];
-  const initialUnknown = initialSubTypes.find((s) => !Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(s)));
   const derivedInitialJobTypes = (initialJobTypes.length === 0 && initialSubTypes.length > 0)
     ? Array.from(new Set(
         Object.entries(SubTypes)
@@ -89,10 +79,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
           .map(([jt]) => jt)
       ))
     : initialJobTypes;
-  const derivedInitialWithOther = initialUnknown
-    ? Array.from(new Set([...derivedInitialJobTypes, JobType.OTHER]))
-    : derivedInitialJobTypes;
-  const effectiveJobTypes = selectedJobTypes.length ? selectedJobTypes : derivedInitialWithOther;
+  const effectiveJobTypes = selectedJobTypes.length ? selectedJobTypes : derivedInitialJobTypes;
   const effectiveSubTypes = selectedSubTypes.length ? selectedSubTypes : initialSubTypes;
 
   if (!isOpen || !initialData) return null;
@@ -105,11 +92,6 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
   };
 
   const handleSubmit = () => {
-    const finalSubTypes = [...selectedSubTypes];
-    if (selectedJobTypes.includes(JobType.OTHER) && otherJobTypeText.trim().length > 0) {
-      const otherValue = otherJobTypeText.trim();
-      if (!finalSubTypes.includes(otherValue)) finalSubTypes.push(otherValue);
-    }
     const data: JobPostAddFormData & { subTypes?: string[] } = {
       title: title.trim(),
       jobTypes: selectedJobTypes,
@@ -123,7 +105,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
       salaryPeriod,
       about: about.trim(),
       qualifications: qualifications.trim(),
-      subTypes: finalSubTypes,
+      subTypes: selectedSubTypes,
     };
     onSubmit?.(data);
     onClose();
@@ -179,9 +161,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
               <div className="space-y-2">
                  {jobTypeOptions.map((opt) => {
                     const isSelected = effectiveJobTypes.includes(opt.value);
-                    const isOther = opt.value === JobType.OTHER;
                     const subList = SubTypes[opt.value as JobType] || [];
-                    const hasExpandableContent = isOther || subList.length > 0;
                     return (
                       <div key={opt.value} className="space-y-2">
                         <div
@@ -195,7 +175,6 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                             setSelectedJobTypes(prev => toggleArrayValue(prev, String(opt.value)));
                             if (isSelected) {
                               setSelectedSubTypes(prev => prev.filter(s => !subList.includes(s)));
-                              if (isOther) setOtherJobTypeText("");
                             }
                           }}
                           aria-expanded={isSelected}
@@ -206,36 +185,24 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                         <div
                           className="px-3"
                           style={{
-                            // Allow focus ring and rounded corners of the TextBox to render fully
-                            // when the "Other" input is visible. Keep hidden for chip lists.
-                            overflow: isSelected && isOther ? 'visible' : 'hidden',
-                            maxHeight: isSelected && hasExpandableContent ? '500px' : '0px',
-                            opacity: isSelected && hasExpandableContent ? 1 : 0,
+                            overflow: 'hidden',
+                            maxHeight: isSelected && subList.length > 0 ? '500px' : '0px',
+                            opacity: isSelected && subList.length > 0 ? 1 : 0,
                             transition: 'max-height 250ms ease, opacity 200ms ease',
-                            marginTop: isSelected && hasExpandableContent ? '8px' : '0px'
+                            marginTop: isSelected && subList.length > 0 ? '8px' : '0px'
                           }}
                         >
-                          {isOther ? (
-                            <div className="pt-2">
-                              <TextBox
-                                placeholder="Enter custom job type"
-                                value={otherJobTypeText}
-                                onChange={(e) => setOtherJobTypeText(e.target.value)}
+                          <div className="flex flex-wrap gap-2">
+                            {subList.map((sub) => (
+                              <JobTypeTag
+                                key={`${opt.value}-${sub}`}
+                                label={sub}
+                                selected={effectiveSubTypes.includes(sub)}
+                                onClick={() => toggleSubType(sub)}
+                                categoryIcon={`/icons/${opt.value}.svg`}
                               />
-                            </div>
-                          ) : (
-                            <div className="flex flex-wrap gap-2">
-                              {subList.map((sub) => (
-                                <JobTypeTag
-                                  key={`${opt.value}-${sub}`}
-                                  label={sub}
-                                  selected={effectiveSubTypes.includes(sub)}
-                                  onClick={() => toggleSubType(sub)}
-                                  categoryIcon={`/icons/${opt.value}.svg`}
-                                />
-                              ))}
-                            </div>
-                          )}
+                            ))}
+                          </div>
                         </div>
                       </div>
                     );
