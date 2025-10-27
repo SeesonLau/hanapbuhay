@@ -131,7 +131,7 @@ export default function ManageJobPostsPage() {
       {/* Banner Section with Header and Search */}
       <Banner variant="manageJobPosts" onSearch={handleSearch} onPostClick={() => setIsAddOpen(true)} />
 
-      <main className="pl-4 pr-4 pb-8 pt-2">
+      <main className="pl-4 pr-4 pb-8 pt-[240px]">
 
         {/* Job Posts Section */}
         <div className="mt-2 space-y-6">

@@ -141,7 +141,7 @@ export default function FindJobsPage() {
       {/* Banner Section with Header and Search */}
       <Banner variant="findJobs" onSearch={handleSearch} />
 
-      <main className="pl-4 pr-4 pb-8 pt-8">
+      <main className="pl-4 pr-4 pb-8 pt-[240px]">
         {/* Stats Row */}
         <div className="w-full mb-6">
           <div className="max-w-screen-2xl mx-auto flex flex-wrap md:flex-nowrap items-stretch gap-4 justify-center md:justify-between">

@@ -109,7 +109,7 @@ const Banner: React.FC<BannerProps> = ({
 
   return (
     <div 
-      className={`w-full font-inter ${className}`}
+      className={`w-full font-inter fixed top-0 left-0 right-0 z-40 ${className}`}
       style={{ 
         background: 'radial-gradient(55% 45% at 50% 70%, #666666 0%,  #000000 80.77%)'
       }}
@@ -126,9 +126,9 @@ const Banner: React.FC<BannerProps> = ({
       />
 
       {/* Banner Content Container - Left-aligned structure */}
-      <div className="flex flex-col pt-4 sm:pt-6 pb-6 sm:pb-8 px-12 sm:px-12 md:px-16 lg:px-32 w-full min-h-[230px]">
+      <div className="flex flex-col pt-2 pb-2 px-4 sm:pt-4 sm:px-6 md:px-16 lg:px-32 w-full min-h-[130px] max-h-[130px]">
         {/* Banner Text Section - Left-aligned typography and spacing */}
-        <div className={`text-start mb-4 sm:mb-5 w-full ${variant === 'profile' || variant === 'chat' ? 'mt-24' : 'mt-16'}`}>
+        <div className={`text-start mb-2 sm:mb-2 w-full ${variant === 'profile' || variant === 'chat' ? 'mt-6' : 'mt-0'}`}>
           <h1 className="text-body sm:text-body md:text-description lg:text-lead font-bold font-alexandria text-white leading-tight mb-2">
             {bannerContent.title}{' '}
             <span className="bg-gradient-to-r from-primary-primary400 to-primary-primary600 bg-clip-text text-transparent">
@@ -136,9 +136,7 @@ const Banner: React.FC<BannerProps> = ({
             </span>
             {bannerContent.subtitle && (
               <>
-                <br className="block sm:hidden" />
-                <span className="hidden sm:inline"> </span>
-                {bannerContent.subtitle}{' '}
+                {' '}{bannerContent.subtitle}{' '}
                 <span className="bg-gradient-to-r from-primary-primary400 to-primary-primary600 bg-clip-text text-transparent">
                   {bannerContent.subtitleHighlight}
                 </span>
