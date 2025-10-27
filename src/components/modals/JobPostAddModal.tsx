@@ -9,8 +9,7 @@ import SelectBox from "@/components/ui/SelectBox";
 import Button from "@/components/ui/Button";
 import { Gender, getGenderOptions } from "@/lib/constants/gender";
 import { ExperienceLevel, getExperienceOptions } from "@/lib/constants/experience-level";
-import { getJobTypeOptions, SubTypes } from "@/lib/constants/job-types";
-import type { JobType } from "@/lib/constants/job-types";
+import { JobType, getJobTypeOptions, SubTypes } from "@/lib/constants/job-types";
 import { GenderTag, ExperienceLevelTag, JobTypeTag } from "@/components/ui/TagItem";
 
 export interface JobPostAddFormData {
@@ -60,6 +59,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
   const [salaryPeriod, setSalaryPeriod] = useState<'day' | 'week' | 'month'>("day");
   const [about, setAbout] = useState("");
   const [qualifications, setQualifications] = useState("");
+  const [otherJobTypeText, setOtherJobTypeText] = useState("");
 
   const jobTypeOptions = useMemo(() => getJobTypeOptions(), []);
   const experienceOptions = useMemo(() => getExperienceOptions(), []);
@@ -75,6 +75,11 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
   };
 
   const handleSubmit = () => {
+    const finalSubTypes = [...selectedSubTypes];
+    if (selectedJobTypes.includes(JobType.OTHER) && otherJobTypeText.trim().length > 0) {
+      const otherValue = otherJobTypeText.trim();
+      if (!finalSubTypes.includes(otherValue)) finalSubTypes.push(otherValue);
+    }
     const data: JobPostAddFormData = {
       title: title.trim(),
       jobTypes: selectedJobTypes,
@@ -89,7 +94,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
       about: about.trim(),
       qualifications: qualifications.trim(),
       // @ts-expect-error allow optional for now without breaking callers
-      subTypes: selectedSubTypes,
+      subTypes: finalSubTypes,
     };
     onSubmit?.(data);
     onClose();
@@ -144,53 +149,68 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
               <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Job Type</div>
               <div className="space-y-2">
                  {jobTypeOptions.map((opt) => {
-                   const isSelected = selectedJobTypes.includes(opt.value);
-                   const subList = SubTypes[opt.value as JobType] || [];
-                   return (
-                     <div key={opt.value} className="space-y-2">
-                       <div
-                         className={`w-full py-2 px-3 rounded-md text-[12px] cursor-pointer transition-all duration-200 transform hover:scale-[1.02] hover:shadow-sm active:scale-[0.98]`}
-                         style={{
-                           backgroundColor: isSelected ? getNeutral100Color() : getWhiteColor(),
-                           color: getBlackColor(),
-                           border: `1px solid ${getNeutral300Color()}`
-                         }}
-                         onClick={() => {
-                           setSelectedJobTypes(prev => toggleArrayValue(prev, String(opt.value)));
-                           if (isSelected) {
-                             setSelectedSubTypes(prev => prev.filter(s => !subList.includes(s)));
-                           }
-                         }}
-                         aria-expanded={isSelected}
-                       >
-                         {opt.label}
-                       </div>
+                    const isSelected = selectedJobTypes.includes(opt.value);
+                    const isOther = opt.value === JobType.OTHER;
+                    const subList = SubTypes[opt.value as JobType] || [];
+                    const hasExpandableContent = isOther || subList.length > 0;
+                    return (
+                      <div key={opt.value} className="space-y-2">
+                        <div
+                          className={`w-full py-2 px-3 rounded-md text-[12px] cursor-pointer transition-all duration-200 transform hover:scale-[1.02] hover:shadow-sm active:scale-[0.98]`}
+                          style={{
+                            backgroundColor: isSelected ? getNeutral100Color() : getWhiteColor(),
+                            color: getBlackColor(),
+                            border: `1px solid ${getNeutral300Color()}`
+                          }}
+                          onClick={() => {
+                            setSelectedJobTypes(prev => toggleArrayValue(prev, String(opt.value)));
+                            if (isSelected) {
+                              setSelectedSubTypes(prev => prev.filter(s => !subList.includes(s)));
+                              if (isOther) setOtherJobTypeText("");
+                            }
+                          }}
+                          aria-expanded={isSelected}
+                        >
+                          {opt.label}
+                        </div>
 
-                       <div
-                         className="px-3"
-                         style={{
-                           overflow: 'hidden',
-                           maxHeight: isSelected && subList.length > 0 ? '500px' : '0px',
-                           opacity: isSelected && subList.length > 0 ? 1 : 0,
-                           transition: 'max-height 250ms ease, opacity 200ms ease',
-                           marginTop: isSelected && subList.length > 0 ? '8px' : '0px'
-                         }}
-                       >
-                         <div className="flex flex-wrap gap-2">
-                           {subList.map((sub) => (
-                             <JobTypeTag
-                               key={`${opt.value}-${sub}`}
-                               label={sub}
-                               selected={selectedSubTypes.includes(sub)}
-                               onClick={() => toggleSubType(sub)}
-                               categoryIcon={`/icons/${opt.value}.svg`}
-                             />
-                           ))}
-                         </div>
-                       </div>
-                     </div>
-                   );
-                 })}
+                        <div
+                          className="px-3"
+                          style={{
+                            // Allow focus ring and rounded corners of the TextBox to render fully
+                            // when the "Other" input is visible. Keep hidden for chip lists.
+                            overflow: isSelected && isOther ? 'visible' : 'hidden',
+                            maxHeight: isSelected && hasExpandableContent ? '500px' : '0px',
+                            opacity: isSelected && hasExpandableContent ? 1 : 0,
+                            transition: 'max-height 250ms ease, opacity 200ms ease',
+                            marginTop: isSelected && hasExpandableContent ? '8px' : '0px'
+                          }}
+                        >
+                          {isOther ? (
+                            <div className="pt-2">
+                              <TextBox
+                                placeholder="Enter custom job type"
+                                value={otherJobTypeText}
+                                onChange={(e) => setOtherJobTypeText(e.target.value)}
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex flex-wrap gap-2">
+                              {subList.map((sub) => (
+                                <JobTypeTag
+                                  key={`${opt.value}-${sub}`}
+                                  label={sub}
+                                  selected={selectedSubTypes.includes(sub)}
+                                  onClick={() => toggleSubType(sub)}
+                                  categoryIcon={`/icons/${opt.value}.svg`}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                </div>
              </div>
 
