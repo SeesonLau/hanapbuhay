@@ -5,7 +5,6 @@ import Banner from '@/components/ui/Banner';
 import StatsSection from '@/components/sections/StatsSection';
 import { useStats } from '@/hooks/useStats';
 import { AuthService } from '@/lib/services/auth-services';
-import { ApplicationsComponent } from '@/components/mock/applications/ApplicationsComponent';
 
 export default function AppliedJobsPage() {
   const [user, setUser] = useState<any | null>(null);
@@ -50,10 +49,7 @@ export default function AppliedJobsPage() {
           <div className="flex-1 bg-white rounded-lg shadow-md p-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-6">Applied Jobs</h1>
             {userId ? (
-              <ApplicationsComponent 
-                applications={[]} // The component fetches its own data
-                readOnly 
-              />
+              <div></div>
             ) : (
               <p className="text-lg text-gray-600">Please log in to view your applications.</p>
             )}
