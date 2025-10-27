@@ -239,22 +239,17 @@ export class ApplicationService {
     }
   }
 
-  // Get applications count by user ID with optional status filter
-  static async getApplicationsByUserIdCount(userId: string, options: { status?: string } = {}): Promise<number> {
+  // Get total applications count by post ID
+  static async getTotalApplicationsByPostIdCount(postId: string): Promise<number> {
     try {
-      const { status } = options;
-      let query = supabase
+      const { count, error } = await supabase
         .from('applications')
-        .select('*', { count: 'exact', head: true })
-        .eq('userId', userId)
+        .select('*', { count: 'exact' })
+        .eq('postId', postId)
         .is('deletedAt', null);
 
-      if (status) {
-        query = query.eq('status', status);
-      }
-
-      const { count, error } = await query;
       if (error) throw error;
+
       return count || 0;
     } catch (error) {
       toast.error(ApplicationMessages.FETCH_APPLICATIONS_ERROR);
@@ -262,24 +257,6 @@ export class ApplicationService {
     }
   }
 
-  // Get total applications count by post ID
-  static async getTotalApplicationsByPostIdCount(postId: string): Promise<number> {
-    try {
-      const { count, error } = await supabase
-        .from('applications')
-        .select('*', { count: 'exact' })
-        .eq('postId', postId)
-        .is('deletedAt', null)
-        .neq('status', ApplicationStatus.CANCELLED); // Exclude cancelled status
-
-      if (error) throw error;
-
-      return count || 0;
-    } catch (error) {
-      toast.error(ApplicationMessages.FETCH_APPLICATIONS_ERROR);
-      throw error;
-    }
-  }
   // Helper: Validate application status
   static validateApplicationStatus(status: string): status is ApplicationStatus {
     return Object.values(ApplicationStatus).includes(status as ApplicationStatus);

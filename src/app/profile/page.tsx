@@ -52,7 +52,7 @@ export default function ProfilePage() {
   }, [loading, user]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col mt-[220px]">
       <Preloader 
         message={PreloaderMessages.LOADING_PROFILE} 
         isVisible={!contentReady} 
@@ -67,7 +67,7 @@ export default function ProfilePage() {
           />
           
           <main className="flex-grow flex p-3">
-            <div className="w-full h-full flex flex-col md:flex-row gap-10 md:gap-0">
+            <div className="w-full flex flex-col md:flex-row gap-10 md:gap-0" >
               {user && <ProfileSection userId={user.userId} className="flex-1" />}
               <div className="hidden md:block w-px bg-gray-neutral300 md:-my-3"></div>
               {user && <ProjectsSection userId={user.userId} className="flex-1" />}

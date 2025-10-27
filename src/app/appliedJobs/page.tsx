@@ -1,32 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Banner from '@/components/ui/Banner';
-import StatsSection from '@/components/sections/StatsSection';
-import { useStats } from '@/hooks/useStats';
-import { AuthService } from '@/lib/services/auth-services';
+import StatCardAppliedJobs from '@/components/cards/StatCardAppliedJobs';
 
 export default function AppliedJobsPage() {
-  const [user, setUser] = useState<any | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const { stats, loading, error } = useStats({ variant: 'appliedJobs', userId });
-
-  useEffect(() => {
-    const getUser = async () => {
-      const current = await AuthService.getCurrentUser();
-      setUser(current ?? null);
-      setUserId(current?.id ?? null);
-    };
-    getUser();
-  }, []);
-
   const handleSearch = (query: string) => {
+    // Add your search logic here
     console.log('Searching for:', query);
   };
 
+  // Removed mock types and data (AppliedJob, sampleJobs) and delete handler
+
   const handleStatFilter = (type: 'total' | 'pending' | 'approved' | 'rejected') => {
     console.log('Selected stat:', type);
-    // TODO: filter applied jobs by status
+    // TODO: Filter applied jobs list by selected status (not implemented yet)
   };
 
   return (
@@ -42,17 +29,16 @@ export default function AppliedJobsPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
           {/* Left Stats Sidebar */}
           <div className="flex flex-col gap-4 md:sticky md:top-6">
-            <StatsSection stats={stats} variant="appliedJobs" loading={loading} error={error} onStatClick={handleStatFilter} />
+            <StatCardAppliedJobs type="total" onClick={handleStatFilter} />
+            <StatCardAppliedJobs type="pending" onClick={handleStatFilter} />
+            <StatCardAppliedJobs type="approved" onClick={handleStatFilter} />
+            <StatCardAppliedJobs type="rejected" onClick={handleStatFilter} />
           </div>
 
           {/* Right Main Content Container */}
           <div className="flex-1 bg-white rounded-lg shadow-md p-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-6">Applied Jobs</h1>
-            {userId ? (
-              <div></div>
-            ) : (
-              <p className="text-lg text-gray-600">Please log in to view your applications.</p>
-            )}
+            <p className="text-lg text-gray-600">Track your job applications here. Content coming soon...</p>
           </div>
         </div>
       </main>

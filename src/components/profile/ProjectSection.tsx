@@ -57,7 +57,7 @@ export default function ProjectsSection({ userId, className }: ProjectsSectionPr
   return (
     <div className={`${className} flex flex-col gap-2 px-5 relative`}>
       <div className="flex items-center gap-4">
-        <h3 className="font-inter font-bold text-gray-neutral700">
+        <h3 className="text-description font-inter font-bold text-gray-neutral700">
           Add Work Experience
         </h3>
         <button
@@ -96,7 +96,7 @@ export default function ProjectsSection({ userId, className }: ProjectsSectionPr
 
       {/* Scroll hint */}
       {isScrollable && !isAtBottom && (
-        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center p-2 text-sm text-gray-neutral500 pointer-events-none">
+        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 bg-gradient-to-t from-white/95 to-transparent p-0 text-sm text-gray-neutral500 pointer-events-none">
           <HiArrowDown className="w-4 h-4 animate-bounce" />
         </div>
       )}

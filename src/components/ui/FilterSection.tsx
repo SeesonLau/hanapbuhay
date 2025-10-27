@@ -113,9 +113,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 
   return (
     <div
-      className={`flex flex-col bg-white overflow-hidden w-full max-w-[240px] h-auto max-h-[982px] ${className}`}
+      className={`flex flex-col bg-white overflow-hidden w-full h-full ${className}`}
       style={{
-        padding: '20px 24px',
+        padding: '20px 18px',
         gap: '10px',
       }}
     >
@@ -136,7 +136,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       <div className="w-full h-[1px] mb-4 bg-gray-neutral200" />
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto pr-2 space-y-5 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar pb-4">
         {/* Job Type Section */}
         <div className="space-y-3">
           <h3 className="text-body font-inter font-bold text-gray-neutral900">
@@ -250,19 +250,19 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             />
           </div>
         </div>
-      </div>
 
-      {/* Apply Button */}
-      <div className="mt-2">
-        <Button
-          variant="primary"
-          size="md"
-          onClick={handleApply}
-          className="w-full"
-          fullRounded
-        >
-          Apply
-        </Button>
+        {/* Apply Button - Inside scrollable area */}
+        <div className="pt-3">
+          <Button
+            variant="primary"
+            size="md"
+            onClick={handleApply}
+            className="w-full"
+            fullRounded
+          >
+            Apply
+          </Button>
+        </div>
       </div>
 
       <style jsx>{`

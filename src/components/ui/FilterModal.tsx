@@ -74,7 +74,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
       {/* Modal Panel - Slide from left */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-full max-w-[250px] sm:max-w-[250px] bg-white shadow-2xl transform transition-transform duration-300 ease-out flex flex-col"
+        className="absolute left-0 top-0 bottom-0 w-full max-w-[240px] bg-white shadow-2xl transform transition-transform duration-300 ease-out flex flex-col"
         style={{
           transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
         }}
@@ -86,7 +86,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
             onApply={handleApply}
             onClearAll={onClearAll}
             initialFilters={initialFilters}
-            className="max-w-full h-full"
+            className="w-full h-full"
           />
         </div>
 
