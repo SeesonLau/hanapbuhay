@@ -6,6 +6,9 @@ import { passwordRequirements } from '@/lib/constants';
 import { validatePassword } from '@/lib/utils/validation';
 import { Modal } from '@/components/modals/Modal';
 import Button from '@/components/ui/Button';
+import TextBox from '@/components/ui/TextBox';
+import Image from 'next/image';
+import { IoArrowBack } from "react-icons/io5";
 import { 
   getGrayColor, 
   getNeutral600Color, 
@@ -16,7 +19,13 @@ import {
   getBlueDarkColor
 } from '@/styles';
 
-export const SignupForm: React.FC = () => {
+interface SignupFormProps {
+  onBackClick?: () => void;
+  onSignInClick?: () => void;
+}
+
+export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInClick }) => {
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -83,115 +92,155 @@ export const SignupForm: React.FC = () => {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div 
-            className="p-3 rounded-md text-sm"
-            style={{
-              backgroundColor: '#FEF2F2',
-              color: '#DC2626',
-              border: '1px solid #FECACA'
-            }}
+      <div className="w-full max-w-md mx-auto">
+        {/* Back Button */}
+        {onBackClick && (
+          <button
+            onClick={onBackClick}
+            className="mb-1 p-2 hover:bg-gray-neutral100 rounded-full transition-colors"
+            aria-label="Go back"
           >
-            {error}
-          </div>
+            <IoArrowBack className="w-6 h-6 text-gray-neutral800" />
+          </button>
         )}
 
-        <div>
-          <label 
-            className={`block ${TYPOGRAPHY_CLASSES.small} font-medium text-gray-700`}
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Enter your email"
+        {/* Logo */}
+        <div className="flex justify-center mb-0">
+          <Image
+            src="/image/hanapbuhay-logo-notext.svg"
+            alt="HanapBuhay Logo"
+            width={80}
+            height={80}
+            priority
           />
         </div>
 
-        <div>
-          <label 
-            className={`block ${TYPOGRAPHY_CLASSES.small} font-medium text-gray-700`}
-          >
-            Password
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              checkPasswordRequirements(e.target.value);
-            }}
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Create a password"
-          />
+        {/* Title */}
+        <h2 className="text-h3 font-bold text-gray-neutral900 text-center mb-4 font-alexandria">
+          Sign Up
+        </h2>
 
-          {/* Password Requirements List */}
-          <div className="mt-2 p-3 rounded-md bg-gray-50 border border-gray-200">
-            <p className="text-sm font-medium text-gray-700 mb-2">
-              Password must contain:
-            </p>
-            <ul className="space-y-1 text-sm">
-              {passwordRequirements.map((requirement, index) => {
-                const status = getRequirementStatus(requirement);
-                return (
-                  <li
-                    key={index}
-                    className="flex items-center"
-                    style={{
-                      color: status.isMet ? '#059669' : status.isError ? '#DC2626' : '#4B5563'
-                    }}
-                  >
-                    <span
-                      className="mr-2"
-                      style={{
-                        color: status.isMet ? '#059669' : '#4B5563'
-                      }}
-                    >
-                      {status.isMet ? '✓' : '•'}
-                    </span>
-                    {requirement.label}
-                  </li>
-                );
-              })}
-            </ul>
+        <form onSubmit={handleSubmit} className="space-y-3 px-6 pb-4">
+          {error && (
+            <div className="p-3 rounded-lg text-small bg-error-50 text-error-700 border border-error-200">
+              {error}
+            </div>
+          )}
+
+          {/* Full Name */}
+          <div>
+            <TextBox
+              type="text"
+              label="Full Name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+              placeholder="Juan Dela Cruz"
+              enableValidation={false}
+            />
           </div>
-        </div>
 
-        <div>
-          <label 
-            className={`block ${TYPOGRAPHY_CLASSES.small} font-medium text-gray-700`}
+          {/* Email */}
+          <div>
+            <TextBox
+              type="email"
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="juan.cruz@gmail.com"
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <TextBox
+              type="password"
+              label="Password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                checkPasswordRequirements(e.target.value);
+              }}
+              required
+              placeholder="••••••••"
+              enableValidation={false}
+            />
+
+            {/* Password Requirements List - Only show when password has content */}
+            {password.length > 0 && (
+              <div className="mt-3 p-3 rounded-lg bg-gray-neutral50 border border-gray-neutral200">
+                <p className="text-small font-medium text-gray-neutral700 mb-2 font-inter">
+                  Password must contain:
+                </p>
+                <ul className="space-y-1 text-small font-inter">
+                  {passwordRequirements.map((requirement, index) => {
+                    const status = getRequirementStatus(requirement);
+                    return (
+                      <li
+                        key={index}
+                        className="flex items-center"
+                        style={{
+                          color: status.isMet ? '#46BB27' : status.isError ? '#EE4546' : '#6A706F'
+                        }}
+                      >
+                        <span
+                          className="mr-2"
+                          style={{
+                            color: status.isMet ? '#46BB27' : '#6A706F'
+                          }}
+                        >
+                          {status.isMet ? '✓' : '•'}
+                        </span>
+                        {requirement.label}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <TextBox
+              type="password"
+              label="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+              enableValidation={false}
+            />
+          </div>
+          
+          {/* Sign Up Button */}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full justify-center text-body font-semibold mt-8"
+            isLoading={loading}
+            variant="primary"
+            size="md"
+            fullRounded={true}
+            useCustomHover={true}
           >
-            Confirm Password
-          </label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Confirm your password"
-          />
-        </div>
-        
-        <Button
-          type="submit"
-          disabled={loading}
-          className="w-full justify-center"
-          isLoading={loading}
-          variant="primary"
-          size="lg"
-          fullRounded={true}
-          useCustomHover={true}
-        >
-          {loading ? 'Creating account...' : 'Create Account'}
-        </Button>
-      </form>
+            {loading ? 'Creating account...' : 'Sign Up'}
+          </Button>
+
+          {/* Sign In Link */}
+          <p className="text-center text-small text-gray-neutral600 mt-6 font-alexandria font-light">
+            Already have an account? Sign in{' '}
+            <button
+              type="button"
+              onClick={onSignInClick}
+              className="font-alexandria font-light text-small text-primary-primary500 hover:text-primary-primary600 font-light hover:underline"
+            >
+            here
+            </button>
+          </p>
+        </form>
+      </div>
 
       <Modal
         isOpen={showValidationModal}

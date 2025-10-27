@@ -48,8 +48,8 @@ export default function BenefitsSection() {
                 {/* Column 1 - For Clients */}
                 <div className="space-y-8">
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-20 h-20 rounded-full bg-blue-500 bg-opacity-20 flex items-center justify-center mb-5">
-                      <FaHandshake className="text-3xl text-blue-400" />
+                    <div className="w-20 h-20 rounded-full bg-neutral-50 bg-opacity-20 flex items-center justify-center mb-5">
+                      <FaHandshake className="text-3xl text-neutral-100" />
                     </div>
                     <h3 
                       className={`text-3xl font-bold mb-5 ${fontClasses.heading}`}
@@ -84,8 +84,8 @@ export default function BenefitsSection() {
                 {/* Column 2 - For Workers */}
                 <div className="space-y-8">
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-20 h-20 rounded-full bg-purple-500 bg-opacity-20 flex items-center justify-center mb-5">
-                      <FaBriefcase className="text-3xl text-purple-400" />
+                    <div className="w-20 h-20 rounded-full bg-neutral-50 bg-opacity-20 flex items-center justify-center mb-5">
+                      <FaBriefcase className="text-3xl text-neutral-100" />
                     </div>
                     <h3 
                       className={`text-3xl font-bold mb-5 ${fontClasses.heading}`}
