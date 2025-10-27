@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import Banner from '@/components/ui/Banner';
-import { AuthService } from '@/lib/services/auth-services';
 import ChatList from '@/components/chat/ChatList';
 import MessageList from '@/components/chat/MessageList';
 import MessageInput from '@/components/chat/MessageInput';
@@ -170,13 +169,8 @@ export default function ChatPage() {
   const activeChatRoom = chatRooms.find(room => room.id === activeChat);
 
   return (
-    <div className="min-h-screen">
-      {/* Banner Section with Header */}
-      <Banner
-        variant="chat"
-        showSearchBar={false}
-        userName={user?.email ?? user?.id}
-      />
+    <div className="min-h-screen bg-gray-50">
+      <Banner variant="chat" showSearchBar={false} />
 
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 mt-8">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
