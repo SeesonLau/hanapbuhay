@@ -1,7 +1,7 @@
 // src/components/chat/UserListItem.tsx
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { cn } from "@/lib/utils";
 import type { SearchResult, ChatRoom } from '@/lib/services/chat/chat-services';
 import { format } from 'date-fns';

@@ -1,8 +1,7 @@
 // src/components/chat/ChatHeader.tsx
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import type { ChatRoom } from '@/lib/services/chat/chat-services';
 
 interface ChatHeaderProps {

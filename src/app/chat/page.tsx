@@ -2,10 +2,10 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { RealtimeChat } from '@/components/chat/realtime-chat'; 
+import { RealtimeChat } from '@/components/chat/RealtimeChat'; 
 import Banner from '@/components/ui/Banner'; 
 import { Spinner } from '@/components/chat/Spinner'; 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 
 // Import your services
 import { AuthService } from "@/lib/services/auth-services";
