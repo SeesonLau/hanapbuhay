@@ -1,9 +1,14 @@
-import { createClient } from '@supabase/supabase-js';
+// src/lib/services/supabase/client.ts
+
+// NOTE: Since this is a client-side Supabase client, we use @supabase/supabase-js
+// (If you were using Next.js App Router SSR/Middleware, you'd use @supabase/ssr)
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+// Export the INSTANCE of the Supabase client
+export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
   db: {
     schema: 'public' // Explicitly specify the schema
   },
@@ -12,3 +17,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     fetch: (...args) => fetch(...args),
   }
 });
+
+// Since the hook expects a function named 'createClient', 
+// we'll export a function with that name that returns the instance.
+// This matches the common pattern used by shadcn/ui and Supabase blocks.
+export function createClient() {
+    return supabase;
+}

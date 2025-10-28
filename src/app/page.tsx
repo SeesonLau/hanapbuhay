@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { FiArrowLeft } from 'react-icons/fi';
 import HeaderHome from '@/components/ui/HeaderHome';
 import BenefitsSection from '@/components/home/BenefitsSection';
@@ -25,6 +25,12 @@ type AuthView = 'default' | 'signup' | 'login' | 'forgot-password';
 export default function HomePage() {
   const [authView, setAuthView] = useState<AuthView>('default');
   const [isScrolled, setIsScrolled] = useState(false);
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll();
+  
+  // Parallax effects
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, -100]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -356,32 +362,39 @@ export default function HomePage() {
       />
 
       {/* Hero Section with Text and Image */}
-      <section className="min-h-screen flex items-center justify-center px-4 py-12 pt-24 relative z-10">
+      <motion.section 
+        ref={heroRef}
+        className="min-h-screen flex items-center justify-center px-4 py-12 pt-24 relative z-10"
+        style={{ 
+          y: authView === 'default' ? heroY : 0,
+          opacity: authView === 'default' ? heroOpacity : 1
+        }}
+      >
         <AnimatePresence mode="wait">
           {authView === 'default' ? (
             <motion.div 
               key="landing-page"
               className="container mx-auto flex flex-col md:flex-row items-center justify-center gap-12 md:gap-16 lg:gap-24"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.05 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, scale: 1.02 }}
               transition={{ 
-                duration: 0.5, 
+                duration: 0.6, 
                 ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
               }}
             >
               {/* Left side - Hero Text */}
               <motion.div 
                 className="flex-1 text-white space-y-6 max-w-lg"
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ 
-                  duration: 0.6, 
+                  duration: 0.8, 
                   delay: 0.2,
                   ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
                 }}
               >
-                <h1 
+                <motion.h1 
                   className={fontClasses.heading}
                   style={{
                     fontSize: TYPOGRAPHY.hero.fontSize,
@@ -389,75 +402,129 @@ export default function HomePage() {
                     lineHeight: TYPOGRAPHY.hero.lineHeight
                   }}
                 >
-                  <span className="block">Connecting People,</span>
-                  <span className="block">Creating Opportunities</span>
-                </h1>
-                <p 
+                  <motion.span 
+                    className="block"
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ 
+                      duration: 0.6, 
+                      delay: 0.3,
+                      ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
+                    }}
+                  >
+                    Connecting People,
+                  </motion.span>
+                  <motion.span 
+                    className="block"
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ 
+                      duration: 0.6, 
+                      delay: 0.5,
+                      ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
+                    }}
+                  >
+                    Creating Opportunities
+                  </motion.span>
+                </motion.h1>
+                <motion.p 
                   className={`${fontClasses.body} text-gray-300`}
                   style={{
                     fontSize: TYPOGRAPHY.lead.fontSize,
                     fontWeight: TYPOGRAPHY.lead.fontWeight,
                     lineHeight: TYPOGRAPHY.lead.lineHeight
                   }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.6, 
+                    delay: 0.7,
+                    ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
+                  }}
                 >
                   HanapBuhay bridges people who need help with those who can offer it. Together, we make everyday life easier.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 mt-8">
-                  <Button 
-                    onClick={() => setAuthView('signup')}
-                    variant="primary"
-                    size="lg"
-                    useCustomHover={true}
-                    fullRounded={true}
-                    className="w-full sm:w-auto justify-center px-8 py-3 min-w-44"
+                </motion.p>
+                <motion.div 
+                  className="flex flex-col sm:flex-row gap-4 mt-8"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.6, 
+                    delay: 0.9,
+                    ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
+                  }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   >
-                    Sign Up
-                  </Button>
-                  <Button 
-                    onClick={() => setAuthView('login')}
-                    variant="ghost"
-                    size="lg"
-                    fullRounded={true}
-                    className="w-full sm:w-auto justify-center px-8 py-3 min-w-44"
-                    style={{
-                      outlineColor: getBlueDarkColor('default'),
-                      color: getBlueDarkColor('default'),
-                      backgroundColor: 'transparent',
-                      outline: '2px solid',
-                      outlineOffset: '-2px'
-                    }}
-                    onMouseOver={(e) => {
-                      if (!e.currentTarget.disabled) {
-                        e.currentTarget.style.backgroundColor = '#1453E1';
-                        e.currentTarget.style.color = 'white';
-                        e.currentTarget.style.outlineColor = '#1453E1';
-                      }
-                    }}
-                    onMouseOut={(e) => {
-                      if (!e.currentTarget.disabled) {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                        e.currentTarget.style.color = getBlueDarkColor('default');
-                        e.currentTarget.style.outlineColor = getBlueDarkColor('default');
-                      }
-                    }}
+                    <Button 
+                      onClick={() => setAuthView('signup')}
+                      variant="primary"
+                      size="lg"
+                      useCustomHover={true}
+                      fullRounded={true}
+                      className="w-full sm:w-auto justify-center px-8 py-3 min-w-44 shadow-lg hover:shadow-xl transition-shadow"
+                    >
+                      Sign Up
+                    </Button>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   >
-                    Login
-                  </Button>
-                </div>
+                    <Button 
+                      onClick={() => setAuthView('login')}
+                      variant="ghost"
+                      size="lg"
+                      fullRounded={true}
+                      className="w-full sm:w-auto justify-center px-8 py-3 min-w-44"
+                      style={{
+                        outlineColor: getBlueDarkColor('default'),
+                        color: getBlueDarkColor('default'),
+                        backgroundColor: 'transparent',
+                        outline: '2px solid',
+                        outlineOffset: '-2px'
+                      }}
+                      onMouseOver={(e) => {
+                        if (!e.currentTarget.disabled) {
+                          e.currentTarget.style.backgroundColor = '#1453E1';
+                          e.currentTarget.style.color = 'white';
+                          e.currentTarget.style.outlineColor = '#1453E1';
+                        }
+                      }}
+                      onMouseOut={(e) => {
+                        if (!e.currentTarget.disabled) {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = getBlueDarkColor('default');
+                          e.currentTarget.style.outlineColor = getBlueDarkColor('default');
+                        }
+                      }}
+                    >
+                      Login
+                    </Button>
+                  </motion.div>
+                </motion.div>
               </motion.div>
               
               {/* Right side - Image */}
               <motion.div 
                 className="flex-1 flex justify-center"
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
                 transition={{ 
-                  duration: 0.6, 
-                  delay: 0.3,
+                  duration: 0.8, 
+                  delay: 0.4,
                   ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
                 }}
               >
-                <div className="relative w-full max-w-xl h-[28rem] md:h-[32rem] lg:h-[36rem] rounded-lg overflow-hidden">
+                <motion.div 
+                  className="relative w-full max-w-xl h-[28rem] md:h-[32rem] lg:h-[36rem] rounded-lg overflow-hidden"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
                   <Image
                     src="/image/home-image1.png"
                     alt="People connecting through HanapBuhay"
@@ -466,16 +533,16 @@ export default function HomePage() {
                     priority
                     className="scale-125"
                   />
-                </div>
+                </motion.div>
               </motion.div>
             </motion.div>
           ) : (
             <motion.div 
               key="auth-view"
               className="w-full mt-4 max-w-7xl mx-auto flex flex-col md:flex-row min-h-[600px] bg-transparent rounded-3xl shadow-2xl overflow-hidden"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ 
                 duration: 0.5, 
                 ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
@@ -485,15 +552,20 @@ export default function HomePage() {
             </motion.div>
           )}
         </AnimatePresence>
-      </section>
+      </motion.section>
 
       {/* Other Sections - Only show when in default view */}
       {authView === 'default' && (
-        <div className="pt-16 relative z-10">
+        <motion.div 
+          className="pt-16 relative z-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
           <BenefitsSection />
           <HowItWorksSection />
           <TestimonialsSection />
-        </div>
+        </motion.div>
       )}
 
       {/* Footer Section - Added at the bottom */}

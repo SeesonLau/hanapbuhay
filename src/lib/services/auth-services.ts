@@ -114,7 +114,7 @@ export class AuthService {
         return { success: false, message: error.message };
       }
 
-      toast.success(AuthMessages.LOGIN_SUCCESS);
+      //toast.success(AuthMessages.LOGIN_SUCCESS);
       return { success: true, data: data.user };
     } catch (err) {
       toast.error(AuthMessages.UNEXPECTED_ERROR);
@@ -201,7 +201,7 @@ export class AuthService {
         toast.error(error.message);
         return { success: false, message: error.message };
       }
-      toast.success(AuthMessages.SIGNOUT_SUCCESS);
+      //toast.success(AuthMessages.SIGNOUT_SUCCESS);
       return { success: true, message: AuthMessages.SIGNOUT_SUCCESS };
     } catch (err) {
       toast.error(AuthMessages.UNEXPECTED_ERROR);
