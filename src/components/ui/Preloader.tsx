@@ -7,6 +7,8 @@ import rocketBye from "@/assets/Rocketbye.json";
 export const PreloaderMessages = {
   LOADING_PROFILE: "Loading profile",
   LOADING_PROJECTS: "Loading projects",
+  LOADING_JOBS: "Loading jobs",
+  LOADING_CHAT: "Loading chats",
   SAVING_PROFILE: "Saving profile",
   SAVING_PROJECT: "Saving project",
   UPLOADING_IMAGE: "Uploading image",

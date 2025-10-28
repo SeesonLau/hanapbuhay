@@ -18,6 +18,7 @@ import {
   getGreenColor,
   getBlueDarkColor
 } from '@/styles';
+import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 
 interface SignupFormProps {
   onBackClick?: () => void;
@@ -120,25 +121,18 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
           Sign Up
         </h2>
 
+        <Preloader
+      isVisible={loading}
+      message={PreloaderMessages.PROCESSING}
+      variant="default"
+    />
+
         <form onSubmit={handleSubmit} className="space-y-3 px-6 pb-4">
           {error && (
             <div className="p-3 rounded-lg text-small bg-error-50 text-error-700 border border-error-200">
               {error}
             </div>
           )}
-
-          {/* Full Name */}
-          <div>
-            <TextBox
-              type="text"
-              label="Full Name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-              placeholder="Juan Dela Cruz"
-              enableValidation={false}
-            />
-          </div>
 
           {/* Email */}
           <div>

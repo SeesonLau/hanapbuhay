@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button';
 import TextBox from '@/components/ui/TextBox';
 import Image from 'next/image';
 import { IoArrowBack } from "react-icons/io5";
+import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -88,6 +89,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
       <h2 className="text-h3 font-bold text-gray-neutral900 text-center mb-4 font-alexandria">
         Sign In
       </h2>
+
+      <Preloader
+      isVisible={loading}
+      message={PreloaderMessages.PROCESSING}
+      variant="default"
+    />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (

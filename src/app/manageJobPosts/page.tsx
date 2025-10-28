@@ -10,6 +10,7 @@ import JobPostAddModal from '@/components/modals/JobPostAddModal';
 import JobPostEditModal from '@/components/modals/JobPostEditModal';
 import DeleteModal from '@/components/ui/DeleteModal';
 import PostsSection from '@/components/posts/PostsSection';
+import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 import { useJobPosts } from '@/hooks/useJobPosts';
 import { AuthService } from '@/lib/services/auth-services';
 import { Post } from '@/lib/models/posts';
@@ -17,6 +18,7 @@ import { Post } from '@/lib/models/posts';
 export default function ManageJobPostsPage() {
   const [user, setUser] = useState<any | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true);
   const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, loadMore, refresh, deletePost, updatePost, createPost } = useJobPosts(userId, { skip: !userId });
   
   // Modal states
@@ -36,14 +38,22 @@ export default function ManageJobPostsPage() {
 
   useEffect(() => {
     const init = async () => {
-      const current = await AuthService.getCurrentUser();
-      if (!current) {
-        // Redirect to login if no user is found
+      setInitialLoading(true);
+      try {
+        const current = await AuthService.getCurrentUser();
+        if (!current) {
+          // Redirect to login if no user is found
+          window.location.href = '/auth/login';
+          return;
+        }
+        setUser(current);
+        setUserId(current.id);
+      } catch (error) {
+        console.error('Error fetching user:', error);
         window.location.href = '/auth/login';
-        return;
+      } finally {
+        setInitialLoading(false);
       }
-      setUser(current);
-      setUserId(current.id);
     };
     init();
   }, []);
@@ -124,6 +134,17 @@ export default function ManageJobPostsPage() {
       console.error('Error deleting post:', error);
     }
   };
+
+  // Show preloader while loading user data
+  if (initialLoading) {
+    return (
+      <Preloader
+        isVisible={initialLoading}
+        message={PreloaderMessages.LOADING_JOBS}
+        variant="default"
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen">
