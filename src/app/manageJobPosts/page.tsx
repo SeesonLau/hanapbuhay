@@ -155,60 +155,62 @@ export default function ManageJobPostsPage() {
         onPostClick={handleCreatePost}
       />
 
-      <main className="pl-4 pr-4 pb-8 pt-[240px]">
-        <PostsSection
-          jobs={jobs}
-          variant="manage"
-          loading={loading}
-          isLoadingMore={isLoadingMore}
-          error={error}
-          hasMore={hasMore}
-          viewMode={viewMode}
-          onViewModeChange={(v) => setViewMode(v)}
-          onLoadMore={loadMore as () => void}
-          onOpen={(data) => { setSelectedJob(data); setIsJobViewOpen(true); }}
-          onViewApplicants={handleOpenApplicants}
-          onEdit={handleEditPost}
-          onDelete={handleDeletePost}
-        />
+      <main className="pl-4 pr-4 pb-8 pt-[200px]">
+        <div className="px-4 md:px-6 lg:px-8 pb-8 max-w-full">
+          <PostsSection
+            jobs={jobs}
+            variant="manage"
+            loading={loading}
+            isLoadingMore={isLoadingMore}
+            error={error}
+            hasMore={hasMore}
+            viewMode={viewMode}
+            onViewModeChange={(v) => setViewMode(v)}
+            onLoadMore={loadMore as () => void}
+            onOpen={(data) => { setSelectedJob(data); setIsJobViewOpen(true); }}
+            onViewApplicants={handleOpenApplicants}
+            onEdit={handleEditPost}
+            onDelete={handleDeletePost}
+          />
 
-        {/* Modals */}
-        <JobPostAddModal 
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onSubmit={handlePostSaved}
-        />
+          {/* Modals */}
+          <JobPostAddModal 
+            isOpen={isAddModalOpen}
+            onClose={() => setIsAddModalOpen(false)}
+            onSubmit={handlePostSaved}
+          />
 
-        <JobPostEditModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onSubmit={handlePostSaved}
-          post={selectedPost}
-        />
+          <JobPostEditModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            onSubmit={handlePostSaved}
+            post={selectedPost}
+          />
 
-        <DeleteModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handlePostDeleted}
-          title="Delete Job Post"
-          description="Are you sure you want to delete this job post? This action cannot be undone."
-          confirmText="Delete"
-          variant="trash"
-        />
+          <DeleteModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+            onConfirm={handlePostDeleted}
+            title="Delete Job Post"
+            description="Are you sure you want to delete this job post? This action cannot be undone."
+            confirmText="Delete"
+            variant="trash"
+          />
 
-        <ApplicantsModal 
-          isOpen={isApplicantsModalOpen}
-          onClose={() => setIsApplicantsModalOpen(false)}
-          title={selectedApplicants?.title ?? 'Applicants'}
-          applicantCount={selectedApplicants?.applicantCount ?? 0}
-          postId={selectedApplicants?.postId}
-        />
+          <ApplicantsModal 
+            isOpen={isApplicantsModalOpen}
+            onClose={() => setIsApplicantsModalOpen(false)}
+            title={selectedApplicants?.title ?? 'Applicants'}
+            applicantCount={selectedApplicants?.applicantCount ?? 0}
+            postId={selectedApplicants?.postId}
+          />
 
-        <JobPostViewModal 
-          isOpen={isJobViewOpen} 
-          onClose={() => setIsJobViewOpen(false)} 
-          job={selectedJob}
-        />
+          <JobPostViewModal 
+            isOpen={isJobViewOpen} 
+            onClose={() => setIsJobViewOpen(false)} 
+            job={selectedJob}
+          />
+        </div>
       </main>
     </div>
   );

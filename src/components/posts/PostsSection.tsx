@@ -7,6 +7,7 @@ import { JobPostList } from "@/components/cards/JobPostList";
 import { ManageJobPostCard } from "@/components/cards/ManageJobPostCard";
 import { ManageJobPostList } from "@/components/cards/ManageJobPostList";
 import type { JobPostData } from "@/hooks/useJobPosts";
+import Sort from "@/components/ui/Sort";
 
 type Variant = "find" | "manage";
 
@@ -18,6 +19,7 @@ interface Props {
   error?: string | null;
   hasMore?: boolean;
   viewMode: "card" | "list";
+  onSortChange?: () => void;
   onViewModeChange: (v: "card" | "list") => void;
   onLoadMore?: () => void;
   onOpen?: (data: any) => void;
@@ -35,6 +37,7 @@ const PostsSection: React.FC<Props> = ({
   error,
   hasMore,
   viewMode,
+  onSortChange,
   onViewModeChange,
   onLoadMore,
   onOpen,
@@ -72,14 +75,16 @@ const PostsSection: React.FC<Props> = ({
 
   return (
     <div className="mt-8 space-y-6">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-4">
-        <div className="flex items-center gap-2 justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">View:</span>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <span className="text-small text-gray-neutral600 whitespace-nowrap">Showing: {jobs.length}</span>
+          </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-small text-gray-neutral600 whitespace-nowrap">Sort by:</span>
+            <Sort variant="findJobs" onChange={onSortChange} />
             <ViewToggle value={viewMode} onChange={onViewModeChange} />
           </div>
         </div>
-      </div>
 
       {viewMode === "card" ? (
         <div className="w-full flex justify-center">

@@ -291,27 +291,6 @@ export default function FindJobsPage() {
 
             {/* Job Posts Section */}
             <div className="mt-8 space-y-6">
-              {/* Controls Row with Filter Button */}
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                {/* Left side - Filter Button (Mobile) & Showing count */}
-                <div className="flex items-center gap-3">
-                  {/* Filter Button - Mobile Only */}
-                  <div className="lg:hidden">
-                    <FilterButton
-                      onClick={() => setIsFilterModalOpen(true)}
-                      filterCount={activeFilterCount}
-                    />
-                  </div>
-                  <span className="text-small text-gray-neutral600 whitespace-nowrap">Showing: {jobs.length}</span>
-                </div>
-                
-                {/* Right side - Sort & View Toggle */}
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="text-small text-gray-neutral600 whitespace-nowrap">Sort by</span>
-                  <Sort variant="findJobs" onChange={handleSortChange} />
-                  <ViewToggle value={viewMode} onChange={setViewMode} />
-                </div>
-              </div>
 
               {/* Display */}
               <PostsSection
@@ -326,6 +305,7 @@ export default function FindJobsPage() {
                 onLoadMore={loadMore as () => void}
                 onOpen={(data: any) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
                 onApply={(id: string) => console.log('apply', id)}
+                onSortChange={handleSortChange as () => void}
               />
             </div>
           </div>
