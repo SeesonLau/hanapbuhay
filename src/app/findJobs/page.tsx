@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import Banner from "@/components/ui/Banner";
 import ViewProfileModal from "@/components/modals/ViewProfileModal";
 import JobPostViewModal, { JobPostViewData } from "@/components/modals/JobPostViewModal";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { JobPostCard } from "@/components/cards/JobPostCard";
-import { StatCardFindJobs } from "@/components/cards/StatCardFindJobs";
+import StatsSection from '@/components/posts/StatsSection';
+import { useStats } from '@/hooks/useStats';
+import { useJobPosts } from '@/hooks/useJobPosts';
+import { AuthService } from '@/lib/services/auth-services';
+import PostsSection from '@/components/posts/PostsSection';
 import { JobPostList } from "@/components/cards/JobPostList";
-import { PostService } from "@/lib/services/posts-services";
-import { ApplicationService } from "@/lib/services/applications-services";
+// PostService and ApplicationService usage moved into useJobPosts hook
 import { Post } from "@/lib/models/posts";
 import Sort from "@/components/ui/Sort";
 import FilterSection, { FilterOptions } from "@/components/ui/FilterSection";
@@ -44,10 +47,27 @@ export default function FindJobsPage() {
   });
 
   const [posts, setPosts] = useState<Post[]>([]);
+  // replaced with useJobPosts
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [appCounts, setAppCounts] = useState<Record<string, number>>({});
   const [sortValue, setSortValue] = useState<string>('latest');
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Stats for the page (uses hook)
+  const { stats, loading: statsLoading, error: statsError } = useStats({ variant: 'findJobs', userId: currentUserId });
+
+  const {
+    jobs,
+    loading: jobsLoading,
+    isLoadingMore,
+    error: jobsError,
+    hasMore,
+    handleSearch: hookHandleSearch,
+    handleSort: hookHandleSort,
+    loadMore,
+    applyFilters,
+  } = useJobPosts(currentUserId ?? undefined, { excludeMine: true, excludeApplied: true });
 
   // Count active filters
   const activeFilterCount = useMemo(() => {
@@ -138,12 +158,45 @@ export default function FindJobsPage() {
     return sorted;
   }, [filteredPosts, sortValue]);
 
-  const handleSortChange = (opt: any) => {
-    setSortValue(String(opt?.value ?? 'latest'));
-  };
+  const handleSortChange = useCallback((opt: any) => {
+      const val = String(opt?.value ?? 'latest');
+      setSortValue(val);
+      // map UI sort values to service sort params
+      let sortBy: string = 'createdAt';
+      let sortOrder: 'asc' | 'desc' = 'desc';
+      switch (val) {
+        case 'latest':
+          sortBy = 'createdAt';
+          sortOrder = 'desc';
+          break;
+        case 'oldest':
+          sortBy = 'createdAt';
+          sortOrder = 'asc';
+          break;
+        case 'salary-asc':
+          sortBy = 'price';
+          sortOrder = 'asc';
+          break;
+        case 'salary-desc':
+          sortBy = 'price';
+          sortOrder = 'desc';
+          break;
+        case 'nearby':
+          sortBy = 'location';
+          sortOrder = 'asc';
+          break;
+        default:
+          break;
+      }
+      if (hookHandleSort) {
+        hookHandleSort(sortBy, sortOrder);
+      }
+    }, [hookHandleSort]);
 
   const handleApplyFilters = (filters: FilterOptions) => {
     setActiveFilters(filters);
+    // apply filters to the hook
+    applyFilters?.(filters);
   };
 
   const handleClearFilters = () => {
@@ -170,57 +223,19 @@ export default function FindJobsPage() {
   };
 
   const handleSearch = async (query: string, location?: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await PostService.getAllPosts({ searchTerm: query, location });
-      setPosts(result.posts);
-    } catch (err) {
-      setError("Failed to load posts");
-    } finally {
-      setLoading(false);
-    }
+    // delegate to hook
+    await hookHandleSearch(query, location);
   };
 
   useEffect(() => {
-    const loadInitial = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const result = await PostService.getAllPosts();
-        setPosts(result.posts);
-      } catch (err) {
-        setError("Failed to load posts");
-      } finally {
-        setLoading(false);
-      }
+    const initCurrentUser = async () => {
+      const current = await AuthService.getCurrentUser();
+      setCurrentUserId(current?.id ?? null);
     };
-    loadInitial();
+    initCurrentUser();
   }, []);
 
-  useEffect(() => {
-    const fetchCounts = async () => {
-      try {
-        const entries = await Promise.all(
-          posts.map(async (p) => {
-            try {
-              const count = await ApplicationService.getTotalApplicationsByPostIdCount(p.postId);
-              return [p.postId, count] as const;
-            } catch {
-              return [p.postId, 0] as const;
-            }
-          })
-        );
-        setAppCounts(Object.fromEntries(entries));
-      } catch {
-        // ignore count errors
-      }
-    };
-
-    if (posts.length) {
-      fetchCounts();
-    }
-  }, [posts]);
+  // remove manual counts -- hook already fetches applicant counts for each post
 
   const formatPeso = (amount: number) => {
     return amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -272,14 +287,7 @@ export default function FindJobsPage() {
         <main className="w-full lg:w-[calc(100%-240px)] lg:ml-[240px]">
           <div className="px-4 md:px-6 lg:px-8 pb-8 max-w-full">
             {/* Stats Row */}
-            <div className="w-full mb-4 mt-4">
-              <div className="flex items-stretch gap-4 justify-between">
-                <StatCardFindJobs title="Total Jobs" variant="blue" />
-                <StatCardFindJobs title="Completed" variant="green" />
-                <StatCardFindJobs title="Ratings" variant="yellow" />
-                <StatCardFindJobs title="Posted" variant="red" />
-              </div>
-            </div>
+            <StatsSection stats={stats} variant="findJobs" loading={statsLoading} error={statsError} />
 
             {/* Job Posts Section */}
             <div className="mt-8 space-y-6">
@@ -294,7 +302,7 @@ export default function FindJobsPage() {
                       filterCount={activeFilterCount}
                     />
                   </div>
-                  <span className="text-small text-gray-neutral600 whitespace-nowrap">Showing: {displayPosts.length}</span>
+                  <span className="text-small text-gray-neutral600 whitespace-nowrap">Showing: {jobs.length}</span>
                 </div>
                 
                 {/* Right side - Sort & View Toggle */}
@@ -306,45 +314,19 @@ export default function FindJobsPage() {
               </div>
 
               {/* Display */}
-              {loading ? (
-                <div className="text-center py-8">Loading job posts...</div>
-              ) : error ? (
-                <div className="text-center py-8 text-error-error500">{error}</div>
-              ) : displayPosts.length === 0 ? (
-                <div className="text-center py-8 text-gray-neutral500">No job posts available.</div>
-              ) : viewMode === 'card' ? (
-                <div className="w-full mt-6">
-                  <div className="flex flex-wrap items-center justify-center gap-3">
-                    {displayPosts.map((post) => {
-                      const jd = postToJobData(post);
-                      return (
-                        <JobPostCard
-                          key={post.postId}
-                          jobData={jd as any}
-                          onOpen={(data) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
-                          onApply={(id) => console.log('apply', id)}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : (
-                <div className="w-full overflow-x-auto mt-6">
-                  <div className="flex flex-col items-start gap-4 min-w-full">
-                    {displayPosts.map((post) => {
-                      const jd = postToJobData(post);
-                      return (
-                        <JobPostList
-                          key={post.postId}
-                          jobData={jd as any}
-                          onOpen={(data) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
-                          onApply={(id) => console.log('apply', id)}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+              <PostsSection
+                jobs={jobs}
+                variant="find"
+                loading={jobsLoading}
+                isLoadingMore={isLoadingMore}
+                error={jobsError}
+                hasMore={hasMore}
+                viewMode={viewMode}
+                onViewModeChange={(v: 'card' | 'list') => setViewMode(v)}
+                onLoadMore={loadMore as () => void}
+                onOpen={(data: any) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
+                onApply={(id: string) => console.log('apply', id)}
+              />
             </div>
           </div>
         </main>

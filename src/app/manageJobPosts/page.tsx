@@ -17,7 +17,7 @@ import { Post } from '@/lib/models/posts';
 export default function ManageJobPostsPage() {
   const [user, setUser] = useState<any | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, loadMore, refresh, deletePost, updatePost, createPost } = useJobPosts(userId, { skip: !userId });
+  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort, loadMore, refresh, deletePost, updatePost, createPost } = useJobPosts(userId, { skip: !userId });
   
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
