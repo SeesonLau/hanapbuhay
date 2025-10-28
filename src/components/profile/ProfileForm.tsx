@@ -16,6 +16,8 @@ interface ProfileFormProps {
   className?: string;
 }
 
+const NAME_DELIMITER = " | ";
+
 export default function ProfileForm({ userId, className }: ProfileFormProps) {
   const [profile, setProfile] = useState<Profile & { email?: string | null } | null>(null);
   const [firstName, setFirstName] = useState("");
@@ -38,9 +40,25 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
 
         if (profileData) {
           setProfile(profileData);
-          const [f, ...l] = (profileData.name ?? "").split(" ");
-          setFirstName(f ?? "");
-          setLastName(l.join(" ") ?? "");
+          
+          const fullName = profileData.name ?? "";
+          
+          if (fullName.includes(NAME_DELIMITER)) {
+            const [first, last] = fullName.split(NAME_DELIMITER);
+            setFirstName(first || "");
+            setLastName(last || "");
+          } else {
+            const lastSpaceIndex = fullName.lastIndexOf(" ");
+            
+            if (lastSpaceIndex === -1) {
+              setFirstName(fullName);
+              setLastName("");
+            } else {
+              setFirstName(fullName.substring(0, lastSpaceIndex));
+              setLastName(fullName.substring(lastSpaceIndex + 1));
+            }
+          }
+          
           setPreviewUrl(profileData.profilePictureUrl ?? null);
         }
 
@@ -49,7 +67,8 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
         }
 
         if (userName) {
-          setDisplayName(userName);
+          const cleanName = userName.replace(NAME_DELIMITER, " ");
+          setDisplayName(cleanName);
         }
       } catch (err) {
         toast.error(ProfileMessages.LOAD_ERROR);
@@ -98,11 +117,19 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
         uploadedUrl = result;
       }
 
-      const fullName = `${firstName} ${lastName}`.trim();
-      const success = await ProfileService.upsertProfile({ ...profile, name: fullName, profilePictureUrl: uploadedUrl });
+      // Store with delimiter to preserve the exact split between first and last name
+      const storedName = `${firstName.trim()}${NAME_DELIMITER}${lastName.trim()}`;
+      // Display name without delimiter for UI
+      const displayFullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+      
+      const success = await ProfileService.upsertProfile({ 
+        ...profile, 
+        name: storedName, 
+        profilePictureUrl: uploadedUrl 
+      });
       
       if (success) {
-        setDisplayName(fullName);
+        setDisplayName(displayFullName);
         toast.success(ProfileMessages.SAVE_SUCCESS);
       } else {
         toast.error(ProfileMessages.SAVE_ERROR);

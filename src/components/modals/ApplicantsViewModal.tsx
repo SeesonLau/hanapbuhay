@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import NewApplicantsSection from '@/components/applications/NewApplicantsSection';
 import AllApplicantsSection from '@/components/applications/AllApplicantsSection';
 import SearchBar from '@/components/ui/SearchBar';
@@ -18,19 +18,21 @@ interface ApplicantsModalProps {
 type SortOrder = 'newest' | 'oldest';
 
 export default function ApplicantsModal({ 
+  postId,
   isOpen, 
   onClose, 
-  title = "Frontend Developer", 
-  applicantCount = 12 
+  title = "", 
+  applicantCount = 0 
 }: ApplicantsModalProps) {
   const [newApplicantsSort, setNewApplicantsSort] = useState<SortOrder>('newest');
   const [allApplicantsSort, setAllApplicantsSort] = useState<SortOrder>('newest');
   const [searchQuery, setSearchQuery] = useState('');
-
-  if (!isOpen) return null;
+  
+  // Refresh triggers for both sections
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query);
+    setSearchQuery(query);  
   };
 
   const truncateTitle = (text: string, maxLength: number = 30) => {
@@ -58,6 +60,35 @@ export default function ApplicantsModal({
       onClose();
     }
   };
+
+   // ✅ Move all hooks before any return
+  const handleStatusChange = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
+
+  // ✅ Single early return after all hooks
+  if (!isOpen) return null;
+
+  // Show error if postId is missing
+  if (!postId) {
+    return (
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+        onClick={handleOverlayClick}
+      >
+        <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+          <h2 className="text-xl font-semibold text-red-600 mb-4">Error</h2>
+          <p className="text-gray-600">Post ID is required to view applicants.</p>
+          <button
+            onClick={onClose}
+            className="mt-4 px-4 py-2 bg-primary-400 text-white rounded hover:bg-primary-500"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -119,8 +150,11 @@ export default function ApplicantsModal({
             </div>
 
             <NewApplicantsSection 
+              postId={postId}
               sortOrder={newApplicantsSort} 
               searchQuery={searchQuery}
+              refreshTrigger={refreshTrigger}
+              onStatusChange={handleStatusChange}
             />
           </section>
 
@@ -145,8 +179,10 @@ export default function ApplicantsModal({
             </div>
 
             <AllApplicantsSection 
+              postId={postId}
               sortOrder={allApplicantsSort}
               searchQuery={searchQuery}
+              refreshTrigger={refreshTrigger}
             />
           </section>
         </div>
