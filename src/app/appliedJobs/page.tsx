@@ -1,20 +1,56 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Banner from '@/components/ui/Banner';
 import StatCardAppliedJobs from '@/components/cards/StatCardAppliedJobs';
+import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
+import { AuthService } from '@/lib/services/auth-services';
 
 export default function AppliedJobsPage() {
+  const [user, setUser] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const init = async () => {
+      setLoading(true);
+      try {
+        const current = await AuthService.getCurrentUser();
+        if (!current) {
+          // Redirect to login if no user is found
+          window.location.href = '/auth/login';
+          return;
+        }
+        setUser(current);
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        window.location.href = '/auth/login';
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+  }, []);
+
   const handleSearch = (query: string) => {
     // Add your search logic here
     console.log('Searching for:', query);
   };
 
-  // Removed mock types and data (AppliedJob, sampleJobs) and delete handler
-
   const handleStatFilter = (type: 'total' | 'pending' | 'approved' | 'rejected') => {
     console.log('Selected stat:', type);
     // TODO: Filter applied jobs list by selected status (not implemented yet)
   };
+
+  // Show preloader while loading user data
+  if (loading) {
+    return (
+      <Preloader
+        isVisible={loading}
+        message={PreloaderMessages.LOADING_JOBS}
+        variant="default"
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-neutral50">

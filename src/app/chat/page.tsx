@@ -1,11 +1,10 @@
-// need to connect to db. make table, and fetch list of users for the chat list.
 'use client'
 
 import React, { useState, useEffect } from 'react';
 import { RealtimeChat } from '@/components/chat/RealtimeChat'; 
 import Banner from '@/components/ui/Banner'; 
-import { Spinner } from '@/components/chat/Spinner'; 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
+import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 
 // Import your services
 import { AuthService } from "@/lib/services/auth-services";
@@ -70,13 +69,14 @@ export default function ChatPage() {
     const roomIdentifier = 'global-realtime-room-1'; 
     const activeChatRoomName = 'Global Realtime Chat'; 
 
-    // Render loading state if data is being fetched
+    // Render loading state with Preloader
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <Spinner size="lg" />
-                <p className="ml-2 text-lg text-gray-600">Loading user data...</p>
-            </div>
+            <Preloader
+                isVisible={isLoading}
+                message={PreloaderMessages.LOADING_CHAT}
+                variant="default"
+            />
         );
     }
     
