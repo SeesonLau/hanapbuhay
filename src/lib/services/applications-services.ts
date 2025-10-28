@@ -137,6 +137,25 @@ export class ApplicationService {
     }
   }
 
+  // Get array of postIds that the user has applied for
+  static async getAppliedPostIdsByUser(userId: string): Promise<string[]> {
+    try {
+      const { data, error } = await supabase
+        .from('applications')
+        .select('postId')
+        .eq('userId', userId)
+        .is('deletedAt', null);
+
+      if (error) throw error;
+
+      if (!data) return [];
+      return data.map((row: any) => row.postId).filter(Boolean);
+    } catch (error) {
+      // don't toast here to avoid noisy UI, let caller decide
+      throw error;
+    }
+  }
+
   // Get applications by post ID
   static async getApplicationsByPostId(
     postId: string,
@@ -231,6 +250,39 @@ export class ApplicationService {
       if (error) {
         throw error;
       }
+
+      return count || 0;
+    } catch (error) {
+      toast.error(ApplicationMessages.FETCH_APPLICATIONS_ERROR);
+      throw error;
+    }
+  }
+
+  // Get applications count by user ID with optional status filter
+  static async getApplicationsByUserIdCount(
+    userId: string,
+    params: { status?: string | string[] } = {}
+  ): Promise<number> {
+    try {
+      const { status } = params;
+
+      let query = supabase
+        .from('applications')
+        .select('*', { count: 'exact', head: true })
+        .eq('userId', userId)
+        .is('deletedAt', null);
+
+      if (status !== undefined) {
+        if (Array.isArray(status)) {
+          query = query.in('status', status as any);
+        } else {
+          query = query.eq('status', status as any);
+        }
+      }
+
+      const { count, error } = await query;
+
+      if (error) throw error;
 
       return count || 0;
     } catch (error) {

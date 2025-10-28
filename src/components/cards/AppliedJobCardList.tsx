@@ -51,7 +51,13 @@ const statusConfig = {
     bgColor: 'bg-error-error100',
     textColor: 'text-error-error700',
     icon: LuCircleX
-  }
+  },
+  unknown: {
+    text: 'Unknown',
+    bgColor: 'bg-gray-neutral100',
+    textColor: 'text-gray-neutral700',
+    icon: GoClock
+  },
 };
 
 // Tag color variants
@@ -73,7 +79,7 @@ export default function AppliedJobCard({
   onDelete, 
   className = '' 
 }: AppliedJobCardProps) {
-  const status = statusConfig[job.status];
+  const status = statusConfig[job.status] || statusConfig.unknown;
   
   const handleDelete = () => {
     if (onDelete) {
