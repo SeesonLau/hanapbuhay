@@ -178,32 +178,34 @@ export class ProfileService {
   
   static async getNameProfilePic(userId: string): Promise<{
     name: string | null;
-    profilePicUrl: string | null;
+    profilePicUrl: string | null; // Renamed output for client-side consistency
   } | null> {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        //.select('name, profilePicUrl')
-        .select('name, profilePictureUrl')
+        .select('name, profilePictureUrl') 
         .eq('userId', userId)
         .single();
 
       if (error) {
         if (error.code !== 'PGRST116') {
-          toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
+          // toast.error(ProfileMessages.FETCH_PROFILE_ERROR); // Assuming ProfileMessages exists
+          console.error('Error fetching profile name/pic:', error.message);
         }
         return null;
       }
 
       return {
         name: data?.name ?? null,
-        //profilePicUrl: data?.profilePicUrl ?? null,
         profilePicUrl: data?.profilePictureUrl ?? null,
       };
     } catch {
-      toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
+      // toast.error(ProfileMessages.FETCH_PROFILE_ERROR); // Assuming ProfileMessages exists
       return null;
     }
   }
- 
+
 }
+
+
+

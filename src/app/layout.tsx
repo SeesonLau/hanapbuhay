@@ -1,4 +1,5 @@
 // src/app/layout.tsx
+
 import type { Metadata } from 'next'
 import { inter, alexandria } from '@/styles/fonts';
 import '../app/global.css'

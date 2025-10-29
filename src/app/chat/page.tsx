@@ -1,14 +1,18 @@
+// src/app/chat/page.tsx
 'use client'
 
-import React, { useState, useEffect } from 'react';
-import { RealtimeChat } from '@/components/chat/RealtimeChat'; 
-import Banner from '@/components/ui/Banner'; 
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { RealtimeChat } from '@/components/chat/RealtimeChat';
+import { ChatRoomList } from '@/components/chat/ChatRoomList';
+import { SearchUsers } from '@/components/chat/SearchUsers';
+import Banner from '@/components/ui/Banner';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
-
-// Import your services
+import { UserContact, ChatRoom } from '@/lib/models/chat';
 import { AuthService } from "@/lib/services/auth-services";
 import { ProfileService } from "@/lib/services/profile-services";
+import { ChatService } from "@/lib/services/chat/chat-services";
+import { toast } from 'react-hot-toast';
 
 // --- Custom Hook to Fetch Profile Data ---
 interface UserProfile {
@@ -17,7 +21,7 @@ interface UserProfile {
     profilePicUrl: string | null;
 }
 
-const useCurrentProfile = () => {
+const useCurrentProfile = () => { 
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -36,16 +40,11 @@ const useCurrentProfile = () => {
                         profilePicUrl: profileData?.profilePicUrl || null,
                     });
                 } else {
-                    // Handle unauthenticated state
                     setProfile(null);
                 }
             } catch (error) {
                 console.error('Error fetching user profile for chat:', error);
-                setProfile({
-                    id: 'unknown-id',
-                    name: 'Guest User',
-                    profilePicUrl: null,
-                });
+                setProfile({ id: 'unknown-id', name: 'Guest User', profilePicUrl: null });
             } finally {
                 setIsLoading(false);
             }
@@ -57,30 +56,175 @@ const useCurrentProfile = () => {
 };
 // ------------------------------------------
 
+const GLOBAL_ROOM_ID = ChatService.getGlobalRoomId(); 
+const GLOBAL_ROOM_NAME = 'Global Realtime Chat';
 
 export default function ChatPage() {
     const { profile, isLoading } = useCurrentProfile();
-    
-    // Fallback values if profile is still loading or unavailable
-    const currentUsername = profile?.name || 'Loading User...';
-    const currentProfilePicUrl = profile?.profilePicUrl;
+    const [userContactsMap, setUserContactsMap] = useState<Record<string, UserContact>>({});
+    const [activeRoom, setActiveRoom] = useState<ChatRoom | null>(null);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [isMounted, setIsMounted] = useState(false);
 
-    // Hardcoded room details for the simplified RealtimeChat component
-    const roomIdentifier = 'global-realtime-room-1'; 
-    const activeChatRoomName = 'Global Realtime Chat'; 
+    // Fix hydration by waiting for component to mount
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
-    // Render loading state with Preloader
-    if (isLoading) {
+    // Convert map to a sorted array for the sidebar list - memoized to prevent re-renders
+    const userContacts = useMemo(() => {
+        const list = Object.values(userContactsMap);
+        list.sort((a, b) => {
+            if (a.room_id === GLOBAL_ROOM_ID) return -1;
+            if (b.room_id === GLOBAL_ROOM_ID) return 1;
+            return (b.lastMessage?.created_at || '') < (a.lastMessage?.created_at || '') ? -1 : 1;
+        });
+        return list;
+    }, [userContactsMap]);
+
+    // Load rooms only once when profile is available
+    useEffect(() => {
+        if (!profile || !isInitialLoad) return;
+
+        const loadRooms = async () => {
+            try {
+                console.log('🔄 Loading chat rooms for user:', profile.id);
+                const existingRooms = await ChatService.getExistingChatRooms(profile.id);
+
+                const initialMap: Record<string, UserContact> = {};
+
+                // Add the Global Chat first
+                initialMap[GLOBAL_ROOM_ID] = {
+                    userId: 'global',
+                    name: GLOBAL_ROOM_NAME,
+                    profilePicUrl: null,
+                    unreadCount: 0, 
+                    room_id: GLOBAL_ROOM_ID,
+                };
+
+                // Add existing DMs
+                existingRooms.forEach((contact: UserContact) => {
+                    if (contact.room_id) {
+                        initialMap[contact.room_id] = contact;
+                    }
+                });
+
+                setUserContactsMap(initialMap);
+                
+                // Set active room to Global Chat initially
+                setActiveRoom({
+                    id: GLOBAL_ROOM_ID,
+                    type: 'global',
+                    name: GLOBAL_ROOM_NAME,
+                    participants: null,
+                    created_at: new Date().toISOString(),
+                });
+
+                setIsInitialLoad(false);
+                console.log('✅ Rooms loaded:', {
+                    global: true,
+                    dmCount: existingRooms.length,
+                    totalRooms: Object.keys(initialMap).length
+                });
+            } catch (error) {
+                console.error('❌ Error loading rooms:', error);
+                // Fallback with just global room
+                setUserContactsMap({
+                    [GLOBAL_ROOM_ID]: {
+                        userId: 'global',
+                        name: GLOBAL_ROOM_NAME,
+                        profilePicUrl: null,
+                        unreadCount: 0, 
+                        room_id: GLOBAL_ROOM_ID,
+                    }
+                });
+                setActiveRoom({
+                    id: GLOBAL_ROOM_ID,
+                    type: 'global',
+                    name: GLOBAL_ROOM_NAME,
+                    participants: null,
+                    created_at: new Date().toISOString(),
+                });
+                setIsInitialLoad(false);
+            }
+        };
+        
+        loadRooms();
+    }, [profile, isInitialLoad]);
+
+    // Stable handler to switch the active chat room
+    const handleSelectRoom = useCallback((room: ChatRoom, contact: UserContact) => {
+        console.log('💬 Switching to room:', room.id, room.name);
+        setActiveRoom(prevRoom => {
+            // Only update if the room is actually changing
+            if (prevRoom?.id === room.id) return prevRoom;
+            return room;
+        });
+        
+        // Update unread count for the selected contact to zero locally
+        setUserContactsMap(prev => ({
+            ...prev,
+            [room.id]: { ...contact, unreadCount: 0 },
+        }));
+    }, []);
+
+    // Stable handler for starting DMs
+    const handleUserSelectForDM = useCallback(async (contact: UserContact) => {
+        if (!profile) return;
+
+        console.log('🤝 Starting DM with user:', contact.userId, contact.name);
+
+        // 1. Get or Create the Private Room
+        const result = await ChatService.getOrCreatePrivateRoom(profile.id, contact.userId);
+        
+        if (result) {
+            const newRoom = result.room;
+            
+            // 2. Update the map state
+            const contactWithRoom: UserContact = { 
+                ...contact, 
+                room_id: newRoom.id, 
+                unreadCount: 0,
+            };
+            
+            setUserContactsMap(prev => ({
+                ...prev,
+                [newRoom.id]: contactWithRoom,
+            }));
+
+            // 3. Set the new room as active
+            setActiveRoom(prevRoom => {
+                if (prevRoom?.id === newRoom.id) return prevRoom;
+                return newRoom;
+            });
+            console.log('✅ DM room created/selected:', newRoom.id);
+        } else {
+            toast.error(`Could not start chat with ${contact.name}.`);
+            console.error('❌ Failed to create DM room');
+        }
+    }, [profile]);
+
+    // Memoize active contact to prevent unnecessary re-renders
+    const activeContact = useMemo(() => {
+        return userContactsMap[activeRoom?.id || ''] || { 
+            name: activeRoom?.name || 'Chat', 
+            profilePicUrl: null 
+        };
+    }, [userContactsMap, activeRoom]);
+
+    // Prevent hydration issues by not rendering until mounted
+    if (!isMounted) {
         return (
-            <Preloader
-                isVisible={isLoading}
-                message={PreloaderMessages.LOADING_CHAT}
-                variant="default"
-            />
+            <div className="min-h-screen bg-gray-50">
+                <Preloader isVisible={true} message="Loading chat..." variant="default" />
+            </div>
         );
     }
     
-    // Render an error/unauthenticated state if no profile is found after loading
+    if (isLoading) {
+        return <Preloader isVisible={isLoading} message={PreloaderMessages.LOADING_CHAT} variant="default" />;
+    }
+
     if (!profile) {
         return (
             <div className="min-h-screen p-10 bg-gray-50 text-center">
@@ -90,59 +234,55 @@ export default function ChatPage() {
         );
     }
 
-
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50" suppressHydrationWarning>
             <Banner variant="chat" showSearchBar={false} />
 
             <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 pt-[240px]">
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <div className="flex h-[600px]"> 
-                        
-                        {/* 1. Simplified Chat List Sidebar (Static Placeholder) */}
+                    <div className="flex h-[600px]">
+
+                        {/* 1. Chat List Sidebar (Rooms and Search) */}
                         <div className="w-1/3 border-r border-gray-200 flex flex-col">
                             <div className="p-4 border-b border-gray-200">
                                 <h2 className="text-xl font-semibold text-gray-800">Messages</h2>
+                                <SearchUsers currentUserId={profile.id} onUserSelect={handleUserSelectForDM} />
                             </div>
-                            
-                            <div className="flex-1 overflow-y-auto">
-                                <div className="p-4 bg-blue-50">
-                                    <h3 className="font-semibold text-blue-800">Active Room:</h3>
-                                    <p className="text-sm text-blue-600">{activeChatRoomName}</p>
-                                    <p className="text-xs text-gray-500 mt-2">
-                                        Logged in as: 
-                                        <span className="font-medium text-gray-800"> {currentUsername}</span>
-                                    </p>
-                                </div>
-                            </div>
+
+                            <ChatRoomList
+                                currentUserId={profile.id}
+                                activeRoomId={activeRoom?.id || ''}
+                                contacts={userContacts}
+                                onSelectRoom={handleSelectRoom}
+                            />
                         </div>
 
                         {/* 2. Chat Messages Area */}
                         <div className="flex-1 flex flex-col">
-                            {/* Header using the logged-in user's data for the Avatar/Initial */}
+                            
                             <div className="p-4 border-b border-gray-200">
                                 <div className="flex items-center space-x-3">
-                                    {/* Use Avatar component to display profile picture or initial */}
                                     <Avatar className="h-10 w-10">
-                                        {currentProfilePicUrl ? (
-                                            <AvatarImage src={currentProfilePicUrl} alt={currentUsername} />
-                                        ) : (
-                                            <AvatarFallback className="bg-gray-300 text-gray-700">
-                                                {currentUsername.substring(0, 2).toUpperCase()}
-                                            </AvatarFallback>
-                                        )}
+                                        <AvatarImage src={activeContact.profilePicUrl || undefined} alt={activeContact.name} />
+                                        <AvatarFallback className="bg-gray-300 text-gray-700">
+                                            {activeContact.name ? activeContact.name.substring(0, 2).toUpperCase() : '??'}
+                                        </AvatarFallback>
                                     </Avatar>
-                                    <h3 className="text-lg font-semibold text-gray-800">{activeChatRoomName}</h3>
+                                    <h3 className="text-lg font-semibold text-gray-800">{activeContact.name}</h3>
                                 </div>
                             </div>
-                            
-                            {/* RealtimeChat Component */}
+
                             <div className="flex-1 flex flex-col overflow-hidden">
-                                <RealtimeChat 
-                                    roomName={roomIdentifier}
-                                    username={currentUsername}
-                                    // NOTE: The RealtimeChat component will use this username when displaying messages.
-                                />
+                                {activeRoom && (
+                                    <RealtimeChat
+                                        key={activeRoom.id}
+                                        roomId={activeRoom.id}
+                                        roomName={activeRoom.name || 'Chat Room'}
+                                        username={profile.name}
+                                        userId={profile.id}
+                                        isGlobal={activeRoom.type === 'global'}
+                                    />
+                                )}
                             </div>
                         </div>
                     </div>

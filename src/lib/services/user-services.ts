@@ -1,5 +1,5 @@
 import { supabase } from './supabase/client';
-import { User } from '../models';
+import { User } from '../models/user';
 import { toast } from 'react-hot-toast';
 import { UserMessages } from '@/resources/messages/user';
 
