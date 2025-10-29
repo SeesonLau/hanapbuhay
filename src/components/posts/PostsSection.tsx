@@ -72,15 +72,6 @@ const PostsSection: React.FC<Props> = ({
 
   return (
     <div className="mt-8 space-y-6">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-4">
-        <div className="flex items-center gap-2 justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">View:</span>
-            <ViewToggle value={viewMode} onChange={onViewModeChange} />
-          </div>
-        </div>
-      </div>
-
       {viewMode === "card" ? (
         <div className="w-full flex justify-center">
           <div className="flex flex-wrap items-start justify-center gap-5">

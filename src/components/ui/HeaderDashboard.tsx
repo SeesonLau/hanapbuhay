@@ -369,6 +369,28 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                     >
                       Profile
                     </Link>
+
+                    <Link
+                      href={ROUTES.QUERY}
+                      className="block px-4 py-2 text-sm transition-colors duration-300"
+                      style={{ 
+                        color: getGrayColor('neutral600'),
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = getNeutral100Color();
+                        e.currentTarget.style.color = getBlueColor();
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = getWhiteColor();
+                        e.currentTarget.style.color = getGrayColor('neutral600');
+                      }}
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      Query Test
+                    </Link>
+
+
+
                     <button
                       onClick={openSettings}
                       className="block w-full text-left px-4 py-2 text-sm transition-colors duration-300"
