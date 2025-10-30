@@ -1,7 +1,7 @@
 // src/components/chat/SearchUsers.tsx
 
 import React, { useState, useEffect } from 'react';
-import { Input } from '@/components/chat/Input';
+import { Input } from '@/components/chat/input';
 import { UserContact } from '@/lib/models/chat';
 import { ChatService } from '@/lib/services/chat/chat-services';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
