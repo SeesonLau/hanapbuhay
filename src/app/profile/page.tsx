@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthService } from '@/lib/services/auth-services';
 import { UserService } from '@/lib/services/user-services';
-import { User } from '@/lib/models';
+import { User } from '@/lib/models/user';
 import { ROUTES } from '@/lib/constants';
 import ProfileSection from '@/components/profile/ProfileSection';
 import ProjectsSection from '@/components/profile/ProjectSection';

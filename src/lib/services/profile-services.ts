@@ -176,34 +176,29 @@ export class ProfileService {
     }
   }
   
-  static async getNameProfilePic(userId: string): Promise<{
-    name: string | null;
-    profilePicUrl: string | null;
-  } | null> {
+  static async getNameProfilePic(userId: string): Promise<{ name: string | null; profilePicUrl: string | null } | null> {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        //.select('name, profilePicUrl')
-        .select('name, profilePictureUrl')
+        .select('name, profilePictureUrl') // Match your column names
         .eq('userId', userId)
         .single();
 
       if (error) {
-        if (error.code !== 'PGRST116') {
-          toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
-        }
+        console.error('Error fetching profile:', error);
         return null;
       }
 
       return {
-        name: data?.name ?? null,
-        //profilePicUrl: data?.profilePicUrl ?? null,
-        profilePicUrl: data?.profilePictureUrl ?? null,
+        name: data?.name || null,
+        profilePicUrl: data?.profilePictureUrl || null
       };
-    } catch {
-      toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
+    } catch (error) {
+      console.error('Unexpected error in getNameProfilePic:', error);
       return null;
     }
   }
- 
 }
+
+
+

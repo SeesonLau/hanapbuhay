@@ -14,5 +14,5 @@ export const ROUTES = {
   MANAGEJOBPOSTS: '/manageJobPosts',
   APPLIEDJOBS: '/appliedJobs',
   FINDJOBS: '/findJobs',
-  MOCK: '/mock'
+  QUERY: '/query'
 };
