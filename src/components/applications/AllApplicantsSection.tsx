@@ -26,9 +26,6 @@ interface AllApplicantsSectionProps {
   refreshTrigger?: number;
 }
 
-// Delimiter to remove from display names
-const NAME_DELIMITER = " | ";
-
 export default function AllApplicantsSection({ 
   postId,
   sortOrder = 'newest',
@@ -56,23 +53,13 @@ export default function AllApplicantsSection({
         const applicantsWithProfiles = await Promise.all(
           applications.map(async (app) => {
             const profileData = await ProfileService.getNameProfilePic(app.userId);
-            
-            // Clean the name by removing delimiter
-            const cleanName = profileData?.name
-              ? (() => {
-                  const [firstPart, lastPart] = profileData.name.split(NAME_DELIMITER);
-                  const firstName = firstPart?.trim().split(' ')[0] || '';
-                  const lastName = lastPart?.trim() || '';
-                  return `${firstName} ${lastName}`.trim();
-                })()
-              : 'Unknown User';
 
             const cardStatus: 'Approved' | 'Rejected' =
               app.status === ApplicationStatus.APPROVED ? 'Approved' : 'Rejected';
 
             return {
               userId: app.userId,
-              name: cleanName,
+              name: profileData?.name || 'Unknown Applicant',
               status: cardStatus,
               rating: 0,
               dateApplied: new Date(app.createdAt).toLocaleDateString('en-US', {
@@ -87,8 +74,6 @@ export default function AllApplicantsSection({
 
         setApplicants(applicantsWithProfiles);
       } catch (error) {
-        console.error('Error fetching applicants:', error);
-        toast.error('Failed to load applicants');
       } finally {
         setLoading(false);
       }

@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { Profile } from "@/lib/models/profile";
 import { ProfileService } from "@/lib/services/profile-services";
-import { toast } from "react-hot-toast";
-import { ProfileMessages } from "@/resources/messages/profile";
+import { combineToStoredName } from "@/lib/utils/profile-utils";
 import upload2 from "@/assets/upload2.svg";
 import { FaUserCircle } from 'react-icons/fa';
 import TextBox from "../ui/TextBox";
@@ -15,8 +14,6 @@ interface ProfileFormProps {
   userId: string;
   className?: string;
 }
-
-const NAME_DELIMITER = " | ";
 
 export default function ProfileForm({ userId, className }: ProfileFormProps) {
   const [profile, setProfile] = useState<Profile & { email?: string | null } | null>(null);
@@ -32,53 +29,38 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
   useEffect(() => {
     const fetchProfileAndEmail = async () => {
       try {
-        const [profileData, userEmail, userName] = await Promise.all([
+        const [profileData, userEmail, parsedName, displayName] = await Promise.all([
           ProfileService.getProfileByUserId(userId),
           ProfileService.getEmailByUserId(userId),
-          ProfileService.getNameByUserId(userId)
+          ProfileService.getParsedNameByUserId(userId),
+          ProfileService.getDisplayNameByUserId(userId)
         ]);
 
         if (profileData) {
           setProfile(profileData);
-          
-          const fullName = profileData.name ?? "";
-          
-          if (fullName.includes(NAME_DELIMITER)) {
-            const [first, last] = fullName.split(NAME_DELIMITER);
-            setFirstName(first || "");
-            setLastName(last || "");
-          } else {
-            const lastSpaceIndex = fullName.lastIndexOf(" ");
-            
-            if (lastSpaceIndex === -1) {
-              setFirstName(fullName);
-              setLastName("");
-            } else {
-              setFirstName(fullName.substring(0, lastSpaceIndex));
-              setLastName(fullName.substring(lastSpaceIndex + 1));
-            }
-          }
-          
           setPreviewUrl(profileData.profilePictureUrl ?? null);
+        }
+
+        if (parsedName) {
+          setFirstName(parsedName.firstName);
+          setLastName(parsedName.lastName);
         }
 
         if (userEmail) {
           setEmail(userEmail); 
         }
 
-        if (userName) {
-          const cleanName = userName.replace(NAME_DELIMITER, " ");
-          setDisplayName(cleanName);
+        if (displayName) {
+          setDisplayName(displayName);
         }
       } catch (err) {
-        toast.error(ProfileMessages.LOAD_ERROR);
       } finally {
         setLoading(false);
       }
     };
 
-  fetchProfileAndEmail();
-}, [userId]);
+    fetchProfileAndEmail();
+  }, [userId]);
 
   const handleChange = (field: keyof Profile, value: any) => {
     setProfile((prev) => prev ? { ...prev, [field]: value } : prev);
@@ -108,6 +90,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
 
     try {
       let uploadedUrl = profile.profilePictureUrl ?? null;
+      
       if (selectedFile) {
         const result = await ProfileService.uploadProfileImage(userId, selectedFile);
         if (!result) {
@@ -117,11 +100,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
         uploadedUrl = result;
       }
 
-      // Store with delimiter to preserve the exact split between first and last name
-      const storedName = `${firstName.trim()}${NAME_DELIMITER}${lastName.trim()}`;
-      // Display name without delimiter for UI
-      const displayFullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-      
+      const storedName = combineToStoredName(firstName, lastName);
       const success = await ProfileService.upsertProfile({ 
         ...profile, 
         name: storedName, 
@@ -129,20 +108,19 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
       });
       
       if (success) {
-        setDisplayName(displayFullName);
-        toast.success(ProfileMessages.SAVE_SUCCESS);
-      } else {
-        toast.error(ProfileMessages.SAVE_ERROR);
+        const newDisplayName = await ProfileService.getDisplayNameByUserId(userId);
+        if (newDisplayName) {
+          setDisplayName(newDisplayName);
+        }
       }
     } catch (err) {
-      toast.error(ProfileMessages.SAVE_ERROR);
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className={`${className}  py-7 px-10 bg-white rounded-xl shadow-md flex flex-col gap-6`}>
+    <div className={`${className} py-7 px-10 bg-white rounded-xl shadow-md flex flex-col gap-6`}>
 
       {/* Profile Picture Upload */}
       <div className="flex items-center justify-center gap-6">
@@ -255,7 +233,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
           disabled
         />
 
-      {/* Sex */}
+        {/* Sex */}
         <SelectBox
           label="Sex"
           value={profile?.sex ?? ''}
@@ -278,7 +256,6 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
           variant="primary400"
           size="xl"
           fullRounded={false}
-          isLoading={saving}
         > 
           Save
         </Button>
