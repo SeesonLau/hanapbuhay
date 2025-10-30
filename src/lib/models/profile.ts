@@ -19,6 +19,7 @@ export interface Project {
   userId: string;
   projectId?: string;
   projectPictureUrl?: string | null; 
+  projectImages?: string[];
   title: string;
   description?: string | null;
   createdBy?: string | null;

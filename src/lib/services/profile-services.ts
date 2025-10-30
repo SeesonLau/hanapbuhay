@@ -2,57 +2,105 @@ import { supabase } from './supabase/client';
 import { Profile } from '../models/profile';
 import { toast } from 'react-hot-toast';
 import { ProfileMessages } from '@/resources/messages/profile';
+import { formatDisplayName, parseStoredName, combineToStoredName } from '@/lib/utils/profile-utils';
 
 export class ProfileService {
   static async getEmailByUserId(userId: string): Promise<string | null> {
-    const { data, error } = await supabase
-      .from('users')
-      .select('email')
-      .eq('userId', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('email')
+        .eq('userId', userId)
+        .single();
 
-    if (error) {
+      if (error) {
+        toast.error(ProfileMessages.FETCH_EMAIL_ERROR);
+        return null;
+      }
+
+      return data?.email ?? null;
+    } catch (error) {
       toast.error(ProfileMessages.FETCH_EMAIL_ERROR);
       return null;
     }
-
-    return data?.email ?? null;
   }
 
   static async getProfileByUserId(userId: string): Promise<Profile | null> {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('userId', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('userId', userId)
+        .single();
 
-    if (error) {
+      if (error) {
+        if (error.code !== 'PGRST116') {
+          toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
+        }
+        return null;
+      }
+
+      return data as Profile;
+    } catch (error) {
       toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
       return null;
     }
-
-    return data as Profile;
   }
 
-   static async getNameByUserId(userId: string): Promise<string | null> {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('name')
-      .eq('userId', userId)
-      .single();
+  static async getNameByUserId(userId: string): Promise<string | null> {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('name')
+        .eq('userId', userId)
+        .single();
 
-    if (error) {
-      if (error.code !== 'PGRST116') {
-        toast.error(ProfileMessages.FETCH_NAME_ERROR);
+      if (error) {
+        if (error.code !== 'PGRST116') {
+          toast.error(ProfileMessages.FETCH_NAME_ERROR);
+        }
+        return null;
       }
+
+      return data?.name ?? null;
+    } catch (error) {
       return null;
     }
+  }
 
-    return data?.name ?? null;
+  /**
+   * Gets the formatted display name for a user
+   * Removes delimiter and limits first name to first 2 words
+   */
+  static async getDisplayNameByUserId(userId: string): Promise<string | null> {
+    try {
+      const storedName = await this.getNameByUserId(userId);
+      if (!storedName) return null;
+      
+      return formatDisplayName(storedName);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
+   * Gets parsed first and last name components
+   */
+  static async getParsedNameByUserId(userId: string): Promise<{ firstName: string; lastName: string } | null> {
+    try {
+      const storedName = await this.getNameByUserId(userId);
+      if (!storedName) return null;
+      
+      return parseStoredName(storedName);
+    } catch (error) {
+      return null;
+    }
   }
 
   static async upsertProfile(profile: Profile): Promise<boolean> {
     try {
+      console.log('Upserting profile:', profile);
+
       const { data: existing, error: fetchError } = await supabase
         .from('profiles')
         .select('userId, createdAt, createdBy')
@@ -64,63 +112,79 @@ export class ProfileService {
         return false;
       }
 
+      const now = new Date().toISOString();
+      
       const payload: any = {
-        ...profile,
-        updatedAt: new Date().toISOString(),
+        userId: profile.userId,
+        name: profile.name,
+        address: profile.address,
+        phoneNumber: profile.phoneNumber,
+        birthdate: profile.birthdate,
+        age: profile.age,
+        sex: profile.sex,
+        profilePictureUrl: profile.profilePictureUrl,
+        updatedAt: now,
         updatedBy: profile.userId,
       };
 
       if (!existing) {
-        payload.createdAt = new Date().toISOString();
+        payload.createdAt = now;
         payload.createdBy = profile.userId;
       } else {
         payload.createdAt = existing.createdAt;
         payload.createdBy = existing.createdBy;
       }
 
-      const { error } = await supabase.from('profiles').upsert(payload, {
-        onConflict: 'userId',
-      });
+      const { error, data } = await supabase
+        .from('profiles')
+        .upsert(payload, {
+          onConflict: 'userId',
+        })
+        .select();
 
       if (error) {
         toast.error(ProfileMessages.SAVE_PROFILE_ERROR);
         return false;
       }
-
+      toast.success(ProfileMessages.SAVE_SUCCESS);
       return true;
-    } catch {
+    } catch (error) {
       toast.error(ProfileMessages.CHECK_EXISTING_PROFILE_ERROR);
       return false;
     }
   }
 
   static async uploadProfileImage(userId: string, file: File): Promise<string | null> {
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+    try {
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error(ProfileMessages.FILE_SIZE_EXCEEDED);
-      return null;
-    }
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(ProfileMessages.FILE_SIZE_EXCEEDED);
+        return null;
+      }
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}-${Date.now()}.${fileExt}`;
-    const filePath = `${userId}/${fileName}`;
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userId}-${Date.now()}.${fileExt}`;
+      const filePath = `${userId}/${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('profile-images')
-      .upload(filePath, file);
+      const { error: uploadError } = await supabase.storage
+        .from('profile-images')
+        .upload(filePath, file);
 
-    if (uploadError) {
-      console.error("Upload error:", uploadError.message);
+      if (uploadError) {
+        toast.error(ProfileMessages.UPLOAD_IMAGE_ERROR);
+        return null;
+      }
+
+      const { data } = supabase.storage
+        .from('profile-images')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error) {
       toast.error(ProfileMessages.UPLOAD_IMAGE_ERROR);
       return null;
     }
-
-    const { data } = supabase.storage
-      .from('profile-images')
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
   }
 
   static async getProfileContact(userId: string): Promise<{
@@ -136,7 +200,7 @@ export class ProfileService {
       // Fetch profile details
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('profilePicUrl, name, sex, age, phoneNumber, address')
+        .select('profilePictureUrl, name, sex, age, phoneNumber, address')
         .eq('userId', userId)
         .single();
 
@@ -162,7 +226,7 @@ export class ProfileService {
       }
 
       return {
-        profilePicUrl: profileData?.profilePicUrl ?? null,
+        profilePicUrl: profileData?.profilePictureUrl ?? null,
         name: profileData?.name ?? null,
         sex: profileData?.sex ?? null,
         age: profileData?.age ?? null,
@@ -170,7 +234,7 @@ export class ProfileService {
         phoneNumber: profileData?.phoneNumber ?? null,
         address: profileData?.address ?? null,
       };
-    } catch {
+    } catch (error) {
       toast.error(ProfileMessages.FETCH_PROFILE_ERROR);
       return null;
     }
@@ -180,7 +244,7 @@ export class ProfileService {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('name, profilePictureUrl') // Match your column names
+        .select('name, profilePictureUrl')
         .eq('userId', userId)
         .single();
 
@@ -199,6 +263,3 @@ export class ProfileService {
     }
   }
 }
-
-
-

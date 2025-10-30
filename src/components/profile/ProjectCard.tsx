@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { Project } from '@/lib/models/profile';
-import DeleteIcon from "@/assets/delete.svg";
 import { DeleteModal } from '@/components/ui/DeleteModal';
 import { ProjectService } from '@/lib/services/project-services';
 import { toast } from 'react-hot-toast';
 import { ProjectMessages } from '@/resources/messages/project';
+import { X } from 'lucide-react'; // Using a clean close icon
 
 interface ProjectCardProps {
   project: Project;
@@ -19,14 +19,15 @@ interface ProjectCardProps {
 
 export default function ProjectCard({
   project,
-  userId, // Add this here
+  userId,
   onClick,
   onDeleteSuccess,
-  titleCharLimit = 50, 
-  descCharLimit = 200, 
+  titleCharLimit = 50,
+  descCharLimit = 200,
 }: ProjectCardProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const truncateChars = (text: string, limit: number) => {
     if (!text) return '';
@@ -57,25 +58,89 @@ export default function ProjectCard({
     }
   };
 
+  // Parse project images
+  const images = project.projectImages?.length
+    ? project.projectImages
+    : ProjectService.parseProjectImages(project.projectPictureUrl);
+
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!images || images.length <= 1) return;
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!images || images.length <= 1) return;
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
   return (
     <>
       <div
         onClick={onClick}
-        className="flex w-full max-w-[873px] h-[250px] p-[15px] gap-x-10 bg-white shadow rounded-lg cursor-pointer hover:shadow-md transition"
+        className="relative flex w-full max-w-[873px] h-[15.475rem] p-[15px] gap-x-10 bg-white shadow rounded-lg cursor-pointer hover:shadow-md transition"
       >
-        {/* Image / Placeholder */}
-        {project.projectPictureUrl ? (
-          <img
-            src={project.projectPictureUrl}
-            alt={project.title}
-            className="w-1/2 h-full object-cover rounded-lg flex-shrink-0"
-          />
-        ) : (
-          <div className="w-1/2 h-full bg-gray-200 rounded-lg flex items-center justify-center text-gray-neutral500 flex-shrink-0">
-            No Image
-          </div>
-        )}
+        {/* Close Button */}
+        <button
+          onClick={handleDeleteClick}
+          className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-gray-neutral100 transition-colors"
+        >
+          <X size={20} className="text-gray-neutral600 hover:text-gray-neutral800" />
+        </button>
 
+        {/* Image Carousel */}
+        <div className="relative w-1/2 h-full flex-shrink-0 overflow-hidden rounded-lg bg-gray-neutral200 group">
+          {images && images.length > 0 ? (
+            <>
+              <img
+                src={images[currentImageIndex]}
+                alt={`${project.title} image ${currentImageIndex + 1}`}
+                className="w-full h-full object-cover transition-all duration-300"
+              />
+
+              {/* Navigation arrows */}
+              {images.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={prevImage}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 text-gray-neutral700 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-white transition opacity-0 group-hover:opacity-100"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    onClick={nextImage}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 text-gray-neutral700 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-white transition opacity-0 group-hover:opacity-100"
+                  >
+                    →
+                  </button>
+                </>
+              )}
+
+              {/* Dots indicator */}
+              {images.length > 1 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {images.map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-2.5 h-2.5 rounded-full transition-all ${
+                        i === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                      }`}
+                    ></div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-neutral500">
+              No Image
+            </div>
+          )}
+        </div>
+
+        {/* Text Content */}
         <div className="flex flex-col flex-1 min-w-0 min-h-0 gap-2 pr-2 justify-center">
           <div className="flex-shrink-0">
             <p className="font-inter font-bold text-xl line-clamp-2 break-words">
@@ -90,15 +155,6 @@ export default function ProjectCard({
               </p>
             </div>
           )}
-
-          <div className="flex justify-end flex-shrink-0">
-            <img 
-              src={DeleteIcon.src}
-              alt="Delete"
-              onClick={handleDeleteClick}
-              className="p-1 text-error-error500 hover:text-error-error600 hover:bg-error-error50 rounded transition-colors flex-shrink-0" 
-            />
-          </div>
         </div>
       </div>
 
@@ -106,11 +162,10 @@ export default function ProjectCard({
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleConfirmDelete}
-        title="Delete Work Experience"
-        description="Are you sure you want to delete this work experience? This action cannot be undone."
+        title="Delete Project"
+        description="Are you sure you want to delete this project? This action cannot be undone."
         confirmText="Delete"
         variant="trash"
-        isProcessing={isDeleting}
       />
     </>
   );

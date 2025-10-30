@@ -1,4 +1,3 @@
-// src/app/profile/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -43,31 +42,25 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!loading && user) {
-      // Small delay to ensure components have mounted
-      const timer = setTimeout(() => {
-        setContentReady(true);
-      }, 300);
+      const timer = setTimeout(() => setContentReady(true), 300);
       return () => clearTimeout(timer);
     }
   }, [loading, user]);
 
   return (
-    <div className="min-h-screen flex flex-col mt-[220px]">
-      <Preloader 
-        message={PreloaderMessages.LOADING_PROFILE} 
-        isVisible={!contentReady} 
+    <div className="min-h-screen flex flex-col">
+      <Preloader
+        message={PreloaderMessages.LOADING_PROFILE}
+        isVisible={!contentReady}
       />
 
       {contentReady && (
         <>
-          {/* Banner Section with Header */}
-          <Banner
-            variant="profile"
-            showSearchBar={false}
-          />
-          
-          <main className="flex-grow flex p-3">
-            <div className="w-full h-full flex flex-col md:flex-row gap-10 md:gap-0" >
+          {/* Fixed Banner */}
+          <Banner variant="profile" showSearchBar={false} />
+
+          <main className="flex-grow flex p-3 pt-[14rem] ">
+            <div className="w-full h-full flex flex-col md:flex-row gap-10 md:gap-0">
               {user && <ProfileSection userId={user.userId} className="flex-1" />}
               <div className="hidden md:block w-px bg-gray-neutral300 md:-my-3"></div>
               {user && <ProjectsSection userId={user.userId} className="flex-1" />}
