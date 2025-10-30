@@ -1,15 +1,12 @@
-// src/components/chat/RealtimeChat.tsx
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { supabase } from '@/lib/services/supabase/client'
+import React, { useState, useCallback } from 'react'
 import { ChatMessage } from '@/lib/models/chat'
-import { ChatService } from '@/lib/services/chat/chat-services'
-import { ProfileService } from '@/lib/services/profile-services'
 import { Input } from '@/components/chat/input'
 import Button from '@/components/ui/Button'
 import { Preloader } from '@/components/ui/Preloader'
-import { format } from 'date-fns'
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
+import { format, isToday, isYesterday } from 'date-fns'
 import { toast } from 'react-hot-toast'
 import { 
   FiWifi, 
@@ -20,6 +17,8 @@ import {
   FiSend,
   FiMessageSquare
 } from 'react-icons/fi'
+import { useRealtimeChat } from '@/hooks/use-realtime-chat'
+import { useChatScroll } from '@/hooks/use-chat-scroll'
 
 interface RealtimeChatProps {
   roomId: string
@@ -38,270 +37,64 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
   isGlobal,
   onNewMessage,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
   const [isSending, setIsSending] = useState(false)
-  const [subscriptionStatus, setSubscriptionStatus] = useState<'connecting' | 'connected' | 'error'>('connecting')
-  const chatContainerRef = useRef<HTMLDivElement>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const retryCountRef = useRef(0)
-  const maxRetries = 3
+  
+  // Use the custom hooks
+  const { 
+    messages, 
+    sendMessage, 
+    isConnected, 
+    isLoading 
+  } = useRealtimeChat({
+    roomId,
+    userId,
+    username
+  })
 
-  // Optimized scroll to bottom
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [])
+  const { containerRef } = useChatScroll()
 
-  // Fetch message history only when roomId changes
-  useEffect(() => {
-    if (!roomId || !userId) return
-
-    const fetchHistory = async () => {
-      setIsLoadingHistory(true)
-      try {
-        console.log('Fetching history for room:', roomId)
-        const history = await ChatService.getMessageHistory(roomId)
-        console.log('History fetched:', history.length, 'messages')
-        setMessages(history)
-
-        // Mark unread messages as read
-        const unreadMessageIds = history
-          .filter(
-            (msg) =>
-              msg.sender_id !== userId && !msg.is_read_by?.includes(userId)
-          )
-          .map((msg) => msg.id)
-
-        if (unreadMessageIds.length > 0) {
-          await ChatService.markMessagesAsRead(unreadMessageIds, userId)
-        }
-      } catch (error) {
-        toast.error('Could not load chat history.')
-        console.error('Error fetching history:', error)
-      } finally {
-        setIsLoadingHistory(false)
-      }
+  // Format message time
+  const formatMessageTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    if (isToday(date)) {
+      return format(date, 'HH:mm');
+    } else if (isYesterday(date)) {
+      return 'Yesterday';
+    } else {
+      return format(date, 'MMM dd');
     }
+  };
 
-    fetchHistory()
-  }, [roomId, userId])
-
-  // Improved real-time subscription with retry logic
-  useEffect(() => {
-    if (!roomId || !userId) return
-
-    let channel: any = null
-    let retryTimeout: NodeJS.Timeout
-
-    const setupSubscription = () => {
-      console.log('Setting up real-time subscription for room:', roomId)
-      setSubscriptionStatus('connecting')
-
-      channel = supabase
-        .channel(`room-${roomId}-${userId}`, {
-          config: {
-            broadcast: { self: true },
-            presence: { key: roomId }
-          }
-        })
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages',
-            filter: `room_id=eq.${roomId}`,
-          },
-          async (payload) => {
-            console.log('New message received via subscription:', payload)
-            const newMsg = payload.new as any
-
-            // Skip if this is our own optimistic message
-            if (newMsg.sender_id === userId && retryCountRef.current > 0) {
-              console.log('Skipping own message from subscription')
-              return
-            }
-
-            try {
-              // Fetch sender profile info
-              const profileData = await ProfileService.getNameProfilePic(newMsg.sender_id)
-              
-              const messageWithProfile: ChatMessage = {
-                id: newMsg.id,
-                room_id: newMsg.room_id,
-                sender_id: newMsg.sender_id,
-                content: newMsg.content,
-                created_at: newMsg.created_at,
-                is_read_by: newMsg.is_read_by || [],
-                sender_name: profileData?.name || 'Unknown',
-                sender_profile_pic_url: profileData?.profilePicUrl,
-              }
-
-              console.log('Adding new message to state:', messageWithProfile)
-
-              // Add the new message to state
-              setMessages(prev => {
-                const exists = prev.some(msg => msg.id === messageWithProfile.id)
-                if (exists) {
-                  console.log('Message already in state, not adding duplicate')
-                  return prev
-                }
-                return [...prev, messageWithProfile]
-              })
-
-              // Notify parent component about new message for ChatRoomList update
-              if (onNewMessage) {
-                onNewMessage(messageWithProfile)
-              }
-
-              // Auto mark as read if it's from someone else and we're in this room
-              if (newMsg.sender_id !== userId) {
-                console.log('Marking message as read:', newMsg.id)
-                await ChatService.markMessagesAsRead([newMsg.id], userId)
-              }
-            } catch (error) {
-              console.error('Error processing new message:', error)
-              // Add message even if profile fetch fails
-              const fallbackMessage: ChatMessage = {
-                id: newMsg.id,
-                room_id: newMsg.room_id,
-                sender_id: newMsg.sender_id,
-                content: newMsg.content,
-                created_at: newMsg.created_at,
-                is_read_by: newMsg.is_read_by || [],
-                sender_name: 'Unknown',
-                sender_profile_pic_url: null,
-              }
-              
-              setMessages(prev => {
-                const exists = prev.some(msg => msg.id === fallbackMessage.id)
-                if (exists) return prev
-                return [...prev, fallbackMessage]
-              })
-
-              if (onNewMessage) {
-                onNewMessage(fallbackMessage)
-              }
-            }
-          }
-        )
-        .subscribe((status) => {
-          console.log('Subscription status:', status)
-          
-          if (status === 'SUBSCRIBED') {
-            console.log('Successfully subscribed to room:', roomId)
-            setSubscriptionStatus('connected')
-            retryCountRef.current = 0 // Reset retry count on success
-          }
-          
-          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-            console.error('Channel error, attempting to resubscribe...')
-            setSubscriptionStatus('error')
-            
-            if (retryCountRef.current < maxRetries) {
-              retryCountRef.current++
-              console.log(`Retry attempt ${retryCountRef.current} of ${maxRetries}`)
-              retryTimeout = setTimeout(() => {
-                if (channel) {
-                  supabase.removeChannel(channel)
-                }
-                setupSubscription()
-              }, 2000 * retryCountRef.current) // Exponential backoff
-            } else {
-              console.error('Max retries reached, giving up on subscription')
-              toast.error('Real-time connection failed. Messages may be delayed.')
-            }
-          }
-        })
-    }
-
-    setupSubscription()
-
-    return () => {
-      console.log('Cleaning up subscription for room:', roomId)
-      if (retryTimeout) clearTimeout(retryTimeout)
-      if (channel) {
-        supabase.removeChannel(channel)
-      }
-      retryCountRef.current = 0
-    }
-  }, [roomId, userId, onNewMessage])
-
-  // Auto-scroll when new messages arrive
-  useEffect(() => {
-    if (messages.length > 0) {
-      scrollToBottom()
-    }
-  }, [messages, scrollToBottom])
-
-  // Optimized send message handler with optimistic updates
+  // Handle sending messages
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (newMessage.trim() === '' || !userId || !roomId || isSending) {
+    if (newMessage.trim() === '' || !userId || !roomId || isSending || !isConnected) {
       return
     }
 
-    const messageContent = newMessage.trim()
-    setNewMessage('') // Clear input immediately
     setIsSending(true)
-
-    // Create optimistic message
-    const tempId = `temp-${Date.now()}`
-    const optimisticMessage: ChatMessage = {
-      id: tempId,
-      room_id: roomId,
-      sender_id: userId,
-      content: messageContent,
-      created_at: new Date().toISOString(),
-      is_read_by: [userId],
-      sender_name: username,
-      sender_profile_pic_url: null,
-    }
-
-    // Add optimistic message immediately
-    setMessages(prev => [...prev, optimisticMessage])
+    const messageContent = newMessage.trim()
+    setNewMessage('')
 
     try {
-      console.log('Sending message to server...')
-      const sentMessage = await ChatService.sendMessage(
-        roomId,
-        userId,
-        messageContent
-      )
-
-      if (sentMessage) {
-        console.log('Message sent successfully:', sentMessage)
-        // Replace optimistic message with real message
-        setMessages(prev => 
-          prev.map(msg => 
-            msg.id === tempId ? { ...sentMessage } : msg
-          )
-        )
-
-        // Notify parent about the new sent message
-        if (onNewMessage) {
-          onNewMessage(sentMessage)
-        }
-      } else {
+      const sentMessage = await sendMessage(messageContent)
+      
+      if (sentMessage && onNewMessage) {
+        onNewMessage(sentMessage)
+      } else if (!sentMessage) {
         toast.error('Failed to send message. Please try again.')
-        console.error('Send message returned null')
-        // Remove optimistic message on failure
-        setMessages(prev => prev.filter(msg => msg.id !== tempId))
-        setNewMessage(messageContent) // Restore the message
+        setNewMessage(messageContent)
       }
     } catch (error) {
       toast.error('Failed to send message.')
-      console.error('Error in handleSendMessage:', error)
-      // Remove optimistic message on error
-      setMessages(prev => prev.filter(msg => msg.id !== tempId))
-      setNewMessage(messageContent) // Restore the message
+      setNewMessage(messageContent)
     } finally {
       setIsSending(false)
     }
   }
 
-  // Handle input key press for better UX
+  // Handle input key press
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -309,122 +102,195 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
     }
   }
 
+  // Render message item
+  const renderMessageItem = (message: ChatMessage, index: number) => {
+    const isCurrentUser = message.sender_id === userId
+    const prevMessage = index > 0 ? messages[index - 1] : null
+    
+    // Check if this is the first message in a consecutive sequence
+    const isFirstInSequence = !prevMessage || 
+      prevMessage.sender_id !== message.sender_id ||
+      new Date(message.created_at).getTime() - new Date(prevMessage.created_at).getTime() > 300000
+    
+    // Check if this is the last message in a consecutive sequence
+    const nextMessage = index < messages.length - 1 ? messages[index + 1] : null
+    const isLastInSequence = !nextMessage || 
+      nextMessage.sender_id !== message.sender_id ||
+      new Date(nextMessage.created_at).getTime() - new Date(message.created_at).getTime() > 300000
+
+    // Determine margin between messages
+    const marginClass = !isLastInSequence && nextMessage?.sender_id === message.sender_id 
+      ? 'mb-1' 
+      : 'mb-3'
+
+    // Determine border radius
+    let borderRadiusClass = ''
+    if (isFirstInSequence && isLastInSequence) {
+      borderRadiusClass = isCurrentUser ? 'rounded-2xl rounded-br-lg' : 'rounded-2xl rounded-bl-lg'
+    } else if (isFirstInSequence) {
+      borderRadiusClass = isCurrentUser ? 'rounded-t-2xl rounded-l-2xl rounded-br-lg' : 'rounded-t-2xl rounded-r-2xl rounded-bl-lg'
+    } else if (isLastInSequence) {
+      borderRadiusClass = isCurrentUser ? 'rounded-b-2xl rounded-l-2xl rounded-tr-lg' : 'rounded-b-2xl rounded-r-2xl rounded-tl-lg'
+    } else {
+      borderRadiusClass = isCurrentUser ? 'rounded-l-2xl rounded-br-lg rounded-tr-lg' : 'rounded-r-2xl rounded-bl-lg rounded-tl-lg'
+    }
+
+    return (
+      <div
+        key={message.id}
+        className={`flex items-end ${marginClass} ${
+          isCurrentUser ? 'justify-end' : 'justify-start'
+        }`}
+      >
+        {/* Profile picture for other users (left side) */}
+        {!isCurrentUser && isFirstInSequence && (
+          <div className="flex-shrink-0 mr-2 self-end">
+            <Avatar className="h-8 w-8">
+              <AvatarImage 
+                src={message.sender_profile_pic_url || undefined} 
+                alt={message.sender_name} 
+              />
+              <AvatarFallback className="bg-gray-300 text-gray-700 text-xs">
+                {message.sender_name?.substring(0, 2).toUpperCase() || '??'}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+        )}
+
+        {/* Empty space for alignment when no profile picture is shown */}
+        {!isCurrentUser && !isFirstInSequence && (
+          <div className="w-8 mr-2 flex-shrink-0" />
+        )}
+
+        <div className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'} max-w-[calc(100%-40px)]`}>
+          {/* Show sender name only for first message in sequence */}
+          {(isGlobal || !isCurrentUser) && isFirstInSequence && (
+            <p className={`text-xs font-medium mb-1 px-1 ${
+              isCurrentUser ? 'text-blue-600' : 'text-gray-600'
+            }`}>
+              {isCurrentUser ? 'You' : message.sender_name}
+            </p>
+          )}
+          
+          {/* Message bubble */}
+          <div
+            className={`max-w-xs lg:max-w-md px-4 py-2 shadow-sm ${
+              isCurrentUser
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-100 text-gray-800'
+            } ${borderRadiusClass} ${message.id.startsWith('temp-') ? 'opacity-80' : ''}`}
+          >
+            <p className="break-words">{message.content}</p>
+            
+            {/* Only show timestamp and status for last message in sequence */}
+            {isLastInSequence && (
+              <div
+                className={`text-xs mt-1 flex items-center gap-1 ${
+                  isCurrentUser
+                    ? 'justify-end text-blue-200'
+                    : 'justify-start text-gray-500'
+                }`}
+              >
+                <span>{formatMessageTime(message.created_at)}</span>
+                {isCurrentUser && (
+                  <>
+                    {message.id.startsWith('temp-') ? (
+                      <FiClock className="w-3 h-3 animate-pulse" />
+                    ) : message.is_read_by && message.is_read_by.length > 1 ? (
+                      <FiCheckCircle className="w-3 h-3" />
+                    ) : (
+                      <FiCheck className="w-3 h-3" />
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Profile picture for current user (right side) */}
+        {isCurrentUser && isFirstInSequence && (
+          <div className="flex-shrink-0 ml-2 self-end">
+            <Avatar className="h-8 w-8">
+              <AvatarImage 
+                src={message.sender_profile_pic_url || undefined} 
+                alt="You" 
+              />
+              <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
+                {username?.substring(0, 2).toUpperCase() || 'YO'}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+        )}
+
+        {/* Empty space for alignment for current user non-first messages */}
+        {isCurrentUser && !isFirstInSequence && (
+          <div className="w-8 ml-2 flex-shrink-0" />
+        )}
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-col h-full">
-      {/* Connection Status Indicator */}
-      {subscriptionStatus === 'connecting' && (
+    <div className="flex flex-col h-full w-full bg-white">
+      {/* Connection Status */}
+      {!isConnected && (
         <div className="bg-yellow-500 text-white text-center py-2 px-4 text-sm flex items-center justify-center gap-2">
           <FiWifi className="animate-pulse" />
           <span>Connecting to real-time updates...</span>
         </div>
       )}
-      {subscriptionStatus === 'error' && (
-        <div className="bg-red-500 text-white text-center py-2 px-4 text-sm flex items-center justify-center gap-2">
-          <FiWifiOff />
-          <span>Connection issues. Messages may be delayed.</span>
-        </div>
-      )}
 
-      <div
-        ref={chatContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4"
-      >
-        {isLoadingHistory && (
-          <Preloader isVisible={true} message="Loading messages..." />
+      {/* Messages */}
+      <div ref={containerRef} className="flex-1 overflow-y-auto p-4">
+        {isLoading && (
+          <div className="flex justify-center py-4">
+            <Preloader isVisible={true} message="Loading messages..." />
+          </div>
         )}
 
-        {!isLoadingHistory && messages.length === 0 && (
+        {!isLoading && messages.length === 0 && (
           <div className="text-center text-gray-500 py-8 flex flex-col items-center gap-2">
             <FiMessageSquare className="w-12 h-12 text-gray-300" />
-            <p>
-              {roomId ? 'No messages yet. Start the conversation!' : 'Select a chat to start messaging'}
+            <p className="text-lg font-medium">No messages yet</p>
+            <p className="text-sm">
+              {roomId ? 'Start the conversation!' : 'Select a chat to start messaging'}
             </p>
           </div>
         )}
 
-        {!isLoadingHistory &&
-          messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${
-                msg.sender_id === userId ? 'justify-end' : 'justify-start'
-              }`}
-            >
-              <div
-                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg shadow ${
-                  msg.sender_id === userId
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 text-gray-800'
-                } ${msg.id.startsWith('temp-') ? 'opacity-80' : ''}`}
-              >
-                {msg.sender_id !== userId && (
-                  <p className="font-semibold text-sm mb-1">
-                    {msg.sender_name}
-                  </p>
-                )}
-                <p>{msg.content}</p>
-                <div
-                  className={`text-xs mt-1 flex items-center ${
-                    msg.sender_id === userId
-                      ? 'justify-end text-blue-200'
-                      : 'justify-start text-gray-500'
-                  }`}
-                >
-                  {msg.id.startsWith('temp-') ? (
-                    <div className="flex items-center gap-1">
-                      <FiClock className="w-3 h-3" />
-                      <span>Sending...</span>
-                    </div>
-                  ) : (
-                    <>
-                      <span>{format(new Date(msg.created_at), 'hh:mm a')}</span>
-                      {msg.sender_id === userId && (
-                        <div className="flex items-center gap-1 ml-2">
-                          {msg.is_read_by?.length > 1 ? (
-                            <FiCheckCircle className="w-3 h-3" />
-                          ) : (
-                            <FiCheck className="w-3 h-3" />
-                          )}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
+        <div className="space-y-1">
+          {!isLoading && messages.map((message, index) => (
+            <div key={message.id} className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+              {renderMessageItem(message, index)}
             </div>
           ))}
-        <div ref={messagesEndRef} />
+        </div>
       </div>
 
-      <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200">
-        <div className="flex space-x-2">
-          <Input
-            type="text"
-            placeholder={roomId ? 'Type a message...' : 'Select a chat to start messaging'}
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className="flex-1"
-            disabled={!userId || !roomId || isSending}
-          />
-          <Button 
-            type="submit" 
-            disabled={!newMessage.trim() || !userId || !roomId || isSending}
-            className="flex items-center gap-2"
-          >
-            {isSending ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Sending...</span>
-              </>
-            ) : (
-              <>
-                <FiSend className="w-4 h-4" />
-                <span>Send</span>
-              </>
-            )}
-          </Button>
-        </div>
+      {/* Message Input */}
+      <form onSubmit={handleSendMessage} className="flex w-full gap-2 border-t border-gray-200 p-4">
+        <Input
+          type="text"
+          placeholder={roomId ? 'Type a message...' : 'Select a chat to start messaging'}
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          onKeyPress={handleKeyPress}
+          className="flex-1"
+          disabled={!userId || !roomId || isSending || !isConnected}
+        />
+        <Button 
+          type="submit" 
+          disabled={!newMessage.trim() || !userId || !roomId || isSending || !isConnected}
+          className="flex items-center gap-2 px-4"
+          size="sm"
+        >
+          {isSending ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <FiSend className="w-4 h-4" />
+          )}
+        </Button>
       </form>
     </div>
   )
