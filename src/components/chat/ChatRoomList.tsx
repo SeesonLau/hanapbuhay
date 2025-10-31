@@ -1,18 +1,16 @@
 // src/components/chat/ChatRoomList.tsx
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { UserContact, ChatRoom } from '@/lib/models/chat';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { ChatService } from '@/lib/services/chat/chat-services';
 import { toast } from 'react-hot-toast';
-import { supabase } from '@/lib/services/supabase/client';
 
 interface ChatRoomListProps {
     currentUserId: string;
     activeRoomId: string;
     contacts: UserContact[];
     onSelectRoom: (room: ChatRoom, contact: UserContact) => void;
-    onNewMessage?: (message: any) => void; // Add this prop for real-time updates
 }
 
 const GLOBAL_ROOM_ID = ChatService.getGlobalRoomId();
@@ -23,97 +21,8 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({
     activeRoomId, 
     contacts, 
     onSelectRoom,
-    onNewMessage 
 }) => {
-    const [localContacts, setLocalContacts] = useState<UserContact[]>(contacts);
-    
-    // Update local contacts when props change
-    useEffect(() => {
-        setLocalContacts(contacts);
-    }, [contacts]);
-
-    // Listen for new messages to update the contact list in real-time
-    useEffect(() => {
-        if (!currentUserId) return;
-
-        console.log('🔔 Setting up ChatRoomList real-time subscription');
-
-        const channel = supabase
-            .channel('chat-room-list-updates')
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'messages',
-                },
-                (payload) => {
-                    console.log('🆕 New message for ChatRoomList:', payload);
-                    const newMessage = payload.new as any;
-                    
-                    // Only process messages not sent by current user
-                    if (newMessage.sender_id !== currentUserId) {
-                        updateContactWithNewMessage(newMessage);
-                    }
-                }
-            )
-            .subscribe();
-
-        return () => {
-            console.log('🧹 Cleaning up ChatRoomList subscription');
-            supabase.removeChannel(channel);
-        };
-    }, [currentUserId]);
-
-    // Update contact when a new message is received
-    const updateContactWithNewMessage = (message: any) => {
-        setLocalContacts(prev => 
-            prev.map(contact => {
-                if (contact.room_id === message.room_id) {
-                    // Update the last message and increment unread count if not active
-                    const updatedContact: UserContact = {
-                        ...contact,
-                        lastMessage: {
-                            id: message.id,
-                            room_id: message.room_id,
-                            sender_id: message.sender_id,
-                            content: message.content,
-                            created_at: message.created_at,
-                            is_read_by: message.is_read_by || [],
-                        },
-                        unreadCount: contact.room_id === activeRoomId 
-                            ? 0  // Reset if this is the active room
-                            : (contact.unreadCount + 1) // Increment if not active
-                    };
-                    return updatedContact;
-                }
-                return contact;
-            })
-        );
-    };
-
-    // Also update when parent component notifies about new messages
-    useEffect(() => {
-        if (onNewMessage) {
-            const handleNewMessage = (message: any) => {
-                updateContactWithNewMessage(message);
-            };
-            
-            // This would be set by the parent component
-            // For now, we'll use the Supabase subscription above
-        }
-    }, [onNewMessage, activeRoomId]);
-
     const handleRoomClick = (contact: UserContact) => {
-        // Reset unread count when room is selected
-        setLocalContacts(prev => 
-            prev.map(c => 
-                c.room_id === contact.room_id 
-                    ? { ...c, unreadCount: 0 }
-                    : c
-            )
-        );
-
         // 1. Global Room Switch
         if (contact.room_id === GLOBAL_ROOM_ID) {
             const globalRoom: ChatRoom = {
@@ -143,8 +52,32 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({
         toast.error('Could not identify chat room or contact.');
     };
 
+    // Check if message is unread (not read by current user)
+    const isMessageUnread = (contact: UserContact): boolean => {
+        if (!contact.lastMessage) return false;
+        if (contact.lastMessage.sender_id === currentUserId) return false; // Our own messages
+        return !contact.lastMessage.is_read_by?.includes(currentUserId);
+    };
+
+    // Format the last message display
+    const formatLastMessage = (contact: UserContact): string => {
+        if (!contact.lastMessage) {
+            return contact.room_id === GLOBAL_ROOM_ID 
+                ? 'Welcome to global chat' 
+                : 'Say hello!';
+        }
+
+        const isFromCurrentUser = contact.lastMessage.sender_id === currentUserId;
+        
+        if (isFromCurrentUser) {
+            return `You: ${contact.lastMessage.content}`;
+        } else {
+            return contact.lastMessage.content;
+        }
+    };
+
     // Sort contacts by last message time (most recent first)
-    const sortedContacts = [...localContacts].sort((a, b) => {
+    const sortedContacts = [...contacts].sort((a, b) => {
         const aTime = a.lastMessage?.created_at || a.room_id === GLOBAL_ROOM_ID ? '9999-12-31' : '0000-01-01';
         const bTime = b.lastMessage?.created_at || b.room_id === GLOBAL_ROOM_ID ? '9999-12-31' : '0000-01-01';
         
@@ -157,60 +90,75 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({
 
     return (
         <div className="flex-1 overflow-y-auto">
-            {sortedContacts.map((contact) => (
-                <div
-                    key={contact.room_id || contact.userId}
-                    className={`flex items-center p-4 cursor-pointer hover:bg-gray-100 transition-colors ${
-                        contact.room_id === activeRoomId 
-                            ? 'bg-blue-50 border-l-4 border-blue-500' 
-                            : 'border-l-4 border-transparent'
-                    }`}
-                    onClick={() => handleRoomClick(contact)}
-                >
-                    {/* Contact Avatar */}
-                    <Avatar className="h-10 w-10">
-                        <AvatarImage 
-                            src={contact.profilePicUrl || undefined} 
-                            alt={contact.name} 
-                        />
-                        <AvatarFallback className="bg-gray-300 text-gray-700">
-                            {contact.name.substring(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                    </Avatar>
-
-                    {/* Contact Info */}
-                    <div className="ml-3 flex-1 overflow-hidden">
-                        <p className="font-semibold text-gray-800 truncate">
-                            {contact.name}
-                        </p>
-                        <p className="text-sm text-gray-500 truncate">
-                            {contact.lastMessage 
-                                ? contact.lastMessage.content 
-                                : (contact.room_id === GLOBAL_ROOM_ID 
-                                    ? 'Global Chat' 
-                                    : 'Tap to start chat')
-                            }
-                        </p>
-                    </div>
-
-                    {/* Unread Count Badge */}
-                    {contact.unreadCount > 0 && (
-                        <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                            {contact.unreadCount}
-                        </span>
-                    )}
-
-                    {/* Last message time */}
-                    {contact.lastMessage && (
-                        <p className="text-xs text-gray-400 ml-2">
-                            {new Date(contact.lastMessage.created_at).toLocaleTimeString([], { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
-                            })}
-                        </p>
-                    )}
+            {sortedContacts.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                    <svg className="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <p>No conversations yet</p>
+                    <p className="text-sm mt-1">Search for users to start a chat</p>
                 </div>
-            ))}
+            ) : (
+                sortedContacts.map((contact) => (
+                    <div
+                        key={contact.room_id || contact.userId}
+                        className={`flex items-center p-4 cursor-pointer transition-all duration-200 ${
+                            contact.room_id === activeRoomId 
+                                ? 'bg-blue-50 border-l-4 border-blue-500' 
+                                : 'border-l-4 border-transparent hover:bg-gray-50'
+                        }`}
+                        onClick={() => handleRoomClick(contact)}
+                    >
+                        {/* Contact Avatar */}
+                        <div className="relative flex-shrink-0">
+                            <Avatar className="h-12 w-12">
+                                <AvatarImage 
+                                    src={contact.profilePicUrl || undefined} 
+                                    alt={contact.name} 
+                                />
+                                <AvatarFallback className={`${
+                                    contact.room_id === GLOBAL_ROOM_ID 
+                                        ? 'bg-green-100 text-green-800' 
+                                        : 'bg-blue-100 text-blue-800'
+                                }`}>
+                                    {contact.name.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                            </Avatar>
+                            {contact.unreadCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                    {contact.unreadCount}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Contact Info */}
+                        <div className="ml-3 flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                                <p className={`font-semibold truncate ${
+                                    isMessageUnread(contact) ? 'text-gray-900 font-bold' : 'text-gray-800'
+                                }`}>
+                                    {contact.name}
+                                </p>
+                                {contact.lastMessage && (
+                                    <p className="text-xs text-gray-400 flex-shrink-0 ml-2">
+                                        {new Date(contact.lastMessage.created_at).toLocaleTimeString([], { 
+                                            hour: '2-digit', 
+                                            minute: '2-digit' 
+                                        })}
+                                    </p>
+                                )}
+                            </div>
+                            <p className={`text-sm truncate ${
+                                isMessageUnread(contact) 
+                                    ? 'text-gray-900 font-semibold' 
+                                    : 'text-gray-500'
+                            }`}>
+                                {formatLastMessage(contact)}
+                            </p>
+                        </div>
+                    </div>
+                ))
+            )}
         </div>
     );
 };
