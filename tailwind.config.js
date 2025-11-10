@@ -1,3 +1,12 @@
+const MinWidthScreens = {
+  'mobile-S': '320px',
+  'mobile-M': '375px',
+  'mobile-L': '425px',
+  'tablet': '768px',
+  'laptop': '1024px',
+  'laptop-L': '1440px',
+};
+
 module.exports = {
     darkMode: ["class"],
     content: [
@@ -6,6 +15,7 @@ module.exports = {
   ],
   theme: {
   	extend: {
+      screens: MinWidthScreens,
   		fontFamily: {
   			inter: [
   				'var(--font-inter)',

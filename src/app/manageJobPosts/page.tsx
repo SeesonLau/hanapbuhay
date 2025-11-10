@@ -4,6 +4,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import Banner from '@/components/ui/Banner';
+import Sort from '@/components/ui/Sort';
+import { ViewToggle } from '@/components/ui/ViewToggle';
 import ApplicantsModal from '@/components/modals/ApplicantsViewModal';
 import JobPostViewModal, { JobPostViewData } from '@/components/modals/JobPostViewModal';
 import JobPostAddModal from '@/components/modals/JobPostAddModal';
@@ -65,6 +67,8 @@ export default function ManageJobPostsPage() {
   };
 
   const handleCreatePost = () => {
+    // Ensure we are not carrying over a previously selected post
+    setSelectedPost(null);
     setIsAddModalOpen(true);
   };
 
@@ -78,31 +82,61 @@ export default function ManageJobPostsPage() {
     setIsDeleteModalOpen(true);
   };
 
+  // Stable sort change handler to avoid re-render loops
+  const handleManageSortChange = useCallback((opt: any) => {
+    const val = String(opt?.value ?? 'latest');
+    let sortBy = 'createdAt';
+    let sortOrder: 'asc' | 'desc' = 'desc';
+    if (val === 'oldest') sortOrder = 'asc';
+    handleSort?.(sortBy, sortOrder);
+  }, [handleSort]);
+
   const handlePostSaved = async (data?: any) => {
     // If editing an existing post, call updatePost from the hook
     try {
-      if (selectedPost && data) {
+      // Use modal state to decide action. This avoids accidental updates when a previous selection lingers.
+      if (isEditModalOpen && selectedPost && data) {
         // Map form data to Post partial fields
+        const about = data.about ?? selectedPost.description ?? "";
+        const qualifications = (data.qualifications ?? "").trim();
+        const combinedDescription = qualifications
+          ? `${about}\n\n[requirements]\n${qualifications}`
+          : about;
         const payload: Partial<Post> = {
           title: data.title ?? selectedPost.title,
-          description: data.about ?? selectedPost.description,
+          description: combinedDescription,
           // Price: try to parse numeric from string
           price: data.salary ? Number(String(data.salary).replace(/[^0-9.-]+/g, '')) : (selectedPost.price ?? 0),
-          subType: data.subTypes ?? (data.jobTypes ?? selectedPost.subType),
+          // Persist subtypes plus experience and gender selections (deduped)
+          subType: Array.from(new Set([
+            ...((data.subTypes ?? (data.jobTypes ?? selectedPost.subType)) || []),
+            ...((data.experienceLevels ?? []) as string[]),
+            ...((data.genders ?? []) as string[]),
+          ])),
           location: data.city ?? selectedPost.location,
         };
 
         await updatePost?.(selectedPost.postId, payload);
-      } else if (!selectedPost && data) {
+      } else if (isAddModalOpen && data) {
         // Creating new post
         try {
+          const about = data.about ?? "";
+          const qualifications = (data.qualifications ?? "").trim();
+          const combinedDescription = qualifications
+            ? `${about}\n\n[requirements]\n${qualifications}`
+            : about;
           const payload: Omit<Post, 'postId' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'deletedBy'> = {
             userId: userId as string,
             title: data.title ?? "",
-            description: data.about ?? "",
+            description: combinedDescription,
             price: data.salary ? Number(String(data.salary).replace(/[^0-9.-]+/g, '')) : 0,
             type: (data.jobTypes && data.jobTypes[0]) || (data.subTypes && data.subTypes[0]) || 'other',
-            subType: data.subTypes ?? (data.jobTypes ?? []),
+            // Persist subtypes plus experience and gender selections (deduped)
+            subType: Array.from(new Set([
+              ...((data.subTypes ?? (data.jobTypes ?? [])) || []),
+              ...((data.experienceLevels ?? []) as string[]),
+              ...((data.genders ?? []) as string[]),
+            ])),
             location: data.city ?? (data.province ?? ''),
             imageUrl: '',
             createdBy: userId as string,
@@ -155,7 +189,20 @@ export default function ManageJobPostsPage() {
         onPostClick={handleCreatePost}
       />
 
-      <main className="pl-4 pr-4 pb-8 pt-[240px]">
+      <main className="pt-[240px] px-4 sm:px-6 md:px-16 lg:px-32 pb-8">
+        {/* Controls Row: Showing count, Sort, View Toggle */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+          {/* Left - Showing count aligned with search bar */}
+          <div className="flex items-center gap-3">
+            <span className="text-small text-gray-neutral600 whitespace-nowrap">Showing: {jobs.length}</span>
+          </div>
+          {/* Right - Sort & View Toggle */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-small text-gray-neutral600 whitespace-nowrap">Sort by</span>
+            <Sort variant="manageJobs" defaultToFirst={false} onChange={handleManageSortChange} />
+            <ViewToggle value={viewMode} onChange={setViewMode} />
+          </div>
+        </div>
         <PostsSection
           jobs={jobs}
           variant="manage"

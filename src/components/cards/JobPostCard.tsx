@@ -130,7 +130,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
 
   return (
     <div 
-      className={`w-[420px] h-[250px] min-h-[250px] max-h-[250px] bg-white rounded-lg border border-gray-200 shadow-sm p-[30px] flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-300 cursor-pointer ${className}`}
+      className={`w-[400px] h-[250px] min-h-[250px] max-h-[250px] bg-white rounded-lg border border-gray-200 shadow-sm p-[30px] flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-300 cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
       {/* Header */}

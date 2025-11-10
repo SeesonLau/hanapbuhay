@@ -5,6 +5,9 @@ import { toast } from "react-hot-toast";
 import { PostService } from "@/lib/services/posts-services";
 import { ApplicationService } from "@/lib/services/applications-services";
 import type { Post } from "@/lib/models/posts";
+import { Gender } from "@/lib/constants/gender";
+import { ExperienceLevel } from "@/lib/constants/experience-level";
+import { JobType, SubTypes } from "@/lib/constants/job-types";
 import type { FilterOptions } from '@/components/ui/FilterSection';
 
 const PAGE_SIZE = 10;
@@ -21,6 +24,7 @@ export interface JobPostData {
   genderTags?: string[];
   experienceTags?: string[];
   jobTypeTags?: string[];
+  requirements?: string[];
   raw?: Post;
 }
 
@@ -52,20 +56,47 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
   });
   const [filters, setFilters] = useState<FilterOptions | null>(null);
 
-  const mapPost = (post: Post, applicantCount = 0): JobPostData => ({
-    id: post.postId,
-    title: post.title,
-    description: post.description ?? "",
-    location: post.location ?? "",
-    salary: formatPeso((post as any).price),
-    salaryPeriod: "month",
-    postedDate: formatPostedDate(post.createdAt),
-    applicantCount,
-    genderTags: [],
-    experienceTags: [],
-    jobTypeTags: post.subType ?? (post.type ? [post.type] : []),
-    raw: post,
-  });
+  const REQUIREMENTS_MARKER = "[requirements]";
+  const splitDescriptionAndRequirements = (desc?: string): { about: string; requirements: string[] } => {
+    const raw = desc ?? "";
+    const markerIdx = raw.indexOf(REQUIREMENTS_MARKER);
+    if (markerIdx === -1) {
+      return { about: raw, requirements: [] };
+    }
+    const about = raw.slice(0, markerIdx).trim();
+    const reqSection = raw.slice(markerIdx + REQUIREMENTS_MARKER.length).trim();
+    const lines = reqSection.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const items = lines.map((l) => l.replace(/^[-•]\s*/, "").trim()).filter(Boolean);
+    return { about, requirements: items };
+  };
+
+  const mapPost = (post: Post, applicantCount = 0): JobPostData => {
+    const { about, requirements } = splitDescriptionAndRequirements(post.description);
+    const sub = post.subType || [];
+    const genderTags = Array.from(new Set(sub.filter(s => Object.values(Gender).includes(s as Gender))));
+    const experienceTags = Array.from(new Set(sub.filter(s => Object.values(ExperienceLevel).includes(s as ExperienceLevel))));
+    const allJobSubTypes = Object.values(SubTypes).flat();
+    const jobSubtypeTags = Array.from(new Set(
+      sub.filter(s => allJobSubTypes.includes(s))
+         .filter(s => !genderTags.includes(s) && !experienceTags.includes(s))
+    ));
+    const jobTypeTags = Array.from(new Set([post.type, ...jobSubtypeTags].filter(Boolean)));
+    return {
+      id: post.postId,
+      title: post.title,
+      description: about,
+      location: post.location ?? "",
+      salary: formatPeso((post as any).price),
+      salaryPeriod: "month",
+      postedDate: formatPostedDate(post.createdAt),
+      applicantCount,
+      genderTags,
+      experienceTags,
+      jobTypeTags,
+      requirements,
+      raw: post,
+    };
+  };
 
   const load = useCallback(async (params: { page?: number; isLoadMore?: boolean; searchTerm?: string; location?: string; sortBy?: string; sortOrder?: 'asc' | 'desc'; filters?: FilterOptions | null } = {}) => {
     const page = params.page ?? 1;

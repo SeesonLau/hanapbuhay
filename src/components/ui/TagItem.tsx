@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getColor, getGrayColor, getBlackColor, getWhiteColor } from '@/styles/colors';
 import { fontClasses } from '@/styles/fonts';
 // Icons served from public/icons
@@ -131,9 +131,9 @@ export const GenderTag: React.FC<GenderTagProps> = ({
   selected = false 
 }) => {
   const [isSelected, setIsSelected] = useState(selected);
+  useEffect(() => { setIsSelected(selected); }, [selected]);
 
   const handleClick = () => {
-    setIsSelected(!isSelected);
     if (onClick) onClick();
   };
 
@@ -159,9 +159,9 @@ export const ExperienceLevelTag: React.FC<ExperienceLevelTagProps> = ({
   selected = false 
 }) => {
   const [isSelected, setIsSelected] = useState(selected);
+  useEffect(() => { setIsSelected(selected); }, [selected]);
 
   const handleClick = () => {
-    setIsSelected(!isSelected);
     if (onClick) onClick();
   };
 
@@ -192,9 +192,9 @@ export const JobTypeTag: React.FC<JobTypeTagProps> = ({
   categoryIcon
 }) => {
   const [isSelected, setIsSelected] = useState(selected);
+  useEffect(() => { setIsSelected(selected); }, [selected]);
 
   const handleClick = () => {
-    setIsSelected(!isSelected);
     if (onClick) onClick();
   };
 
@@ -205,7 +205,7 @@ export const JobTypeTag: React.FC<JobTypeTagProps> = ({
         backgroundColor: isSelected ? getColor('tag', 'jobText') : getColor('tag', 'jobUnselectedBg'),
         color: isSelected ? getWhiteColor() : getColor('tag', 'jobText')
       }}
-      onClick={handleClick}
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleClick(); }}
     >
       {categoryIcon && (
         <img 
