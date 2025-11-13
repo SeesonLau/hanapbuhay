@@ -1,5 +1,5 @@
 import { supabase } from './supabase/client';
-import { AuthResponse } from '../models';
+import { AuthResponse } from '../models/user';
 import { validatePassword, validateEmail } from '../utils/validation';
 import { toast } from 'react-hot-toast';
 import { AuthMessages } from '@/resources/messages/auth';

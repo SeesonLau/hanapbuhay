@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { Profile } from "@/lib/models/profile";
 import { ProfileService } from "@/lib/services/profile-services";
-import { toast } from "react-hot-toast";
-import { ProfileMessages } from "@/resources/messages/profile";
+import { combineToStoredName } from "@/lib/utils/profile-utils";
 import upload2 from "@/assets/upload2.svg";
 import { FaUserCircle } from 'react-icons/fa';
+import { Edit3 } from 'lucide-react';
 import TextBox from "../ui/TextBox";
 import SelectBox from "../ui/SelectBox";
 import Button from "../ui/Button";
@@ -15,8 +15,6 @@ interface ProfileFormProps {
   userId: string;
   className?: string;
 }
-
-const NAME_DELIMITER = " | ";
 
 export default function ProfileForm({ userId, className }: ProfileFormProps) {
   const [profile, setProfile] = useState<Profile & { email?: string | null } | null>(null);
@@ -28,57 +26,43 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [email, setEmail] = useState<string>("");
   const [displayName, setDisplayName] = useState<string>("");
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const fetchProfileAndEmail = async () => {
       try {
-        const [profileData, userEmail, userName] = await Promise.all([
+        const [profileData, userEmail, parsedName, displayName] = await Promise.all([
           ProfileService.getProfileByUserId(userId),
           ProfileService.getEmailByUserId(userId),
-          ProfileService.getNameByUserId(userId)
+          ProfileService.getParsedNameByUserId(userId),
+          ProfileService.getDisplayNameByUserId(userId)
         ]);
 
         if (profileData) {
           setProfile(profileData);
-          
-          const fullName = profileData.name ?? "";
-          
-          if (fullName.includes(NAME_DELIMITER)) {
-            const [first, last] = fullName.split(NAME_DELIMITER);
-            setFirstName(first || "");
-            setLastName(last || "");
-          } else {
-            const lastSpaceIndex = fullName.lastIndexOf(" ");
-            
-            if (lastSpaceIndex === -1) {
-              setFirstName(fullName);
-              setLastName("");
-            } else {
-              setFirstName(fullName.substring(0, lastSpaceIndex));
-              setLastName(fullName.substring(lastSpaceIndex + 1));
-            }
-          }
-          
           setPreviewUrl(profileData.profilePictureUrl ?? null);
         }
 
-        if (userEmail) {
-          setEmail(userEmail); 
+        if (parsedName) {
+          setFirstName(parsedName.firstName);
+          setLastName(parsedName.lastName);
         }
 
-        if (userName) {
-          const cleanName = userName.replace(NAME_DELIMITER, " ");
-          setDisplayName(cleanName);
+        if (userEmail) {
+          setEmail(userEmail);
         }
-      } catch (err) {
-        toast.error(ProfileMessages.LOAD_ERROR);
+
+        if (displayName) {
+          setDisplayName(displayName);
+        }
+      } catch {
       } finally {
         setLoading(false);
       }
     };
 
-  fetchProfileAndEmail();
-}, [userId]);
+    fetchProfileAndEmail();
+  }, [userId]);
 
   const handleChange = (field: keyof Profile, value: any) => {
     setProfile((prev) => prev ? { ...prev, [field]: value } : prev);
@@ -108,6 +92,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
 
     try {
       let uploadedUrl = profile.profilePictureUrl ?? null;
+      
       if (selectedFile) {
         const result = await ProfileService.uploadProfileImage(userId, selectedFile);
         if (!result) {
@@ -117,11 +102,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
         uploadedUrl = result;
       }
 
-      // Store with delimiter to preserve the exact split between first and last name
-      const storedName = `${firstName.trim()}${NAME_DELIMITER}${lastName.trim()}`;
-      // Display name without delimiter for UI
-      const displayFullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-      
+      const storedName = combineToStoredName(firstName, lastName);
       const success = await ProfileService.upsertProfile({ 
         ...profile, 
         name: storedName, 
@@ -129,20 +110,30 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
       });
       
       if (success) {
-        setDisplayName(displayFullName);
-        toast.success(ProfileMessages.SAVE_SUCCESS);
-      } else {
-        toast.error(ProfileMessages.SAVE_ERROR);
+        const newDisplayName = await ProfileService.getDisplayNameByUserId(userId);
+        if (newDisplayName) {
+          setDisplayName(newDisplayName);
+        }
+        setIsEditing(false); 
       }
-    } catch (err) {
-      toast.error(ProfileMessages.SAVE_ERROR);
+    } catch {
     } finally {
       setSaving(false);
     }
   };
 
+  if (loading) return <div>Loading...</div>;
+
   return (
-    <div className={`${className}  py-7 px-10 bg-white rounded-xl shadow-md flex flex-col gap-6`}>
+    <div className={`${className} relative py-7 px-10 bg-white rounded-xl shadow-md flex flex-col gap-6`}>
+
+      {/* Edit Icon */}
+      <button
+        onClick={() => setIsEditing(!isEditing)}
+        className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-neutral100 transition"
+      >
+        <Edit3 size={20} className="text-gray-neutral600" />
+      </button>
 
       {/* Profile Picture Upload */}
       <div className="flex items-center justify-center gap-6">
@@ -159,16 +150,18 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
             </div>
           )}
           
-          {/* Edit / Upload Icon */}
-          <label className="absolute bottom-0 -right-5 p-2 rounded-full cursor-pointer flex items-center justify-center">
-            <img src={upload2.src} alt="Upload" className="w-5 h-5 " />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-          </label>
+          {/* Upload icon */}
+          {isEditing && (
+            <label className="absolute bottom-0 -right-5 p-2 rounded-full cursor-pointer flex items-center justify-center">
+              <img src={upload2.src} alt="Upload" className="w-5 h-5" />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+            </label>
+          )}
         </div>
 
         {displayName && (
@@ -191,6 +184,8 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
           width="100%"
+          readOnly={!isEditing}
+          disabled={!isEditing}
         />
 
         <TextBox
@@ -199,6 +194,8 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
           width="100%"
+          readOnly={!isEditing}
+          disabled={!isEditing}
         />
       </div>
 
@@ -210,6 +207,8 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
           value={profile?.address ?? ''}
           onChange={(e) => handleChange('address', e.target.value)}
           width="100%"
+          readOnly={!isEditing}
+          disabled={!isEditing}
         />
 
         <TextBox
@@ -233,6 +232,8 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
           width="100%"
           enableValidation={true}
           showSuccessIcon={true}
+          readOnly={!isEditing}
+          disabled={!isEditing}
         />
 
         <TextBox
@@ -241,10 +242,12 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
           value={profile?.birthdate ?? ''}
           onChange={(e) => handleBirthdateChange(e.target.value)}
           width="100%"
+          readOnly={!isEditing}
+          disabled={!isEditing}
         />
       </div>
 
-      {/* Age */}
+      {/* Age & Sex */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         <TextBox
           label="Age"
@@ -255,7 +258,6 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
           disabled
         />
 
-      {/* Sex */}
         <SelectBox
           label="Sex"
           value={profile?.sex ?? ''}
@@ -267,22 +269,24 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
             { value: 'Other', label: 'Other' }
           ]}
           width="100%"
+          disabled={!isEditing}
         />
       </div>
         
       {/* Save Button */}
-      <div className="flex justify-center">
-        <Button
-          onClick={handleSave}
-          disabled={saving}
-          variant="primary400"
-          size="xl"
-          fullRounded={false}
-          isLoading={saving}
-        > 
-          Save
-        </Button>
-      </div>
+      {isEditing && (
+        <div className="flex justify-center">
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            variant="primary400"
+            size="xl"
+            fullRounded={false}
+          > 
+            Save
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

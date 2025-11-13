@@ -1,182 +1,333 @@
-// src/lib/services/chat/chat-services.ts
+import { supabase } from '@/lib/services/supabase/client';
+import { ChatRoom, ChatMessage, UserContact } from '@/lib/models/chat';
+import { ProfileService } from '../profile-services';
 
-import { createClient } from '@/lib/services/supabase/client'; 
-// Import RealtimeChannel and types from the Supabase JS library
-import type { RealtimeChannel } from '@supabase/supabase-js'; 
-
-
-// ===================================
-// 1. DATA TYPES
-// ===================================
-
-export interface Message {
-  id: string;
-  sender_id: string;
-  room_id: string;
-  content: string;
-  created_at: string;
-}
-
-export interface ChatRoom {
-  id: string;
-  participant_id: string; // The ID of the other user in the 1:1 chat
-  participant_name: string;
-  participant_picture_url: string | null;
-  last_message_content: string;
-  last_message_at: string;
-  unread_count: number;
-}
-
-export interface SearchResult {
-    userId: string;
-    name: string;
-    profilePictureUrl: string | null;
-}
-
-// Define the shape of the data returned by the search query
-type ProfileRow = {
-  userId: string; 
-  name: string; 
-  profilePictureUrl: string | null;
-}
-
-
-// ===================================
-// 2. CHAT SERVICE CLASS
-// ===================================
+// The fixed UUID for the global room as set in the SQL script
+const GLOBAL_ROOM_ID_UUID = '00000000-0000-0000-0000-000000000000'; 
+const MESSAGES_LIMIT = 50; 
 
 export class ChatService {
-  
-  // FIX: Use a static getter for correct access and initialization of the client
-  private static get supabase() {
-    return createClient();
-  }
-
-  // -----------------------------------
-  // A. USER SEARCH FUNCTIONALITY (Working)
-  // -----------------------------------
 
   /**
-   * Searches the 'profiles' table for users matching the query by name.
-   * Excludes the currently authenticated user.
+   * 1. Get or Create a Private Chat Room (DM)
    */
-  static async searchUsers(query: string, currentUserId: string): Promise<SearchResult[]> {
-    if (!query || query.trim().length < 2) {
-      return []; 
-    }
-      
+  static async getOrCreatePrivateRoom(currentUserId: string, targetUserId: string): Promise<{ room: ChatRoom, isNew: boolean } | null> {
     try {
-        const { data, error } = await ChatService.supabase
-          .from('profiles')
-          .select(`
-            userId, 
-            name, 
-            profilePictureUrl
-          `)
-          .ilike('name', `%${query.trim()}%`)
-          .neq('userId', currentUserId)
-          .limit(20); 
+      // Sort IDs to ensure consistent array order for the unique index
+      const participants = [currentUserId, targetUserId].sort(); 
 
-        if (error) {
-          console.error('Supabase Query Error:', error); 
-          throw new Error(error.message || 'Supabase query failed');
-        }
+      // 1. Try to find existing room using the unique index check
+      const { data: existingRoom, error: searchError } = await supabase
+        .from('chat_rooms')
+        .select('*')
+        .eq('type', 'private')
+        .contains('participants', participants)
+        .limit(1)
+        .single();
 
-        // FIX: Explicitly type the data array and the map parameter
-        const profileData = data as ProfileRow[] | null;
+      if (searchError && searchError.code !== 'PGRST116') { // PGRST116 is 'No rows found'
+        console.error('Error searching for existing private room:', searchError);
+        return null;
+      }
 
-        if (!profileData) {
-            return [];
-        }
-        
-        return profileData.map((profile: ProfileRow) => ({
-          userId: profile.userId,
-          name: profile.name,
-          profilePictureUrl: profile.profilePictureUrl,
-        }));
-        
-    } catch (e) {
-        console.error("Search failed:", e);
-        return [];
+      if (existingRoom) {
+        return { room: existingRoom as ChatRoom, isNew: false };
+      }
+
+      // 2. If no room found, create a new one
+      const { data: newRoomData, error: createError } = await supabase
+        .from('chat_rooms')
+        .insert({
+          type: 'private',
+          participants: participants,
+        })
+        .select('*')
+        .single();
+
+      if (createError) {
+        console.error('Error creating new private room:', createError);
+        return null;
+      }
+
+      return { room: newRoomData as ChatRoom, isNew: true };
+    } catch (error) {
+      console.error('Unexpected error in getOrCreatePrivateRoom:', error);
+      return null;
     }
   }
 
-  // -----------------------------------
-  // B. CONVERSATION MANAGEMENT (STUBS)
-  // -----------------------------------
-
   /**
-   * STUB: Fetches the user's list of active chat rooms (conversations).
-   * NOTE: This requires tables like 'conversations' and 'participants'.
+   * Get existing chat rooms for a user
    */
-  static async getUserChatRooms(userId: string): Promise<ChatRoom[]> {
-    console.log('STUB: Fetching chat rooms for user:', userId);
-    // TODO: Implement Supabase RPC or complex query to join participants, 
-    // last message, and unread counts.
-    return []; // Returns an empty array until implemented
+  static async getExistingChatRooms(currentUserId: string): Promise<UserContact[]> {
+    try {
+      const { data: privateRooms, error: roomsError } = await supabase
+        .from('chat_rooms')
+        .select('*')
+        .eq('type', 'private')
+        .contains('participants', [currentUserId]);
+
+      if (roomsError) {
+        console.error('Error fetching private rooms:', roomsError);
+        return [];
+      }
+
+      if (!privateRooms || privateRooms.length === 0) {
+        return [];
+      }
+
+      const contacts: UserContact[] = [];
+
+      for (const room of privateRooms) {
+        const otherParticipantId = room.participants.find((id: string) => id !== currentUserId);
+        
+        if (!otherParticipantId) continue;
+
+        // Get profile with proper column names
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('name, profilePictureUrl') // Your actual column names
+          .eq('userId', otherParticipantId)
+          .single();
+
+        // Get last message
+        const { data: lastMessage } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('room_id', room.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        contacts.push({
+          userId: otherParticipantId,
+          name: profileData?.name || 'Unknown User',
+          profilePicUrl: profileData?.profilePictureUrl || null, // Your column name
+          unreadCount: 0,
+          room_id: room.id,
+          lastMessage: lastMessage ? {
+            id: lastMessage.id,
+            room_id: lastMessage.room_id,
+            sender_id: lastMessage.sender_id,
+            content: lastMessage.content,
+            created_at: lastMessage.created_at,
+            is_read_by: lastMessage.is_read_by,
+          } : undefined,
+        });
+      }
+
+      return contacts;
+    } catch (error) {
+      console.error('Error in getExistingChatRooms:', error);
+      return [];
+    }
   }
 
   /**
-   * STUB: Fetches the historical messages for a given chat room.
+   * 2 & 5. Fetch Chat History
    */
-  static async getMessages(chatRoomId: string): Promise<Message[]> {
-    console.log('STUB: Fetching messages for room:', chatRoomId);
-    // TODO: Implement Supabase query on the 'messages' table, ordered by created_at.
-    return []; // Returns an empty array until implemented
+  static async getMessageHistory(roomId: string, offset: number = 0, limit: number = MESSAGES_LIMIT): Promise<ChatMessage[]> {
+    try {
+      // Validate roomId
+      if (!roomId) {
+        console.error('Invalid roomId provided to getMessageHistory');
+        return [];
+      }
+
+      const { data, error, status, statusText } = await supabase
+        .from('messages')
+        .select('*, sender:profiles(name, profilePictureUrl)') 
+        .eq('room_id', roomId)
+        .order('created_at', { ascending: false }) 
+        .range(offset, offset + limit - 1);
+
+      if (error) {
+        console.error('Error fetching chat history:', {
+          error,
+          roomId,
+          status,
+          statusText,
+          details: error.details,
+          hint: error.hint,
+          message: error.message
+        });
+        return [];
+      }
+
+      // Handle case where data is null or undefined
+      if (!data) {
+        return [];
+      }
+
+      return (data as any[]).map(msg => ({
+        id: msg.id,
+        room_id: msg.room_id,
+        sender_id: msg.sender_id,
+        content: msg.content,
+        created_at: msg.created_at,
+        is_read_by: msg.is_read_by,
+        sender_name: msg.sender?.name || 'Unknown',
+        sender_profile_pic_url: msg.sender?.profilePictureUrl,
+      })).reverse(); 
+    } catch (error) {
+      console.error('Unexpected error in getMessageHistory:', error);
+      return [];
+    }
   }
 
   /**
-   * STUB: Marks all messages in a chat room as read for the current user.
+   * 4. Send a Message
    */
-  static markAsRead(chatRoomId: string, userId: string) {
-    console.log(`STUB: Marking room ${chatRoomId} as read for user ${userId}`);
-    // TODO: Implement Supabase update/insert logic (e.g., in a 'read_receipts' table).
-  }
-  
-  // -----------------------------------
-  // C. SENDING AND REALTIME (STUBS)
-  // -----------------------------------
+  static async sendMessage(roomId: string, senderId: string, content: string): Promise<ChatMessage | null> {
+  try {
+    // Validate inputs
+    if (!roomId || !senderId || !content?.trim()) {
+      console.error('❌ Invalid parameters for sendMessage:', { roomId, senderId, content });
+      return null;
+    }
 
-  /**
-   * STUB: Inserts a new message into the database and broadcasts it.
-   */
-  static async sendMessage(chatRoomId: string, senderId: string, content: string): Promise<Message | null> {
-    console.log('STUB: Sending message to room:', chatRoomId);
+    console.log('📤 Sending message:', { 
+      roomId, 
+      senderId, 
+      content: content.trim(),
+      roomIdType: typeof roomId,
+      senderIdType: typeof senderId
+    });
+
+    const { data, error, status, statusText } = await supabase
+      .from('messages')
+      .insert({
+        room_id: roomId,
+        sender_id: senderId,
+        content: content.trim(),
+        is_read_by: [senderId],
+      })
+      .select('*, sender:profiles(name, profilePictureUrl)') 
+      .single();
+
+    console.log('📩 Send message response:', { 
+      data: data ? 'Has data' : 'No data',
+      error: error ? {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        stack: error.stack
+      } : 'No error',
+      status,
+      statusText
+    });
+
+    if (error) {
+      console.error('❌ Error sending message - FULL ERROR OBJECT:', JSON.stringify(error, null, 2));
+      console.error('❌ Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        stack: error.stack
+      });
+      return null;
+    }
+
+    if (!data) {
+      console.error('❌ No data returned after sending message');
+      return null;
+    }
+
+    console.log('✅ Message sent successfully:', data);
     
-    // 1. Insert message into the 'messages' table (for persistence)
-    // 2. Broadcast a message via Supabase Realtime (for immediate delivery)
-    
-    // Example STUB return for immediate local update:
+    // Map data to ChatMessage model for consistency
+    const sentMsg = data as any;
     return {
-      id: crypto.randomUUID(),
-      sender_id: senderId,
-      room_id: chatRoomId,
-      content: content,
-      created_at: new Date().toISOString(),
+      id: sentMsg.id,
+      room_id: sentMsg.room_id,
+      sender_id: sentMsg.sender_id,
+      content: sentMsg.content,
+      created_at: sentMsg.created_at,
+      is_read_by: sentMsg.is_read_by,
+      sender_name: sentMsg.sender?.name || 'Unknown',
+      sender_profile_pic_url: sentMsg.sender?.profilePictureUrl,
     };
+  } catch (error) {
+    console.error('💥 Unexpected error in sendMessage:', error);
+    console.error('💥 Error stack:', error instanceof Error ? error.stack : 'No stack');
+    return null;
   }
+}
 
   /**
-   * STUB: Subscribes to real-time updates for a user's chat rooms (e.g., when a new room is created).
+   * 6. Mark Messages as Read
    */
-  static subscribeToChatRooms(userId: string, callback: () => void): RealtimeChannel {
-      console.log('STUB: Subscribing to chat room updates');
-      // TODO: Implement Supabase Realtime subscription on the 'participants' table 
-      // where the user is involved.
-      
-      // Return a mock channel with an unsubscribe method
-      return { unsubscribe: () => console.log('STUB: Unsubscribed from rooms') } as unknown as RealtimeChannel;
+  static async markMessagesAsRead(messageIds: string[], currentUserId: string): Promise<boolean> {
+    try {
+      for (const id of messageIds) {
+        const { error } = await supabase.rpc('mark_message_read', {
+          msg_id: id,  // Now this is UUID string
+          user_id: currentUserId
+        });
+        if (error) throw error;
+      }
+      return true;
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+      return false;
+    }
   }
   
   /**
-   * STUB: Subscribes to real-time message updates for a specific room.
+   * 3. Search Users
    */
-  static subscribeToMessages(chatRoomId: string, callback: (message: Message) => void): RealtimeChannel {
-      console.log(`STUB: Subscribing to messages for room: ${chatRoomId}`);
-      // TODO: Implement Supabase Realtime subscription on the 'messages' table 
-      // filtered by room_id.
-      
-      // Return a mock channel with an unsubscribe method
-      return { unsubscribe: () => console.log('STUB: Unsubscribed from messages') } as unknown as RealtimeChannel;
+  static async searchUsers(query: string, currentUserId: string): Promise<UserContact[]> {
+    try {
+      if (!query || query.length < 2) return [];
+
+      // Use Full-Text Search on the 'name_search' column
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('userId, name, profilePictureUrl')
+        .textSearch('name_search', `'${query.trim()}'`) 
+        .neq('userId', currentUserId) 
+        .limit(10); 
+
+      if (error) {
+        console.error('Error searching users:', error);
+        return [];
+      }
+
+      return (profiles || []).map(p => ({
+        userId: p.userId,
+        name: p.name || 'Unknown User',
+        profilePicUrl: p.profilePictureUrl,
+        unreadCount: 0, 
+      }));
+    } catch (error) {
+      console.error('Unexpected error in searchUsers:', error);
+      return [];
+    }
   }
+
+  // Helper to get the constant global room UUID
+  static getGlobalRoomId(): string {
+    return GLOBAL_ROOM_ID_UUID;
+  }
+
+  // Add this temporary method to ChatService to verify the room
+static async verifyRoomExists(roomId: string): Promise<boolean> {
+  try {
+    console.log('🔍 Verifying room exists:', roomId);
+    const { data, error } = await supabase
+      .from('chat_rooms')
+      .select('id, type, name')
+      .eq('id', roomId)
+      .single();
+
+    console.log('🔍 Room verification result:', { data, error });
+    return !!data && !error;
+  } catch (error) {
+    console.error('❌ Error verifying room:', error);
+    return false;
+  }
+}
+
 }

@@ -26,9 +26,6 @@ interface NewApplicantsSectionProps {
   onStatusChange?: () => void;
 }
 
-// Delimiter to remove from display names
-const NAME_DELIMITER = ' | ';
-
 export default function NewApplicantsSection({
   postId,
   sortOrder = 'newest',
@@ -57,19 +54,9 @@ export default function NewApplicantsSection({
         applications.map(async (app) => {
           const profileData = await ProfileService.getNameProfilePic(app.userId);
 
-          // Clean the name by removing delimiter
-          const cleanName = profileData?.name
-            ? (() => {
-                const [firstPart, lastPart] = profileData.name.split(NAME_DELIMITER);
-                const firstName = firstPart?.trim().split(' ')[0] || '';
-                const lastName = lastPart?.trim() || '';
-                return `${firstName} ${lastName}`.trim();
-              })()
-            : 'Unknown User';
-
           return {
             userId: app.userId,
-            name: cleanName,
+            name: profileData?.name || 'Unknown Applicant',
             rating: 0, // placeholder
             dateApplied: new Date(app.createdAt).toLocaleDateString('en-US', {
               month: 'short',
@@ -83,8 +70,6 @@ export default function NewApplicantsSection({
 
       setApplicants(applicantsWithProfiles);
     } catch (error) {
-      console.error('Error fetching applicants:', error);
-      toast.error('Failed to load applicants');
     } finally {
       setLoading(false);
     }

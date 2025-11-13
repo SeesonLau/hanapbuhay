@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { HiArrowDown } from 'react-icons/hi';
 import { Project } from '@/lib/models/profile';
 import { ProjectService } from '@/lib/services/project-services';
-import ProjectAddModal from './ProjectModal';
+import ProjectAddModal from '../modals/ProjectModal';
 import ProjectCard from './ProjectCard'; 
 import AddButton from "@/assets/add.svg";
 
@@ -69,25 +69,30 @@ export default function ProjectsSection({ userId, className }: ProjectsSectionPr
       </div>
 
       {/* Projects List */}
-      <div 
+      <div
         ref={scrollRef}
-        className="overflow-y-auto pr-2 scrollbar-hide snap-y snap-mandatory scroll-smooth" 
-        style={{ 
+        className="overflow-y-auto pr-2 scrollbar-hide scroll-smooth snap-y snap-mandatory"
+        style={{
           height: 'calc(100vh - 280px)',
-          scrollPaddingTop: '0.5rem',
-          scrollPaddingBottom: '0.5rem'
+          scrollSnapType: 'y mandatory',
         }}
       >
         <div className="flex flex-col gap-8">
-          {projects.map((project) => (
-            <div key={project.projectId} className="snap-start">
+          {projects.map((project, index) => (
+            <div
+              key={project.projectId}
+              className="snap-start"
+              style={{
+                scrollSnapAlign: 'start',
+                marginTop: index === 0 ? '0' : undefined,
+                marginBottom: index === projects.length - 1 ? '0.5rem' : undefined,
+              }}
+            >
               <ProjectCard
                 project={project}
                 userId={userId}
                 onClick={() => handleCardClick(project)}
-                onDeleteSuccess={() => {
-                  fetchProjects();
-                }}
+                onDeleteSuccess={fetchProjects}
               />
             </div>
           ))}

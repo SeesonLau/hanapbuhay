@@ -7,12 +7,25 @@ import TextBox from "@/components/ui/TextBox";
 import TextArea from "@/components/ui/TextArea";
 import SelectBox from "@/components/ui/SelectBox";
 import Button from "@/components/ui/Button";
-import { getGenderOptions } from "@/lib/constants/gender";
-import { getExperienceOptions } from "@/lib/constants/experience-level";
+import { getGenderOptions, Gender } from "@/lib/constants/gender";
+import { getExperienceOptions, ExperienceLevel } from "@/lib/constants/experience-level";
 import { JobType, getJobTypeOptions, SubTypes } from "@/lib/constants/job-types";
 import { GenderTag, ExperienceLevelTag, JobTypeTag } from "@/components/ui/TagItem";
+import JobTypeGrid from "@/components/ui/JobTypeGrid";
 import type { JobPostAddFormData } from "./JobPostAddModal";
 import type { Post } from '@/lib/models/posts';
+
+const REQUIREMENTS_MARKER = "[requirements]";
+function splitDescription(desc?: string): { about: string; qualifications: string } {
+  const raw = desc ?? "";
+  const idx = raw.indexOf(REQUIREMENTS_MARKER);
+  if (idx === -1) {
+    return { about: raw, qualifications: "" };
+  }
+  const about = raw.slice(0, idx).trim();
+  const rest = raw.slice(idx + REQUIREMENTS_MARKER.length).trim();
+  return { about, qualifications: rest };
+}
 
 interface JobPostEditModalProps {
   isOpen: boolean;
@@ -24,20 +37,26 @@ interface JobPostEditModalProps {
 }
 
 function mapPostToInitial(post: Post): Partial<JobPostAddFormData> & { subTypes?: string[] } {
+  const { about, qualifications } = splitDescription(post.description);
+  const sub = post.subType || [];
+  const genders = sub.filter(s => Object.values(Gender).includes(s as Gender));
+  const experiences = sub.filter(s => Object.values(ExperienceLevel).includes(s as ExperienceLevel));
+  const allJobSubTypes = Object.values(SubTypes).flat();
+  const jobSubTypes = sub.filter(s => allJobSubTypes.includes(s));
   return {
     title: post.title ?? "",
     jobTypes: post.type ? [post.type] : [],
-    experienceLevels: [],
-    genders: [],
+    experienceLevels: experiences,
+    genders: genders,
     country: "Philippines",
     province: "",
     city: post.location ?? "",
     address: "",
     salary: (typeof post.price === 'number') ? String(post.price) : (post.price ?? ""),
     salaryPeriod: 'month',
-    about: post.description ?? "",
-    qualifications: "",
-    subTypes: post.subType ?? [],
+    about,
+    qualifications,
+    subTypes: Array.from(new Set(jobSubTypes)),
   };
 }
 
@@ -56,37 +75,26 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
   const [salaryPeriod, setSalaryPeriod] = useState<'day' | 'week' | 'month'>(resolvedInitial?.salaryPeriod ?? "day");
   const [about, setAbout] = useState(resolvedInitial?.about ?? "");
   const [qualifications, setQualifications] = useState(resolvedInitial?.qualifications ?? "");
-  const [otherJobTypeText, setOtherJobTypeText] = useState(() => {
-    const subs = resolvedInitial?.subTypes ?? [];
-    const unknown = subs.find((s) => !Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(s)));
-    return unknown ?? "";
-  });
 
-  // Sync state when `initialData` or `post` changes. Compute resolvedInitial locally
-  // to avoid object-identity changes causing repeated effects.
-  useEffect(() => {
-    const ri = initialData ?? (post ? mapPostToInitial(post) : undefined);
+  // Helper to reset all state from a given initial data snapshot
+  const resetFromInitial = (ri?: Partial<JobPostAddFormData> & { subTypes?: string[] }) => {
     const nextJobTypes = ri?.jobTypes ?? [];
-    const nextSubTypes = ri?.subTypes ?? [];
-    const nextUnknown = nextSubTypes.find((s) => !Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(s)));
+    const nextSubTypes = Array.from(new Set(ri?.subTypes ?? []));
 
     // Fallback: derive job types from subTypes if jobTypes not provided
-    let derivedJobTypes = (nextJobTypes.length === 0 && nextSubTypes.length > 0)
+    const derivedJobTypes = (nextJobTypes.length === 0 && nextSubTypes.length > 0)
       ? Array.from(new Set(
           Object.entries(SubTypes)
             .filter(([, subs]) => nextSubTypes.some(s => subs.includes(s)))
             .map(([jt]) => jt)
         ))
       : nextJobTypes;
-    if (nextUnknown) {
-      derivedJobTypes = Array.from(new Set([...derivedJobTypes, JobType.OTHER]));
-    }
 
     setTitle(ri?.title ?? "");
     setSelectedJobTypes(derivedJobTypes);
     setSelectedSubTypes(nextSubTypes);
-    setSelectedExperience(ri?.experienceLevels ?? []);
-    setSelectedGenders(ri?.genders ?? []);
+    setSelectedExperience(Array.from(new Set(ri?.experienceLevels ?? [])));
+    setSelectedGenders(Array.from(new Set(ri?.genders ?? [])));
     setCountry(ri?.country ?? "Philippines");
     setProvince(ri?.province ?? "Cebu");
     setCity(ri?.city ?? "Cebu City");
@@ -95,8 +103,22 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
     setSalaryPeriod(ri?.salaryPeriod ?? "day");
     setAbout(ri?.about ?? "");
     setQualifications(ri?.qualifications ?? "");
-    setOtherJobTypeText(nextUnknown ?? "");
+  };
+
+  // Sync state when `initialData` or `post` changes. Compute resolvedInitial locally
+  // to avoid object-identity changes causing repeated effects.
+  useEffect(() => {
+    const ri = initialData ?? (post ? mapPostToInitial(post) : undefined);
+    resetFromInitial(ri);
   }, [initialData, post]);
+
+  // Reset to unedited values each time the modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const ri = initialData ?? (post ? mapPostToInitial(post) : undefined);
+      resetFromInitial(ri);
+    }
+  }, [isOpen, initialData, post]);
 
   const jobTypeOptions = useMemo(() => getJobTypeOptions(), []);
   const experienceOptions = useMemo(() => getExperienceOptions(), []);
@@ -105,7 +127,6 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
   // Compute effective selections for first render before state sync
   const initialSubTypes = resolvedInitial?.subTypes ?? [];
   const initialJobTypes = resolvedInitial?.jobTypes ?? [];
-  const initialUnknown = initialSubTypes.find((s) => !Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(s)));
   const derivedInitialJobTypes = (initialJobTypes.length === 0 && initialSubTypes.length > 0)
     ? Array.from(new Set(
         Object.entries(SubTypes)
@@ -113,10 +134,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
           .map(([jt]) => jt)
       ))
     : initialJobTypes;
-  const derivedInitialWithOther = initialUnknown
-    ? Array.from(new Set([...derivedInitialJobTypes, JobType.OTHER]))
-    : derivedInitialJobTypes;
-  const effectiveJobTypes = selectedJobTypes.length ? selectedJobTypes : derivedInitialWithOther;
+  const effectiveJobTypes = selectedJobTypes.length ? selectedJobTypes : derivedInitialJobTypes;
   const effectiveSubTypes = selectedSubTypes.length ? selectedSubTypes : initialSubTypes;
 
   if (!isOpen || !resolvedInitial) return null;
@@ -130,10 +148,6 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
 
   const handleSubmit = () => {
     const finalSubTypes = [...selectedSubTypes];
-    if (selectedJobTypes.includes(JobType.OTHER) && otherJobTypeText.trim().length > 0) {
-      const otherValue = otherJobTypeText.trim();
-      if (!finalSubTypes.includes(otherValue)) finalSubTypes.push(otherValue);
-    }
     const data: JobPostAddFormData & { subTypes?: string[] } = {
       title: title.trim(),
       jobTypes: selectedJobTypes,
@@ -166,7 +180,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
       onClick={onClose}
     >
       <div
-        className={`${fontClasses.body} w-[700px] max-w-[95vw] max-h-[90vh] overflow-y-auto rounded-2xl shadow-lg border`}
+        className={`${fontClasses.body} w-[700px] max-w-[95vw] max-h-[90vh] overflow-y-auto scrollbar-hide rounded-2xl shadow-lg border`}
         style={containerStyle}
         onClick={(e) => e.stopPropagation()}
       >
@@ -197,75 +211,67 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
           {/* Tags Section */}
           <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Tags</div>
           <div className="rounded-xl border p-4" style={{ borderColor: getNeutral300Color() }}>
+            {/* Selected Tags Summary */}
+            <div className="mb-3">
+              <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Selected Tags</div>
+              <div
+                className="rounded-lg border px-3 py-2 min-h-[34px] flex flex-wrap gap-2 items-center"
+                style={{ borderColor: getNeutral300Color() }}
+              >
+                {selectedSubTypes.length === 0 && selectedExperience.length === 0 && selectedGenders.length === 0 ? (
+                  <span className="text-[12px]" style={{ color: getNeutral600Color() }}>Selected tags</span>
+                ) : (
+                  <>
+                    {selectedSubTypes.map((label) => (
+                      <JobTypeTag 
+                        key={`sel-jt-${label}`} 
+                        label={label} 
+                        selected={true}
+                        onClick={() => setSelectedSubTypes(prev => prev.filter(s => s !== label))}
+                      />
+                    ))}
+                    {selectedExperience.map((label) => (
+                      <ExperienceLevelTag 
+                        key={`sel-exp-${label}`} 
+                        label={label} 
+                        selected={true}
+                        onClick={() => setSelectedExperience(prev => prev.filter(v => v !== label))}
+                      />
+                    ))}
+                    {selectedGenders.map((label) => (
+                      <GenderTag 
+                        key={`sel-gen-${label}`} 
+                        label={label} 
+                        selected={true}
+                        onClick={() => setSelectedGenders(prev => prev.filter(v => v !== label))}
+                      />
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
             {/* Job Type */}
             <div className="mb-3">
               <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Job Type</div>
-              <div className="space-y-2">
-                 {jobTypeOptions.map((opt) => {
-                    const isSelected = effectiveJobTypes.includes(opt.value);
-                    const isOther = opt.value === JobType.OTHER;
-                    const subList = SubTypes[opt.value as JobType] || [];
-                    const hasExpandableContent = isOther || subList.length > 0;
-                    return (
-                      <div key={opt.value} className="space-y-2">
-                        <div
-                          className={`w-full py-2 px-3 rounded-md text-[12px] cursor-pointer transition-all duration-200 transform hover:scale-[1.02] hover:shadow-sm active:scale-[0.98]`}
-                          style={{
-                            backgroundColor: isSelected ? getNeutral100Color() : getWhiteColor(),
-                            color: getBlackColor(),
-                            border: `1px solid ${getNeutral300Color()}`
-                          }}
-                          onClick={() => {
-                            setSelectedJobTypes(prev => toggleArrayValue(prev, String(opt.value)));
-                            if (isSelected) {
-                              setSelectedSubTypes(prev => prev.filter(s => !subList.includes(s)));
-                              if (isOther) setOtherJobTypeText("");
-                            }
-                          }}
-                          aria-expanded={isSelected}
-                        >
-                          {opt.label}
-                        </div>
-
-                        <div
-                          className="px-3"
-                          style={{
-                            // Allow focus ring and rounded corners of the TextBox to render fully
-                            // when the "Other" input is visible. Keep hidden for chip lists.
-                            overflow: isSelected && isOther ? 'visible' : 'hidden',
-                            maxHeight: isSelected && hasExpandableContent ? '500px' : '0px',
-                            opacity: isSelected && hasExpandableContent ? 1 : 0,
-                            transition: 'max-height 250ms ease, opacity 200ms ease',
-                            marginTop: isSelected && hasExpandableContent ? '8px' : '0px'
-                          }}
-                        >
-                          {isOther ? (
-                            <div className="pt-2">
-                              <TextBox
-                                placeholder="Enter custom job type"
-                                value={otherJobTypeText}
-                                onChange={(e) => setOtherJobTypeText(e.target.value)}
-                              />
-                            </div>
-                          ) : (
-                            <div className="flex flex-wrap gap-2">
-                              {subList.map((sub) => (
-                                <JobTypeTag
-                                  key={`${opt.value}-${sub}`}
-                                  label={sub}
-                                  selected={effectiveSubTypes.includes(sub)}
-                                  onClick={() => toggleSubType(sub)}
-                                  categoryIcon={`/icons/${opt.value}.svg`}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-               </div>
-             </div>
+              <JobTypeGrid
+                options={jobTypeOptions}
+                selected={effectiveJobTypes.slice(0, 1)}
+                selectedSubTypes={selectedSubTypes}
+                onToggleSubType={(sub) => toggleSubType(sub)}
+                onToggle={(value) => {
+                  const subList = SubTypes[value as JobType] || [];
+                  const isAlreadySelected = effectiveJobTypes[0] === value;
+                  if (isAlreadySelected) {
+                    // Deselect current but preserve previously selected subtypes
+                    setSelectedJobTypes([]);
+                  } else {
+                    // Switch selected category; keep ALL previously selected subtypes across categories
+                    setSelectedJobTypes([String(value)]);
+                  }
+                }}
+              />
+              {/* Subtypes now render inside the selected tiles above */}
+            </div>
 
              <div className="border-t my-4" style={{ borderColor: getNeutral300Color() }} />
              {/* Experience Level */}

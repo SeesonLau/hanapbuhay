@@ -94,10 +94,12 @@ export const isValidSubType = (jobType: JobType, subType: string): boolean => {
 
 // Get all job types as options for dropdowns
 export const getJobTypeOptions = () => {
-  return Object.values(JobType).map(type => ({
-    value: type,
-    label: type
-  }));
+  return Object.values(JobType)
+    .filter(type => type !== JobType.OTHER)
+    .map(type => ({
+      value: type,
+      label: type
+    }));
 };
 
 // Get subtypes as options for dropdowns

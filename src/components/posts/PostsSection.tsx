@@ -7,7 +7,6 @@ import { JobPostList } from "@/components/cards/JobPostList";
 import { ManageJobPostCard } from "@/components/cards/ManageJobPostCard";
 import { ManageJobPostList } from "@/components/cards/ManageJobPostList";
 import type { JobPostData } from "@/hooks/useJobPosts";
-import Sort from "@/components/ui/Sort";
 
 type Variant = "find" | "manage";
 
@@ -19,7 +18,6 @@ interface Props {
   error?: string | null;
   hasMore?: boolean;
   viewMode: "card" | "list";
-  onSortChange?: () => void;
   onViewModeChange: (v: "card" | "list") => void;
   onLoadMore?: () => void;
   onOpen?: (data: any) => void;
@@ -37,7 +35,6 @@ const PostsSection: React.FC<Props> = ({
   error,
   hasMore,
   viewMode,
-  onSortChange,
   onViewModeChange,
   onLoadMore,
   onOpen,
@@ -75,20 +72,9 @@ const PostsSection: React.FC<Props> = ({
 
   return (
     <div className="mt-8 space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <span className="text-small text-gray-neutral600 whitespace-nowrap">Showing: {jobs.length}</span>
-          </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-small text-gray-neutral600 whitespace-nowrap">Sort by:</span>
-            <Sort variant="findJobs" onChange={onSortChange} />
-            <ViewToggle value={viewMode} onChange={onViewModeChange} />
-          </div>
-        </div>
-
       {viewMode === "card" ? (
-        <div className="w-full flex justify-center">
-          <div className="flex flex-wrap items-start justify-center gap-5">
+        <div className="w-full">
+          <div className={`${isManage ? 'w-full flex flex-wrap items-start justify-start gap-5' : 'max-w-[1648px] mx-auto flex flex-wrap items-start justify-start gap-4'}`}>
             {jobs.map((job) => (
               isManage ? (
                 <ManageJobPostCard
@@ -106,8 +92,8 @@ const PostsSection: React.FC<Props> = ({
           </div>
         </div>
       ) : (
-        <div className="w-full overflow-x-auto">
-          <div className={`flex flex-col items-start gap-4 mx-auto ${viewMode === 'list' ? 'w-[1526px]' : ''}`}>
+        <div className="w-full overflow-x-hidden">
+          <div className={`flex flex-col items-start gap-4 mx-auto w-full`}>
             {jobs.map((job) => (
               isManage ? (
                 <ManageJobPostList

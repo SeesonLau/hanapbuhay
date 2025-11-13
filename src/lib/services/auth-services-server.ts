@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/services/supabase/server-client';
-import { AuthResponse } from '../models';
+import { AuthResponse } from '../models/user';
 
 export class AuthServiceServer {
   static async verifyEmail(token: string): Promise<AuthResponse> {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { getWhiteColor, getNeutral300Color, getNeutral600Color, getBlackColor, getPrimary500Color, getNeutral100Color } from "@/styles/colors";
 import { fontClasses } from "@/styles/fonts";
 import TextBox from "@/components/ui/TextBox";
@@ -12,6 +12,7 @@ import { ExperienceLevel, getExperienceOptions } from "@/lib/constants/experienc
 import { getJobTypeOptions, SubTypes } from "@/lib/constants/job-types";
 import type { JobType } from "@/lib/constants/job-types";
 import { GenderTag, ExperienceLevelTag, JobTypeTag } from "@/components/ui/TagItem";
+import JobTypeGrid from "@/components/ui/JobTypeGrid";
 
 export interface JobPostAddFormData {
   title: string;
@@ -61,6 +62,29 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
   const [about, setAbout] = useState("");
   const [qualifications, setQualifications] = useState("");
 
+  const resetForm = () => {
+    setTitle("");
+    setSelectedJobTypes([]);
+    setSelectedSubTypes([]);
+    setSelectedExperience([]);
+    setSelectedGenders([]);
+    setCountry("Philippines");
+    setProvince("Cebu");
+    setCity("Cebu City");
+    setAddress("");
+    setSalary("");
+    setSalaryPeriod("day");
+    setAbout("");
+    setQualifications("");
+  };
+
+  // Always start with a clean form whenever the modal opens
+  useEffect(() => {
+    if (isOpen) {
+      resetForm();
+    }
+  }, [isOpen]);
+
   const jobTypeOptions = useMemo(() => getJobTypeOptions(), []);
   const experienceOptions = useMemo(() => getExperienceOptions(), []);
   const genderOptions = useMemo(() => getGenderOptions(), []);
@@ -92,6 +116,8 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
       subTypes: selectedSubTypes,
     };
     onSubmit?.(data);
+    // Reset after submit so next open is blank
+    resetForm();
     onClose();
   };
 
@@ -108,7 +134,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
       onClick={onClose}
     >
       <div
-        className={`${fontClasses.body} w-[700px] max-w-[95vw] max-h-[90vh] overflow-y-auto rounded-2xl shadow-lg border`}
+        className={`${fontClasses.body} w-[700px] max-w-[95vw] max-h-[90vh] overflow-y-auto scrollbar-hide rounded-2xl shadow-lg border`}
         style={containerStyle}
         onClick={(e) => e.stopPropagation()}
       >
@@ -139,60 +165,67 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
           {/* Tags Section */}
           <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Tags</div>
           <div className="rounded-xl border p-4" style={{ borderColor: getNeutral300Color() }}>
+            {/* Selected Tags Summary */}
+            <div className="mb-3">
+              <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Selected Tags</div>
+              <div
+                className="rounded-lg border px-3 py-2 min-h-[34px] flex flex-wrap gap-2 items-center"
+                style={{ borderColor: getNeutral300Color() }}
+              >
+                {selectedSubTypes.length === 0 && selectedExperience.length === 0 && selectedGenders.length === 0 ? (
+                  <span className="text-[12px]" style={{ color: getNeutral600Color() }}>Selected tags</span>
+                ) : (
+                  <>
+                    {selectedSubTypes.map((label) => (
+                      <JobTypeTag 
+                        key={`sel-jt-${label}`} 
+                        label={label} 
+                        selected={true}
+                        onClick={() => toggleSubType(label)}
+                      />
+                    ))}
+                    {selectedExperience.map((label) => (
+                      <ExperienceLevelTag 
+                        key={`sel-exp-${label}`} 
+                        label={label} 
+                        selected={true}
+                        onClick={() => setSelectedExperience(prev => prev.filter(v => v !== label))}
+                      />
+                    ))}
+                    {selectedGenders.map((label) => (
+                      <GenderTag 
+                        key={`sel-gen-${label}`} 
+                        label={label} 
+                        selected={true}
+                        onClick={() => setSelectedGenders(prev => prev.filter(v => v !== label))}
+                      />
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
             {/* Job Type */}
             <div className="mb-3">
               <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Job Type</div>
-              <div className="space-y-2">
-                 {jobTypeOptions.map((opt) => {
-                   const isSelected = selectedJobTypes.includes(opt.value);
-                   const subList = SubTypes[opt.value as JobType] || [];
-                   return (
-                     <div key={opt.value} className="space-y-2">
-                       <div
-                         className={`w-full py-2 px-3 rounded-md text-[12px] cursor-pointer transition-all duration-200 transform hover:scale-[1.02] hover:shadow-sm active:scale-[0.98]`}
-                         style={{
-                           backgroundColor: isSelected ? getNeutral100Color() : getWhiteColor(),
-                           color: getBlackColor(),
-                           border: `1px solid ${getNeutral300Color()}`
-                         }}
-                         onClick={() => {
-                           setSelectedJobTypes(prev => toggleArrayValue(prev, String(opt.value)));
-                           if (isSelected) {
-                             setSelectedSubTypes(prev => prev.filter(s => !subList.includes(s)));
-                           }
-                         }}
-                         aria-expanded={isSelected}
-                       >
-                         {opt.label}
-                       </div>
-
-                       <div
-                         className="px-3"
-                         style={{
-                           overflow: 'hidden',
-                           maxHeight: isSelected && subList.length > 0 ? '500px' : '0px',
-                           opacity: isSelected && subList.length > 0 ? 1 : 0,
-                           transition: 'max-height 250ms ease, opacity 200ms ease',
-                           marginTop: isSelected && subList.length > 0 ? '8px' : '0px'
-                         }}
-                       >
-                         <div className="flex flex-wrap gap-2">
-                           {subList.map((sub) => (
-                             <JobTypeTag
-                               key={`${opt.value}-${sub}`}
-                               label={sub}
-                               selected={selectedSubTypes.includes(sub)}
-                               onClick={() => toggleSubType(sub)}
-                               categoryIcon={`/icons/${opt.value}.svg`}
-                             />
-                           ))}
-                         </div>
-                       </div>
-                     </div>
-                   );
-                 })}
-               </div>
-             </div>
+              <JobTypeGrid
+                options={jobTypeOptions}
+                selected={selectedJobTypes.slice(0, 1)}
+                selectedSubTypes={selectedSubTypes}
+                onToggleSubType={(sub) => toggleSubType(sub)}
+                onToggle={(value) => {
+                  const subList = SubTypes[value as JobType] || [];
+                  const isAlreadySelected = selectedJobTypes[0] === value;
+                  if (isAlreadySelected) {
+                    // Deselect current but preserve previously selected subtypes
+                    setSelectedJobTypes([]);
+                  } else {
+                    // Switch selected category; keep ALL previously selected subtypes across categories
+                    setSelectedJobTypes([String(value)]);
+                  }
+                }}
+              />
+              {/* Subtypes now render inside the selected tiles above */}
+            </div>
 
              {/* Sub Types are now rendered directly below their selected main tag above */}
 

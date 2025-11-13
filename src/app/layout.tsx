@@ -1,4 +1,3 @@
-// src/app/layout.tsx
 import type { Metadata } from 'next'
 import { inter, alexandria } from '@/styles/fonts';
 import '../app/global.css'
@@ -20,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${alexandria.variable}`} >
-      <body className="min-h-screen relative">       
+      <body className="min-h-screen relative" suppressHydrationWarning>       
         <Toaster position="top-center" />
         {children}
       </body>
