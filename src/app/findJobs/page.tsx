@@ -14,6 +14,9 @@ import PostsSection from '@/components/posts/PostsSection';
 import { JobPostList } from "@/components/cards/JobPostList";
 // PostService and ApplicationService usage moved into useJobPosts hook
 import { Post } from "@/lib/models/posts";
+import { Gender } from "@/lib/constants/gender";
+import { ExperienceLevel } from "@/lib/constants/experience-level";
+import { SubTypes } from "@/lib/constants/job-types";
 import Sort from "@/components/ui/Sort";
 import FilterSection, { FilterOptions } from "@/components/ui/FilterSection";
 import FilterButton from "@/components/ui/FilterButton";
@@ -251,6 +254,15 @@ export default function FindJobsPage() {
   };
 
   const postToJobData = (post: Post): JobPostViewData => {
+    const sub = post.subType || [];
+    const genderTags = Array.from(new Set(sub.filter(s => Object.values(Gender).includes(s as Gender))));
+    const experienceTags = Array.from(new Set(sub.filter(s => Object.values(ExperienceLevel).includes(s as ExperienceLevel))));
+    const allJobSubTypes = Object.values(SubTypes).flat();
+    const jobSubtypeTags = Array.from(new Set(
+      sub.filter(s => allJobSubTypes.includes(s))
+         .filter(s => !genderTags.includes(s) && !experienceTags.includes(s))
+    ));
+    const jobTypeTags = Array.from(new Set([post.type, ...jobSubtypeTags].filter(Boolean)));
     return {
       id: post.postId,
       title: post.title,
@@ -260,76 +272,78 @@ export default function FindJobsPage() {
       salaryPeriod: 'month',
       postedDate: formatPostedDate(post.createdAt),
       applicantCount: appCounts[post.postId] || 0,
-      genderTags: [],
-      experienceTags: [],
-      jobTypeTags: [post.type, ...(post.subType || [])],
+      genderTags,
+      experienceTags,
+      jobTypeTags,
     };
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div className="overflow-x-hidden">
       {/* Banner Section with Header and Search */}
       <Banner variant="findJobs" onSearch={handleSearch} />
 
-      {/* Main Container */}
-      <div className="pt-[214px]">
-        {/* Filter Section - Desktop Only (leftmost, no margin, full height) */}
-        <aside className="hidden lg:block fixed left-0 top-[214px] bottom-0 w-[240px] bg-white shadow-lg overflow-y-auto z-20">
-          <FilterSection
-            initialFilters={activeFilters}
-            onApply={handleApplyFilters}
-            onClearAll={handleClearFilters}
-            className="h-full"
-          />
-        </aside>
+      {/* Main Container with VH layout below banner */}
+      <div className="pt-[220px] min-h-screen">
+        <div className="h-[calc(100vh-220px)]">
+          {/* Filter Section - Desktop Only (leftmost, no margin, full height) */}
+          <aside className="hidden lg:block fixed left-0 top-[220px] bottom-0 w-[240px] bg-white shadow-lg overflow-y-auto z-20">
+            <FilterSection
+              initialFilters={activeFilters}
+              onApply={handleApplyFilters}
+              onClearAll={handleClearFilters}
+              className="h-full"
+            />
+          </aside>
 
-        {/* Main Content Area */}
-        <main className="w-full lg:w-[calc(100%-240px)] lg:ml-[240px]">
-          <div className="px-4 md:px-6 lg:px-8 pb-8 max-w-full">
-            {/* Stats Row */}
-            <StatsSection stats={stats} variant="findJobs" loading={statsLoading} error={statsError} />
+          {/* Main Content Area */}
+          <main className="w-full lg:w-[calc(100%-240px)] lg:ml-[240px]">
+            <div className="px-4 md:px-6 lg:px-8 pb-8 max-w-full">
+              {/* Stats Row */}
+              <StatsSection stats={stats} variant="findJobs" loading={statsLoading} error={statsError} />
 
-            {/* Job Posts Section */}
-            <div className="mt-8 space-y-6">
-              {/* Controls Row with Filter Button */}
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                {/* Left side - Filter Button (Mobile) & Showing count */}
-                <div className="flex items-center gap-3">
-                  {/* Filter Button - Mobile Only */}
-                  <div className="lg:hidden">
-                    <FilterButton
-                      onClick={() => setIsFilterModalOpen(true)}
-                      filterCount={activeFilterCount}
-                    />
+              {/* Job Posts Section */}
+              <div className="mt-8 space-y-6">
+                {/* Controls Row with Filter Button */}
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  {/* Left side - Filter Button (Mobile) & Showing count */}
+                  <div className="flex items-center gap-3">
+                    {/* Filter Button - Mobile Only */}
+                    <div className="lg:hidden">
+                      <FilterButton
+                        onClick={() => setIsFilterModalOpen(true)}
+                        filterCount={activeFilterCount}
+                      />
+                    </div>
+                    <span className="text-small text-gray-neutral600 whitespace-nowrap">Showing: {jobs.length}</span>
                   </div>
-                  <span className="text-small text-gray-neutral600 whitespace-nowrap">Showing: {jobs.length}</span>
+                  
+                  {/* Right side - Sort & View Toggle */}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-small text-gray-neutral600 whitespace-nowrap">Sort by</span>
+                    <Sort variant="findJobs" onChange={handleSortChange} />
+                    <ViewToggle value={viewMode} onChange={setViewMode} />
+                  </div>
                 </div>
-                
-                {/* Right side - Sort & View Toggle */}
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="text-small text-gray-neutral600 whitespace-nowrap">Sort by</span>
-                  <Sort variant="findJobs" onChange={handleSortChange} />
-                  <ViewToggle value={viewMode} onChange={setViewMode} />
-                </div>
-              </div>
 
-              {/* Display */}
-              <PostsSection
-                jobs={jobs}
-                variant="find"
-                loading={jobsLoading}
-                isLoadingMore={isLoadingMore}
-                error={jobsError}
-                hasMore={hasMore}
-                viewMode={viewMode}
-                onViewModeChange={(v: 'card' | 'list') => setViewMode(v)}
-                onLoadMore={loadMore as () => void}
-                onOpen={(data: any) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
-                onApply={(id: string) => console.log('apply', id)}
-              />
+                {/* Display */}
+                <PostsSection
+                  jobs={jobs}
+                  variant="find"
+                  loading={jobsLoading}
+                  isLoadingMore={isLoadingMore}
+                  error={jobsError}
+                  hasMore={hasMore}
+                  viewMode={viewMode}
+                  onViewModeChange={(v: 'card' | 'list') => setViewMode(v)}
+                  onLoadMore={loadMore as () => void}
+                  onOpen={(data: any) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
+                  onApply={(id: string) => console.log('apply', id)}
+                />
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
 
       {/* Modal */}

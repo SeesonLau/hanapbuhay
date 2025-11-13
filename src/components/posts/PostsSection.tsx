@@ -73,8 +73,8 @@ const PostsSection: React.FC<Props> = ({
   return (
     <div className="mt-8 space-y-6">
       {viewMode === "card" ? (
-        <div className="w-full flex justify-center">
-          <div className="flex flex-wrap items-start justify-center gap-5">
+        <div className="w-full">
+          <div className={`${isManage ? 'w-full flex flex-wrap items-start justify-start gap-5' : 'max-w-[1648px] mx-auto flex flex-wrap items-start justify-start gap-4'}`}>
             {jobs.map((job) => (
               isManage ? (
                 <ManageJobPostCard
@@ -92,8 +92,8 @@ const PostsSection: React.FC<Props> = ({
           </div>
         </div>
       ) : (
-        <div className="w-full overflow-x-auto">
-          <div className={`flex flex-col items-start gap-4 mx-auto ${viewMode === 'list' ? 'w-[1526px]' : ''}`}>
+        <div className="w-full overflow-x-hidden">
+          <div className={`flex flex-col items-start gap-4 mx-auto w-full`}>
             {jobs.map((job) => (
               isManage ? (
                 <ManageJobPostList

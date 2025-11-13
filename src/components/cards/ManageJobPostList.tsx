@@ -54,9 +54,8 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
     jobTypeTags = []
   } = jobData;
 
-  // Ensure horizontal arrangement and handle truncation/overflow
-  const shortTitle = title.length > 20 ? `${title.slice(0, 20)}...` : title;
-  const shortDescription = description.length > 50 ? `${description.slice(0, 50)}...` : description;
+  // Title truncation for consistent row height
+  const shortTitle = title.length > 60 ? `${title.slice(0, 60)}...` : title;
 
   const normalizeJobType = (label: string): string | null => {
     // Only allow subtypes; exclude top-level JobType enums from display
@@ -89,68 +88,95 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
     ...normalizedExperiences.map((label) => ({ type: 'experience' as const, label })),
     ...normalizedGenders.map((label) => ({ type: 'gender' as const, label })),
   ];
-  const MAX_TAGS = 4;
-  const visibleTags = allTags.slice(0, MAX_TAGS);
-  const extraCount = Math.max(0, allTags.length - visibleTags.length);
+  // Responsive tag subsets
+  const tagsTop2 = allTags.slice(0, 2);
+  const tagsTop1 = allTags.slice(0, 1);
+  const extraCountLarge = Math.max(0, allTags.length - tagsTop2.length);
+  const extraCountMedium = Math.max(0, allTags.length - tagsTop1.length);
 
   return (
     <div 
-      className={`w-[1840px] h-[60px] bg-white border border-gray-200 shadow-sm px-6 rounded-[10px] transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-300 cursor-pointer ${className}`}
+      className={`w-full h-[60px] bg-white border border-gray-200 shadow-sm px-6 rounded-[10px] transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-300 cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
-      {/* Strict horizontal layout */}
-      <div className="flex flex-row items-center justify-between h-full gap-3">
-        {/* Title + Description (horizontal alignment) */}
-        <div className="min-w-0 flex items-center gap-3">
-          <h3 className={`${fontClasses.heading} font-semibold text-[15px] whitespace-nowrap`} style={{ color: getBlackColor() }}>
+      {/* Table-like aligned columns: Title | Tags | Location+Salary | Date | Actions */}
+      <div
+        className="grid items-center h-full gap-6 grid-cols-2 mobile-L:grid-cols-3 laptop:grid-cols-4 laptop-L:grid-cols-5"
+      >
+        {/* Title */}
+        <div className="min-w-0">
+          <h3 className={`${fontClasses.heading} font-semibold text-[15px] truncate`} style={{ color: getBlackColor() }}>
             {shortTitle}
           </h3>
-          <p className={`${fontClasses.body} font-light text-[12px] whitespace-nowrap`} style={{ color: getNeutral600Color() }}>
-            {shortDescription}
-          </p>
         </div>
 
-        {/* Tags */}
-        <div className="flex flex-wrap items-center gap-3">
-          {visibleTags.map((tag, index) => (
-            tag.type === 'gender' ? (
-              <StaticGenderTag key={`tag-${index}`} label={tag.label} />
-            ) : tag.type === 'experience' ? (
-              <StaticExperienceLevelTag key={`tag-${index}`} label={tag.label} />
-            ) : (
-              <StaticJobTypeTag key={`tag-${index}`} label={tag.label} />
-            )
-          ))}
-          {extraCount > 0 && (
-            <div
-              className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
-              style={{ backgroundColor: getNeutral100Color(), color: getNeutral400Color() }}
-            >
-              {extraCount}+
-            </div>
-          )}
+        {/* Tags (responsive: fewer tags on smaller screens; hidden on very small) */}
+        <div className="min-w-0 hidden mobile-L:block">
+          {/* Large (laptop and up): show up to 2 tags */}
+          <div className="hidden laptop:flex items-center gap-3 whitespace-nowrap overflow-hidden">
+            {tagsTop2.map((tag, index) => (
+              tag.type === 'gender' ? (
+                <StaticGenderTag key={`tag-lg-${index}`} label={tag.label} />
+              ) : tag.type === 'experience' ? (
+                <StaticExperienceLevelTag key={`tag-lg-${index}`} label={tag.label} />
+              ) : (
+                <StaticJobTypeTag key={`tag-lg-${index}`} label={tag.label} />
+              )
+            ))}
+            {extraCountLarge > 0 && (
+              <div
+                className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
+                style={{ backgroundColor: getNeutral100Color(), color: getNeutral400Color() }}
+              >
+                +{extraCountLarge}
+              </div>
+            )}
+          </div>
+
+          {/* Medium (>= mobile-L and < laptop): show 1 tag */}
+          <div className="flex laptop:hidden items-center gap-2 whitespace-nowrap overflow-hidden">
+            {tagsTop1.map((tag, index) => (
+              tag.type === 'gender' ? (
+                <StaticGenderTag key={`tag-md-${index}`} label={tag.label} />
+              ) : tag.type === 'experience' ? (
+                <StaticExperienceLevelTag key={`tag-md-${index}`} label={tag.label} />
+              ) : (
+                <StaticJobTypeTag key={`tag-md-${index}`} label={tag.label} />
+              )
+            ))}
+            {extraCountMedium > 0 && (
+              <div
+                className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
+                style={{ backgroundColor: getNeutral100Color(), color: getNeutral400Color() }}
+              >
+                +{extraCountMedium}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Location + Salary */}
-        <div className="flex items-center gap-3">
+        {/* Location + Salary (hide below laptop) */}
+        <div className="hidden laptop:flex items-center gap-3 whitespace-nowrap overflow-hidden">
           <StaticLocationTag label={location} />
           <StaticSalaryTag label={`${salary} /${salaryPeriod}`} />
         </div>
 
-        {/* Posted Date */}
-        <div className="flex-shrink-0">
-          <span className={`${fontClasses.body} text-[10px]`} style={{ color: getNeutral600Color() }}>Posted on: {postedDate}</span>
+        {/* Posted Date (single line; hide below laptop-L for progressive collapse) */}
+        <div className="flex-shrink-0 hidden laptop-L:block">
+          <span className={`${fontClasses.body} text-[10px] whitespace-nowrap`} style={{ color: getNeutral600Color() }}>Posted on: {postedDate}</span>
         </div>
 
-        {/* Action Buttons */}
-        <ManageJobActionButtons
-          applicantCount={applicantCount}
-          onViewApplicants={() => onViewApplicants?.(jobData)}
-          onEdit={() => onEdit?.(jobData)}
-          onDelete={() => onDelete?.(jobData)}
-          variant="horizontal"
-          className="w-[362px]"
-        />
+        {/* Action Buttons (flush right) */}
+        <div className="flex-shrink-0 justify-self-end flex justify-end">
+          <ManageJobActionButtons
+            applicantCount={applicantCount}
+            onViewApplicants={() => onViewApplicants?.(jobData)}
+            onEdit={() => onEdit?.(jobData)}
+            onDelete={() => onDelete?.(jobData)}
+            variant="horizontal"
+            className="w-[362px] laptop:w-[320px] tablet:w-[280px] mobile-L:w-[220px] mobile-M:w-[200px] mobile-S:w-[180px]"
+          />
+        </div>
       </div>
     </div>
   );

@@ -21,8 +21,8 @@ const StatsSection: React.FC<Props> = ({ stats, variant, loading, error, onStatC
 
   if (variant === 'findJobs') {
     return (
-      <div className="w-full mb-6">
-        <div className="max-w-screen-2xl mx-auto flex flex-wrap md:flex-nowrap items-stretch gap-4 justify-center md:justify-between">
+      <div className="w-full mt-4 mb-6">
+        <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
           <StatCardFindJobs title="Total Jobs" value={stats.totalJobs ?? 0} variant="blue" />
           <StatCardFindJobs title="Completed" value={stats.completed ?? 0} variant="green" />
           <StatCardFindJobs title="Ratings" value={stats.ratings ?? 0} variant="yellow" />
