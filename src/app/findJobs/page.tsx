@@ -156,9 +156,6 @@ export default function FindJobsPage() {
       case 'salary-desc':
         sorted.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
         break;
-      case 'nearby':
-        sorted.sort((a, b) => String(a.location).localeCompare(String(b.location)));
-        break;
       default:
         break;
     }
@@ -187,10 +184,6 @@ export default function FindJobsPage() {
         case 'salary-desc':
           sortBy = 'price';
           sortOrder = 'desc';
-          break;
-        case 'nearby':
-          sortBy = 'location';
-          sortOrder = 'asc';
           break;
         default:
           break;

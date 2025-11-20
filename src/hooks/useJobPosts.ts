@@ -120,21 +120,64 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       if (appliedFilters) {
         const { jobTypes, salaryRange } = appliedFilters;
 
-        // jobTypes: object where keys are jobType and values are arrays of subtypes
-        const jobTypeKeys = Object.keys(jobTypes || {});
-        if (jobTypeKeys.length === 1) {
-          const jt = jobTypeKeys[0];
-          requestParams.jobType = jt;
-          const subs = jobTypes[jt];
-          if (subs && subs.length) requestParams.subType = subs;
-        } else if (jobTypeKeys.length > 1) {
-          // multiple job types selected: pass all selected subtypes as subType filter
-          const allSubs: string[] = [];
-          for (const k of jobTypeKeys) {
-            const arr = jobTypes[k];
-            if (arr && arr.length) allSubs.push(...arr);
+        console.log('Applying filters - jobTypes object:', jobTypes);
+
+        // jobTypes: object where keys are jobType (e.g., "Agriculture") and values are arrays of subtypes (e.g., ["Farmhand", "Other"])
+        const jobTypeKeys = Object.keys(jobTypes || {}).filter(key => {
+          const subs = jobTypes[key];
+          return subs && subs.length > 0; // Only include job types with selected subtypes
+        });
+
+        console.log('Job type keys with selections:', jobTypeKeys);
+
+        if (jobTypeKeys.length > 0) {
+          // Separate "Other" selections from specific subtype selections
+          const otherJobTypes: string[] = []; // Job types that have "Other" selected
+          const specificSubTypes: string[] = []; // Specific subtypes like "Farmhand", "Graphic Designer", etc.
+
+          for (const jobType of jobTypeKeys) {
+            const subs = jobTypes[jobType];
+            if (subs && subs.length > 0) {
+              console.log(`Processing ${jobType}:`, subs);
+              // Check if this job type has "Other" selected
+              if (subs.includes('Other')) {
+                otherJobTypes.push(jobType);
+                console.log(`  -> Added to otherJobTypes`);
+              }
+              // Add all non-"Other" subtypes to the list
+              const nonOtherSubs = subs.filter(s => s !== 'Other');
+              if (nonOtherSubs.length > 0) {
+                specificSubTypes.push(...nonOtherSubs);
+                console.log(`  -> Added to specificSubTypes:`, nonOtherSubs);
+              }
+            }
           }
-          if (allSubs.length) requestParams.subType = allSubs;
+
+          console.log('Final filter state:', { specificSubTypes, otherJobTypes });
+
+          // If there are specific subtypes selected, filter by subType field
+          if (specificSubTypes.length > 0) {
+            requestParams.subType = specificSubTypes;
+            console.log('Set requestParams.subType:', specificSubTypes);
+          }
+
+          // If there are "Other" selections (job types with only "Other" selected), filter by type field
+          if (otherJobTypes.length > 0) {
+            if (specificSubTypes.length > 0) {
+              // Mix of specific subtypes and "Other": need to filter by both
+              // We'll use a combination approach: (subType IN [...] OR type IN [...])
+              requestParams.jobType = otherJobTypes;
+              requestParams.matchMode = 'mixed'; // Flag to indicate mixed filtering
+              console.log('Mixed filter mode - jobType:', otherJobTypes, 'matchMode: mixed');
+            } else {
+              // Only "Other" selected
+              if (otherJobTypes.length === 1) {
+                requestParams.jobType = otherJobTypes[0];
+              } else {
+                requestParams.jobType = otherJobTypes;
+              }
+            }
+          }
         }
 
         // salaryRange: only support single selection for server-side filtering
@@ -154,6 +197,8 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
         }
       }
 
+      console.log('Final requestParams sent to API:', requestParams);
+
       let svcResult: any;
       if (userId && options.excludeMine !== true) {
         // existing behavior: fetch posts by user when userId provided and not excluding mine
@@ -163,6 +208,7 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       }
 
       let posts: Post[] = svcResult?.posts ?? [];
+      console.log('Retrieved posts from API:', posts.length, 'posts');
 
       // If requested, exclude posts that belong to the current user
       if (userId && options.excludeMine) {
@@ -177,7 +223,6 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
           posts = posts.filter((p) => !set.has(p.postId));
         } catch (err) {
           // swallow error and proceed without excluding
-          console.error('Failed to fetch applied post ids', err);
         }
       }
 
@@ -195,7 +240,6 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       setHasMoreData(Boolean(svcResult?.hasMore));
       setError(null);
     } catch (err) {
-      console.error("Error loading posts:", err);
       setError("Failed to load posts");
     } finally {
       setLoading(false);
@@ -208,6 +252,54 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     await load({ page: 1, filters: f });
   }, [load]);
 
+  // Client-side filtering for experience level and preferred gender
+  const getFilteredJobsByTags = (jobsToFilter: JobPostData[], filterOptions: FilterOptions | null): JobPostData[] => {
+    if (!filterOptions) return jobsToFilter;
+
+    const { experienceLevel, preferredGender } = filterOptions;
+
+    const selectedExperienceLevels = Object.entries(experienceLevel || {})
+      .filter(([_, v]) => v)
+      .map(([k]) => {
+        // Map filter keys to ExperienceLevel constants
+        if (k === 'entryLevel') return ExperienceLevel.ENTRY;
+        if (k === 'intermediate') return ExperienceLevel.INTERMEDIATE;
+        if (k === 'professional') return ExperienceLevel.EXPERT;
+        return k;
+      });
+
+    const selectedGenders = Object.entries(preferredGender || {})
+      .filter(([_, v]) => v)
+      .map(([k]) => {
+        // Map filter keys to Gender constants
+        if (k === 'any') return Gender.ANY;
+        if (k === 'male') return Gender.MALE;
+        if (k === 'female') return Gender.FEMALE;
+        if (k === 'others') return Gender.OTHERS;
+        return k;
+      });
+
+    return jobsToFilter.filter((job) => {
+      // Filter by experience level if any are selected
+      if (selectedExperienceLevels.length > 0) {
+        const jobHasSelectedExp = job.experienceTags?.some((tag) =>
+          selectedExperienceLevels.includes(tag)
+        );
+        if (!jobHasSelectedExp) return false;
+      }
+
+      // Filter by preferred gender if any are selected
+      if (selectedGenders.length > 0) {
+        const jobHasSelectedGender = job.genderTags?.some((tag) =>
+          selectedGenders.includes(tag)
+        );
+        if (!jobHasSelectedGender) return false;
+      }
+
+      return true;
+    });
+  };
+
   useEffect(() => {
     if (options.skip) {
       return;
@@ -216,8 +308,77 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     load({ page: 1 });
   }, [load, options.skip]);
 
-  const handleSearch = useCallback(async (query: string, location?: string) => {
-    await load({ page: 1, searchTerm: query, location });
+  const handleSearch = useCallback((query: string, location?: string) => {
+    // First fetch from server with search term
+    (async () => {
+      await load({ page: 1, searchTerm: query, location });
+
+      // Then apply fuzzy search ranking on client-side for better relevance
+      setJobs((prevJobs) => {
+        if (!query.trim()) return prevJobs;
+
+        const queryLower = query.toLowerCase();
+        const queryWords = queryLower.split(/\s+/).filter(Boolean);
+
+        // Calculate fuzzy match score using Levenshtein-like algorithm
+        const calculateFuzzyScore = (text: string, searchTerm: string): number => {
+          const textLower = text.toLowerCase();
+          
+          // Exact match gets highest score
+          if (textLower.includes(searchTerm)) return 1000;
+          
+          // Check if all words are present
+          const words = searchTerm.split(/\s+/).filter(Boolean);
+          if (words.every(w => textLower.includes(w))) return 500;
+          
+          // Fuzzy matching: count character matches and position similarity
+          let score = 0;
+          let textIdx = 0;
+          let matchedChars = 0;
+          
+          for (let i = 0; i < searchTerm.length && textIdx < textLower.length; i++) {
+            const searchChar = searchTerm[i];
+            while (textIdx < textLower.length && textLower[textIdx] !== searchChar) {
+              textIdx++;
+            }
+            if (textIdx < textLower.length) {
+              matchedChars++;
+              textIdx++;
+            }
+          }
+          
+          // Score based on character match ratio
+          score = (matchedChars / searchTerm.length) * 300;
+          
+          // Bonus if word starts match (e.g., "desc" matches "description")
+          words.forEach(word => {
+            if (textLower.includes(word.substring(0, 3))) {
+              score += 50;
+            }
+          });
+          
+          return score;
+        };
+
+        return prevJobs
+          .map((job) => {
+            let score = 0;
+            const titleLower = job.title.toLowerCase();
+            const descLower = job.description.toLowerCase();
+
+            // Title match (higher weight)
+            score += calculateFuzzyScore(titleLower, queryLower) * 1.5;
+            
+            // Description match (lower weight)
+            score += calculateFuzzyScore(descLower, queryLower) * 0.5;
+
+            return { job, score };
+          })
+          .filter((item) => item.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .map((item) => item.job);
+      });
+    })();
   }, [load]);
 
   const handleSort = useCallback(async (sortBy: string, sortOrder: 'asc' | 'desc') => {
@@ -251,7 +412,6 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       await load({ page: 1 });
       return updated;
     } catch (err) {
-      console.error("Failed to update post:", err);
       throw err;
     }
   }, [userId, load]);
@@ -264,7 +424,6 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       await load({ page: 1 });
       return created;
     } catch (err) {
-      console.error("Failed to create post:", err);
       throw err;
     }
   }, [userId, load]);
@@ -273,8 +432,13 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     await load({ page: 1 });
   }, [load]);
 
+  // Apply tag-based filtering (experience level, preferred gender) to jobs
+  const filteredJobs = useCallback(() => {
+    return getFilteredJobsByTags(jobs, filters);
+  }, [jobs, filters]);
+
   return {
-    jobs,
+    jobs: filteredJobs(),
     loading,
     isLoadingMore,
     error,

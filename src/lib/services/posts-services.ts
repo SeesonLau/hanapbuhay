@@ -8,9 +8,10 @@ interface RequestParams {
   location?: string;
   sortBy: string;
   sortOrder: 'asc' | 'desc';
-  jobType?: string;
+  jobType?: string | string[];
   subType?: string[];
   priceRange?: { min: number; max: number };
+  matchMode?: 'mixed'; // For when both subType and type filtering is needed
   // ... other filter params
 }
 
@@ -19,23 +20,24 @@ export class PostService {
    * Fetches all job posts with pagination, search, and filtering.
    */
   static async getAllPosts(params: RequestParams): Promise<{ posts: Post[], hasMore: boolean }> {
-    const { page, pageSize, searchTerm, location, sortBy, sortOrder, jobType, subType, priceRange } = params;
+    const { page, pageSize, searchTerm, location, sortBy, sortOrder, jobType, subType, priceRange, matchMode } = params;
     const offset = (page - 1) * pageSize;
+
+    // Log filter params for debugging
+    console.log('getAllPosts filter params:', { jobType, subType, matchMode });
 
     let query = supabase
       .from('posts')
       .select('*', { count: 'exact' })
-      .is('deletedAt', null) // Exclude soft-deleted posts
-      .order(sortBy, { ascending: sortOrder === 'asc' })
-      .range(offset, offset + pageSize - 1);
+      .is('deletedAt', null); // Exclude soft-deleted posts
 
     // Apply search term filter (for title, description, etc.)
-    // Assumes you have a full-text search index on 'fts' column
+    // Search using ilike on title and description fields
     if (searchTerm) {
-      query = query.textSearch('fts', searchTerm.replace(/\*/g, ''), {
-        type: 'websearch',
-        config: 'english',
-      });
+      const cleanSearchTerm = searchTerm.replace(/\*/g, '').trim();
+      if (cleanSearchTerm) {
+        query = query.or(`title.ilike.%${cleanSearchTerm}%,description.ilike.%${cleanSearchTerm}%`);
+      }
     }
 
     // Apply location filter
@@ -45,11 +47,50 @@ export class PostService {
     }
 
     // Apply job type and subtype filters
-    if (jobType) {
-      query = query.eq('type', jobType);
-    }
+    // Logic:
+    // - If specific subtypes are selected (e.g., "Farmhand"), match subType field
+    // - If "Other" is selected for a job type (e.g., "Agriculture"), match type field
+    // - If both exist, use OR: (subType contains [...] OR type IN [...])
     if (subType && subType.length > 0) {
-      query = query.in('subType', subType);
+      console.log('Filtering by subType:', subType);
+      // Specific subtypes selected: filter by subType field using array contains operator
+      // Since subType is a Postgres array, we use .cs. (contains) operator or .or() with multiple conditions
+      const subTypeConditions: string[] = [];
+      for (const subTypeValue of subType) {
+        subTypeConditions.push(`subType.cs.{${subTypeValue}}`);
+      }
+      query = query.or(subTypeConditions.join(','));
+      console.log('SubType conditions:', subTypeConditions.join(','));
+
+      // If also have "Other" job types, add OR condition
+      if (jobType && matchMode === 'mixed') {
+        const otherJobTypes = Array.isArray(jobType) ? jobType : [jobType];
+        console.log('Adding mixed filter - otherJobTypes:', otherJobTypes);
+        // Construct OR condition: subType contains any selected subtype OR type is in otherJobTypes
+        const orConditions: string[] = [];
+        for (const subTypeValue of subType) {
+          orConditions.push(`subType.cs.{${subTypeValue}}`);
+        }
+        for (const jobTypeValue of otherJobTypes) {
+          orConditions.push(`type.eq.${jobTypeValue}`);
+        }
+        if (orConditions.length > 0) {
+          console.log('OR conditions:', orConditions.join(','));
+          query = query.or(orConditions.join(','));
+        }
+      }
+    } else if (jobType) {
+      console.log('Filtering by jobType:', jobType);
+      // Only job type filtering (when "Other" is selected without specific subtypes)
+      if (Array.isArray(jobType)) {
+        // Multiple job types: use .in() operator
+        console.log('Using .in() for multiple job types:', jobType);
+        query = query.in('type', jobType);
+      } else {
+        // Single job type: use .eq() operator
+        console.log('Using .eq() for single job type:', jobType);
+        query = query.eq('type', jobType);
+      }
     }
 
     // Apply price range filter
@@ -59,10 +100,14 @@ export class PostService {
         .lte('price', priceRange.max);
     }
 
+    // Apply ordering and pagination at the end
+    query = query
+      .order(sortBy, { ascending: sortOrder === 'asc' })
+      .range(offset, offset + pageSize - 1);
+
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching posts:', error);
       throw new Error('Could not fetch posts.');
     }
 
@@ -75,28 +120,76 @@ export class PostService {
    * Fetches all job posts for a specific user.
    */
   static async getPostsByUserId(userId: string, params: RequestParams): Promise<{ posts: Post[], hasMore: boolean }> {
-    const { page, pageSize, searchTerm, location, sortBy, sortOrder } = params;
+    const { page, pageSize, searchTerm, location, sortBy, sortOrder, jobType, subType, priceRange, matchMode } = params;
     const offset = (page - 1) * pageSize;
 
     let query = supabase
       .from('posts')
       .select('*', { count: 'exact' })
       .eq('userId', userId)
-      .is('deletedAt', null)
-      .order(sortBy, { ascending: sortOrder === 'asc' })
-      .range(offset, offset + pageSize - 1);
+      .is('deletedAt', null);
 
     if (searchTerm) {
-      query = query.textSearch('fts', searchTerm.replace(/\*/g, ''), { type: 'websearch', config: 'english' });
+      const cleanSearchTerm = searchTerm.replace(/\*/g, '').trim();
+      if (cleanSearchTerm) {
+        query = query.or(`title.ilike.%${cleanSearchTerm}%,description.ilike.%${cleanSearchTerm}%`);
+      }
     }
     if (location) {
       query = query.ilike('location', `%${location}%`);
     }
 
+    // Apply job type and subtype filters with same logic as getAllPosts
+    if (subType && subType.length > 0) {
+      // Specific subtypes selected: filter by subType field using array contains operator
+      // Since subType is a Postgres array, we use .cs. (contains) operator
+      const subTypeConditions: string[] = [];
+      for (const subTypeValue of subType) {
+        subTypeConditions.push(`subType.cs.{${subTypeValue}}`);
+      }
+      query = query.or(subTypeConditions.join(','));
+
+      // If also have "Other" job types, add OR condition
+      if (jobType && matchMode === 'mixed') {
+        const otherJobTypes = Array.isArray(jobType) ? jobType : [jobType];
+        // Construct OR condition: subType contains any selected subtype OR type is in otherJobTypes
+        const orConditions: string[] = [];
+        for (const subTypeValue of subType) {
+          orConditions.push(`subType.cs.{${subTypeValue}}`);
+        }
+        for (const jobTypeValue of otherJobTypes) {
+          orConditions.push(`type.eq.${jobTypeValue}`);
+        }
+        if (orConditions.length > 0) {
+          query = query.or(orConditions.join(','));
+        }
+      }
+    } else if (jobType) {
+      // Only job type filtering (when "Other" is selected without specific subtypes)
+      if (Array.isArray(jobType)) {
+        // Multiple job types: use .in() operator
+        query = query.in('type', jobType);
+      } else {
+        // Single job type: use .eq() operator
+        query = query.eq('type', jobType);
+      }
+    }
+
+    // Apply price range filter
+    if (priceRange) {
+      query = query
+        .gte('price', priceRange.min)
+        .lte('price', priceRange.max);
+    }
+
+    // Apply ordering and pagination at the end
+    query = query
+      .order(sortBy, { ascending: sortOrder === 'asc' })
+      .range(offset, offset + pageSize - 1);
+
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching posts by user:', error);
       throw new Error('Could not fetch user posts.');
     }
 
@@ -110,7 +203,6 @@ export class PostService {
   static async createPost(postData: Omit<Post, 'postId' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'deletedBy'>): Promise<Post> {
     const { data, error } = await supabase.from('posts').insert(postData).select().single();
     if (error) {
-      console.error('Error creating post:', error);
       throw new Error('Could not create post.');
     }
     return data as Post;
@@ -122,7 +214,6 @@ export class PostService {
   static async updatePost(postId: string, postData: Partial<Post>): Promise<Post> {
     const { data, error } = await supabase.from('posts').update(postData).eq('postId', postId).select().single();
     if (error) {
-      console.error('Error updating post:', error);
       throw new Error('Could not update post.');
     }
     return data as Post;
@@ -138,7 +229,6 @@ export class PostService {
       .match({ postId: postId, userId: userId });
 
     if (error) {
-      console.error('Error deleting post:', error);
       throw new Error('Could not delete post.');
     }
   }
@@ -153,7 +243,6 @@ export class PostService {
       .is('deletedAt', null);
 
     if (error) {
-      console.error('Error getting total posts count:', error);
       return 0;
     }
     return count ?? 0;
@@ -170,9 +259,71 @@ export class PostService {
       .is('deletedAt', null);
 
     if (error) {
-      console.error('Error getting user posts count:', error);
       return 0;
     }
     return count ?? 0;
+  }
+
+  /**
+   * Get job title suggestions based on search query
+   * Returns distinct job titles that match the query
+   */
+  static async getJobTitleSuggestions(searchQuery: string): Promise<string[]> {
+    if (!searchQuery.trim()) return [];
+
+    const cleanQuery = searchQuery.toLowerCase().trim();
+
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('title')
+        .is('deletedAt', null)
+        .limit(100); // Get a reasonable sample
+
+      if (error) {
+        return [];
+      }
+
+      if (!data || data.length === 0) return [];
+
+      // Extract unique titles and filter by query match
+      const uniqueTitles = Array.from(new Set(data.map((post: any) => post.title || '')));
+
+      // Score and rank titles similar to the search ranking logic
+      const scoredTitles = uniqueTitles
+        .filter((title) => title.trim().length > 0)
+        .map((title) => {
+          const titleLower = title.toLowerCase();
+          let score = 0;
+
+          // Exact phrase match (highest priority)
+          if (titleLower.includes(cleanQuery)) {
+            score += 1000;
+          }
+
+          // All words present in title
+          const queryWords = cleanQuery.split(/\s+/).filter(Boolean);
+          const allWordsMatch = queryWords.every((word) => titleLower.includes(word));
+          if (allWordsMatch) {
+            score += 500;
+          }
+
+          // Starting letter sequence match
+          const wordStartMatches = queryWords.filter((word) =>
+            titleLower.split(/\s+/).some((titleWord: string) => titleWord.startsWith(word))
+          ).length;
+          score += wordStartMatches * 10;
+
+          return { title, score };
+        })
+        .filter((item) => item.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10) // Limit to top 10 suggestions
+        .map((item) => item.title);
+
+      return scoredTitles;
+    } catch (err) {
+      return [];
+    }
   }
 }
