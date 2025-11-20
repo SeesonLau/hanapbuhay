@@ -52,32 +52,20 @@ export class PostService {
     // - If "Other" is selected for a job type (e.g., "Agriculture"), match type field
     // - If both exist, use OR: (subType contains [...] OR type IN [...])
     if (subType && subType.length > 0) {
-      console.log('Filtering by subType:', subType);
-      // Specific subtypes selected: filter by subType field using array contains operator
-      // Since subType is a Postgres array, we use .cs. (contains) operator or .or() with multiple conditions
-      const subTypeConditions: string[] = [];
-      for (const subTypeValue of subType) {
-        subTypeConditions.push(`subType.cs.{${subTypeValue}}`);
-      }
-      query = query.or(subTypeConditions.join(','));
-      console.log('SubType conditions:', subTypeConditions.join(','));
-
-      // If also have "Other" job types, add OR condition
       if (jobType && matchMode === 'mixed') {
         const otherJobTypes = Array.isArray(jobType) ? jobType : [jobType];
         console.log('Adding mixed filter - otherJobTypes:', otherJobTypes);
-        // Construct OR condition: subType contains any selected subtype OR type is in otherJobTypes
-        const orConditions: string[] = [];
-        for (const subTypeValue of subType) {
-          orConditions.push(`subType.cs.{${subTypeValue}}`);
-        }
-        for (const jobTypeValue of otherJobTypes) {
-          orConditions.push(`type.eq.${jobTypeValue}`);
-        }
-        if (orConditions.length > 0) {
-          console.log('OR conditions:', orConditions.join(','));
-          query = query.or(orConditions.join(','));
-        }
+        // Mixed mode: (subType contains any of the specific subtypes) OR (type is one of the "Other" job types)
+        const subTypeFilter = `subType.cs.{${subType.join(',')}}`;
+        const jobTypeFilter = `type.in.(${otherJobTypes.join(',')})`;
+        query = query.or(`${subTypeFilter},${jobTypeFilter}`);
+      } else {
+        // Only specific subtypes are selected.
+        // The 'subType' column is an array, so we use the 'cs' (contains) operator.
+        // The format is `column.cs.{value1,value2}`
+        console.log('Filtering by subType (contains):', subType);
+        const subTypeFilter = `subType.cs.{${subType.join(',')}}`;
+        query = query.or(subTypeFilter);
       }
     } else if (jobType) {
       console.log('Filtering by jobType:', jobType);
@@ -141,28 +129,18 @@ export class PostService {
 
     // Apply job type and subtype filters with same logic as getAllPosts
     if (subType && subType.length > 0) {
-      // Specific subtypes selected: filter by subType field using array contains operator
-      // Since subType is a Postgres array, we use .cs. (contains) operator
-      const subTypeConditions: string[] = [];
-      for (const subTypeValue of subType) {
-        subTypeConditions.push(`subType.cs.{${subTypeValue}}`);
-      }
-      query = query.or(subTypeConditions.join(','));
-
-      // If also have "Other" job types, add OR condition
       if (jobType && matchMode === 'mixed') {
         const otherJobTypes = Array.isArray(jobType) ? jobType : [jobType];
-        // Construct OR condition: subType contains any selected subtype OR type is in otherJobTypes
-        const orConditions: string[] = [];
-        for (const subTypeValue of subType) {
-          orConditions.push(`subType.cs.{${subTypeValue}}`);
-        }
-        for (const jobTypeValue of otherJobTypes) {
-          orConditions.push(`type.eq.${jobTypeValue}`);
-        }
-        if (orConditions.length > 0) {
-          query = query.or(orConditions.join(','));
-        }
+        // Mixed mode: (subType contains any of the specific subtypes) OR (type is one of the "Other" job types)
+        const subTypeFilter = `subType.cs.{${subType.join(',')}}`;
+        const jobTypeFilter = `type.in.(${otherJobTypes.join(',')})`;
+        query = query.or(`${subTypeFilter},${jobTypeFilter}`);
+      } else {
+        // Only specific subtypes are selected.
+        // The 'subType' column is an array, so we use the 'cs' (contains) operator.
+        // The format is `column.cs.{value1,value2}`
+        const subTypeFilter = `subType.cs.{${subType.join(',')}}`;
+        query = query.or(subTypeFilter);
       }
     } else if (jobType) {
       // Only job type filtering (when "Other" is selected without specific subtypes)
