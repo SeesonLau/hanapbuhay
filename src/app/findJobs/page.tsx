@@ -9,6 +9,7 @@ import { JobPostCard } from "@/components/cards/JobPostCard";
 import StatsSection from '@/components/posts/StatsSection';
 import { useStats } from '@/hooks/useStats';
 import { useJobPosts } from '@/hooks/useJobPosts';
+import { useApplications } from '@/hooks/useApplications';
 import { AuthService } from '@/lib/services/auth-services';
 import PostsSection from '@/components/posts/PostsSection';
 import { JobPostList } from "@/components/cards/JobPostList";
@@ -71,6 +72,9 @@ export default function FindJobsPage() {
     loadMore,
     applyFilters,
   } = useJobPosts(currentUserId ?? undefined, { excludeMine: true, excludeApplied: true });
+
+  // Applications hook for apply functionality
+  const { createApplication } = useApplications(currentUserId, { skip: !currentUserId });
 
   // Count active filters
   const activeFilterCount = useMemo(() => {
@@ -230,6 +234,10 @@ export default function FindJobsPage() {
     await hookHandleSearch(query, location);
   };
 
+  const handleApplyNow = useCallback(async (postId: string) => {
+    await createApplication(postId);
+  }, [createApplication]);
+
   useEffect(() => {
     const initCurrentUser = async () => {
       const current = await AuthService.getCurrentUser();
@@ -338,7 +346,7 @@ export default function FindJobsPage() {
                   onViewModeChange={(v: 'card' | 'list') => setViewMode(v)}
                   onLoadMore={loadMore as () => void}
                   onOpen={(data: any) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
-                  onApply={(id: string) => console.log('apply', id)}
+                  onApply={handleApplyNow}
                 />
               </div>
             </div>
@@ -352,7 +360,7 @@ export default function FindJobsPage() {
         isOpen={isJobViewOpen}
         onClose={() => setIsJobViewOpen(false)}
         job={selectedJob}
-        onApply={(id) => console.log('apply', id)}
+        onApply={handleApplyNow}
       />
       
       {/* Filter Modal - Mobile Only */}
