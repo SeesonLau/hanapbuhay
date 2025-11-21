@@ -50,12 +50,6 @@ export default function FindJobsPage() {
     },
   });
 
-  const [posts, setPosts] = useState<Post[]>([]);
-  // replaced with useJobPosts
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [appCounts, setAppCounts] = useState<Record<string, number>>({});
-  const [sortValue, setSortValue] = useState<string>('latest');
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Stats for the page (uses hook)
@@ -99,72 +93,8 @@ export default function FindJobsPage() {
     return count;
   }, [activeFilters]);
 
-  // Apply filters to posts
-  const filteredPosts = useMemo(() => {
-    return posts.filter((post) => {
-      // Filter by job types
-      const jobTypeKeys = Object.keys(activeFilters.jobTypes).filter(
-        (key) => activeFilters.jobTypes[key]
-      );
-      if (jobTypeKeys.length > 0) {
-        const postType = post.type.toLowerCase();
-        const hasMatchingType = jobTypeKeys.some((key) => {
-          if (key.includes('-')) {
-            // It's a subtype like "cleaning-housekeeping"
-            const [parent, sub] = key.split('-');
-            return (
-              postType === parent.toLowerCase() &&
-              post.subType?.some((st) => st.toLowerCase() === sub.toLowerCase())
-            );
-          }
-          return postType === key.toLowerCase();
-        });
-        if (!hasMatchingType) return false;
-      }
-
-      // Filter by salary range
-      const { lessThan5000, range10to20, moreThan20000 } = activeFilters.salaryRange;
-      if (lessThan5000 || range10to20 || moreThan20000) {
-        const salary = post.price || 0;
-        const matchesSalary =
-          (lessThan5000 && salary < 5000) ||
-          (range10to20 && salary >= 10000 && salary <= 20000) ||
-          (moreThan20000 && salary > 20000);
-        if (!matchesSalary) return false;
-      }
-
-      // Note: Experience level and preferred gender filters can be added
-      // when the Post model includes these fields
-
-      return true;
-    });
-  }, [posts, activeFilters]);
-
-  // Derived posts based on sort selection
-  const displayPosts = useMemo(() => {
-    const sorted = [...filteredPosts];
-    switch (sortValue) {
-      case 'latest':
-        sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        break;
-      case 'oldest':
-        sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-        break;
-      case 'salary-asc':
-        sorted.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-        break;
-      case 'salary-desc':
-        sorted.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
-        break;
-      default:
-        break;
-    }
-    return sorted;
-  }, [filteredPosts, sortValue]);
-
   const handleSortChange = useCallback((opt: any) => {
       const val = String(opt?.value ?? 'latest');
-      setSortValue(val);
       // map UI sort values to service sort params
       let sortBy: string = 'createdAt';
       let sortOrder: 'asc' | 'desc' = 'desc';
@@ -242,41 +172,6 @@ export default function FindJobsPage() {
   // remove manual counts -- hook already fetches applicant counts for each post
 
   const formatPeso = (amount: number) => {
-    return amount.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  };
-
-  const formatPostedDate = (iso: string) => {
-    try {
-      const d = new Date(iso);
-      return d.toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' });
-    } catch {
-      return iso;
-    }
-  };
-
-  const postToJobData = (post: Post): JobPostViewData => {
-    const sub = post.subType || [];
-    const genderTags = Array.from(new Set(sub.filter(s => Object.values(Gender).includes(s as Gender))));
-    const experienceTags = Array.from(new Set(sub.filter(s => Object.values(ExperienceLevel).includes(s as ExperienceLevel))));
-    const allJobSubTypes = Object.values(SubTypes).flat();
-    const jobSubtypeTags = Array.from(new Set(
-      sub.filter(s => allJobSubTypes.includes(s))
-         .filter(s => !genderTags.includes(s) && !experienceTags.includes(s))
-    ));
-    const jobTypeTags = Array.from(new Set([post.type, ...jobSubtypeTags].filter(Boolean)));
-    return {
-      id: post.postId,
-      title: post.title,
-      description: post.description,
-      location: post.location,
-      salary: formatPeso(post.price),
-      salaryPeriod: 'month',
-      postedDate: formatPostedDate(post.createdAt),
-      applicantCount: appCounts[post.postId] || 0,
-      genderTags,
-      experienceTags,
-      jobTypeTags,
-    };
   };
 
   return (
