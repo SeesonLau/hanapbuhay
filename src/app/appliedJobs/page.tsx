@@ -309,7 +309,7 @@ export default function AppliedJobsPage() {
       <Banner variant="appliedJobs" onSearch={handleSearch} />
 
       {/* Main Container with VH layout below banner */}
-      <div className="mt-[200px] mobile-S:mt-[140px] mobile-M:mt-[145px] mobile-L:mt-[150px] tablet:mt-[180px] laptop:mt-[190px] laptop-L:mt-[200px] min-h-screen bg-gray-50">
+      <div className="mt-[200px] mobile-S:mt-[140px] mobile-M:mt-[145px] mobile-L:mt-[150px] tablet:mt-[180px] laptop:mt-[190px] laptop-L:mt-[200px] min-h-screen bg-transparent">
         {/* Stats Section - Fixed on laptop, top on mobile/tablet */}
         <aside className="block laptop:hidden px-4 md:px-6">
           <StatsSection 
@@ -322,7 +322,7 @@ export default function AppliedJobsPage() {
         </aside>
         
         {/* Stats Section - Fixed sidebar on laptop only */}
-        <aside className="hidden laptop:block fixed left-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[180px] laptop-L:w-[200px] z-20 px-3 bg-gray-50">
+        <aside className="hidden laptop:block fixed left-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[180px] laptop-L:w-[200px] z-20 px-3 bg-transparent">
           <StatsSection 
             stats={stats} 
             variant="appliedJobs" 
