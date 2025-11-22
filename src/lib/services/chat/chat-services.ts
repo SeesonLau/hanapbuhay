@@ -7,10 +7,7 @@ const GLOBAL_ROOM_ID_UUID = '00000000-0000-0000-0000-000000000000';
 const MESSAGES_LIMIT = 50; 
 
 export class ChatService {
-
-  /**
-   * 1. Get or Create a Private Chat Room (DM)
-   */
+  // 1. Get or Create a Private Chat Room (DM)
   static async getOrCreatePrivateRoom(currentUserId: string, targetUserId: string): Promise<{ room: ChatRoom, isNew: boolean } | null> {
     try {
       // Sort IDs to ensure consistent array order for the unique index
@@ -55,10 +52,7 @@ export class ChatService {
       return null;
     }
   }
-
-  /**
-   * Get existing chat rooms for a user
-   */
+  // Get existing chat rooms for a user
   static async getExistingChatRooms(currentUserId: string): Promise<UserContact[]> {
     try {
       const { data: privateRooms, error: roomsError } = await supabase
@@ -122,10 +116,7 @@ export class ChatService {
       return [];
     }
   }
-
-  /**
-   * 2 & 5. Fetch Chat History
-   */
+  // 2 & 5. Fetch Chat History
   static async getMessageHistory(roomId: string, offset: number = 0, limit: number = MESSAGES_LIMIT): Promise<ChatMessage[]> {
     try {
       // Validate roomId
@@ -174,10 +165,7 @@ export class ChatService {
       return [];
     }
   }
-
-  /**
-   * 4. Send a Message
-   */
+  // 4. Send a Message
   static async sendMessage(roomId: string, senderId: string, content: string): Promise<ChatMessage | null> {
   try {
     // Validate inputs
@@ -255,10 +243,7 @@ export class ChatService {
     return null;
   }
 }
-
-  /**
-   * 6. Mark Messages as Read
-   */
+  // 6. Mark Messages as Read
   static async markMessagesAsRead(messageIds: string[], currentUserId: string): Promise<boolean> {
     try {
       for (const id of messageIds) {
@@ -274,44 +259,42 @@ export class ChatService {
       return false;
     }
   }
-  
-  /**
-   * 3. Search Users
-   */
+  // 3. Search Users
   static async searchUsers(query: string, currentUserId: string): Promise<UserContact[]> {
-    try {
-      if (!query || query.length < 2) return [];
+  try {
+    // Allow searching with just 1 character
+    if (!query || query.trim().length < 1) return [];
 
-      // Use Full-Text Search on the 'name_search' column
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('userId, name, profilePictureUrl')
-        .textSearch('name_search', `'${query.trim()}'`) 
-        .neq('userId', currentUserId) 
-        .limit(10); 
+    const searchTerm = query.trim().toLowerCase();
 
-      if (error) {
-        console.error('Error searching users:', error);
-        return [];
-      }
+    // Use ILIKE for case-insensitive partial matching (searches anywhere in the name)
+    const { data: profiles, error } = await supabase
+      .from('profiles')
+      .select('userId, name, profilePictureUrl')
+      .ilike('name', `${searchTerm}%`)
+      .neq('userId', currentUserId) 
+      .limit(10); 
 
-      return (profiles || []).map(p => ({
-        userId: p.userId,
-        name: p.name || 'Unknown User',
-        profilePicUrl: p.profilePictureUrl,
-        unreadCount: 0, 
-      }));
-    } catch (error) {
-      console.error('Unexpected error in searchUsers:', error);
+    if (error) {
+      console.error('Error searching users:', error);
       return [];
     }
-  }
 
+    return (profiles || []).map(p => ({
+      userId: p.userId,
+      name: p.name || 'Unknown User',
+      profilePicUrl: p.profilePictureUrl,
+      unreadCount: 0, 
+    }));
+  } catch (error) {
+    console.error('Unexpected error in searchUsers:', error);
+    return [];
+  }
+}
   // Helper to get the constant global room UUID
   static getGlobalRoomId(): string {
     return GLOBAL_ROOM_ID_UUID;
   }
-
   // Add this temporary method to ChatService to verify the room
 static async verifyRoomExists(roomId: string): Promise<boolean> {
   try {
@@ -329,5 +312,4 @@ static async verifyRoomExists(roomId: string): Promise<boolean> {
     return false;
   }
 }
-
 }

@@ -127,14 +127,14 @@ export default function HeaderHome({
       </div>
 
       {/* Desktop Navigation - Centered */}
-      <nav className="hidden md:flex items-center gap-6 lg:gap-8 xl:gap-12 absolute left-1/2 transform -translate-x-1/2">
+      <nav className="hidden laptop:flex items-center gap-6 lg:gap-8 xl:gap-12 absolute left-1/2 transform -translate-x-1/2">
         {/* Benefits */}
         <button
           onClick={() => onNavigateToSection('benefits')}
           className="flex justify-center items-center cursor-pointer transition-all duration-300 hover:scale-105"
         >
           <div 
-            className="text-center text-neutral-200 hover:text-blue-default px-2 py-2 text-sm md:text-base whitespace-nowrap transition-colors duration-300"
+            className="text-center text-neutral-200 hover:text-blue-default px-2 py-2 text-sm tablet:text-base whitespace-nowrap transition-colors duration-300"
             style={{
               fontSize: TYPOGRAPHY.body.fontSize,
               fontWeight: TYPOGRAPHY.body.fontWeight,
@@ -152,7 +152,7 @@ export default function HeaderHome({
           className="flex justify-center items-center cursor-pointer transition-all duration-300 hover:scale-105"
         >
           <div 
-            className="text-center text-neutral-200 hover:text-blue-default px-2 py-2 text-sm md:text-base whitespace-nowrap transition-colors duration-300"
+            className="text-center text-neutral-200 hover:text-blue-default px-2 py-2 text-sm tablet:text-base whitespace-nowrap transition-colors duration-300"
             style={{
               fontSize: TYPOGRAPHY.body.fontSize,
               fontWeight: TYPOGRAPHY.body.fontWeight,
@@ -170,7 +170,7 @@ export default function HeaderHome({
           className="flex justify-center items-center cursor-pointer transition-all duration-300 hover:scale-105"
         >
           <div 
-            className="text-center text-neutral-200 hover:text-blue-default px-2 py-2 text-sm md:text-base whitespace-nowrap transition-colors duration-300"
+            className="text-center text-neutral-200 hover:text-blue-default px-2 py-2 text-sm tablet:text-base whitespace-nowrap transition-colors duration-300"
             style={{
               fontSize: TYPOGRAPHY.body.fontSize,
               fontWeight: TYPOGRAPHY.body.fontWeight,
@@ -188,7 +188,7 @@ export default function HeaderHome({
           className="flex justify-center items-center cursor-pointer transition-all duration-300 hover:scale-105"
         >
           <div 
-            className="text-center text-neutral-200 hover:text-blue-default px-2 py-2 text-sm md:text-base whitespace-nowrap transition-colors duration-300"
+            className="text-center text-neutral-200 hover:text-blue-default px-2 py-2 text-sm tablet:text-base whitespace-nowrap transition-colors duration-300"
             style={{
               fontSize: TYPOGRAPHY.body.fontSize,
               fontWeight: TYPOGRAPHY.body.fontWeight,
@@ -204,7 +204,7 @@ export default function HeaderHome({
       {/* Mobile Menu Button */}
       <div className="flex-shrink-0">
         <button
-          className="mobile-menu-button md:hidden flex flex-col items-center justify-center w-8 h-8 space-y-1.5 cursor-pointer"
+          className="mobile-menu-button laptop:hidden flex flex-col items-center justify-center w-8 h-8 space-y-1.5 cursor-pointer"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
         <span 
@@ -228,7 +228,7 @@ export default function HeaderHome({
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
         <div 
-          className="mobile-menu-container md:hidden absolute top-full right-4 mt-2 rounded-xl bg-gray-900 bg-opacity-95 min-w-48"
+          className="mobile-menu-container laptop:hidden absolute top-full right-4 mt-2 rounded-xl bg-gray-900 bg-opacity-95 min-w-48"
         >
           <nav className="flex flex-col space-y-2 p-4">
             <button

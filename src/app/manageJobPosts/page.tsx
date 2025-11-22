@@ -262,14 +262,15 @@ export default function ManageJobPostsPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
+      <div className="fixed inset-0 -z-10 bg-gray-default" />
       {/* Banner Section with Header and Search */}
       <Banner 
         variant="manageJobPosts" 
         onSearch={handleSearch} 
         onPostClick={handleCreatePost}
       />
-      <div className="mt-[200px] mobile-S:mt-[140px] mobile-M:mt-[145px] mobile-L:mt-[150px] tablet:mt-[180px] laptop:mt-[190px] laptop-L:mt-[200px] min-h-screen bg-transparent">
+      <div className="mt-[200px] mobile-S:mt-[140px] mobile-M:mt-[145px] mobile-L:mt-[150px] tablet:mt-[180px] laptop:mt-[190px] laptop-L:mt-[200px] min-h-screen bg-gray-default">
         {/* Stats Section - fixed left on laptop, top on mobile/tablet */}
         <aside className="block laptop:hidden px-4 md:px-6">
           <StatsSection stats={stats} variant="manageJobs" loading={statsLoading} error={statsError} />

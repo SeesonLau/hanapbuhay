@@ -70,6 +70,11 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
           setTimeout(() => setIsHover(false), 0);
         }}
         className={`flex items-center w-full px-3 py-1 gap-1 transition-colors duration-150 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        style={{
+          transform: isHover || isFocus ? 'scale(1.06)' : 'scale(1)',
+          transitionProperty: 'transform, background-color, border-color',
+          transitionDuration: '150ms'
+        }}
       >
         {/* Visual checkbox */}
         <div
