@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { IoSearchOutline } from "react-icons/io5";
 import { CiLocationOn } from "react-icons/ci";
 import Button from './Button';
-import { searchLocations, PHILIPPINES_LOCATIONS } from '@/lib/constants/philippines-locations';
+import { PHILIPPINES_LOCATIONS } from '@/resources/locations/philippines';
 import { PostService } from '@/lib/services/posts-services';
 
 interface SearchBarProps {
