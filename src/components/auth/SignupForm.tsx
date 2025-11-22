@@ -1,3 +1,4 @@
+// components/auth/SignupForm.tsx
 'use client';
 
 import { useState } from 'react';
@@ -258,3 +259,4 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
     </>
   );
 };
+
