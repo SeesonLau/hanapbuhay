@@ -1,3 +1,5 @@
+//components/auth/LoginForm.tsx
+
 'use client';
 
 import { useState } from 'react';
@@ -27,34 +29,73 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Clear previous states
     setLoading(true);
     setNeedsConfirmation(false);
     setError('');
 
+    // Basic validation
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      setLoading(false);
+      return;
+    }
+
+    console.log('=== LOGIN ATTEMPT ===');
+    console.log('Email:', email);
+
     try {
       const result = await AuthService.login(email, password);
 
-      if (result.success) {
+      console.log('Login result:', {
+        success: result.success,
+        hasData: !!result.data,
+        needsConfirmation: result.needsConfirmation,
+        message: result.message
+      });
+
+      // CRITICAL: Only navigate if BOTH success is true AND we have user data
+      if (result.success === true && result.data) {
+        console.log('✅ Login successful, redirecting to findJobs');
         router.push(ROUTES.FINDJOBS);
       } else if (result.needsConfirmation) {
+        console.log('⚠️ Email confirmation needed');
         setNeedsConfirmation(true);
+        setError(''); // Clear any previous errors
       } else {
-        setError(result.message || 'Login failed. Please try again.');
+        // Login failed - show error and stay on page
+        console.log('❌ Login failed:', result.message);
+        setError(result.message || 'Invalid email or password. Please try again.');
       }
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+    } catch (err: any) {
+      console.error('❌ Login exception:', err);
+      setError(err.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
+      console.log('===================');
     }
   };
 
   const handleResendConfirmation = async () => {
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
+
     setResendLoading(true);
+    setError('');
+
     try {
-      await AuthService.resendConfirmationEmail(email);
-      setNeedsConfirmation(false);
-      setError('Confirmation email sent. Please check your inbox.');
-    } catch (err) {
+      const result = await AuthService.resendConfirmationEmail(email);
+      
+      if (result.success) {
+        setNeedsConfirmation(false);
+        setError('Confirmation email sent. Please check your inbox.');
+      } else {
+        setError(result.message || 'Failed to resend confirmation email. Please try again.');
+      }
+    } catch (err: any) {
       setError('Failed to resend confirmation email. Please try again.');
     } finally {
       setResendLoading(false);
@@ -91,10 +132,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
       </h2>
 
       <Preloader
-      isVisible={loading}
-      message={PreloaderMessages.PROCESSING}
-      variant="default"
-    />
+        isVisible={loading}
+        message={PreloaderMessages.PROCESSING}
+        variant="default"
+      />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
@@ -113,6 +154,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
             required
             autoComplete="email"
             placeholder="juan.cruz@gmail.com"
+            disabled={loading}
           />
         </div>
 
@@ -127,6 +169,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
             autoComplete="current-password"
             placeholder="••••••••"
             enableValidation={false}
+            disabled={loading}
           />
         </div>
 
@@ -135,7 +178,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
           <button
             type="button"
             onClick={onForgotPassword}
-            className="font-alexandria font-light text-small text-primary-primary600 hover:text-primary-primary700 font-light hover:underline"
+            disabled={loading}
+            className="font-alexandria font-light text-small text-primary-primary600 hover:text-primary-primary700 font-light hover:underline disabled:opacity-50"
           >
             Forgot Password?
           </button>
@@ -144,7 +188,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
         {/* Log In Button */}
         <Button
           type="submit"
-          disabled={loading}
+          disabled={loading || !email || !password}
           className="w-full justify-center text-body font-semibold mt-6 py-2 rounded-full"
           isLoading={loading}
           variant="primary"
@@ -191,7 +235,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
           <button
             type="button"
             onClick={onSignUpClick}
-            className="font-alexandria font-light text-small text-primary-primary500 hover:text-primary-primary600 font-light hover:underline"
+            disabled={loading}
+            className="font-alexandria font-light text-small text-primary-primary500 hover:text-primary-primary600 font-light hover:underline disabled:opacity-50"
           >
             here
           </button>
