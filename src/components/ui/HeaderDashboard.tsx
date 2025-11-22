@@ -22,6 +22,7 @@ import { ROUTES } from '@/lib/constants';
 import SettingsModal from '@/components/modals/SettingsModal';
 import NotificationPopUp from '../notifications/NotificationPopUp';
 import { Preloader, PreloaderMessages } from "./Preloader";
+import ProfileDropdown from './ProfileDropdown';
 
 import { ProfileService } from "@/lib/services/profile-services";
 
@@ -54,13 +55,26 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
   
   // State for user data
-  const [userData, setUserData] = useState({
-    name: userName,
-    email: userEmail,
-    profilePicUrl: userAvatar,
-    userId: userId
+  const [userData, setUserData] = useState(() => {
+    // Try to get cached data from sessionStorage first
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem('headerUserData');
+      if (cached) {
+        try {
+          return JSON.parse(cached);
+        } catch (e) {
+          // If parsing fails, fall back to props
+        }
+      }
+    }
+    return {
+      name: userName,
+      email: userEmail,
+      profilePicUrl: userAvatar,
+      userId: userId
+    };
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   //Logout animation state
   const [showGoodbye, setShowGoodbye] = useState(false);
@@ -73,7 +87,10 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        setIsLoading(true);
+        // Only show loading if we don't have any cached data
+        if (!userData.name && !userData.email) {
+          setIsLoading(true);
+        }
         
         // Get current user from AuthService
         const currentUser = await AuthService.getCurrentUser();
@@ -87,22 +104,35 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
           // Fetch email using ProfileService
           const userEmail = await ProfileService.getEmailByUserId(userId);
           
-          setUserData({
+          const newUserData = {
             name: profileData?.name || 'User',
             email: userEmail || '',
             profilePicUrl: profileData?.profilePicUrl || '',
             userId: userId
-          });
+          };
+          
+          setUserData(newUserData);
+          
+          // Cache the data in sessionStorage
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('headerUserData', JSON.stringify(newUserData));
+          }
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
         // Fallback to props if available
-        setUserData({
+        const fallbackData = {
           name: userName || 'User',
           email: userEmail || '',
           profilePicUrl: userAvatar || '',
           userId: userId || ''
-        });
+        };
+        setUserData(fallbackData);
+        
+        // Cache fallback data
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('headerUserData', JSON.stringify(fallbackData));
+        }
       } finally {
         setIsLoading(false);
       }
@@ -145,6 +175,12 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const handleSignOut = async () => {
     setIsProfileOpen(false);
     setShowGoodbye(true);
+    
+    // Clear cached user data on sign out
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('headerUserData');
+    }
+    
     setTimeout(async () => {
       await AuthService.signOut();
       router.push(ROUTES.HOME);
@@ -341,92 +377,12 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                 </button>
 
                 {/* Profile Dropdown */}
-                {isProfileOpen && (
-                  <div 
-                    className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 z-50 transition-all duration-300 ease-in-out"
-                    style={{ 
-                      backgroundColor: getWhiteColor(),
-                      border: `1px solid ${getGrayColor('border')}`,
-                      backdropFilter: 'blur(10px)',
-                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
-                    }}
-                  >
-                    <Link
-                      href={ROUTES.PROFILE}
-                      className="block px-4 py-2 text-sm transition-colors duration-300"
-                      style={{ 
-                        color: getGrayColor('neutral600'),
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = getNeutral100Color();
-                        e.currentTarget.style.color = getBlueColor();
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = getWhiteColor();
-                        e.currentTarget.style.color = getGrayColor('neutral600');
-                      }}
-                      onClick={() => setIsProfileOpen(false)}
-                    >
-                      Profile
-                    </Link>
-
-                    <Link
-                      href={ROUTES.QUERY}
-                      className="block px-4 py-2 text-sm transition-colors duration-300"
-                      style={{ 
-                        color: getGrayColor('neutral600'),
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = getNeutral100Color();
-                        e.currentTarget.style.color = getBlueColor();
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = getWhiteColor();
-                        e.currentTarget.style.color = getGrayColor('neutral600');
-                      }}
-                      onClick={() => setIsProfileOpen(false)}
-                    >
-                      Query Test
-                    </Link>
-
-
-
-                    <button
-                      onClick={openSettings}
-                      className="block w-full text-left px-4 py-2 text-sm transition-colors duration-300"
-                      style={{ 
-                        color: getGrayColor('neutral600'),
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = getNeutral100Color();
-                        e.currentTarget.style.color = getBlueColor();
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = getWhiteColor();
-                        e.currentTarget.style.color = getGrayColor('neutral600');
-                      }}
-                    >
-                      Settings
-                    </button>
-                    <button
-                      onClick={handleSignOut}
-                      className="block w-full text-left px-4 py-2 text-sm transition-colors duration-300"
-                      style={{ 
-                        color: getGrayColor('neutral600'),
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = getNeutral100Color();
-                        e.currentTarget.style.color = getBlueColor();
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = getWhiteColor();
-                        e.currentTarget.style.color = getGrayColor('neutral600');
-                      }}
-                    >
-                      Sign out
-                    </button>
-                  </div>
-                )}
+                <ProfileDropdown 
+                  isOpen={isProfileOpen}
+                  onClose={() => setIsProfileOpen(false)}
+                  onOpenSettings={openSettings}
+                  onSignOut={handleSignOut}
+                />
               </div>
 
               {/* Mobile Menu Button */}
@@ -477,26 +433,6 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                   </button>
                 </Link>
               ))}
-              {/* Settings in Mobile Menu */}
-              <button
-                onClick={() => {
-                  openSettings();
-                  setIsMenuOpen(false);
-                }}
-                className="w-full text-left px-3 py-2 text-base font-medium transition-all duration-300 focus:outline-none text-neutral-200 hover:bg-blue-default hover:text-white rounded-lg"
-              >
-                Settings
-              </button>
-              {/* Sign Out in Mobile Menu */}
-              <button
-                onClick={() => {
-                  handleSignOut();
-                  setIsMenuOpen(false);
-                }}
-                className="w-full text-left px-3 py-2 text-base font-medium transition-all duration-300 focus:outline-none text-neutral-200 hover:bg-red-default hover:text-white rounded-lg"
-              >
-                Sign Out
-              </button>
             </div>
           </div>
         )}

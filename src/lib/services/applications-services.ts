@@ -87,55 +87,60 @@ export class ApplicationService {
 
   // Get applications by user ID
   static async getApplicationsByUserId(
-    userId: string,
-    params: ApplicationQueryParams = {}
-  ): Promise<PaginatedApplications> {
-    try {
-      const {
-        page = 1,
-        pageSize = this.DEFAULT_PAGE_SIZE,
-        status,
-        sortBy = 'createdAt',
-        sortOrder = 'desc'
-      } = params;
+  userId: string,
+  params: ApplicationQueryParams = {}
+): Promise<PaginatedApplications> {
+  try {
+    const {
+      page = 1,
+      pageSize = this.DEFAULT_PAGE_SIZE,
+      status,
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
+    } = params;
 
-      let query = supabase
-        .from('applications')
-        .select(`
-          *,
-          posts (
-            title,
-            description,
-            price,
-            location
-          )
-        `, { count: 'exact' })
-        .eq('userId', userId)
-        .is('deletedAt', null);
+    let query = supabase
+      .from('applications')
+      .select(`
+        *,
+        posts (
+          postId,
+          title,
+          description,
+          price,
+          location,
+          type,
+          subType
+        )
+      `, { count: 'exact' })
+      .eq('userId', userId)
+      .is('deletedAt', null);
 
-      if (status?.length) {
-        query = query.in('status', status);
-      }
-
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-
-      const { data, count, error } = await query
-        .order(sortBy, { ascending: sortOrder === 'asc' })
-        .range(from, to);
-
-      if (error) throw error;
-
-      return {
-        applications: data || [],
-        count: count || 0,
-        hasMore: count ? from + (data?.length || 0) < count : false
-      };
-    } catch (error) {
-      toast.error(ApplicationMessages.FETCH_APPLICATIONS_ERROR);
-      throw error;
+    if (status?.length) {
+      query = query.in('status', status);
     }
+
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, count, error } = await query
+      .order(sortBy, { ascending: sortOrder === 'asc' })
+      .range(from, to);
+
+    if (error) throw error;
+
+    console.log('ApplicationService - Raw data from Supabase:', data);
+
+    return {
+      applications: data || [],
+      count: count || 0,
+      hasMore: count ? from + (data?.length || 0) < count : false
+    };
+  } catch (error) {
+    toast.error(ApplicationMessages.FETCH_APPLICATIONS_ERROR);
+    throw error;
   }
+}
 
   // Get array of postIds that the user has applied for
   static async getAppliedPostIdsByUser(userId: string): Promise<string[]> {

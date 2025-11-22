@@ -2,6 +2,15 @@
 
 import React, { useState } from "react";
 import {
+  getWhiteColor,
+  getNeutral100Color,
+  getNeutral300Color,
+  getNeutral600Color,
+  getBlackColor,
+  getPrimary500Color,
+} from "@/styles/colors";
+import { fontClasses } from "@/styles/fonts";
+import {
   StaticGenderTag,
   StaticExperienceLevelTag,
   StaticJobTypeTag,
@@ -95,22 +104,25 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: getBlackColor(0.5) }}
       onClick={onClose}
     >
       <div
-        className={`font-inter w-[600px] max-w-[95vw] max-h-[90vh] overflow-y-auto rounded-2xl shadow-lg border bg-white border-gray-neutral300 text-gray-neutral600`}
+        className={`${fontClasses.body} w-[600px] max-w-[95vw] max-h-[90vh] overflow-y-auto rounded-2xl shadow-lg border`}
+        style={{ backgroundColor: getWhiteColor(), borderColor: getNeutral300Color(), color: getNeutral600Color() }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="px-6 pt-6 pb-3 flex items-start justify-between">
-          <h2 className={`font-alexandria text-[24px] font-semibold text-gray-neutral900`}>
+          <h2 className={`${fontClasses.heading} text-[24px] font-semibold`} style={{ color: getBlackColor() }}>
             {title}
           </h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-2xl leading-none px-2 text-gray-neutral600"
+            className="text-2xl leading-none px-2"
+            style={{ color: getNeutral600Color() }}
           >
             ×
           </button>
@@ -164,7 +176,8 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
         {/* Profile container (between Requirements and footer) */}
         <div className="px-6 pt-6">
           <div
-            className="inline-flex items-center gap-3 px-4 py-2 rounded-lg border cursor-pointer bg-white border-gray-neutral300"
+            className="inline-flex items-center gap-3 px-4 py-2 rounded-lg border cursor-pointer"
+            style={{ backgroundColor: getWhiteColor(), borderColor: getNeutral300Color() }}
             onClick={() => setIsProfileOpen(true)}
           >
             <img
@@ -198,7 +211,10 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
             {onApply && (
               <button
                 onClick={() => onApply(id)}
-                className="px-4 py-2 rounded-lg text-white text-sm bg-primary-primary500 hover:bg-primary-primary600"
+                className="px-4 py-2 rounded-lg text-white text-sm"
+                style={{ backgroundColor: getPrimary500Color() }}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = getPrimary500Color(0.9))}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = getPrimary500Color())}
               >
                 Apply Now
               </button>
@@ -206,8 +222,6 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
           </div>
         </div>
 
-        {/* Embedded ViewProfileModal */}
-        <ViewProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
       </div>
     </div>
   );
