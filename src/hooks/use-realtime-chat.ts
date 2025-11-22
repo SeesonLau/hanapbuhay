@@ -75,14 +75,18 @@ export function useRealtimeChat({ roomId, userId, username }: UseRealtimeChatPro
     loadMessages()
   }, [roomId, userId])
 
-  // Real-time subscription - FIXED VERSION
+  // Real-time subscription
   useEffect(() => {
     if (!roomId || !userId) return
 
     console.log('🔔 Setting up real-time subscription for room:', roomId)
 
     const channel = supabase
-      .channel(`room-${roomId}`)
+      .channel(`room-${roomId}`, {
+        config: {
+          broadcast: { self: false }, // Don't receive our own broadcasts
+        },
+      })
       .on(
         'postgres_changes',
         {
@@ -92,26 +96,19 @@ export function useRealtimeChat({ roomId, userId, username }: UseRealtimeChatPro
           filter: `room_id=eq.${roomId}`,
         },
         async (payload) => {
+          console.log('📨 Raw payload received:', payload)
           const newMsg = payload.new as any
-          console.log('📨 New message received via real-time:', newMsg)
           
-          // Skip if this is our own optimistic message (check by sender_id)
+          // Skip if this is our own message (already added optimistically)
           if (newMsg.sender_id === userId) {
             console.log('⏩ Skipping own message')
             return
           }
 
-          try {
-            // Check if message already exists (prevents duplicates)
-            setMessages(prev => {
-              const exists = prev.some(msg => msg.id === newMsg.id)
-              if (exists) {
-                console.log('⏩ Message already exists, skipping')
-                return prev
-              }
-              return prev
-            })
+          console.log('📩 Processing incoming message from other user:', newMsg)
 
+          try {
+            // Fetch profile data for the sender
             const profileData = await ProfileService.getNameProfilePic(newMsg.sender_id)
             
             const messageWithProfile: ChatMessage = {
@@ -125,20 +122,31 @@ export function useRealtimeChat({ roomId, userId, username }: UseRealtimeChatPro
               sender_profile_pic_url: profileData?.profilePicUrl,
             }
 
-            console.log('✅ Adding new message to state:', messageWithProfile)
+            console.log('✅ Adding message with profile:', messageWithProfile)
             
+            // Add the new message
             setMessages(prev => {
-              const exists = prev.some(msg => msg.id === messageWithProfile.id)
-              if (exists) return prev
+              // Check for duplicates
+              const exists = prev.some(msg => msg.id === newMsg.id)
+              if (exists) {
+                console.log('⚠️ Duplicate detected, skipping')
+                return prev
+              }
+              console.log('✨ Message added to state')
               return [...prev, messageWithProfile]
             })
 
-            // Mark as read immediately
-            await ChatService.markMessagesAsRead([newMsg.id], userId)
-            console.log('📖 Marked message as read')
+            // Mark as read
+            try {
+              await ChatService.markMessagesAsRead([newMsg.id], userId)
+              console.log('📖 Marked as read')
+            } catch (readError) {
+              console.error('Failed to mark as read:', readError)
+            }
 
           } catch (error) {
-            console.error('❌ Error processing new message:', error)
+            console.error('❌ Error fetching profile, adding with fallback:', error)
+            
             // Fallback: add message without profile data
             const fallbackMessage: ChatMessage = {
               id: newMsg.id,
@@ -159,19 +167,27 @@ export function useRealtimeChat({ roomId, userId, username }: UseRealtimeChatPro
           }
         }
       )
-      .subscribe((status) => {
-        console.log('📡 Subscription status:', status)
+      .subscribe((status, err) => {
+        console.log('📡 Subscription status:', status, err ? `Error: ${err}` : '')
+        
         if (status === 'SUBSCRIBED') {
           setIsConnected(true)
-          console.log('✅ Successfully subscribed to real-time updates')
-        } else {
+          console.log('✅ Successfully subscribed to real-time updates for room:', roomId)
+        } else if (status === 'CHANNEL_ERROR') {
           setIsConnected(false)
-          console.log('❌ Subscription failed:', status)
+          console.error('❌ Channel error:', err)
+        } else if (status === 'TIMED_OUT') {
+          setIsConnected(false)
+          console.error('❌ Subscription timed out')
+        } else if (status === 'CLOSED') {
+          setIsConnected(false)
+          console.log('🔒 Channel closed')
         }
       })
 
     return () => {
       console.log('🧹 Cleaning up subscription for room:', roomId)
+      channel.unsubscribe()
       supabase.removeChannel(channel)
       setIsConnected(false)
     }
