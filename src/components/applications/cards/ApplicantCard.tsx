@@ -16,7 +16,9 @@ interface ApplicantCardProps {
   userId: string;
   name: string;
   rating: number;
+  reviewCount: number;
   dateApplied: string;
+  profilePicUrl?: string | null;
   onStatusChange?: (status: ApplicationStatus) => void; 
 }
 
@@ -25,12 +27,12 @@ export default function ApplicantCard({
   userId,
   name,
   rating,
+  reviewCount,
   dateApplied,
+  profilePicUrl,
   onStatusChange
 }: ApplicantCardProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [averageRating, setAverageRating] = useState<number>(4.6);
-  const [reviewCount, setReviewCount] = useState<number>(12);
   const router = useRouter(); 
 
   const handleStatusChange = async (newStatus: ApplicationStatus) => {
@@ -65,12 +67,23 @@ export default function ApplicantCard({
       {/* Profile + Chat */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <FaUserCircle className="text-gray-neutral400 w-[48px] h-[48px]" />
+          {profilePicUrl ? (
+            <div className="relative w-[48px] h-[48px] rounded-full overflow-hidden">
+              <Image
+                src={profilePicUrl}
+                alt={`${name}'s profile`}
+                fill
+                className="object-cover"
+              />
+            </div>
+          ) : (
+            <FaUserCircle className="text-gray-neutral400 w-[48px] h-[48px]" />
+          )}
           <div className="flex flex-col">
             <span className="text-gray-neutral800 font-semibold text-small">{name}</span>
             <StarRating
               variant="display"
-              value={averageRating}
+              value={rating}
               labelVariant="count"
               ratingCount={reviewCount}
               size="sm"
@@ -92,7 +105,7 @@ export default function ApplicantCard({
       {/* Date Applied */}
       <div className="font-inter text-mini text-gray-neutral300 mt-2 text-center">
         Applied On:{' '}
-        <span className="font-inter text-mini font-medium text-gray-neutral500">
+        <span className="font-inter text-tiny  font-medium text-gray-neutral500">
           {dateApplied}
         </span>
       </div>

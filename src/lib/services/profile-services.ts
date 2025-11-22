@@ -72,7 +72,8 @@ export class ProfileService {
    * Gets the formatted display name for a user
    * Removes delimiter and limits first name to first 2 words
    */
-  static async getDisplayNameByUserId(userId: string): Promise<string | null> {
+  static async getDisplayNameByUserId
+  (userId: string): Promise<string | null> {
     try {
       const storedName = await this.getNameByUserId(userId);
       if (!storedName) return null;

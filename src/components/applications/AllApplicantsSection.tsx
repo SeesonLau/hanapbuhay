@@ -5,16 +5,18 @@ import { HiArrowDown } from 'react-icons/hi';
 import ApplicantStatusCard from './cards/ApplicantStatusCard';
 import { ApplicationService } from '@/lib/services/applications-services';
 import { ProfileService } from '@/lib/services/profile-services';
+import { ReviewService } from '@/lib/services/reviews-services';
 import { ApplicationStatus } from '@/lib/constants/application-status';
-import { toast } from 'react-hot-toast';
 
 interface Applicant {
   userId: string;
   name: string;
   status: 'Approved' | 'Rejected';
   rating: number;
+  reviewCount: number;
   dateApplied: string;
   applicationId: string;
+  profilePicUrl: string | null;
 }
 
 type SortOrder = 'newest' | 'oldest';
@@ -52,22 +54,27 @@ export default function AllApplicantsSection({
 
         const applicantsWithProfiles = await Promise.all(
           applications.map(async (app) => {
+            const displayName = await ProfileService.getDisplayNameByUserId(app.userId);
             const profileData = await ProfileService.getNameProfilePic(app.userId);
+            const averageRating = await ReviewService.getAverageRating(app.userId);
+            const totalReviews = await ReviewService.getTotalReviewsCountByUserId(app.userId);
 
             const cardStatus: 'Approved' | 'Rejected' =
               app.status === ApplicationStatus.APPROVED ? 'Approved' : 'Rejected';
 
             return {
               userId: app.userId,
-              name: profileData?.name || 'Unknown Applicant',
+              name: displayName || 'Unknown Applicant',
               status: cardStatus,
-              rating: 0,
+              rating: averageRating || 0,
+              reviewCount: totalReviews || 0,
               dateApplied: new Date(app.createdAt).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric'
               }),
-              applicationId: app.applicationId
+              applicationId: app.applicationId,
+              profilePicUrl: profileData?.profilePicUrl || null,
             };
           })
         );
@@ -151,8 +158,10 @@ export default function AllApplicantsSection({
               userId={applicant.userId}
               name={applicant.name}
               rating={applicant.rating}
+              reviewCount={applicant.reviewCount}
               dateApplied={applicant.dateApplied}
               status={applicant.status === 'Approved' ? 'Accepted' : 'Denied'}
+              profilePicUrl={applicant.profilePicUrl}
             />
           ))
         )}

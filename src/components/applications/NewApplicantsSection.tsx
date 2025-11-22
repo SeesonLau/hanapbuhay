@@ -5,15 +5,17 @@ import { HiArrowDown } from 'react-icons/hi';
 import ApplicantCard from './cards/ApplicantCard';
 import { ApplicationService } from '@/lib/services/applications-services';
 import { ProfileService } from '@/lib/services/profile-services';
+import { ReviewService } from '@/lib/services/reviews-services';
 import { ApplicationStatus } from '@/lib/constants/application-status';
-import { toast } from 'react-hot-toast';
 
 interface Applicant {
   userId: string;
   name: string;
   rating: number;
+  reviewCount: number;
   dateApplied: string;
   applicationId: string;
+  profilePicUrl: string | null;
 }
 
 type SortOrder = 'newest' | 'oldest';
@@ -52,18 +54,23 @@ export default function NewApplicantsSection({
 
       const applicantsWithProfiles = await Promise.all(
         applications.map(async (app) => {
+          const displayName = await ProfileService.getDisplayNameByUserId(app.userId);
           const profileData = await ProfileService.getNameProfilePic(app.userId);
+          const averageRating = await ReviewService.getAverageRating(app.userId);
+          const totalReviews = await ReviewService.getTotalReviewsCountByUserId(app.userId);
 
           return {
             userId: app.userId,
-            name: profileData?.name || 'Unknown Applicant',
-            rating: 0, // placeholder
+            name: displayName || 'Unknown Applicant',
+            rating: averageRating || 0,
+            reviewCount: totalReviews || 0,
             dateApplied: new Date(app.createdAt).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',
               year: 'numeric',
             }),
             applicationId: app.applicationId,
+            profilePicUrl: profileData?.profilePicUrl || null,
           };
         })
       );
@@ -158,7 +165,9 @@ export default function NewApplicantsSection({
                   userId={applicant.userId}
                   name={applicant.name}
                   rating={applicant.rating}
+                  reviewCount={applicant.reviewCount}
                   dateApplied={applicant.dateApplied}
+                  profilePicUrl={applicant.profilePicUrl}
                   onStatusChange={handleCardStatusChange}
                 />
               </div>
