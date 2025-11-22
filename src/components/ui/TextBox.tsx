@@ -21,6 +21,8 @@ export interface TextBoxProps extends Omit<React.InputHTMLAttributes<HTMLInputEl
   label?: string;
   /** Error message to display below the input */
   error?: string;
+  /** Phone prefix to display (e.g., '+63') - only for tel type */
+  phonePrefix?: string;
   /** Helper text to display below the input */
   helperText?: string;
   /** Icon component to display on the left side */
@@ -41,10 +43,10 @@ export interface TextBoxProps extends Omit<React.InputHTMLAttributes<HTMLInputEl
   className?: string;
   /** Enable real-time validation (default: true) */
   enableValidation?: boolean;
-  /** Minimum value for number inputs */
-  min?: number;
-  /** Maximum value for number inputs */
-  max?: number;
+  /** Minimum value for number inputs or date string for date inputs */
+  min?: number | string;
+  /** Maximum value for number inputs or date string for date inputs */
+  max?: number | string;
   /** Minimum length for password validation */
   minPasswordLength?: number;
   /** Custom validation function */
@@ -89,6 +91,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
   defaultValue,
   onChange,
   onBlur,
+  phonePrefix,
   ...props
 }, ref) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -96,6 +99,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
   const [validationError, setValidationError] = useState<string | undefined>();
   const [touched, setTouched] = useState(false);
   const [isValid, setIsValid] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
   
   const inputType = type === 'password' && showPassword ? 'text' : type;
 
@@ -119,7 +123,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
         case 'tel':
           return validatePhone(inputValue);
         case 'number':
-          return validateNumber(inputValue, min, max);
+          return validateNumber(inputValue, typeof min === 'number' ? min : undefined, typeof max === 'number' ? max : undefined);
         case 'url':
           return validateUrl(inputValue);
         case 'password':
@@ -150,7 +154,18 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
   }, [value]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
+    let newValue = e.target.value;
+    
+    // For phone type, only allow numbers and limit to 11 digits
+    if (type === 'tel') {
+      // Remove any non-digit characters
+      newValue = newValue.replace(/\D/g, '');
+      // Limit to 11 digits
+      newValue = newValue.slice(0, 11);
+      // Update the event value
+      e.target.value = newValue;
+    }
+    
     setInternalValue(newValue);
     onChange?.(e);
   };
@@ -185,6 +200,8 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
                       (showSuccessIcon && isValid && touched && !currentError) || 
                       showLoadingIcon;
 
+  const hasPhonePrefix = type === 'tel' && phonePrefix;
+  
   const inputClasses = `
     w-full 
     ${responsive ? 'h-10 sm:h-10' : 'h-10'}
@@ -239,7 +256,11 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
       )}
 
       {/* Input Container */}
-      <div className={inputWrapperClasses}>
+      <div 
+        className={inputWrapperClasses}
+        onMouseEnter={() => currentError && setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
         {/* Left Icon */}
         {leftIcon && (
           <div className={`${iconClasses} ${responsive ? 'left-3 sm:left-3' : 'left-3'}`}>
@@ -265,6 +286,17 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
           style={passwordInputStyles}
           {...props}
         />
+
+        {/* Validation Error Tooltip */}
+        {currentError && showTooltip && (
+          <div className="absolute right-0 bottom-full mb-2 z-50 pointer-events-none">
+            <div className="relative bg-error-error600 text-white px-2 py-1 rounded shadow-lg text-mini font-inter whitespace-nowrap max-w-xs">
+              {currentError}
+              {/* Arrow pointing down */}
+              <div className="absolute right-4 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-error-error600"></div>
+            </div>
+          </div>
+        )}
 
         {/* Right Icon or Password Toggle */}
         {hasRightIcon && (
@@ -298,13 +330,8 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
         )}
       </div>
 
-      {/* Error or Helper Text */}
-      {currentError && (
-        <span className={errorTextClasses}>
-          {currentError}
-        </span>
-      )}
-      {!currentError && helperText && (
+      {/* Helper Text (errors now shown in tooltip on hover) */}
+      {helperText && (
         <span className={helperTextClasses}>
           {helperText}
         </span>

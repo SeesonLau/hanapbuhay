@@ -226,7 +226,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
         <TextBox
           label="Phone Number"
           type="tel"
-          placeholder="Enter your phone number"
+          placeholder="09XXXXXXXXX"
           value={profile?.phoneNumber ?? ''}
           onChange={(e) => handleChange('phoneNumber', e.target.value)}
           width="100%"
@@ -244,6 +244,13 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
           width="100%"
           readOnly={!isEditing}
           disabled={!isEditing}
+          max={new Date().toISOString().split('T')[0]}
+          onKeyDown={(e) => e.preventDefault()}
+          onClick={(e) => {
+            if (!isEditing) return;
+            const input = e.currentTarget as HTMLInputElement;
+            input.showPicker?.();
+          }}
         />
       </div>
 

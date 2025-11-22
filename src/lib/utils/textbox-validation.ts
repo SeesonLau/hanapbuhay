@@ -15,7 +15,7 @@ export const validateEmail = (email: string): ValidationResult => {
   
   return {
     isValid,
-    error: isValid ? undefined : 'Please enter a valid email address'
+    error: isValid ? undefined : 'Invalid input!'
   };
 };
 
@@ -26,12 +26,24 @@ export const validatePhone = (phone: string): ValidationResult => {
   
   // Remove all non-digit characters for validation
   const digitsOnly = phone.replace(/\D/g, '');
-  const isValid = digitsOnly.length >= 10 && digitsOnly.length <= 15;
   
-  return {
-    isValid,
-    error: isValid ? undefined : 'Please enter a valid phone number'
-  };
+  // Must be exactly 11 digits
+  if (digitsOnly.length !== 11) {
+    return {
+      isValid: false,
+      error: 'Phone number must be 11 digits'
+    };
+  }
+  
+  // Must start with 09
+  if (!digitsOnly.startsWith('09')) {
+    return {
+      isValid: false,
+      error: 'Phone number must start with 09'
+    };
+  }
+  
+  return { isValid: true };
 };
 
 export const validateNumber = (value: string, min?: number, max?: number): ValidationResult => {
@@ -44,7 +56,7 @@ export const validateNumber = (value: string, min?: number, max?: number): Valid
   if (isNaN(num)) {
     return {
       isValid: false,
-      error: 'Please enter a valid number'
+      error: 'Invalid input!'
     };
   }
   
