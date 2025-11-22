@@ -26,13 +26,13 @@ export class AuthService {
 
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 
                      (typeof window !== 'undefined' ? window.location.origin : '') ||
-                     'http://localhost:3000';
+                     'https://hanapbuhay.vercel.app';
 
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${siteUrl}/auth/confirm`,
+          emailRedirectTo: `${siteUrl}/auth/callback?next=/findJobs`,
         },
       });
 
@@ -101,9 +101,7 @@ export class AuthService {
       });
 
       if (error) {
-        // Check if the error is due to email not confirmed
         if (error.message.includes('Email not confirmed')) {
-          // Offer to resend confirmation email
           return { 
             success: false, 
             message: 'Email not confirmed. Would you like us to resend the confirmation email?',
@@ -114,7 +112,6 @@ export class AuthService {
         return { success: false, message: error.message };
       }
 
-      //toast.success(AuthMessages.LOGIN_SUCCESS);
       return { success: true, data: data.user };
     } catch (err) {
       toast.error(AuthMessages.UNEXPECTED_ERROR);
@@ -124,9 +121,16 @@ export class AuthService {
 
   static async resendConfirmationEmail(email: string): Promise<AuthResponse> {
     try {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+                     (typeof window !== 'undefined' ? window.location.origin : '') ||
+                     'https://hanapbuhay.vercel.app';
+
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email: email,
+        options: {
+          emailRedirectTo: `${siteUrl}/auth/callback?next=/findJobs`,
+        }
       });
 
       if (error) {
@@ -134,8 +138,10 @@ export class AuthService {
         return { success: false, message: error.message };
       }
 
+      toast.success('Confirmation email sent successfully');
       return { success: true, message: 'Confirmation email sent successfully' };
     } catch (error) {
+      toast.error('An unexpected error occurred');
       return { success: false, message: 'An unexpected error occurred' };
     }
   }
@@ -161,10 +167,10 @@ export class AuthService {
     try {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 
                      (typeof window !== 'undefined' ? window.location.origin : '') ||
-                     'http://localhost:3000';
+                     'https://hanapbuhay.vercel.app';
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${siteUrl}/reset-password`,
+        redirectTo: `${siteUrl}/auth/callback?next=/reset-password`,
       });
 
       if (error) {
@@ -174,6 +180,25 @@ export class AuthService {
 
       toast.success(AuthMessages.PASSWORD_RESET_SENT);
       return { success: true, message: AuthMessages.PASSWORD_RESET_SENT };
+    } catch (err) {
+      toast.error(AuthMessages.UNEXPECTED_ERROR);
+      return { success: false, message: AuthMessages.UNEXPECTED_ERROR };
+    }
+  }
+
+  static async updatePassword(newPassword: string): Promise<AuthResponse> {
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return { success: false, message: error.message };
+      }
+
+      toast.success('Password updated successfully');
+      return { success: true, message: 'Password updated successfully', data: data.user };
     } catch (err) {
       toast.error(AuthMessages.UNEXPECTED_ERROR);
       return { success: false, message: AuthMessages.UNEXPECTED_ERROR };
@@ -201,7 +226,6 @@ export class AuthService {
         toast.error(error.message);
         return { success: false, message: error.message };
       }
-      //toast.success(AuthMessages.SIGNOUT_SUCCESS);
       return { success: true, message: AuthMessages.SIGNOUT_SUCCESS };
     } catch (err) {
       toast.error(AuthMessages.UNEXPECTED_ERROR);
