@@ -36,8 +36,12 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  // Get both session and user to verify authentication
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+  // Check if user is actually authenticated (must have BOTH valid session AND user)
+  const isAuthenticated = !sessionError && !userError && !!session && !!user;
 
   const protectedRoutes = [
     '/findJobs', 
@@ -64,9 +68,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // Allow reset-password route only if user is authenticated
-  // (they get authenticated via the email link callback)
   if (isResetPasswordRoute) {
-    if (!user) {
+    if (!isAuthenticated) {
       const url = request.nextUrl.clone();
       url.pathname = '/forgot-password';
       url.searchParams.set('error', 'Session expired. Please request a new reset link.');
@@ -80,11 +83,14 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Redirect unauthenticated users from protected routes
-  if (isProtectedRoute && !user) {
+  // CRITICAL: Redirect unauthenticated users from protected routes
+  if (isProtectedRoute && !isAuthenticated) {
+    console.log('🚫 Blocking access to protected route:', pathname, 'Auth status:', isAuthenticated);
+    
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('redirectedFrom', pathname);
+    url.searchParams.set('error', 'Please log in to access this page');
 
     const redirectResponse = NextResponse.redirect(url);
     supabaseResponse.cookies.getAll().forEach(cookie => {
@@ -94,7 +100,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect authenticated users away from auth pages
-  if (isAuthRoute && user) {
+  if (isAuthRoute && isAuthenticated) {
     const url = request.nextUrl.clone();
     url.pathname = '/findJobs';
 
