@@ -1,8 +1,6 @@
 "use client";
 
 import React from 'react';
-import { getBlackColor, getNeutral600Color, getNeutral100Color, getNeutral400Color } from '@/styles/colors';
-import { fontClasses } from '@/styles/fonts';
 // Use public assets for icons
 import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticLocationTag, StaticSalaryTag } from '@/components/ui/TagItem';
 import ManageJobActionButtons from '@/components/posts/ManageJobActionButtons';
@@ -96,7 +94,7 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
 
   return (
     <div 
-      className={`w-full h-[60px] bg-white border border-gray-200 shadow-sm px-6 rounded-[10px] transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-300 cursor-pointer ${className}`}
+      className={`w-full h-[60px] bg-white border border-gray-neutral200 shadow-sm px-6 rounded-[10px] transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300 cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
       {/* Table-like aligned columns: Title | Tags | Location+Salary | Date | Actions */}
@@ -105,7 +103,7 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
       >
         {/* Title */}
         <div className="min-w-0">
-          <h3 className={`${fontClasses.heading} font-semibold text-[15px] truncate`} style={{ color: getBlackColor() }}>
+          <h3 className={`font-alexandria font-semibold text-[15px] truncate text-gray-neutral900`}>
             {shortTitle}
           </h3>
         </div>
@@ -125,8 +123,7 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
             ))}
             {extraCountLarge > 0 && (
               <div
-                className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
-                style={{ backgroundColor: getNeutral100Color(), color: getNeutral400Color() }}
+                className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400"
               >
                 +{extraCountLarge}
               </div>
@@ -146,8 +143,7 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
             ))}
             {extraCountMedium > 0 && (
               <div
-                className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
-                style={{ backgroundColor: getNeutral100Color(), color: getNeutral400Color() }}
+                className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400"
               >
                 +{extraCountMedium}
               </div>
@@ -163,7 +159,7 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
 
         {/* Posted Date (single line; hide below laptop-L for progressive collapse) */}
         <div className="flex-shrink-0 hidden laptop-L:block">
-          <span className={`${fontClasses.body} text-[10px] whitespace-nowrap`} style={{ color: getNeutral600Color() }}>Posted on: {postedDate}</span>
+          <span className={`font-inter text-[10px] whitespace-nowrap text-gray-neutral600`}>Posted on: {postedDate}</span>
         </div>
 
         {/* Action Buttons (flush right) */}

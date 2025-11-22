@@ -2,8 +2,6 @@
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticLocationTag, StaticSalaryTag } from '@/components/ui/TagItem';
-import { getBlackColor, getNeutral600Color, getNeutral100Color, getNeutral400Color } from '@/styles/colors';
-import { fontClasses } from '@/styles/fonts';
 import ManageJobActionButtons from '@/components/posts/ManageJobActionButtons';
 import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
@@ -142,13 +140,13 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
 
   return (
     <div 
-      className={`w-[420px] h-[250px] min-h-[250px] max-h-[250px] bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-300 cursor-pointer ${className}`}
+      className={`w-[420px] h-[250px] min-h-[250px] max-h-[250px] bg-white rounded-lg border border-gray-neutral200 shadow-sm p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300 cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
       {/* Header */}
       <div className="flex-shrink-0 mb-[16px]">
-        <h3 className={`${fontClasses.heading} font-semibold text-[20px] mb-2 truncate`} style={{ color: getBlackColor() }}>{title}</h3>
-        <p className={`${fontClasses.body} font-light text-[12px] line-clamp-1`} style={{ color: getNeutral600Color() }}>{description}</p>
+        <h3 className={`font-alexandria font-semibold text-[20px] mb-2 truncate text-gray-neutral900`}>{title}</h3>
+        <p className={`font-inter font-light text-[12px] line-clamp-1 text-gray-neutral600`}>{description}</p>
       </div>
 
       {/* Tags Section - Single row that adapts to fit */}
@@ -166,7 +164,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
           ))}
         </div>
         {/* Measure overflow indicator width */}
-        <div ref={overflowMeasureRef} className="fixed -top-[9999px] -left-[9999px] inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]" style={{ backgroundColor: getNeutral100Color(), color: getNeutral400Color() }}>
+        <div ref={overflowMeasureRef} className="fixed -top-[9999px] -left-[9999px] inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
           99+
         </div>
 
@@ -182,8 +180,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
           ))}
           {extraCount > 0 && (
             <div
-              className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
-              style={{ backgroundColor: getNeutral100Color(), color: getNeutral400Color() }}
+              className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400"
             >
               {extraCount}+
             </div>
@@ -201,7 +198,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
 
         {/* Posted Date */}
         <div className="flex justify-start">
-          <span className={`${fontClasses.body} font-medium text-[10px]`} style={{ color: getNeutral600Color() }}>Posted on: {postedDate}</span>
+          <span className={`font-inter font-medium text-[10px] text-gray-neutral600`}>Posted on: {postedDate}</span>
         </div>
         
         {/* Action Buttons */}

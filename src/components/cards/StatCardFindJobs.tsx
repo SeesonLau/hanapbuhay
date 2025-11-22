@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { getWhiteColor, getBlackColor, getNeutral600Color, getBlueColor, getGreenColor, getYellowColor, getRedColor } from "@/styles/colors";
-import { fontClasses } from "@/styles/fonts";
+// Refactored to Tailwind theme tokens
 
 type ColorVariant = "blue" | "green" | "yellow" | "red";
 
@@ -21,36 +20,32 @@ const iconPathForTitle = (title: string): string => {
   return "/icons/stats-posted.svg";
 };
 
-const variantBg: Record<ColorVariant, string> = {
-  blue: getBlueColor(),
-  green: getGreenColor(),
-  yellow: getYellowColor(),
-  red: getRedColor(),
+const variantBgClass: Record<ColorVariant, string> = {
+  blue: "bg-blue-default",
+  green: "bg-success-success400", // use success tint for green
+  yellow: "bg-warning-warning300",
+  red: "bg-error-error500",
 };
 
 export const StatCardFindJobs: React.FC<StatCardFindJobsProps> = ({ title, value, variant = "blue", className = "" }) => {
   const iconSrc = iconPathForTitle(title);
-  const iconBg = variantBg[variant];
+  const iconBgClass = variantBgClass[variant];
 
   return (
     <div
-      className={`flex items-center justify-between px-4 w-full h-[87px] rounded-[10px] bg-white shadow ${className}`}
-      style={{
-        boxShadow: `0 4px 16px ${getBlackColor(0.12)}`,
-      }}
+      className={`flex items-center justify-between px-4 w-full h-[87px] rounded-[10px] bg-white shadow-md ${className}`}
     >
       <div className="flex items-center gap-3">
         <div
-          className="flex items-center justify-center rounded-md"
-          style={{ width: 48, height: 48, backgroundColor: iconBg }}
+          className={`flex items-center justify-center rounded-md ${iconBgClass} w-12 h-12`}
         >
-          <img src={iconSrc} alt={`${title} icon`} style={{ width: 44, height: 44 }} />
+          <img src={iconSrc} alt={`${title} icon`} className="w-11 h-11" />
         </div>
-        <span className={`${fontClasses.body} text-sm`} style={{ color: getNeutral600Color() }}>
+        <span className={`font-inter text-sm text-gray-neutral600`}>
           {title}
         </span>
       </div>
-      <span className={`${fontClasses.heading} text-sm`} style={{ color: getNeutral600Color() }}>
+      <span className={`font-alexandria text-sm text-gray-neutral600`}>
         {value !== undefined && value !== null ? value : "—"}
       </span>
     </div>

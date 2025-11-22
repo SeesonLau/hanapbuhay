@@ -1,16 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  getWhiteColor,
-  getBlackColor,
-  getNeutral600Color,
-  getBlueColor,
-  getGreenColor,
-  getYellowColor,
-  getRedColor,
-} from "@/styles/colors";
-import { fontClasses } from "@/styles/fonts";
+// Refactored to Tailwind theme tokens
 
 type AppliedType = "total" | "pending" | "approved" | "rejected";
 
@@ -45,11 +36,11 @@ const variantForType: Record<AppliedType, ColorVariant> = {
   rejected: "red",
 };
 
-const variantBg: Record<ColorVariant, string> = {
-  blue: getBlueColor(),
-  green: getGreenColor(),
-  yellow: getYellowColor(),
-  red: getRedColor(),
+const variantBgClass: Record<ColorVariant, string> = {
+  blue: "bg-blue-default",
+  green: "bg-success-success400",
+  yellow: "bg-warning-warning300",
+  red: "bg-error-error500",
 };
 
 export const StatCardAppliedJobs: React.FC<StatCardAppliedJobsProps> = ({
@@ -61,11 +52,11 @@ export const StatCardAppliedJobs: React.FC<StatCardAppliedJobsProps> = ({
 }) => {
   const resolvedTitle = title || titleForType[type];
   const iconSrc = iconForType[type];
-  const iconBg = variantBg[variantForType[type]];
+  const iconBgClass = variantBgClass[variantForType[type]];
 
   return (
     <div
-      className={`flex items-center justify-between px-4 w-[340px] h-[130px] rounded-[10px] bg-white shadow transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] cursor-pointer ${className}`}
+      className={`flex items-center justify-between px-4 w-[340px] h-[130px] rounded-[10px] bg-white shadow-md transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-[2px] cursor-pointer ${className}`}
       role="button"
       tabIndex={0}
       aria-label={`Filter applied jobs: ${resolvedTitle}`}
@@ -79,16 +70,15 @@ export const StatCardAppliedJobs: React.FC<StatCardAppliedJobsProps> = ({
     >
       <div className="flex items-center gap-4">
         <div
-          className="flex items-center justify-center rounded-md"
-          style={{ width: 100, height: 100, backgroundColor: iconBg }}
+          className={`flex items-center justify-center rounded-md ${iconBgClass} w-[100px] h-[100px]`}
         >
-          <img src={iconSrc} alt={`${resolvedTitle} icon`} style={{ width: 80, height: 80 }} />
+          <img src={iconSrc} alt={`${resolvedTitle} icon`} className="w-20 h-20" />
         </div>
-        <span className={`${fontClasses.body} text-sm`} style={{ color: getNeutral600Color() }}>
+        <span className={`font-inter text-sm text-gray-neutral600`}>
           {resolvedTitle}
         </span>
       </div>
-      <span className={`${fontClasses.heading} text-sm`} style={{ color: getNeutral600Color() }}>
+      <span className={`font-alexandria text-sm text-gray-neutral600`}>
         {value !== undefined && value !== null ? value : "—"}
       </span>
     </div>
