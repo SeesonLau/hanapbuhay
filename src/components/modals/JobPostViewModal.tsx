@@ -227,9 +227,6 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
             )}
           </div>
         </div>
-
-        {/* Embedded ViewProfileModal */}
-        <ViewProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
       </div>
     </div>
   );

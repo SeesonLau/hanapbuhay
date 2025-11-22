@@ -7,6 +7,7 @@ import { ApplicationService } from '@/lib/services/applications-services';
 import { ProfileService } from '@/lib/services/profile-services';
 import { ReviewService } from '@/lib/services/reviews-services';
 import { ApplicationStatus } from '@/lib/constants/application-status';
+import ViewProfileModal from '../modals/ViewProfileModal';
 
 interface Applicant {
   userId: string;
@@ -26,6 +27,7 @@ interface AllApplicantsSectionProps {
   sortOrder?: SortOrder;
   searchQuery?: string;
   refreshTrigger?: number;
+  onStatusChange?: () => void;
 }
 
 export default function AllApplicantsSection({ 
@@ -36,6 +38,19 @@ export default function AllApplicantsSection({
 }: AllApplicantsSectionProps) {
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openProfileModal = (userId: string) => {
+    setSelectedUserId(userId);
+    setIsModalOpen(true);
+  };
+
+  const closeProfileModal = () => {
+    setSelectedUserId(null);
+    setIsModalOpen(false);
+  };  
 
   useEffect(() => {
     const fetchApplicants = async () => {
@@ -162,6 +177,7 @@ export default function AllApplicantsSection({
               dateApplied={applicant.dateApplied}
               status={applicant.status === 'Approved' ? 'Accepted' : 'Denied'}
               profilePicUrl={applicant.profilePicUrl}
+               onProfileClick={() => openProfileModal(applicant.userId)}
             />
           ))
         )}
@@ -171,6 +187,15 @@ export default function AllApplicantsSection({
         <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center">
           <HiArrowDown className="w-4 h-4 animate-bounce text-gray-neutral500" />
         </div>
+      )}
+
+      {selectedUserId && (
+        <ViewProfileModal
+          userId={selectedUserId}
+          isOpen={isModalOpen}
+          onClose={closeProfileModal}
+          userType="applicant"
+        />
       )}
     </div>
   );

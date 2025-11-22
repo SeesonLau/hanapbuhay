@@ -12,14 +12,15 @@ import { ApplicationStatus } from '@/lib/constants/application-status';
 import { toast } from 'react-hot-toast';
 
 interface ApplicantCardProps {
-  applicationId: string; 
+  applicationId: string;
   userId: string;
   name: string;
   rating: number;
   reviewCount: number;
   dateApplied: string;
   profilePicUrl?: string | null;
-  onStatusChange?: (status: ApplicationStatus) => void; 
+  onStatusChange?: (status: ApplicationStatus) => void;
+  onProfileClick?: () => void; // modal trigger
 }
 
 export default function ApplicantCard({
@@ -30,20 +31,18 @@ export default function ApplicantCard({
   reviewCount,
   dateApplied,
   profilePicUrl,
-  onStatusChange
+  onStatusChange,
+  onProfileClick
 }: ApplicantCardProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter(); 
+  const router = useRouter();
 
   const handleStatusChange = async (newStatus: ApplicationStatus) => {
     try {
       setIsLoading(true);
       await ApplicationService.updateApplicationStatus(applicationId, newStatus, userId);
 
-      // Trigger the parent callback to refresh both sections
-      if (onStatusChange) {
-        onStatusChange(newStatus);
-      }
+      if (onStatusChange) onStatusChange(newStatus);
     } catch (error) {
       console.error('Error updating application status:', error);
       toast.error('Failed to update application status.');
@@ -52,18 +51,16 @@ export default function ApplicantCard({
     }
   };
 
-  /*
-  const handleChatClick = () => {
-    router.push(`/chat/${userId}`);
-  }; */
-
-  const handleChatClick = () => {
+  const handleChatClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent opening modal when clicking chat
     router.push('/chat');
   };
 
-
   return (
-    <div className="bg-white rounded-xl shadow-md p-4 w-full max-w-[300px] aspect-[300/172] flex flex-col justify-between border border-gray-neutral200 transition-transform duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg hover:bg-gray-50">
+    <div
+      className="bg-white rounded-xl shadow-md p-4 w-full max-w-[300px] aspect-[300/172] flex flex-col justify-between border border-gray-neutral200 transition-transform duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg hover:bg-gray-50 cursor-pointer"
+      onClick={onProfileClick} // Entire card clickable
+    >
       {/* Profile + Chat */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
@@ -86,12 +83,12 @@ export default function ApplicantCard({
               value={rating}
               labelVariant="count"
               ratingCount={reviewCount}
-              size="sm"
+              size="vs"
             />
           </div>
         </div>
 
-        {/* ✅ Chat icon navigates to chat page */}
+        {/* Chat icon */}
         <Image
           src={ChatIcon}
           alt="Chat"
@@ -100,12 +97,12 @@ export default function ApplicantCard({
           onClick={handleChatClick}
           className="cursor-pointer hover:opacity-80 transition-opacity"
         />
-      </div>  
+      </div>
 
       {/* Date Applied */}
       <div className="font-inter text-mini text-gray-neutral300 mt-2 text-center">
         Applied On:{' '}
-        <span className="font-inter text-tiny  font-medium text-gray-neutral500">
+        <span className="font-inter text-tiny font-medium text-gray-neutral500">
           {dateApplied}
         </span>
       </div>
@@ -118,7 +115,7 @@ export default function ApplicantCard({
           variant="approve"
           size="approveDeny"
           disabled={isLoading}
-          onClick={() => handleStatusChange(ApplicationStatus.APPROVED)}
+          onClick={(e) => { e.stopPropagation(); handleStatusChange(ApplicationStatus.APPROVED); }}
         >
           Approve
         </Button>
@@ -126,7 +123,7 @@ export default function ApplicantCard({
           variant="deny"
           size="approveDeny"
           disabled={isLoading}
-          onClick={() => handleStatusChange(ApplicationStatus.REJECTED)}
+          onClick={(e) => { e.stopPropagation(); handleStatusChange(ApplicationStatus.REJECTED); }}
         >
           Deny
         </Button>

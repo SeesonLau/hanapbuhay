@@ -30,7 +30,7 @@ export default function ReviewCard({
     <div className={`
       flex flex-col
       px-5 py-3
-      w-full min-h-[81px] max-w-[290px]
+      w-full min-h-[81px]
       bg-white
       border border-gray-neutral300
       rounded-[10px]

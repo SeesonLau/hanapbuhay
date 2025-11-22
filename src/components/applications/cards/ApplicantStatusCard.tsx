@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
-import { FaUserCircle, FaStar } from 'react-icons/fa';
+import { FaUserCircle } from 'react-icons/fa';
 import Image from 'next/image';
-import ChatIcon from '@/assets/chat.svg';
 import StarRating from '@/components/ui/StarRating';
+import ChatIcon from '@/assets/chat.svg';
 import ReviewIcon from '@/assets/review.svg';
 
 interface ApplicantStatusCardProps {
@@ -16,36 +16,42 @@ interface ApplicantStatusCardProps {
   dateApplied: string;
   status: 'Accepted' | 'Denied' | 'Completed';
   profilePicUrl?: string | null;
+  onProfileClick?: () => void; // modal trigger
 }
 
 export default function ApplicantStatusCard({
+  userId,
   name,
   rating = 0,
   reviewCount = 0,
   dateApplied,
   status,
   profilePicUrl,
+  onProfileClick
 }: ApplicantStatusCardProps) {
   const router = useRouter();
 
-  /*
-  const handleChatClick = () => {
-    router.push(`/chat/${userId}`);
-  }; */
-
-  const handleChatClick = () => {
+  const handleChatClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
     router.push('/chat');
+  };
+
+  const handleReviewClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click
+    console.log('Review clicked for', userId);
   };
 
   const statusClasses =
     status === 'Accepted'
       ? 'text-[#71D852] border border-[#71D852]'
       : 'text-[#F87172] border border-[#F87172]';
-      
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-4 w-full max-w-[300px] aspect-[300/172] flex flex-col justify-between border border-gray-neutral200 hover:scale-[1.02] transition-transform duration-200 ease-in-out hover:shadow-lg hover:bg-gray-50">
-      {/* Profile + Chat */}
+    <div
+      className="bg-white rounded-xl shadow-md p-4 w-full max-w-[300px] aspect-[300/172] flex flex-col justify-between border border-gray-neutral200 transition-transform duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg hover:bg-gray-50 cursor-pointer"
+      onClick={onProfileClick} // entire card clickable
+    >
+      {/* Profile + Chat + Review */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           {profilePicUrl ? (
@@ -72,7 +78,6 @@ export default function ApplicantStatusCard({
           </div>
         </div>
 
-        {/* Chat + Review */}
         <div className="flex flex-col items-center gap-2">
           <Image
             src={ChatIcon}
@@ -88,10 +93,8 @@ export default function ApplicantStatusCard({
               alt="Review"
               width={20}
               height={20}
+              onClick={handleReviewClick}
               className="cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => {
-                console.log('Review clicked');
-              }}
             />
           )}
         </div>
