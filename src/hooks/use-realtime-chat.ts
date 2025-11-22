@@ -75,107 +75,133 @@ export function useRealtimeChat({ roomId, userId, username }: UseRealtimeChatPro
     loadMessages()
   }, [roomId, userId])
 
-  // Real-time subscription - FIXED VERSION
-  useEffect(() => {
-    if (!roomId || !userId) return
+  // Real-time subscription - COMPLETELY FIXED
+useEffect(() => {
+  if (!roomId || !userId) return
 
-    console.log('🔔 Setting up real-time subscription for room:', roomId)
+  console.log('🔔 Setting up real-time subscription for room:', roomId)
 
-    const channel = supabase
-      .channel(`room-${roomId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `room_id=eq.${roomId}`,
-        },
-        async (payload) => {
-          const newMsg = payload.new as any
-          console.log('📨 New message received via real-time:', newMsg)
+  const channel = supabase
+    .channel(`room-${roomId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `room_id=eq.${roomId}`,
+      },
+      async (payload) => {
+        const newMsg = payload.new as any
+        console.log('📨 New message received via real-time:', newMsg)
+        console.log('Current userId:', userId)
+        console.log('Message sender_id:', newMsg.sender_id)
+        
+        // Skip if this is our own message (already added optimistically)
+        if (newMsg.sender_id === userId) {
+          console.log('⏩ Skipping own message')
+          return
+        }
+
+        console.log('👤 Message is from another user, processing...')
+
+        // First, check if message already exists
+        let messageExists = false
+        setMessages(prev => {
+          messageExists = prev.some(msg => msg.id === newMsg.id)
+          if (messageExists) {
+            console.log('⚠️ Message already exists in state')
+          }
+          return prev // Don't modify state yet
+        })
+
+        if (messageExists) {
+          console.log('⏩ Skipping duplicate message')
+          return
+        }
+
+        console.log('✨ New message from other user, fetching profile...')
+
+        try {
+          // Fetch profile data
+          const profileData = await ProfileService.getNameProfilePic(newMsg.sender_id)
+          console.log('📋 Profile data fetched:', profileData)
           
-          // Skip if this is our own optimistic message (check by sender_id)
-          if (newMsg.sender_id === userId) {
-            console.log('⏩ Skipping own message')
-            return
+          const messageWithProfile: ChatMessage = {
+            id: newMsg.id,
+            room_id: newMsg.room_id,
+            sender_id: newMsg.sender_id,
+            content: newMsg.content,
+            created_at: newMsg.created_at,
+            is_read_by: newMsg.is_read_by || [],
+            sender_name: profileData?.name || 'Unknown',
+            sender_profile_pic_url: profileData?.profilePicUrl,
           }
 
-          try {
-            // Check if message already exists (prevents duplicates)
-            setMessages(prev => {
-              const exists = prev.some(msg => msg.id === newMsg.id)
-              if (exists) {
-                console.log('⏩ Message already exists, skipping')
-                return prev
-              }
+          console.log('✅ Adding message to state:', messageWithProfile)
+          
+          // Add the message to state
+          setMessages(prev => {
+            // Final duplicate check before adding
+            const stillExists = prev.some(msg => msg.id === newMsg.id)
+            if (stillExists) {
+              console.log('⚠️ Race condition: message appeared while fetching profile')
               return prev
-            })
-
-            const profileData = await ProfileService.getNameProfilePic(newMsg.sender_id)
-            
-            const messageWithProfile: ChatMessage = {
-              id: newMsg.id,
-              room_id: newMsg.room_id,
-              sender_id: newMsg.sender_id,
-              content: newMsg.content,
-              created_at: newMsg.created_at,
-              is_read_by: newMsg.is_read_by || [],
-              sender_name: profileData?.name || 'Unknown',
-              sender_profile_pic_url: profileData?.profilePicUrl,
             }
+            console.log('🎉 Message successfully added!')
+            return [...prev, messageWithProfile]
+          })
 
-            console.log('✅ Adding new message to state:', messageWithProfile)
-            
-            setMessages(prev => {
-              const exists = prev.some(msg => msg.id === messageWithProfile.id)
-              if (exists) return prev
-              return [...prev, messageWithProfile]
-            })
-
-            // Mark as read immediately
+          // Mark as read
+          try {
             await ChatService.markMessagesAsRead([newMsg.id], userId)
             console.log('📖 Marked message as read')
-
-          } catch (error) {
-            console.error('❌ Error processing new message:', error)
-            // Fallback: add message without profile data
-            const fallbackMessage: ChatMessage = {
-              id: newMsg.id,
-              room_id: newMsg.room_id,
-              sender_id: newMsg.sender_id,
-              content: newMsg.content,
-              created_at: newMsg.created_at,
-              is_read_by: newMsg.is_read_by || [],
-              sender_name: 'Unknown',
-              sender_profile_pic_url: null,
-            }
-            
-            setMessages(prev => {
-              const exists = prev.some(msg => msg.id === fallbackMessage.id)
-              if (exists) return prev
-              return [...prev, fallbackMessage]
-            })
+          } catch (readError) {
+            console.error('⚠️ Failed to mark as read:', readError)
           }
-        }
-      )
-      .subscribe((status) => {
-        console.log('📡 Subscription status:', status)
-        if (status === 'SUBSCRIBED') {
-          setIsConnected(true)
-          console.log('✅ Successfully subscribed to real-time updates')
-        } else {
-          setIsConnected(false)
-          console.log('❌ Subscription failed:', status)
-        }
-      })
 
-    return () => {
-      console.log('🧹 Cleaning up subscription for room:', roomId)
-      supabase.removeChannel(channel)
-      setIsConnected(false)
-    }
-  }, [roomId, userId])
+        } catch (error) {
+          console.error('❌ Error processing new message:', error)
+          
+          // Fallback: add message without profile data
+          const fallbackMessage: ChatMessage = {
+            id: newMsg.id,
+            room_id: newMsg.room_id,
+            sender_id: newMsg.sender_id,
+            content: newMsg.content,
+            created_at: newMsg.created_at,
+            is_read_by: newMsg.is_read_by || [],
+            sender_name: 'Unknown',
+            sender_profile_pic_url: null,
+          }
+          
+          console.log('⚠️ Adding fallback message:', fallbackMessage)
+          
+          setMessages(prev => {
+            const exists = prev.some(msg => msg.id === fallbackMessage.id)
+            if (exists) return prev
+            return [...prev, fallbackMessage]
+          })
+        }
+      }
+    )
+    .subscribe((status) => {
+      console.log('📡 Subscription status:', status)
+      if (status === 'SUBSCRIBED') {
+        setIsConnected(true)
+        console.log('✅ Successfully subscribed to real-time updates')
+      } else {
+        setIsConnected(false)
+        console.log('❌ Subscription status:', status)
+      }
+    })
+
+  return () => {
+    console.log('🧹 Cleaning up subscription for room:', roomId)
+    supabase.removeChannel(channel)
+    setIsConnected(false)
+  }
+}, [roomId, userId])
 
   const sendMessage = useCallback(
     async (content: string) => {

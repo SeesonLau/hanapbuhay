@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { ChatMessage } from '@/lib/models/chat'
 import { Input } from '@/components/chat/input'
 import Button from '@/components/ui/Button'
@@ -52,8 +52,12 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
     username
   })
 
-  const { containerRef } = useChatScroll()
-
+  const { containerRef, scrollToBottom } = useChatScroll([messages])
+  useEffect(() => {
+    if (!isLoading && messages.length > 0) {
+      scrollToBottom('instant')
+    }
+  }, [isLoading, messages.length, scrollToBottom])
   // Format message time
   const formatMessageTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -221,7 +225,7 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
               </AvatarFallback>
             </Avatar>
           </div>
-        )}
+        )}  
 
         {/* Empty space for alignment for current user non-first messages */}
         {isCurrentUser && !isFirstInSequence && (

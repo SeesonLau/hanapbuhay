@@ -17,6 +17,11 @@ export const createServerSupabaseClient = () => {
       persistSession: false,
       autoRefreshToken: false,
       detectSessionInUrl: false
+    },
+    realtime: {
+    params: {
+      eventsPerSecond: 10
     }
+  }
   });
 };

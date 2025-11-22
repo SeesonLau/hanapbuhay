@@ -7,14 +7,14 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 // Add detailed logging
-console.log('🔧 Supabase Config Check:', {
+/* console.log('🔧 Supabase Config Check:', {
   hasUrl: !!supabaseUrl,
   hasKey: !!supabaseAnonKey,
   urlLength: supabaseUrl?.length,
   keyLength: supabaseAnonKey?.length,
   urlStart: supabaseUrl?.substring(0, 20) + '...',
   keyStart: supabaseAnonKey?.substring(0, 10) + '...'
-});
+}); */
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('❌ Missing Supabase environment variables');
@@ -28,6 +28,11 @@ export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
   global: {
     // This helps with schema cache issues
     fetch: (...args) => fetch(...args),
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
   }
 });
 

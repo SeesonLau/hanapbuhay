@@ -11,6 +11,7 @@ import { getJobTypeOptions, SubTypes } from "@/lib/constants/job-types";
 import type { JobType } from "@/lib/constants/job-types";
 import { GenderTag, ExperienceLevelTag, JobTypeTag } from "@/components/ui/TagItem";
 import JobTypeGrid from "@/components/ui/JobTypeGrid";
+import { getProvinces, getCitiesByProvince } from "@/lib/constants/philippines-locations";
 
 export interface JobPostAddFormData {
   title: string;
@@ -264,13 +265,18 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
                 placeholder="Select country"
               />
               <SelectBox 
-                options={[{ value: "Cebu", label: "Cebu" }, { value: "Metro Manila", label: "Metro Manila" }]} 
+                options={getProvinces().map((prov) => ({ value: prov, label: prov }))}
                 value={province}
-                onChange={(e) => setProvince(e.target.value)}
+                onChange={(e) => {
+                  setProvince(e.target.value);
+                  // Reset city when province changes
+                  const cities = getCitiesByProvince(e.target.value);
+                  setCity(cities.length > 0 ? cities[0] : "");
+                }}
                 placeholder="Select province"
               />
               <SelectBox 
-                options={[{ value: "Cebu City", label: "Cebu City" }, { value: "Makati", label: "Makati" }]} 
+                options={getCitiesByProvince(province).map((city_name) => ({ value: city_name, label: city_name }))}
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="Select city or municipality"
