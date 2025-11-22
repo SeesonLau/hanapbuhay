@@ -1,3 +1,4 @@
+// src/app/findJobs/page.tsx
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
@@ -192,7 +193,7 @@ export default function FindJobsPage() {
         </aside>
 
         {/* Filter Section - Desktop Only (rightmost, no margin, full height) */}
-        <aside className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-20 border-l border-gray-200 flex flex-col">
+        <aside className="laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-20 border-l border-gray-200 flex flex-col">
           {/* Sort & View Controls */}
           <div className="flex-shrink-0 bg-white  border-b border-gray-200 px-3 py-2 z-10">
             <div className="flex items-center justify-between gap-3">
