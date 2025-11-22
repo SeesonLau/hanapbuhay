@@ -15,12 +15,12 @@ const FilterButton: React.FC<FilterButtonProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`lg:hidden flex items-center gap-2 px-3 py-2 bg-white border border-gray-neutral300 rounded-lg hover:border-gray-neutral400 transition-all duration-200 group ${className}`}
+      className={`lg:hidden flex items-center gap-1.5 mobile-M:gap-2 px-2 mobile-M:px-3 py-1.5 mobile-M:py-2 bg-white border border-gray-neutral300 rounded-lg hover:border-gray-neutral400 transition-all duration-200 group ${className}`}
       aria-label="Open filters"
     >
       {/* Filter Icon */}
       <div className="relative">
-        <RiFilterLine className="h-4 w-4 text-gray-neutral700 group-hover:text-primary-primary500 transition-colors" />
+        <RiFilterLine className="h-3.5 w-3.5 mobile-M:h-4 mobile-M:w-4 text-gray-neutral700 group-hover:text-primary-primary500 transition-colors" />
         
         {/* Active filter count badge */}
         {filterCount > 0 && (
@@ -31,7 +31,7 @@ const FilterButton: React.FC<FilterButtonProps> = ({
       </div>
 
       {/* Label */}
-      <span className="font-inter font-medium text-small text-gray-neutral700 group-hover:text-primary-primary500 transition-colors">
+      <span className="font-inter font-medium text-tiny mobile-M:text-small text-gray-neutral700 group-hover:text-primary-primary500 transition-colors">
         Filter
       </span>
     </button>

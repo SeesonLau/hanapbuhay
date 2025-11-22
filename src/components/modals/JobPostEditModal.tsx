@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
-import { getWhiteColor, getNeutral300Color, getNeutral600Color, getBlackColor, getPrimary500Color, getNeutral100Color } from "@/styles/colors";
-import { fontClasses } from "@/styles/fonts";
 import TextBox from "@/components/ui/TextBox";
 import TextArea from "@/components/ui/TextArea";
 import SelectBox from "@/components/ui/SelectBox";
@@ -167,33 +165,26 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
     onClose();
   };
 
-  const containerStyle: React.CSSProperties = {
-    backgroundColor: getWhiteColor(),
-    borderColor: getNeutral300Color(),
-    color: getNeutral600Color(),
-  };
+  // Using Tailwind theme classes for colors and fonts
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
       onClick={onClose}
     >
       <div
-        className={`${fontClasses.body} w-[700px] max-w-[95vw] max-h-[90vh] overflow-y-auto scrollbar-hide rounded-2xl shadow-lg border`}
-        style={containerStyle}
+        className={`font-inter w-[700px] max-w-[95vw] max-h-[90vh] overflow-y-auto scrollbar-hide rounded-2xl shadow-lg border bg-white border-gray-neutral300 text-gray-neutral600`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="px-[50px] pt-6 pb-3 relative">
-          <h2 className={`${fontClasses.heading} text-[24px] font-semibold text-center w-full`} style={{ color: getBlackColor() }}>
+          <h2 className={`font-alexandria text-[24px] font-semibold text-center w-full text-gray-neutral900`}>
             Edit Job Post
           </h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-2xl leading-none px-2 absolute right-[50px] top-6"
-            style={{ color: getNeutral600Color() }}
+            className="text-2xl leading-none px-2 absolute right-[50px] top-6 text-gray-neutral600"
           >
             ×
           </button>
@@ -209,17 +200,16 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
           />
 
           {/* Tags Section */}
-          <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Tags</div>
-          <div className="rounded-xl border p-4" style={{ borderColor: getNeutral300Color() }}>
+          <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Tags</div>
+          <div className="rounded-xl border p-4 border-gray-neutral300">
             {/* Selected Tags Summary */}
             <div className="mb-3">
-              <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Selected Tags</div>
+              <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Selected Tags</div>
               <div
-                className="rounded-lg border px-3 py-2 min-h-[34px] flex flex-wrap gap-2 items-center"
-                style={{ borderColor: getNeutral300Color() }}
+                className="rounded-lg border px-3 py-2 min-h-[34px] flex flex-wrap gap-2 items-center border-gray-neutral300"
               >
                 {selectedSubTypes.length === 0 && selectedExperience.length === 0 && selectedGenders.length === 0 ? (
-                  <span className="text-[12px]" style={{ color: getNeutral600Color() }}>Selected tags</span>
+                  <span className="text-[12px] text-gray-neutral600">Selected tags</span>
                 ) : (
                   <>
                     {selectedSubTypes.map((label) => (
@@ -252,7 +242,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
             </div>
             {/* Job Type */}
             <div className="mb-3">
-              <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Job Type</div>
+              <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Job Type</div>
               <JobTypeGrid
                 options={jobTypeOptions}
                 selected={effectiveJobTypes.slice(0, 1)}
@@ -273,10 +263,10 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
               {/* Subtypes now render inside the selected tiles above */}
             </div>
 
-             <div className="border-t my-4" style={{ borderColor: getNeutral300Color() }} />
+             <div className="border-t my-4 border-gray-neutral300" />
              {/* Experience Level */}
              <div className="mb-3">
-               <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Experience Level</div>
+               <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Experience Level</div>
                <div className="flex flex-wrap gap-2">
                  {experienceOptions.map((opt) => (
                    <ExperienceLevelTag
@@ -289,11 +279,11 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                </div>
              </div>
 
-             <div className="border-t my-4" style={{ borderColor: getNeutral300Color() }} />
+             <div className="border-t my-4 border-gray-neutral300" />
 
              {/* Preferred Gender */}
              <div>
-               <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Preferred Gender</div>
+               <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Preferred Gender</div>
                <div className="flex flex-wrap gap-2">
                  {genderOptions.map((opt) => (
                    <GenderTag
@@ -309,7 +299,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
 
           {/* Location */}
           <div>
-            <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Location</div>
+            <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Location</div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <SelectBox 
                 options={[{ value: "Philippines", label: "Philippines" }]} 
@@ -341,7 +331,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
 
           {/* Salary Rate */}
           <div>
-            <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Salary Rate</div>
+            <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Salary Rate</div>
             <div className="flex items-center gap-3">
               <TextBox 
                 type="number" 
@@ -366,7 +356,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
 
           {/* About this role */}
           <div>
-            <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>About this role</div>
+            <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">About this role</div>
             <TextArea 
               placeholder="Description"
               value={about}
@@ -377,7 +367,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
 
           {/* Requirements */}
           <div>
-            <div className="text-[14px] font-semibold mb-2" style={{ color: getBlackColor() }}>Requirements</div>
+            <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Requirements</div>
             <TextArea 
               placeholder="Press Enter to add a bullet; list requirements, skills, and experience"
               value={qualifications}

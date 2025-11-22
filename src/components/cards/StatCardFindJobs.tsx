@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { getWhiteColor, getBlackColor, getNeutral600Color, getBlueColor, getGreenColor, getYellowColor, getRedColor } from "@/styles/colors";
-import { fontClasses } from "@/styles/fonts";
+// Refactored to Tailwind theme tokens
 
 type ColorVariant = "blue" | "green" | "yellow" | "red";
 
@@ -21,36 +20,54 @@ const iconPathForTitle = (title: string): string => {
   return "/icons/stats-posted.svg";
 };
 
-const variantBg: Record<ColorVariant, string> = {
-  blue: getBlueColor(),
-  green: getGreenColor(),
-  yellow: getYellowColor(),
-  red: getRedColor(),
+const variantBgClass: Record<ColorVariant, string> = {
+  blue: "bg-blue-default",
+  green: "bg-success-success400", // use success tint for green
+  yellow: "bg-warning-warning300",
+  red: "bg-error-error500",
 };
 
 export const StatCardFindJobs: React.FC<StatCardFindJobsProps> = ({ title, value, variant = "blue", className = "" }) => {
   const iconSrc = iconPathForTitle(title);
-  const iconBg = variantBg[variant];
+  const iconBgClass = variantBgClass[variant];
 
   return (
     <div
-      className={`flex items-center justify-between px-4 w-full h-[87px] rounded-[10px] bg-white shadow ${className}`}
+      className={`flex flex-col items-center justify-center gap-0.5 mobile-M:gap-1 tablet:gap-1.5 laptop:gap-1 laptop-L:gap-1.5 p-2 mobile-M:p-3 tablet:p-4 laptop:p-3 laptop-L:p-3.5 w-full laptop:h-full rounded-lg tablet:rounded-xl bg-white shadow-md ${className}`}
       style={{
-        boxShadow: `0 4px 16px ${getBlackColor(0.12)}`,
+        boxShadow: `0 4px 16px rgba(0, 0, 0, 0.12)`,
       }}
     >
-      <div className="flex items-center gap-3">
-        <div
-          className="flex items-center justify-center rounded-md"
-          style={{ width: 48, height: 48, backgroundColor: iconBg }}
-        >
-          <img src={iconSrc} alt={`${title} icon`} style={{ width: 44, height: 44 }} />
-        </div>
-        <span className={`${fontClasses.body} text-sm`} style={{ color: getNeutral600Color() }}>
-          {title}
-        </span>
+      {/* Icon */}
+      <div
+        className={`flex items-center justify-center rounded-md tablet:rounded-lg flex-shrink-0 ${iconBgClass}`}
+        style={{ 
+          width: 'clamp(32px, 8vw, 40px)', 
+          height: 'clamp(32px, 8vw, 40px)', 
+        }}
+      >
+        <img 
+          src={iconSrc} 
+          alt={`${title} icon`} 
+          className="object-contain"
+          style={{ 
+            width: 'clamp(20px, 6vw, 24px)', 
+            height: 'clamp(20px, 6vw, 24px)' 
+          }} 
+        />
       </div>
-      <span className={`${fontClasses.heading} text-sm`} style={{ color: getNeutral600Color() }}>
+      
+      {/* Title */}
+      <span 
+        className="font-inter text-mini mobile-M:text-tiny tablet:text-small laptop:text-mini laptop-L:text-tiny font-medium text-center leading-tight text-gray-neutral600 line-clamp-1"
+      >
+        {title}
+      </span>
+      
+      {/* Value */}
+      <span 
+        className="font-inter text-tiny mobile-M:text-small tablet:text-body laptop:text-small laptop-L:text-body font-bold text-center text-gray-neutral600 leading-none"
+      >
         {value !== undefined && value !== null ? value : "—"}
       </span>
     </div>
