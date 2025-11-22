@@ -28,6 +28,11 @@ export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
   global: {
     // This helps with schema cache issues
     fetch: (...args) => fetch(...args),
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
   }
 });
 
