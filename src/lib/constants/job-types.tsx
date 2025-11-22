@@ -18,7 +18,7 @@ export const SubTypes: Record<JobType, string[]> = {
     'Coconut Climber',
     'Livestock Tender',
     'Market Porter (Kargador)',
-    'Other'
+    'Agriculture-Others'
   ],
   [JobType.DIGITAL]: [
     'Graphic Designer',
@@ -26,7 +26,7 @@ export const SubTypes: Record<JobType, string[]> = {
     'Social Media Manager',
     'Online Tutor',
     'Content Creator',
-    'Other'
+    'Digital-Others'
   ],
   [JobType.IT]: [
     'Programmer',
@@ -34,7 +34,7 @@ export const SubTypes: Record<JobType, string[]> = {
     'Mobile App Builder',
     'UI/UX Designer',
     'Technician',
-    'Other'
+    'IT-Others'
   ],
   [JobType.CREATIVE]: [
     'Street Performer',
@@ -45,7 +45,7 @@ export const SubTypes: Record<JobType, string[]> = {
     'Videographer',
     'Photographer',
     'Artist',
-    'Other'
+    'Creative-Others'
   ],
   [JobType.CONSTRUCTION]: [
     'Mason',
@@ -55,7 +55,7 @@ export const SubTypes: Record<JobType, string[]> = {
     'Roof Installer',
     'Demolition Worker',
     'Scaffolder',
-    'Other'
+    'Construction-Others'
   ],
   [JobType.SERVICE]: [
     'Waiter',
@@ -68,7 +68,7 @@ export const SubTypes: Record<JobType, string[]> = {
     'Street Food Seller',
     'Parking Attendant',
     'Baby Sitter',
-    'Other'
+    'Service-Others'
   ],
   [JobType.SKILLED]: [
     'Carpenter',
@@ -78,7 +78,7 @@ export const SubTypes: Record<JobType, string[]> = {
     'Plumber',
     'Welder',
     'Shoemaker/Cobbler',
-    'Other'
+    'Skilled-Others'
   ],
   [JobType.OTHER]: []
 };

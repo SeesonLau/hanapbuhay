@@ -434,3 +434,57 @@ export const parseLocation = (
     city: parts.length > 1 ? parts[1].trim() : undefined,
   };
 };
+
+/**
+ * Find province name by a given city/municipality name
+ */
+export const getProvinceByCity = (cityName: string): string | undefined => {
+  const target = cityName.trim().toLowerCase();
+  for (const prov of PHILIPPINES_LOCATIONS) {
+    if (prov.cities.some((c) => c.name.toLowerCase() === target)) {
+      return prov.name;
+    }
+  }
+  return undefined;
+};
+
+/**
+ * Parse a full location string to province, city, and optional address.
+ * Accepts formats:
+ * - "Province > City > Address"
+ * - "Province > City, Address"
+ * - "City" (will infer province when possible)
+ */
+export const parseLocationDetailed = (
+  locationString: string
+): { province?: string; city?: string; address?: string } => {
+  const raw = (locationString ?? "").trim();
+  if (!raw) return {};
+  const parts = raw.split(">").map((p) => p.trim()).filter(Boolean);
+  let province = parts[0];
+  let city = parts[1];
+  let address: string | undefined;
+
+  if (parts.length >= 3) {
+    address = parts.slice(2).join(" > ");
+  } else if (city && city.includes(",")) {
+    const [c, ...rest] = city.split(",");
+    city = c.trim();
+    address = rest.join(",").trim() || undefined;
+  } else if (!city && province && province.includes(",")) {
+    const [provMaybe, ...rest] = province.split(",");
+    province = provMaybe.trim();
+    address = rest.join(",").trim() || undefined;
+  }
+
+  // If only a city was provided originally, infer province
+  if (!city && province) {
+    const maybeProv = getProvinceByCity(province);
+    if (maybeProv) {
+      city = province;
+      province = maybeProv;
+    }
+  }
+
+  return { province, city, address };
+};

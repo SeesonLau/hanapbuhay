@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { parseLocationDetailed } from '@/lib/constants/philippines-locations';
 // Icons served from public/icons
 
 // =====================
@@ -48,16 +49,23 @@ interface StaticLocationTagProps {
 }
 
 export const StaticLocationTag: React.FC<StaticLocationTagProps> = ({ label, className = '' }) => {
+  const { province, city, address } = parseLocationDetailed(label || '');
+  const hasAddress = !!address;
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[25px] rounded-[5px] font-alexandria font-normal text-[10px] text-black bg-gray-default ${className}`}
+      className={`inline-flex items-center px-3 h-[25px] rounded-[5px] font-alexandria font-normal text-[10px] text-black bg-gray-default min-w-0 max-w-full ${className}`}
     >
-      <img 
-        src="/icons/Location.svg" 
-        alt="Location icon" 
-        className="w-[15px] h-[15px] mr-2" 
-      />
-      {label}
+      <img src="/icons/Location.svg" alt="Location" className="w-[15px] h-[15px] mr-2" />
+      <div className="flex items-center min-w-0">
+        {province && <span className="flex-shrink-0">{province}</span>}
+        {city && <span className="flex-shrink-0">{province ? ', ' : ''}{city}</span>}
+        {hasAddress && (
+          <span className="truncate">{(province || city) ? ', ' : ''}{address}</span>
+        )}
+        {!province && !city && !hasAddress && (
+          <span className="truncate">{label}</span>
+        )}
+      </div>
     </div>
   );
 };
@@ -185,7 +193,7 @@ export const JobTypeTag: React.FC<JobTypeTagProps> = ({
 
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] cursor-pointer ${isSelected ? 'bg-tag-jobText text-white' : 'bg-tag-jobUnselectedBg text-tag-jobText'}`}
+      className={`inline-flex items-center justify-center px-3 h-auto min-h-[17px] rounded-[5px] text-[10px] leading-[14px] cursor-pointer whitespace-normal break-words ${isSelected ? 'bg-tag-jobText text-white' : 'bg-tag-jobUnselectedBg text-tag-jobText'}`}
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleClick(); }}
     >
       {categoryIcon && (
@@ -200,7 +208,7 @@ export const JobTypeTag: React.FC<JobTypeTagProps> = ({
           }}
         />
       )}
-      <span>{label}</span>
+      <span className="whitespace-normal break-words">{label}</span>
       {isSelected && (
         <span 
           className="ml-1 cursor-pointer" 

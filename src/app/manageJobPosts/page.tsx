@@ -102,7 +102,7 @@ export default function ManageJobPostsPage() {
         const combinedDescription = qualifications
           ? `${about}\n\n[requirements]\n${qualifications}`
           : about;
-        const payload: Partial<Post> = {
+          const payload: Partial<Post> = {
           title: data.title ?? selectedPost.title,
           description: combinedDescription,
           // Price: try to parse numeric from string
@@ -113,7 +113,17 @@ export default function ManageJobPostsPage() {
             ...((data.experienceLevels ?? []) as string[]),
             ...((data.genders ?? []) as string[]),
           ])),
-          location: data.city ?? selectedPost.location,
+          location: (
+            data.province || data.city || data.address
+          )
+            ? [
+                data.province ?? '',
+                data.city ?? '',
+                (data.address ?? '').trim(),
+              ]
+                .filter(Boolean)
+                .join(' > ')
+            : selectedPost.location,
         };
 
         await updatePost?.(selectedPost.postId, payload);
@@ -137,7 +147,13 @@ export default function ManageJobPostsPage() {
               ...((data.experienceLevels ?? []) as string[]),
               ...((data.genders ?? []) as string[]),
             ])),
-            location: data.city ?? (data.province ?? ''),
+            location: [
+              data.province ?? '',
+              data.city ?? '',
+              (data.address ?? '').trim(),
+            ]
+              .filter(Boolean)
+              .join(' > '),
             imageUrl: '',
             createdBy: userId as string,
             updatedBy: userId as string,

@@ -76,7 +76,7 @@ const PostsSection: React.FC<Props> = ({
         <div className="w-full">
           <div className={`${
             isManage
-              ? 'w-full grid grid-cols-1 mobile-L:grid-cols-2 tablet:grid-cols-3 laptop-L:grid-cols-4 gap-5'
+              ? 'w-full grid grid-cols-1 tablet:grid-cols-2 laptop:grid-cols-3 laptop-L:grid-cols-4 gap-5'
               : 'max-w-[1648px] mx-auto flex flex-wrap items-start justify-start gap-4'
           }`}>
             {jobs.map((job) => (
