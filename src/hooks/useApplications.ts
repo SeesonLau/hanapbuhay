@@ -4,11 +4,28 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { ApplicationService } from '@/lib/services/applications-services';
 import type { AppliedJob } from '@/components/cards/AppliedJobCardList';
-import { supabase } from '@/lib/services/supabase/client';
+import { Gender } from '@/lib/constants/gender';
+import { ExperienceLevel } from '@/lib/constants/experience-level';
+import { JobType, SubTypes } from '@/lib/constants/job-types';
 
 interface UseApplicationsOptions {
   skip?: boolean;
   pageSize?: number;
+}
+
+function formatPeso(value: any) {
+  const n = Number(value ?? 0);
+  return `₱${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function formatAppliedDate(iso?: string) {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString("en-PH", { month: "long", day: "numeric", year: "numeric" });
+  } catch {
+    return iso;
+  }
 }
 
 export function useApplications(userId?: string | null, options: UseApplicationsOptions = {}) {
@@ -30,32 +47,60 @@ export function useApplications(userId?: string | null, options: UseApplications
       const res = await ApplicationService.getApplicationsByUserId(userId, { page: 1, pageSize: options.pageSize ?? 50 });
       const apps = res.applications || [];
 
+      console.log('Raw applications data from API:', apps);
+
       const mapped = apps.map((a: any) => {
         const post = a.posts ?? a.post ?? {};
         const appliedOn = a.createdAt ?? a.created_at ?? '';
         
-        // Handle tags properly - ensure it's always an array
-        let tags: string[] = [];
-        if (post.subType) {
-          tags = Array.isArray(post.subType) ? post.subType : [post.subType];
-        } else if (post.type) {
-          tags = Array.isArray(post.type) ? post.type : [post.type];
-        }
+        console.log('Processing application:', {
+          title: post.title,
+          type: post.type,
+          subType: post.subType,
+          rawPost: post
+        });
+        
+        // Extract subType array from post (same logic as useJobPosts)
+        const sub = post.subType || [];
+        
+        console.log('Extracted subType array:', sub);
+        
+        // Extract gender tags
+        const genderTags = Array.from(new Set(
+          sub.filter((s: string) => Object.values(Gender).includes(s as Gender))
+        ));
+        
+        // Extract experience tags
+        const experienceTags = Array.from(new Set(
+          sub.filter((s: string) => Object.values(ExperienceLevel).includes(s as ExperienceLevel))
+        ));
+        
+        // Extract job type tags (including subtypes)
+        const allJobSubTypes = Object.values(SubTypes).flat();
+        const jobSubtypeTags = Array.from(new Set(
+          sub.filter((s: string) => allJobSubTypes.includes(s))
+             .filter((s: string) => !genderTags.includes(s) && !experienceTags.includes(s))
+        ));
+        const jobTypeTags = Array.from(new Set([post.type, ...jobSubtypeTags].filter(Boolean)));
+        
+        console.log('Extracted tags:', { genderTags, experienceTags, jobTypeTags });
         
         return {
           id: a.applicationId ?? a.id,
           title: post.title ?? 'Untitled',
           description: post.description ?? '',
           location: post.location ?? '',
-          salary: post.price ?? 0,
-          salaryType: 'monthly' as const,
-          appliedOn,
+          salary: formatPeso(post.price),
+          salaryPeriod: 'month',
+          appliedOn: formatAppliedDate(appliedOn),
           status: a.status ?? 'pending',
-          tags,
-          genderPreference: post.preferredGender ?? undefined,
+          genderTags,
+          experienceTags,
+          jobTypeTags,
         } as AppliedJob;
       });
 
+      console.log('Final mapped applications:', mapped);
       setApplications(mapped);
     } catch (err) {
       console.error('Failed to load applications', err);

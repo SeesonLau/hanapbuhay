@@ -14,6 +14,9 @@ import FilterModal from '@/components/ui/FilterModal';
 import { ApplicationStatus } from '@/components/cards/AppliedJobCardList';
 import useApplications from '@/hooks/useApplications';
 import ApplicationsSection from '@/components/applications/ApplicationsSection';
+import { Gender } from '@/lib/constants/gender';
+import { ExperienceLevel } from '@/lib/constants/experience-level';
+import { JobType, SubTypes } from '@/lib/constants/job-types';
 
 export default function AppliedJobsPage() {
   const [user, setUser] = useState<any | null>(null);
@@ -71,10 +74,18 @@ export default function AppliedJobsPage() {
   // Count active filters
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    count += Object.values(activeFilters.jobTypes).filter(Boolean).length;
+    
+    // Count job types (each selected subtype counts as 1)
+    Object.values(activeFilters.jobTypes).forEach((subtypes) => {
+      if (Array.isArray(subtypes)) {
+        count += subtypes.length;
+      }
+    });
+    
     count += Object.values(activeFilters.salaryRange).filter(Boolean).length;
     count += Object.values(activeFilters.experienceLevel).filter(Boolean).length;
     count += Object.values(activeFilters.preferredGender).filter(Boolean).length;
+    
     return count;
   }, [activeFilters]);
 
@@ -98,7 +109,6 @@ export default function AppliedJobsPage() {
 
   const handleApplyFilters = (filters: FilterOptions) => {
     setActiveFilters(filters);
-    // TODO: Apply filters to the applications list
   };
 
   const handleClearFilters = () => {
@@ -133,10 +143,130 @@ export default function AppliedJobsPage() {
   const filteredAndSortedApplications = useMemo(() => {
     if (!applications) return [];
 
-    // Filter by status
-    let filtered = statusFilter 
-      ? applications.filter(app => app.status === statusFilter)
-      : applications;
+    let filtered = applications;
+
+    // Filter by status (from stats section)
+    if (statusFilter) {
+      filtered = filtered.filter(app => app.status === statusFilter);
+    }
+
+    // Apply job type filters
+    const { jobTypes, salaryRange, experienceLevel, preferredGender } = activeFilters;
+
+    // Job Type filtering
+    const selectedJobTypeSubtypes: string[] = [];
+    const selectedJobTypes: string[] = [];
+    
+    Object.entries(jobTypes).forEach(([jobType, subtypes]) => {
+      if (subtypes && subtypes.length > 0) {
+        subtypes.forEach((subtype: string) => {
+          if (subtype === 'Other') {
+            selectedJobTypes.push(jobType);
+          } else {
+            selectedJobTypeSubtypes.push(subtype);
+          }
+        });
+      }
+    });
+
+    console.log('Job Type Filter Debug:', {
+      selectedJobTypes,
+      selectedJobTypeSubtypes,
+      sampleAppJobTypeTags: filtered[0]?.jobTypeTags
+    });
+
+    if (selectedJobTypeSubtypes.length > 0 || selectedJobTypes.length > 0) {
+      filtered = filtered.filter(app => {
+        const jobTypeTags = app.jobTypeTags || [];
+        
+        console.log('Checking application:', {
+          title: app.title,
+          jobTypeTags,
+          selectedJobTypeSubtypes,
+          selectedJobTypes
+        });
+        
+        // If we have specific subtypes selected, check if any match
+        let hasSubtype = false;
+        if (selectedJobTypeSubtypes.length > 0) {
+          hasSubtype = selectedJobTypeSubtypes.some(subtype => jobTypeTags.includes(subtype));
+        }
+        
+        // If we have main job types selected (from "Other"), check if any match
+        let hasJobType = false;
+        if (selectedJobTypes.length > 0) {
+          hasJobType = selectedJobTypes.some(type => jobTypeTags.includes(type));
+        }
+        
+        // Include if either condition is met (OR logic)
+        const shouldInclude = 
+          (selectedJobTypeSubtypes.length > 0 && hasSubtype) ||
+          (selectedJobTypes.length > 0 && hasJobType);
+        
+        console.log('  -> hasSubtype:', hasSubtype, 'hasJobType:', hasJobType, 'shouldInclude:', shouldInclude);
+        
+        return shouldInclude;
+      });
+    }
+
+    // Salary Range filtering
+    const selectedSalaryRanges = Object.entries(salaryRange)
+      .filter(([_, v]) => v)
+      .map(([k]) => k);
+
+    if (selectedSalaryRanges.length > 0) {
+      filtered = filtered.filter(app => {
+        // Extract numeric value from formatted salary string (e.g., "₱50,000.00")
+        const salaryStr = app.salary || '';
+        const numericSalary = parseFloat(salaryStr.replace(/[₱,]/g, ''));
+        
+        return selectedSalaryRanges.some(range => {
+          if (range === 'lessThan5000') {
+            return numericSalary < 5000;
+          } else if (range === 'range10to20') {
+            return numericSalary >= 10000 && numericSalary <= 20000;
+          } else if (range === 'moreThan20000') {
+            return numericSalary > 20000;
+          }
+          return true;
+        });
+      });
+    }
+
+    // Experience Level filtering
+    const selectedExperienceLevels = Object.entries(experienceLevel)
+      .filter(([_, v]) => v)
+      .map(([k]) => {
+        if (k === 'entryLevel') return ExperienceLevel.ENTRY;
+        if (k === 'intermediate') return ExperienceLevel.INTERMEDIATE;
+        if (k === 'professional') return ExperienceLevel.EXPERT;
+        return k;
+      });
+
+    if (selectedExperienceLevels.length > 0) {
+      filtered = filtered.filter(app => {
+        const experienceTags = app.experienceTags || [];
+        return selectedExperienceLevels.some(level => experienceTags.includes(level));
+      });
+    }
+
+    // Preferred Gender filtering
+    const selectedGenders = Object.entries(preferredGender)
+      .filter(([_, v]) => v)
+      .map(([k]) => {
+        if (k === 'any') return Gender.ANY;
+        if (k === 'male') return Gender.MALE;
+        if (k === 'female') return Gender.FEMALE;
+        if (k === 'others') return Gender.OTHERS;
+        return k;
+      });
+
+    if (selectedGenders.length > 0) {
+      filtered = filtered.filter(app => {
+        const genderTags = app.genderTags || [];
+        return selectedGenders.some(gender => genderTags.includes(gender));
+      });
+    }
 
     // Sort applications
     const sorted = [...filtered].sort((a, b) => {
@@ -145,17 +275,23 @@ export default function AppliedJobsPage() {
           return new Date(b.appliedOn).getTime() - new Date(a.appliedOn).getTime();
         case 'oldest':
           return new Date(a.appliedOn).getTime() - new Date(b.appliedOn).getTime();
-        case 'salary-asc':
-          return a.salary - b.salary;
-        case 'salary-desc':
-          return b.salary - a.salary;
+        case 'salary-asc': {
+          const salaryA = parseFloat((a.salary || '0').replace(/[₱,]/g, ''));
+          const salaryB = parseFloat((b.salary || '0').replace(/[₱,]/g, ''));
+          return salaryA - salaryB;
+        }
+        case 'salary-desc': {
+          const salaryA = parseFloat((a.salary || '0').replace(/[₱,]/g, ''));
+          const salaryB = parseFloat((b.salary || '0').replace(/[₱,]/g, ''));
+          return salaryB - salaryA;
+        }
         default:
           return 0;
       }
     });
 
     return sorted;
-  }, [applications, statusFilter, sortOption]);
+  }, [applications, statusFilter, sortOption, activeFilters]);
 
   if (loading) {
     return (
@@ -197,7 +333,7 @@ export default function AppliedJobsPage() {
         </aside>
 
         {/* Filter Section - Desktop Only (rightmost, no margin, full height) */}
-        <aside className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-20 border-l border-gray-200 flex flex-col">
+        <aside className="laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-20 border-l border-gray-200 flex flex-col">
           {/* Sort & View Controls */}
           <div className="flex-shrink-0 bg-white border-b border-gray-200 px-3 py-2 z-10">
             <div className="flex items-center justify-between gap-3">
