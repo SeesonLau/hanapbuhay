@@ -20,7 +20,6 @@ const sortOptions = {
     { id: 'oldest', label: 'Oldest', value: 'oldest' },
     { id: 'salary-asc', label: 'Salary', value: 'salary-asc' },
     { id: 'salary-desc', label: 'Salary', value: 'salary-desc' },
-    { id: 'nearby', label: 'Nearby', value: 'nearby' },
   ] as DropdownOption[],
   
   manageJobs: [

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { ApplicationService } from '@/lib/services/applications-services';
 import type { AppliedJob } from '@/components/cards/AppliedJobCardList';
+import { supabase } from '@/lib/services/supabase/client';
 
 interface UseApplicationsOptions {
   skip?: boolean;
@@ -61,11 +62,40 @@ export function useApplications(userId?: string | null, options: UseApplications
     load();
   }, [load, options.skip]);
 
+  const createApplication = useCallback(async (postId: string) => {
+    if (!userId) {
+      toast.error('Please log in to apply for jobs');
+      return null;
+    }
+
+    try {
+      const result = await ApplicationService.createApplication(postId, userId);
+      // Refresh to reflect new application
+      await load();
+      return result;
+    } catch (error) {
+      console.error('Error applying to job:', error);
+      return null;
+    }
+  }, [userId, load]);
+
+  const getAppliedPostIds = useCallback(async (): Promise<string[]> => {
+    if (!userId) return [];
+    try {
+      return await ApplicationService.getAppliedPostIdsByUser(userId);
+    } catch (error) {
+      console.error('Error fetching applied post IDs:', error);
+      return [];
+    }
+  }, [userId]);
+
   return {
     applications,
     loading,
     error,
     refresh: load,
+    createApplication,
+    getAppliedPostIds,
   };
 }
 
