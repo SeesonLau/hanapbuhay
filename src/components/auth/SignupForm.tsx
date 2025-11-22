@@ -102,7 +102,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
             className="mb-1 p-2 hover:bg-gray-neutral100 rounded-full transition-colors"
             aria-label="Go back"
           >
-            <IoArrowBack className="w-6 h-6 text-gray-neutral800" />
+            <IoArrowBack className="w-6 h-6 text-white" />
           </button>
         )}
 
@@ -111,14 +111,15 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
           <Image
             src="/image/hanapbuhay-logo-notext.svg"
             alt="HanapBuhay Logo"
-            width={80}
-            height={80}
+            width={60}
+            height={60}
             priority
+            className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]"
           />
         </div>
 
         {/* Title */}
-        <h2 className="text-h3 font-bold text-gray-neutral900 text-center mb-4 font-alexandria">
+        <h2 className="text-h4 tablet: text-h3 font-bold text-white text-center mb-4 font-alexandria">
           Sign Up
         </h2>
 
@@ -128,9 +129,16 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
       variant="default"
     />
 
-        <form onSubmit={handleSubmit} className="space-y-3 px-6 pb-4">
+        <form onSubmit={handleSubmit} className="space-y-4 px-2 sm:px-6 pb-4">
           {error && (
-            <div className="p-3 rounded-lg text-small bg-error-50 text-error-700 border border-error-200">
+            <div 
+              className="p-3 rounded-lg text-small text-red-100 border"
+              style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                backdropFilter: 'blur(10px)',
+                borderColor: 'rgba(239, 68, 68, 0.3)'
+              }}
+            >
               {error}
             </div>
           )}
@@ -142,8 +150,8 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
               label="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="juan.cruz@gmail.com"
+              placeholder="Email"
+              variant="glassmorphism"
             />
           </div>
 
@@ -157,15 +165,22 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
                 setPassword(e.target.value);
                 checkPasswordRequirements(e.target.value);
               }}
-              required
-              placeholder="••••••••"
+              placeholder="Password"
               enableValidation={false}
+              variant="glassmorphism"
             />
 
             {/* Password Requirements List - Only show when password has content */}
             {password.length > 0 && (
-              <div className="mt-3 p-3 rounded-lg bg-gray-neutral50 border border-gray-neutral200">
-                <p className="text-small font-medium text-gray-neutral700 mb-2 font-inter">
+              <div 
+                className="mt-3 p-3 rounded-lg border"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  backdropFilter: 'blur(10px)',
+                  borderColor: 'rgba(255, 255, 255, 0.1)'
+                }}
+              >
+                <p className="text-small font-medium text-white mb-2 font-inter">
                   Password must contain:
                 </p>
                 <ul className="space-y-1 text-small font-inter">
@@ -203,9 +218,9 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
               label="Confirm Password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              placeholder="••••••••"
+              placeholder="Password"
               enableValidation={false}
+              variant="glassmorphism"
             />
           </div>
           
@@ -213,7 +228,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
           <Button
             type="submit"
             disabled={loading}
-            className="w-full justify-center text-body font-semibold mt-8"
+            className="w-full justify-center text-body font-semibold mt-12"
             isLoading={loading}
             variant="primary"
             size="md"
@@ -224,12 +239,12 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
           </Button>
 
           {/* Sign In Link */}
-          <p className="text-center text-small text-gray-neutral600 mt-6 font-alexandria font-light">
+          <p className="text-center text-mini sm:text-small text-gray-300 mt-6 font-alexandria font-light">
             Already have an account? Sign in{' '}
             <button
               type="button"
               onClick={onSignInClick}
-              className="font-alexandria font-light text-small text-primary-primary500 hover:text-primary-primary600 font-light hover:underline"
+              className="font-alexandria font-light text-mini sm:text-small text-blue-300 hover:text-blue-200 font-light hover:underline"
             >
             here
             </button>

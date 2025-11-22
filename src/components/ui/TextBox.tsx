@@ -61,6 +61,8 @@ export interface TextBoxProps extends Omit<React.InputHTMLAttributes<HTMLInputEl
   showLoadingIcon?: boolean;
   /** Icon size: 'sm' (12px) | 'md' (16px) or explicit number (px) */
   iconSize?: 'sm' | 'md' | number;
+  /** Visual variant: 'default' or 'glassmorphism' */
+  variant?: 'default' | 'glassmorphism';
 }
 
 const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
@@ -86,6 +88,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
   successIcon,
   showLoadingIcon = false,
   iconSize = 'md',
+  variant = 'default',
   placeholder,
   value,
   defaultValue,
@@ -202,25 +205,46 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
 
   const hasPhonePrefix = type === 'tel' && phonePrefix;
   
-  const inputClasses = `
-    w-full 
-    ${responsive ? 'h-10 sm:h-10' : 'h-10'}
-    ${responsive ? 'px-4 py-1 sm:px-5 sm:py-2' : 'px-5 py-2'}
-    border rounded-[10px] 
-    ${responsive ? 'text-small sm:text-small' : 'text-small'}
-    font-inter font-normal 
-    bg-white 
-    transition-all duration-200
-    focus:outline-none focus:ring-2 focus:ring-primary-primary400 focus:border-transparent
-    disabled:bg-gray-neutral50 disabled:cursor-not-allowed
-    ${leftIcon ? (responsive ? 'pl-9 sm:pl-9' : 'pl-9') : (responsive ? 'pl-4 sm:pl-5' : 'pl-5')}
-    ${hasRightIcon ? (responsive ? 'pr-9 sm:pr-9' : 'pr-9') : (responsive ? 'pr-4 sm:pr-5' : 'pr-5')}
-    ${isInErrorState ? 
-      'border-error-error500 focus:ring-error-error200' : 
-      'border-gray-neutral300 hover:border-gray-neutral400 focus:border-primary-primary500'
-    }
-    placeholder:text-gray-neutral400 placeholder:font-inter placeholder:font-normal placeholder:text-small
-  `.trim();
+  const inputClasses = variant === 'glassmorphism' 
+    ? `
+      w-full 
+      ${responsive ? 'h-10 sm:h-10' : 'h-10'}
+      ${responsive ? 'px-4 py-1 sm:px-5 sm:py-2' : 'px-5 py-2'}
+      border rounded-[10px] 
+      ${responsive ? 'text-small sm:text-small' : 'text-small'}
+      font-inter font-normal 
+      text-white
+      transition-all duration-200
+      focus:outline-none focus:ring-2 focus:border-transparent
+      disabled:cursor-not-allowed
+      ${leftIcon ? (responsive ? 'pl-9 sm:pl-9' : 'pl-9') : (responsive ? 'pl-4 sm:pl-5' : 'pl-5')}
+      ${hasRightIcon ? (responsive ? 'pr-9 sm:pr-9' : 'pr-9') : (responsive ? 'pr-4 sm:pr-5' : 'pr-5')}
+      ${isInErrorState ? 
+        'border-red-400/50 focus:ring-red-400/20 bg-red-500/10 backdrop-blur-[10px]' : 
+        'border-white/20 hover:border-white/30 focus:border-blue-300/50 focus:ring-blue-300/20 bg-white/10 backdrop-blur-[10px] hover:bg-white/15'
+      }
+      placeholder:text-white/50 placeholder:font-inter placeholder:font-normal placeholder:text-small
+      disabled:bg-white/5 disabled:opacity-50
+    `.trim()
+    : `
+      w-full 
+      ${responsive ? 'h-10 sm:h-10' : 'h-10'}
+      ${responsive ? 'px-4 py-1 sm:px-5 sm:py-2' : 'px-5 py-2'}
+      border rounded-[10px] 
+      ${responsive ? 'text-small sm:text-small' : 'text-small'}
+      font-inter font-normal 
+      bg-white 
+      transition-all duration-200
+      focus:outline-none focus:ring-2 focus:ring-primary-primary400 focus:border-transparent
+      disabled:bg-gray-neutral50 disabled:cursor-not-allowed
+      ${leftIcon ? (responsive ? 'pl-9 sm:pl-9' : 'pl-9') : (responsive ? 'pl-4 sm:pl-5' : 'pl-5')}
+      ${hasRightIcon ? (responsive ? 'pr-9 sm:pr-9' : 'pr-9') : (responsive ? 'pr-4 sm:pr-5' : 'pr-5')}
+      ${isInErrorState ? 
+        'border-error-error500 focus:ring-error-error200' : 
+        'border-gray-neutral300 hover:border-gray-neutral400 focus:border-primary-primary500'
+      }
+      placeholder:text-gray-neutral400 placeholder:font-inter placeholder:font-normal placeholder:text-small
+    `.trim();
 
   // CSS to hide browser's default password toggle
   const passwordInputStyles = type === 'password' ? {
@@ -228,14 +252,23 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
     WebkitTextSecurity: showPassword ? 'none' : 'disc',
   } as React.CSSProperties : {};
 
-  const labelClasses = `
-    ${responsive ? 'text-body sm:text-body' : 'text-body'}
-    font-semibold font-inter text-black
-    ${isInErrorState ? 'text-error-error600' : ''}
-    ${required ? 'after:content-["*"] after:text-error-error500 after:ml-1' : ''}
-  `.trim();
+  const labelClasses = variant === 'glassmorphism'
+    ? `
+      ${responsive ? 'text-body sm:text-body' : 'text-body'}
+      font-semibold font-inter text-white
+      ${isInErrorState ? 'text-red-300' : ''}
+      ${required ? 'after:content-["*"] after:text-red-300 after:ml-1' : ''}
+    `.trim()
+    : `
+      ${responsive ? 'text-body sm:text-body' : 'text-body'}
+      font-semibold font-inter text-black
+      ${isInErrorState ? 'text-error-error600' : ''}
+      ${required ? 'after:content-["*"] after:text-error-error500 after:ml-1' : ''}
+    `.trim();
 
-  const iconClasses = `absolute top-1/2 transform -translate-y-1/2 text-gray-neutral400 flex items-center justify-center ${responsive ? 'w-4 h-4 sm:w-4 sm:h-4' : 'w-4 h-4'}`;
+  const iconClasses = variant === 'glassmorphism'
+    ? `absolute top-1/2 transform -translate-y-1/2 text-white/60 flex items-center justify-center ${responsive ? 'w-4 h-4 sm:w-4 sm:h-4' : 'w-4 h-4'}`
+    : `absolute top-1/2 transform -translate-y-1/2 text-gray-neutral400 flex items-center justify-center ${responsive ? 'w-4 h-4 sm:w-4 sm:h-4' : 'w-4 h-4'}`;
 
   const errorTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter text-error-error600 mt-1`;
   const helperTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter text-gray-neutral500 mt-1`;
@@ -306,7 +339,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className={`text-gray-neutral400 hover:text-gray-neutral600 transition-colors duration-200 ${computedIconSizeClass} flex items-center justify-center`}
+                  className={`${variant === 'glassmorphism' ? 'text-white/60 hover:text-white/90' : 'text-gray-neutral400 hover:text-gray-neutral600'} transition-colors duration-200 ${computedIconSizeClass} flex items-center justify-center`}
                   tabIndex={-1}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
@@ -317,7 +350,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
                   )}
                 </button>
               ) : showLoadingIcon ? (
-                <div className={`${computedIconSizeClass} border border-gray-400 border-t-transparent rounded-full animate-spin`} style={computedIconInlineStyle}></div>
+                <div className={`${computedIconSizeClass} border ${variant === 'glassmorphism' ? 'border-white/40 border-t-transparent' : 'border-gray-400 border-t-transparent'} rounded-full animate-spin`} style={computedIconInlineStyle}></div>
               ) : showSuccessIcon && isValid && touched && !currentError ? (
                 successIcon || (
                   <FaCheck className={`${computedIconSizeClass} text-success-success500`} style={computedIconInlineStyle} />

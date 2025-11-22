@@ -3,12 +3,11 @@
 import { useRef } from 'react';
 import Image from 'next/image';
 import { motion, useInView } from 'framer-motion';
-import { getBlueDarkColor, getNeutral600Color, getNeutral300Color, getWhiteColor } from '@/styles/colors';
 import { fontClasses } from '@/styles/fonts';
 
 export default function TestimonialsSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, amount: 0.2, margin: "-20% 0px -20% 0px" });
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -58,20 +57,19 @@ export default function TestimonialsSection() {
   return (
     <section 
       id="testimonials" 
-      className="min-h-screen flex items-center justify-center relative py-20"
+      className="min-h-screen laptop:h-screen flex items-center justify-center relative py-20 laptop:snap-start laptop:snap-always"
       ref={ref}
     >
       <div className="container mx-auto px-4">
         {/* Testimonials Heading */}
         <motion.div 
-          className="text-center mb-16"
+          className="text-center mb-8 mobile-M:mb-10 tablet:mb-12 laptop:mb-16"
           initial={{ opacity: 0, y: -30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -30 }}
           transition={{ duration: 0.6 }}
         >
           <h2 
-            className={`text-5xl md:text-6xl font-bold ${fontClasses.heading}`}
-            style={{ color: getBlueDarkColor('default') }}
+            className={`text-h3 mobile-M:text-h2 tablet:text-h1 laptop:text-hero font-bold text-gray-neutral100 ${fontClasses.heading}`}
           >
             Testimonials
           </h2>
@@ -79,7 +77,7 @@ export default function TestimonialsSection() {
         
         {/* Three Columns */}
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 max-w-6xl mx-auto"
+          className="grid grid-cols-1 md:grid-cols-3 gap-5 mobile-M:gap-6 tablet:gap-8 laptop:gap-10 max-w-6xl mx-auto"
           variants={containerVariants}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
@@ -87,7 +85,7 @@ export default function TestimonialsSection() {
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={index}
-              className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-8 border border-white border-opacity-20 flex flex-col items-center text-center"
+              className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-5 mobile-M:p-6 tablet:p-7 laptop:p-8 border border-white border-opacity-20 flex flex-col items-center text-center"
               style={{ 
                 backgroundColor: 'rgba(255, 255, 255, 0.05)',
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
@@ -101,8 +99,7 @@ export default function TestimonialsSection() {
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
               <motion.div 
-                className="w-32 h-32 rounded-full overflow-hidden mb-6 border-4" 
-                style={{ borderColor: getWhiteColor(0.2) }}
+                className="w-24 h-24 mobile-M:w-28 mobile-M:h-28 tablet:w-32 tablet:h-32 rounded-full overflow-hidden mb-4 mobile-M:mb-5 tablet:mb-6 border-3 mobile-M:border-4 border-white/20" 
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 transition={{ type: "spring", stiffness: 400, damping: 15 }}
               >
@@ -115,20 +112,17 @@ export default function TestimonialsSection() {
                 />
               </motion.div>
               <p 
-                className={`text-lg mb-6 ${fontClasses.body}`}
-                style={{ color: getNeutral300Color() }}
+                className={`text-small mobile-M:text-body tablet:text-lead mb-4 mobile-M:mb-5 tablet:mb-6 text-gray-neutral300 ${fontClasses.body}`}
               >
                 "{testimonial.quote}"
               </p>
               <p 
-                className={`text-lg font-bold mb-2 ${fontClasses.body}`}
-                style={{ color: getWhiteColor() }}
+                className={`text-small mobile-M:text-body tablet:text-lead font-bold mb-2 text-white ${fontClasses.body}`}
               >
                 - {testimonial.name}
               </p>
               <p 
-                className={`text-md ${fontClasses.body}`}
-                style={{ color: getNeutral600Color() }}
+                className={`text-small mobile-M:text-body text-gray-neutral600 ${fontClasses.body}`}
               >
                 {testimonial.role}
               </p>
