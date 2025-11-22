@@ -192,53 +192,43 @@ export default function FindJobsPage() {
         </aside>
 
         {/* Filter Section - Desktop Only (rightmost, no margin, full height) */}
-        <aside className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg overflow-y-auto z-20 border-l border-gray-200">
+        <aside className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-20 border-l border-gray-200 flex flex-col">
           {/* Sort & View Controls */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 z-10">
-            <div className="flex flex-col gap-3">
+          <div className="flex-shrink-0 bg-white  border-b border-gray-200 px-3 py-2 z-10">
+            <div className="flex items-center justify-between gap-3">
               {/* Sort By */}
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
                 <span className="text-small text-gray-neutral600 whitespace-nowrap font-medium">Sort by</span>
-                <div className="flex-1 max-w-[140px]">
-                  <Sort variant="findJobs" onChange={handleSortChange} />
-                </div>
+                <Sort variant="findJobs" onChange={handleSortChange} />
               </div>
               
-              {/* View Toggle */}
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-small text-gray-neutral600 whitespace-nowrap font-medium">View</span>
-                <ViewToggle value={viewMode} onChange={setViewMode} />
-              </div>
-            </div>
-          </div>
-          
-          {/* Filter Section */}
-          <FilterSection
-            initialFilters={activeFilters}
-            onApply={handleApplyFilters}
-            onClearAll={handleClearFilters}
-            className="h-full"
-          />
-        </aside>
-
-        {/* Main Content Area - Job posts only */}
+          {/* View Toggle */}
+          <ViewToggle value={viewMode} onChange={setViewMode} />
+        </div>
+      </div>
+      
+      {/* Filter Section - takes remaining height */}
+      <FilterSection
+        initialFilters={activeFilters}
+        onApply={handleApplyFilters}
+        onClearAll={handleClearFilters}
+        className="flex-1 min-h-0"
+      />
+    </aside>        {/* Main Content Area - Job posts only */}
         <main className="w-full laptop:w-[calc(100%-460px)] laptop:ml-[180px] laptop-L:w-[calc(100%-480px)] laptop-L:ml-[200px]">
-          <div className="px-4 md:px-6 laptop:px-6 pt-4 pb-6 max-w-full">
+          <div className="px-4 md:px-6 laptop:px-6 pt-2 pb-6 max-w-full">
             <div className="space-y-4">
               {/* Controls Row with Filter Button - Mobile/Tablet Only */}
-              <div className="laptop:hidden flex flex-wrap items-center justify-between gap-4 bg-white rounded-lg px-4 py-3 shadow-sm">
-                {/* Left side - Filter Button */}
-                <div className="flex items-center gap-3">
-                  <FilterButton
-                    onClick={() => setIsFilterModalOpen(true)}
-                    filterCount={activeFilterCount}
-                  />
-                  <span className="text-small text-gray-neutral600 whitespace-nowrap font-medium">Showing: {jobs.length}</span>
-                </div>
+              <div className="laptop:hidden flex items-center justify-between gap-1.5 mobile-M:gap-3 bg-white rounded-lg px-2 mobile-M:px-4 py-2 mobile-M:py-3 shadow-sm">
+                {/* Filter Button */}
+                <FilterButton
+                  onClick={() => setIsFilterModalOpen(true)}
+                  filterCount={activeFilterCount}
+                />
                 
-                {/* Right side - Sort & View Toggle */}
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="text-small text-gray-neutral600 whitespace-nowrap">Sort by</span>
+                {/* Sort By and View Toggle */}
+                <div className="flex items-center gap-1.5 mobile-M:gap-3">
+                  <span className="text-tiny mobile-M:text-small text-gray-neutral600 whitespace-nowrap hidden mobile-S:inline">Sort by</span>
                   <Sort variant="findJobs" onChange={handleSortChange} />
                   <ViewToggle value={viewMode} onChange={setViewMode} />
                 </div>

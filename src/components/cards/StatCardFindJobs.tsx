@@ -34,7 +34,7 @@ export const StatCardFindJobs: React.FC<StatCardFindJobsProps> = ({ title, value
 
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-0.5 mobile-M:gap-1 tablet:gap-1.5 laptop:gap-1 laptop-L:gap-1.5 p-2 mobile-M:p-3 tablet:p-4 laptop:p-3 laptop-L:p-3.5 w-full rounded-lg tablet:rounded-xl bg-white shadow-md ${className}`}
+      className={`flex flex-col items-center justify-center gap-0.5 mobile-M:gap-1 tablet:gap-1.5 laptop:gap-1 laptop-L:gap-1.5 p-2 mobile-M:p-3 tablet:p-4 laptop:p-3 laptop-L:p-3.5 w-full laptop:h-full rounded-lg tablet:rounded-xl bg-white shadow-md ${className}`}
       style={{
         boxShadow: `0 4px 16px rgba(0, 0, 0, 0.12)`,
       }}

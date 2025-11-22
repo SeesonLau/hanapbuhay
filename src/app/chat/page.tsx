@@ -331,7 +331,7 @@ export default function ChatPage() {
       <Banner variant="chat" showSearchBar={false} />
 
       {/* Main content area - starts below the fixed banner */}
-      <div className="pt-[10rem] sm:pt-[11rem] md:pt-[11.5rem] min-h-screen">
+      <div className="pt-[220px] min-h-screen">
         <div className="h-[calc(100vh-220px)]">
           <div className="bg-white rounded-lg shadow-lg mx-4 h-full overflow-hidden">
             <div className="flex flex-col md:flex-row h-full">

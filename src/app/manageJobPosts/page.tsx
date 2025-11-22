@@ -189,7 +189,7 @@ export default function ManageJobPostsPage() {
         onPostClick={handleCreatePost}
       />
 
-      <main className="pt-[11.5rem] sm:pt-[12.5rem] md:pt-[13rem] px-4 sm:px-6 md:px-16 lg:px-32 pb-8">
+      <main className="pt-[240px] px-4 sm:px-6 md:px-16 lg:px-32 pb-8">
         {/* Controls Row: Showing count, Sort, View Toggle */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
           {/* Left - Showing count aligned with search bar */}
