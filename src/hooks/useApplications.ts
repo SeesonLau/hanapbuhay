@@ -33,6 +33,15 @@ export function useApplications(userId?: string | null, options: UseApplications
       const mapped = apps.map((a: any) => {
         const post = a.posts ?? a.post ?? {};
         const appliedOn = a.createdAt ?? a.created_at ?? '';
+        
+        // Handle tags properly - ensure it's always an array
+        let tags: string[] = [];
+        if (post.subType) {
+          tags = Array.isArray(post.subType) ? post.subType : [post.subType];
+        } else if (post.type) {
+          tags = Array.isArray(post.type) ? post.type : [post.type];
+        }
+        
         return {
           id: a.applicationId ?? a.id,
           title: post.title ?? 'Untitled',
@@ -42,7 +51,7 @@ export function useApplications(userId?: string | null, options: UseApplications
           salaryType: 'monthly' as const,
           appliedOn,
           status: a.status ?? 'pending',
-          tags: post.subType ?? (post.type ? [post.type] : []),
+          tags,
           genderPreference: post.preferredGender ?? undefined,
         } as AppliedJob;
       });

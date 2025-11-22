@@ -21,12 +21,13 @@ const StatsSection: React.FC<Props> = ({ stats, variant, loading, error, onStatC
 
   if (variant === 'findJobs') {
     return (
-      <div className="w-full mt-4 mb-6">
-        <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
-          <StatCardFindJobs title="Total Jobs" value={stats.totalJobs ?? 0} variant="blue" />
-          <StatCardFindJobs title="Completed" value={stats.completed ?? 0} variant="green" />
-          <StatCardFindJobs title="Ratings" value={stats.ratings ?? 0} variant="yellow" />
-          <StatCardFindJobs title="Posted" value={stats.posts ?? 0} variant="red" />
+      <div className="w-full h-full flex items-center justify-center py-4 laptop:py-6">
+        {/* 2x2 grid on mobile, horizontal row on tablet, vertical column on laptop */}
+        <div className="grid grid-cols-2 gap-2 mobile-M:gap-2.5 tablet:grid-cols-4 tablet:gap-3 laptop:grid-cols-1 laptop:gap-4 laptop-L:gap-5 w-full laptop:h-full auto-rows-fr">
+          <StatCardFindJobs title="Total Jobs" value={stats.totalJobs ?? 0} variant="blue" className="min-w-0" />
+          <StatCardFindJobs title="Ratings" value={stats.ratings ?? 0} variant="yellow" className="min-w-0" />
+          <StatCardFindJobs title="Completed" value={stats.completed ?? 0} variant="green" className="min-w-0" />
+          <StatCardFindJobs title="Posted" value={stats.posts ?? 0} variant="red" className="min-w-0" />
         </div>
       </div>
     );
@@ -34,12 +35,13 @@ const StatsSection: React.FC<Props> = ({ stats, variant, loading, error, onStatC
 
   // appliedJobs
   return (
-    <div className="w-full mb-6">
-      <div className="flex flex-col gap-4 md:sticky md:top-6">
-        <StatCardAppliedJobs type="total" value={stats.totalApplications ?? 0} onClick={onStatClick} />
-        <StatCardAppliedJobs type="pending" value={stats.pending ?? 0} onClick={onStatClick} />
-        <StatCardAppliedJobs type="approved" value={stats.approved ?? 0} onClick={onStatClick} />
-        <StatCardAppliedJobs type="rejected" value={stats.rejected ?? 0} onClick={onStatClick} />
+    <div className="w-full h-full flex items-center justify-center py-4 laptop:py-6">
+      {/* 2x2 grid on mobile, horizontal row on tablet, vertical column on laptop */}
+      <div className="grid grid-cols-2 gap-2 mobile-M:gap-2.5 tablet:grid-cols-4 tablet:gap-3 laptop:grid-cols-1 laptop:gap-4 laptop-L:gap-5 w-full laptop:h-full auto-rows-fr">
+        <StatCardAppliedJobs type="total" value={stats.totalApplications ?? 0} onClick={onStatClick} className="min-w-0" />
+        <StatCardAppliedJobs type="pending" value={stats.pending ?? 0} onClick={onStatClick} className="min-w-0" />
+        <StatCardAppliedJobs type="approved" value={stats.approved ?? 0} onClick={onStatClick} className="min-w-0" />
+        <StatCardAppliedJobs type="rejected" value={stats.rejected ?? 0} onClick={onStatClick} className="min-w-0" />
       </div>
     </div>
   );

@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { getColor, getGrayColor, getBlackColor, getWhiteColor } from '@/styles/colors';
-import { fontClasses } from '@/styles/fonts';
 // Icons served from public/icons
 
 // =====================
@@ -17,8 +15,7 @@ interface StaticTagProps {
 export const StaticGenderTag: React.FC<StaticTagProps> = ({ label, className = '' }) => {
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] ${className}`}
-      style={{ color: getColor('tag', 'genderText'), backgroundColor: getColor('tag', 'genderBg') }}
+      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] text-tag-genderText bg-tag-genderBg ${className}`}
     >
       {label}
     </div>
@@ -28,8 +25,7 @@ export const StaticGenderTag: React.FC<StaticTagProps> = ({ label, className = '
 export const StaticExperienceLevelTag: React.FC<StaticTagProps> = ({ label, className = '' }) => {
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] ${className}`}
-      style={{ color: getColor('tag', 'experienceText'), backgroundColor: getColor('tag', 'experienceBg') }}
+      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] text-tag-experienceText bg-tag-experienceBg ${className}`}
     >
       {label}
     </div>
@@ -39,8 +35,7 @@ export const StaticExperienceLevelTag: React.FC<StaticTagProps> = ({ label, clas
 export const StaticJobTypeTag: React.FC<StaticTagProps> = ({ label, className = '' }) => {
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] ${className}`}
-      style={{ color: getColor('tag', 'jobText'), backgroundColor: getColor('tag', 'jobBg') }}
+      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] text-tag-jobText bg-tag-jobBg ${className}`}
     >
       {label}
     </div>
@@ -55,8 +50,7 @@ interface StaticLocationTagProps {
 export const StaticLocationTag: React.FC<StaticLocationTagProps> = ({ label, className = '' }) => {
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[25px] rounded-[5px] ${fontClasses.heading} font-normal text-[10px] ${className}`}
-      style={{ color: getBlackColor(), backgroundColor: getGrayColor('default') }}
+      className={`inline-flex items-center justify-center px-3 h-[25px] rounded-[5px] font-alexandria font-normal text-[10px] text-black bg-gray-default ${className}`}
     >
       <img 
         src="/icons/Location.svg" 
@@ -76,8 +70,7 @@ interface StaticSalaryTagProps {
 export const StaticSalaryTag: React.FC<StaticSalaryTagProps> = ({ label, className = '' }) => {
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[25px] rounded-[5px] ${fontClasses.heading} font-normal text-[10px] ${className}`}
-      style={{ color: getBlackColor(), backgroundColor: getGrayColor('default') }}
+      className={`inline-flex items-center justify-center px-3 h-[25px] rounded-[5px] font-alexandria font-normal text-[10px] text-black bg-gray-default ${className}`}
     >
       <img 
         src="/icons/PHP.svg" 
@@ -139,11 +132,7 @@ export const GenderTag: React.FC<GenderTagProps> = ({
 
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] cursor-pointer`}
-      style={{
-        color: getColor('tag', 'genderText'),
-        backgroundColor: isSelected ? getColor('tag', 'genderSelectedBg') : getColor('tag', 'genderUnselectedBg')
-      }}
+      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] cursor-pointer text-tag-genderText ${isSelected ? 'bg-tag-genderSelectedBg' : 'bg-tag-genderUnselectedBg'}`}
       onClick={handleClick}
     >
       {label}
@@ -167,11 +156,7 @@ export const ExperienceLevelTag: React.FC<ExperienceLevelTagProps> = ({
 
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] cursor-pointer`}
-      style={{
-        color: getColor('tag', 'experienceText'),
-        backgroundColor: isSelected ? getColor('tag', 'experienceSelectedBg') : getColor('tag', 'experienceUnselectedBg')
-      }}
+      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] cursor-pointer text-tag-experienceText ${isSelected ? 'bg-tag-experienceSelectedBg' : 'bg-tag-experienceUnselectedBg'}`}
       onClick={handleClick}
     >
       {label}
@@ -200,11 +185,7 @@ export const JobTypeTag: React.FC<JobTypeTagProps> = ({
 
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] cursor-pointer`}
-      style={{
-        backgroundColor: isSelected ? getColor('tag', 'jobText') : getColor('tag', 'jobUnselectedBg'),
-        color: isSelected ? getWhiteColor() : getColor('tag', 'jobText')
-      }}
+      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] cursor-pointer ${isSelected ? 'bg-tag-jobText text-white' : 'bg-tag-jobUnselectedBg text-tag-jobText'}`}
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleClick(); }}
     >
       {categoryIcon && (

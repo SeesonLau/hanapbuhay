@@ -1,8 +1,6 @@
 "use client";
 
 import React from 'react';
-import { getBlackColor, getNeutral600Color, getNeutral100Color, getNeutral400Color } from '@/styles/colors';
-import { fontClasses } from '@/styles/fonts';
 import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticLocationTag, StaticSalaryTag } from '@/components/ui/TagItem';
 import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
@@ -91,7 +89,7 @@ export const JobPostList: React.FC<JobPostListProps> = ({ jobData, className = '
       >
         {/* Title */}
         <div className="min-w-0">
-          <h3 className={`${fontClasses.heading} font-semibold text-[15px] truncate`} style={{ color: getBlackColor() }}>
+          <h3 className={`font-alexandria font-semibold text-[15px] truncate text-gray-neutral900`}>
             {shortTitle}
           </h3>
         </div>
@@ -111,8 +109,7 @@ export const JobPostList: React.FC<JobPostListProps> = ({ jobData, className = '
             ))}
             {extraCount > 0 && (
               <div
-                className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
-                style={{ backgroundColor: getNeutral100Color(), color: getNeutral400Color() }}
+                className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400"
               >
                 +{extraCount}
               </div>
@@ -132,8 +129,7 @@ export const JobPostList: React.FC<JobPostListProps> = ({ jobData, className = '
             ))}
             {extraCount > 0 && (
               <div
-                className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
-                style={{ backgroundColor: getNeutral100Color(), color: getNeutral400Color() }}
+                className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400"
               >
                 +{extraCount}
               </div>
@@ -147,12 +143,12 @@ export const JobPostList: React.FC<JobPostListProps> = ({ jobData, className = '
           <StaticSalaryTag label={`${salary} /${salaryPeriod}`} />
         </div>
 
-        {/* Date + Apply (keep a fixed 50px gap; visible on laptop-L+) */}
+        {/* Date + Apply (keep a fixed 100px gap; visible on laptop-L+) */}
         <div className="hidden laptop-L:flex items-center justify-self-end justify-end gap-[100px]">
-          <span className={`${fontClasses.body} text-[10px] whitespace-nowrap`} style={{ color: getNeutral600Color() }}>Posted on: {postedDate}</span>
+          <span className={`font-inter text-[10px] whitespace-nowrap text-gray-neutral600`}>Posted on: {postedDate}</span>
           <button
             onClick={(e) => { e.stopPropagation(); onApply?.(id); }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm w-[140px] laptop:w-[130px] mobile-L:w-[120px] mobile-M:w-[110px] mobile-S:w-[100px]"
+            className="px-4 py-2 bg-primary-primary500 text-white rounded-lg hover:bg-primary-primary600 transition-colors text-sm w-[140px] laptop:w-[130px] mobile-L:w-[120px] mobile-M:w-[110px] mobile-S:w-[100px]"
           >
             Apply Now
           </button>
@@ -162,7 +158,7 @@ export const JobPostList: React.FC<JobPostListProps> = ({ jobData, className = '
         <div className="flex-shrink-0 justify-self-end flex justify-end laptop-L:hidden">
           <button
             onClick={(e) => { e.stopPropagation(); onApply?.(id); }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm w-[140px] laptop:w-[130px] mobile-L:w-[120px] mobile-M:w-[110px] mobile-S:w-[100px]"
+            className="px-4 py-2 bg-primary-primary500 text-white rounded-lg hover:bg-primary-primary600 transition-colors text-sm w-[140px] laptop:w-[130px] mobile-L:w-[120px] mobile-M:w-[110px] mobile-S:w-[100px]"
           >
             Apply Now
           </button>

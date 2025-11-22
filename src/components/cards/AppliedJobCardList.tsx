@@ -81,6 +81,9 @@ export default function AppliedJobCard({
 }: AppliedJobCardProps) {
   const status = statusConfig[job.status] || statusConfig.unknown;
   
+  // Debug: Log tags to see what we're getting
+  console.log('Job tags:', job.title, job.tags);
+  
   const handleDelete = () => {
     if (onDelete) {
       onDelete(job.id);
@@ -198,9 +201,10 @@ export default function AppliedJobCard({
   return (
     <div className={`
       flex flex-col
-      p-8
+      p-6
       gap-2
-      w-full max-w-[450px] min-w-[260px]
+      w-full
+      h-full
       bg-white
       shadow-[0px_0px_10px_rgba(0,0,0,0.25)]
       rounded-[10px]
@@ -208,57 +212,71 @@ export default function AppliedJobCard({
       ${className}
     `}>
       {/* Header with Title and Delete Button */}
-      <div className="flex justify-between items-start gap-3">
+      <div className="flex justify-between items-start gap-3 flex-shrink-0">
         <div className="flex-1 min-w-0">
-          <h2 className="font-alexandria font-bold text-lead text-gray-neutral900 line-clamp-2">
+          <h2 className="font-alexandria font-bold text-lead text-gray-neutral900 line-clamp-1">
             {job.title}
           </h2>
         </div>       
       </div>
 
       {/* Description */}
-      <div className="mb-2">
+      <div className="flex-shrink-0">
         <p className="font-inter text-tiny text-gray-neutral600 line-clamp-2">
           {job.description}
         </p>
       </div>
 
       {/* Tags */}
-      <div className="flex flex-wrap gap-2 mb-2">
-        {job.tags.map((tag, index) => (
-          <span
-            key={index}
-            className={`
-              px-2 py-1 rounded-md text-mini font-inter font-medium
-              ${tagColors[getTagColor(index)]}
-            `}
-          >
-            {tag}
-          </span>
-        ))}
+      <div className="flex-shrink-0 min-h-[32px]">
+        {job.tags && job.tags.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {job.tags.slice(0, 3).map((tag, index) => (
+              <span
+                key={index}
+                className={`
+                  px-2 py-1 rounded-md text-mini font-inter font-medium
+                  ${tagColors[getTagColor(index)]}
+                `}
+              >
+                {tag}
+              </span>
+            ))}
+            {job.tags.length > 3 && (
+              <span className="px-2 py-1 rounded-md text-mini font-inter font-medium bg-gray-neutral100 text-gray-neutral700">
+                +{job.tags.length - 3}
+              </span>
+            )}
+          </div>
+        ) : (
+          <div className="text-gray-neutral400 text-mini italic">No tags</div>
+        )}
       </div>
 
       {/* Location and Salary */}
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
         <div className="flex items-center gap-1 px-3 py-1 bg-gray-neutral100 rounded-md">
           <FaMapMarkerAlt className="w-3 h-3 text-error-error500 flex-shrink-0" />
-          <span className="font-inter text-mini text-gray-neutral700">{job.location}</span>
+          <span className="font-inter text-mini text-gray-neutral700 truncate">{job.location}</span>
         </div>
 
         <div className="flex items-center px-3 py-1 bg-gray-neutral100 rounded-md">
-          <span className="font-inter font-medium text-mini">
+          <span className="font-inter font-medium text-mini whitespace-nowrap">
             {formatSalary(job.salary, job.salaryType)}
           </span>
         </div>
       </div>
 
       {/* Applied Date */}
-      <div className="text-gray-neutral500 font-inter text-mini mb-2">
+      <div className="text-gray-neutral500 font-inter text-mini flex-shrink-0">
         Applied on: <span className="font-medium text-gray-neutral700">{job.appliedOn}</span>
       </div>
 
+      {/* Spacer to push status to bottom */}
+      <div className="flex-grow"></div>
+
       {/* Status */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-shrink-0 pt-2">
         <div className="flex items-center gap-2">
           <span className="font-inter text-tiny text-primary-primary500 font-medium">Status:</span>
           <div className={`
