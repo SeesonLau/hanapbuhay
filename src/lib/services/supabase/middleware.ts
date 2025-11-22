@@ -36,6 +36,14 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  const pathname = request.nextUrl.pathname;
+
+  // CRITICAL: Allow /reset-password to load without auth checks
+  // The SupabaseHashHandler will process the tokens from the URL hash
+  if (pathname === '/reset-password') {
+    return supabaseResponse;
+  }
+
   // Get both session and user to verify authentication
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -55,31 +63,12 @@ export async function middleware(request: NextRequest) {
   const authRoutes = ['/login', '/signup', '/forgot-password'];
   const publicRoutes = ['/', '/auth/callback'];
 
-  const pathname = request.nextUrl.pathname;
-
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
   const isPublicRoute = publicRoutes.some(route => pathname === route || pathname.startsWith('/auth/'));
-  const isResetPasswordRoute = pathname === '/reset-password';
 
   // Allow public routes
   if (isPublicRoute) {
-    return supabaseResponse;
-  }
-
-  // Allow reset-password route only if user is authenticated
-  if (isResetPasswordRoute) {
-    if (!isAuthenticated) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/forgot-password';
-      url.searchParams.set('error', 'Session expired. Please request a new reset link.');
-
-      const redirectResponse = NextResponse.redirect(url);
-      supabaseResponse.cookies.getAll().forEach(cookie => {
-        redirectResponse.cookies.set(cookie);
-      });
-      return redirectResponse;
-    }
     return supabaseResponse;
   }
 
