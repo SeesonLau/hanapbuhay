@@ -92,37 +92,36 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
     >
       {/* Modal Content */}
       <div
-        className="flex flex-col items-center w-[650px] bg-white rounded-[30px] overflow-hidden"
-        style={{ boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.25)' }}
+        className="relative mx-auto flex h-auto w-[90%] min-w-[280px] max-w-[360px] flex-col items-center overflow-hidden rounded-[20px] bg-white shadow-[0px_0px_10px_rgba(0,0,0,0.25)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Red gradient bar */}
         <div 
-          className="w-full h-[20px]"
+          className="h-[12px] w-full self-stretch"
           style={{
-            background: `linear-gradient(270deg, ${COLORS.red.neutral100} 0%, ${COLORS.red.neutral600} 100%)`
+            background: `linear-gradient(270deg, #FFE3E3 0%, #F99292 100%)`
           }} 
         />
 
         {/* Content wrapper with padding and gap */}
-        <div className="flex flex-col items-center w-full pt-[41px] px-[27px] pb-[30px]">
+        <div className="flex flex-col items-center w-full gap-3 pb-6">
           {/* Icon container */}
           <div 
-            className="flex items-center justify-center w-[100px] h-[100px] rounded-full mb-[41px]"
-            style={{ backgroundColor: COLORS.red.neutral200 }}
+            className="mt-3 flex h-14 w-14 flex-row items-center justify-center gap-[10px] rounded-[50px] p-0"
+            style={{ backgroundColor: '#FECACA' }} // Error/200
           >
-            <IconComponent className="w-[53px] h-[53px]" style={{ color: COLORS.red.neutral500 }} />
+            <IconComponent className="h-6 w-6 flex-none" style={{ color: '#EE4546' }} />
           </div>
 
           {/* Title */}
           <h3 
-            className="text-center mb-[20px]"
+            className="h-auto w-auto self-stretch text-center"
             style={{ 
-              color: COLORS.red.neutral500,
-              fontFamily: TYPOGRAPHY.title.fontFamily,
-              fontWeight: TYPOGRAPHY.title.fontWeight,
-              fontSize: TYPOGRAPHY.title.fontSize,
-              lineHeight: TYPOGRAPHY.title.lineHeight
+              fontFamily: 'Inter',
+              fontWeight: 600,
+              fontSize: '18px',
+              lineHeight: '22px',
+              color: '#EE4546', // Error/500
             }}
           >
             {title}
@@ -130,47 +129,45 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
 
           {/* Description */}
           <p 
-            className="text-center mb-[41px]"
+            className="h-auto w-auto self-stretch text-center"
             style={{ 
-              color: COLORS.gray.neutral700,
-              fontFamily: TYPOGRAPHY.description.fontFamily,
-              fontWeight: TYPOGRAPHY.description.fontWeight,
-              fontSize: TYPOGRAPHY.description.fontSize,
-              lineHeight: TYPOGRAPHY.description.lineHeight
+              fontFamily: 'Alexandria',
+              fontWeight: 300,
+              fontSize: '12px',
+              lineHeight: '15px',
+              color: '#444645', // Neutral/800
             }}
           >
             {description}
           </p>
 
           {/* Action Buttons */}
-          <div className="flex flex-row items-center gap-[30px] w-full">
+          <div className="box-border mt-2 flex h-8 w-full flex-row items-center self-stretch px-6 gap-3">
             <Button
               onClick={onClose}
               disabled={isProcessing}
               variant="secondary"
               size="lg"
-              className="flex-1 h-[58px] rounded-[10px]"
+              className="h-8 flex-1 cursor-pointer rounded-[5px]"
               style={{
-                backgroundColor: COLORS.gray.default,
-                border: `1px solid ${COLORS.gray.default}`,
-                color: COLORS.gray.neutral300,
-                fontFamily: TYPOGRAPHY.popups.fontFamily,
-                fontWeight: TYPOGRAPHY.popups.fontWeight,
-                fontSize: TYPOGRAPHY.popups.fontSize,
-                lineHeight: TYPOGRAPHY.popups.lineHeight
+                backgroundColor: '#E6E7E7', // gray.default
+                color: '#858B8A', // gray.neutral400
+                fontFamily: 'Inter',
+                fontWeight: 500,
+                fontSize: '12px',
+                lineHeight: '15px',
+                border: 'none',
               }}
               onMouseEnter={(e) => {
                 if (!isProcessing) {
-                  e.currentTarget.style.backgroundColor = COLORS.gray.neutral300;
-                  e.currentTarget.style.borderColor = COLORS.gray.neutral300;
-                  e.currentTarget.style.color = COLORS.gray.neutral100;
+                  e.currentTarget.style.backgroundColor = COLORS.gray.hover;
+                  e.currentTarget.style.color = COLORS.gray.neutral50;
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isProcessing) {
-                  e.currentTarget.style.backgroundColor = COLORS.gray.default;
-                  e.currentTarget.style.borderColor = COLORS.gray.default;
-                  e.currentTarget.style.color = COLORS.gray.neutral300;
+                  e.currentTarget.style.backgroundColor = '#E6E7E7';
+                  e.currentTarget.style.color = '#858B8A';
                 }
               }}
             >
@@ -181,23 +178,23 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
               isLoading={isProcessing}
               variant="danger"
               size="lg"
-              className="flex-1 h-[58px] rounded-[10px]"
+              className="h-8 flex-1 cursor-pointer rounded-[5px]"
               style={{
-                backgroundColor: COLORS.red.default,
-                color: '#FAFAFA',
-                fontFamily: TYPOGRAPHY.popups.fontFamily,
-                fontWeight: TYPOGRAPHY.popups.fontWeight,
-                fontSize: TYPOGRAPHY.popups.fontSize,
-                lineHeight: TYPOGRAPHY.popups.lineHeight
+                backgroundColor: '#EE4546', // error.error500
+                color: '#FAFAFA', // gray.neutral50
+                fontFamily: 'Inter',
+                fontWeight: 500,
+                fontSize: '12px',
+                lineHeight: '15px',
               }}
               onMouseEnter={(e) => {
                 if (!isProcessing) {
-                  e.currentTarget.style.backgroundColor = COLORS.red.hover;
+                  e.currentTarget.style.backgroundColor = COLORS.red.hover; // #DA2727
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isProcessing) {
-                  e.currentTarget.style.backgroundColor = COLORS.red.default;
+                  e.currentTarget.style.backgroundColor = '#EE4546';
                 }
               }}
             >
