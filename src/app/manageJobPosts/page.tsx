@@ -237,10 +237,7 @@ export default function ManageJobPostsPage() {
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={handlePostDeleted}
-          title="Delete Job Post?"
-          description="This action cannot be undone."
-          confirmText="Delete"
-          variant="trash"
+          modalType="deleteJobPost"
         />
 
         <ApplicantsModal 
