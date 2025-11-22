@@ -21,11 +21,12 @@ const StatsSection: React.FC<Props> = ({ stats, variant, loading, error, onStatC
 
   if (variant === 'findJobs') {
     return (
-      <div className="w-full mt-4 mb-6">
-        <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
+      <div className="w-full h-full flex items-center justify-center py-4 laptop:py-6">
+        {/* 2x2 grid on mobile, horizontal row on tablet, vertical column on laptop */}
+        <div className="grid grid-cols-2 gap-2 mobile-M:gap-2.5 tablet:grid-cols-4 tablet:gap-3 laptop:grid-cols-1 laptop:gap-4 laptop-L:gap-5 w-full">
           <StatCardFindJobs title="Total Jobs" value={stats.totalJobs ?? 0} variant="blue" />
-          <StatCardFindJobs title="Completed" value={stats.completed ?? 0} variant="green" />
           <StatCardFindJobs title="Ratings" value={stats.ratings ?? 0} variant="yellow" />
+          <StatCardFindJobs title="Completed" value={stats.completed ?? 0} variant="green" />
           <StatCardFindJobs title="Posted" value={stats.posts ?? 0} variant="red" />
         </div>
       </div>

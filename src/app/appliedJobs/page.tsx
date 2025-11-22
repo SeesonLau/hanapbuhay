@@ -73,7 +73,7 @@ export default function AppliedJobsPage() {
         onSearch={handleSearch}
       />
 
-      <main className="p-8 pt-[240px]">
+      <main className="p-8 pt-[11.5rem] sm:pt-[12.5rem] md:pt-[13rem]">
         {/* Two-column layout: stats on the left, content on the right */}
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
           {/* Left Stats Sidebar */}

@@ -126,10 +126,10 @@ const Banner: React.FC<BannerProps> = ({
       />
 
       {/* Banner Content Container - Left-aligned structure */}
-      <div className="flex flex-col pt-2 pb-2 px-4 sm:pt-4 sm:px-6 md:px-16 lg:px-32 w-full min-h-[130px] max-h-[130px]">
+      <div className="flex flex-col pt-2 pb-2 px-4 mobile-M:pt-2 mobile-M:pb-2 mobile-L:pt-2 mobile-L:pb-3 tablet:pt-3 tablet:pb-3 laptop:pt-3 laptop:pb-4 laptop-L:pt-4 laptop-L:pb-4 mobile-M:px-6 tablet:px-16 laptop:px-32 w-full">
         {/* Banner Text Section - Left-aligned typography and spacing */}
-        <div className={`text-start mb-2 sm:mb-2 w-full ${variant === 'profile' || variant === 'chat' ? 'mt-6' : 'mt-0'}`}>
-          <h1 className="text-body sm:text-body md:text-description lg:text-lead font-bold font-alexandria text-white leading-tight mb-2">
+        <div className={`text-start mb-1 w-full ${variant === 'profile' || variant === 'chat' ? 'mt-3 sm:mt-4' : 'mt-0'}`}>
+          <h1 className="text-body sm:text-body md:text-description lg:text-lead font-bold font-alexandria text-white leading-tight mb-1.5 sm:mb-2">
             {bannerContent.title}{' '}
             <span className="bg-gradient-to-r from-primary-primary400 to-primary-primary600 bg-clip-text text-transparent">
               {bannerContent.highlight}
