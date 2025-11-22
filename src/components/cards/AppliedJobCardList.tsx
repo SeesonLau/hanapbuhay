@@ -6,6 +6,10 @@ import { GoClock } from "react-icons/go";
 import { IoCheckmarkCircleOutline } from "react-icons/io5";
 import { LuCircleX } from "react-icons/lu";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticSalaryTag } from '@/components/ui/TagItem';
+import { JobType, SubTypes } from '@/lib/constants/job-types';
+import { Gender } from '@/lib/constants/gender';
+import { ExperienceLevel } from '@/lib/constants/experience-level';
 
 // Status type for better type safety
 export type ApplicationStatus = 'pending' | 'approved' | 'rejected';
@@ -16,12 +20,13 @@ export interface AppliedJob {
   title: string;
   description: string;
   location: string;
-  salary: number;
-  salaryType: 'fixed' | 'monthly';
+  salary: string;
+  salaryPeriod: string;
   appliedOn: string;
   status: ApplicationStatus;
-  tags: string[];
-  genderPreference?: string;
+  genderTags?: string[];
+  experienceTags?: string[];
+  jobTypeTags?: string[];
 }
 
 // Component props interface
@@ -60,19 +65,6 @@ const statusConfig = {
   },
 };
 
-// Tag color variants
-const tagColors = {
-  blue: 'bg-primary-primary100 text-primary-primary700',
-  green: 'bg-success-success100 text-success-success700',
-  yellow: 'bg-warning-warning100 text-warning-warning700',
-  gray: 'bg-gray-neutral100 text-gray-neutral700'
-};
-
-const getTagColor = (index: number): keyof typeof tagColors => {
-  const colors: (keyof typeof tagColors)[] = ['blue', 'green', 'yellow', 'gray'];
-  return colors[index % colors.length];
-};
-
 export default function AppliedJobCard({ 
   job, 
   variant = 'card', 
@@ -81,23 +73,70 @@ export default function AppliedJobCard({
 }: AppliedJobCardProps) {
   const status = statusConfig[job.status] || statusConfig.unknown;
   
-  // Debug: Log tags to see what we're getting
-  console.log('Job tags:', job.title, job.tags);
-  
   const handleDelete = () => {
     if (onDelete) {
       onDelete(job.id);
     }
   };
 
-  const formatSalary = (amount: number, type: 'fixed' | 'monthly') => {
-    return (
-      <>
-        <span className="text-success-success600 font-bold">PHP</span>{' '}
-        <span className="text-gray-neutral700">{amount.toLocaleString()}.00{type === 'monthly' ? '/month' : ''}</span>
-      </>
-    );
+  // Removed formatSalary function - we'll use StaticSalaryTag instead
+
+  // Extract and provide defaults for tag arrays
+  const {
+    genderTags = [],
+    experienceTags = [],
+    jobTypeTags = []
+  } = job;
+
+  // Debug logging
+  console.log('AppliedJobCard Debug:', {
+    title: job.title,
+    genderTags,
+    experienceTags,
+    jobTypeTags,
+    hasGender: genderTags.length > 0,
+    hasExperience: experienceTags.length > 0,
+    hasJobType: jobTypeTags.length > 0
+  });
+
+  // Normalize and filter tags (same pattern as ManageJobPostCard)
+  const normalizeJobType = (label: string): string | null => {
+    const isSubType = Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(label));
+    console.log('normalizeJobType:', label, '→', isSubType ? label : null);
+    return isSubType ? label : null;
   };
+
+  const normalizedJobTypes = jobTypeTags
+    .map((label) => normalizeJobType(label))
+    .filter((t): t is string => Boolean(t));
+
+  const normalizeGender = (label: string): string | null => {
+    const isValid = Object.values(Gender).includes(label as Gender);
+    console.log('normalizeGender:', label, '→', isValid ? label : null, 'Valid genders:', Object.values(Gender));
+    return isValid ? label : null;
+  };
+
+  const normalizedGenders = genderTags
+    .map((label) => normalizeGender(label))
+    .filter((t): t is string => Boolean(t));
+
+  const normalizeExperience = (label: string): string | null => {
+    const isValid = Object.values(ExperienceLevel).includes(label as ExperienceLevel);
+    console.log('normalizeExperience:', label, '→', isValid ? label : null);
+    return isValid ? label : null;
+  };
+
+  const normalizedExperiences = experienceTags
+    .map((label) => normalizeExperience(label))
+    .filter((t): t is string => Boolean(t));
+
+  const allTags = [
+    ...normalizedJobTypes.map((label) => ({ type: 'jobtype' as const, label })),
+    ...normalizedExperiences.map((label) => ({ type: 'experience' as const, label })),
+    ...normalizedGenders.map((label) => ({ type: 'gender' as const, label })),
+  ];
+
+  console.log('Final allTags:', allTags);
 
   if (variant === 'list') {
     return (
@@ -129,17 +168,20 @@ export default function AppliedJobCard({
         {/* Tags - Fixed width */}
         <div className="w-52 min-w-0 flex-shrink-0">
           <div className="flex gap-1 flex-wrap">
-            {job.tags.slice(0, 3).map((tag, index) => (
-              <span
-                key={index}
-                className={`
-                  px-2 py-1 rounded-md text-mini font-inter font-medium flex-shrink-0
-                  ${tagColors[getTagColor(index)]}
-                `}
-              >
-                {tag}
-              </span>
+            {allTags.slice(0, 3).map((tag, index) => (
+              tag.type === 'gender' ? (
+                <StaticGenderTag key={`tag-${index}`} label={tag.label} />
+              ) : tag.type === 'experience' ? (
+                <StaticExperienceLevelTag key={`tag-${index}`} label={tag.label} />
+              ) : (
+                <StaticJobTypeTag key={`tag-${index}`} label={tag.label} />
+              )
             ))}
+            {allTags.length > 3 && (
+              <div className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
+                +{allTags.length - 3}
+              </div>
+            )}
           </div>
         </div>
 
@@ -153,11 +195,7 @@ export default function AppliedJobCard({
 
         {/* Salary - Fixed width */}
         <div className="w-32 min-w-0 flex-shrink-0">
-          <div className="flex items-center gap-1 px-2 py-1 bg-gray-neutral100 rounded-md w-fit">
-            <span className="font-inter font-medium text-mini whitespace-nowrap">
-              {formatSalary(job.salary, job.salaryType)}
-            </span>
-          </div>
+          <StaticSalaryTag label={`${job.salary} /${job.salaryPeriod}`} className="whitespace-nowrap" />
         </div>
 
         {/* Applied Date - Fixed width */}
@@ -229,22 +267,20 @@ export default function AppliedJobCard({
 
       {/* Tags */}
       <div className="flex-shrink-0 min-h-[32px]">
-        {job.tags && job.tags.length > 0 ? (
+        {allTags.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {job.tags.slice(0, 3).map((tag, index) => (
-              <span
-                key={index}
-                className={`
-                  px-2 py-1 rounded-md text-mini font-inter font-medium
-                  ${tagColors[getTagColor(index)]}
-                `}
-              >
-                {tag}
-              </span>
+            {allTags.slice(0, 3).map((tag, index) => (
+              tag.type === 'gender' ? (
+                <StaticGenderTag key={`tag-${index}`} label={tag.label} />
+              ) : tag.type === 'experience' ? (
+                <StaticExperienceLevelTag key={`tag-${index}`} label={tag.label} />
+              ) : (
+                <StaticJobTypeTag key={`tag-${index}`} label={tag.label} />
+              )
             ))}
-            {job.tags.length > 3 && (
-              <span className="px-2 py-1 rounded-md text-mini font-inter font-medium bg-gray-neutral100 text-gray-neutral700">
-                +{job.tags.length - 3}
+            {allTags.length > 3 && (
+              <span className="px-2 py-1 rounded-md text-mini font-inter font-medium bg-gray-neutral100 text-gray-neutral400">
+                +{allTags.length - 3}
               </span>
             )}
           </div>
@@ -260,11 +296,7 @@ export default function AppliedJobCard({
           <span className="font-inter text-mini text-gray-neutral700 truncate">{job.location}</span>
         </div>
 
-        <div className="flex items-center px-3 py-1 bg-gray-neutral100 rounded-md">
-          <span className="font-inter font-medium text-mini whitespace-nowrap">
-            {formatSalary(job.salary, job.salaryType)}
-          </span>
-        </div>
+        <StaticSalaryTag label={`${job.salary} /${job.salaryPeriod}`} className="whitespace-nowrap" />
       </div>
 
       {/* Applied Date */}
