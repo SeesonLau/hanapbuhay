@@ -181,7 +181,7 @@ export default function ManageJobPostsPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       {/* Banner Section with Header and Search */}
       <Banner 
         variant="manageJobPosts" 

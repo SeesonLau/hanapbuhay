@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaUserCircle } from 'react-icons/fa';
 import Image from 'next/image';
 import StarRating from '@/components/ui/StarRating';
 import ChatIcon from '@/assets/chat.svg';
 import ReviewIcon from '@/assets/review.svg';
+import { RatingModal } from '@/components/modals/RatingModal';
 
 interface ApplicantStatusCardProps {
   userId: string;
@@ -30,6 +31,7 @@ export default function ApplicantStatusCard({
   onProfileClick
 }: ApplicantStatusCardProps) {
   const router = useRouter();
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 
   const handleChatClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
@@ -38,7 +40,12 @@ export default function ApplicantStatusCard({
 
   const handleReviewClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click
-    console.log('Review clicked for', userId);
+    setIsRatingModalOpen(true);
+  };
+
+  const handleSubmitRating = (rating: number, comment: string) => {
+    console.log('Rating submitted:', { userId, rating, comment });
+    // TODO: Implement API call to submit rating
   };
 
   const statusClasses =
@@ -118,6 +125,14 @@ export default function ApplicantStatusCard({
           {status}
         </span>
       </div>
+
+      {/* Rating Modal */}
+      <RatingModal
+        isOpen={isRatingModalOpen}
+        onClose={() => setIsRatingModalOpen(false)}
+        workerName={name}
+        onSubmit={handleSubmitRating}
+      />
     </div>
   );
 }
