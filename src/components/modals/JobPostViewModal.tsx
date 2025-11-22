@@ -2,6 +2,15 @@
 
 import React, { useState } from "react";
 import {
+  getWhiteColor,
+  getNeutral100Color,
+  getNeutral300Color,
+  getNeutral600Color,
+  getBlackColor,
+  getPrimary500Color,
+} from "@/styles/colors";
+import { fontClasses } from "@/styles/fonts";
+import {
   StaticGenderTag,
   StaticExperienceLevelTag,
   StaticJobTypeTag,
@@ -95,22 +104,25 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: getBlackColor(0.5) }}
       onClick={onClose}
     >
       <div
-        className={`font-inter w-[600px] max-w-[95vw] max-h-[90vh] overflow-y-auto rounded-2xl shadow-lg border bg-white border-gray-neutral300 text-gray-neutral600`}
+        className={`${fontClasses.body} w-[600px] max-w-[95vw] max-h-[90vh] overflow-y-auto rounded-2xl shadow-lg border`}
+        style={{ backgroundColor: getWhiteColor(), borderColor: getNeutral300Color(), color: getNeutral600Color() }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="px-6 pt-6 pb-3 flex items-start justify-between">
-          <h2 className={`font-alexandria text-[24px] font-semibold text-gray-neutral900`}>
+          <h2 className={`${fontClasses.heading} text-[24px] font-semibold`} style={{ color: getBlackColor() }}>
             {title}
           </h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-2xl leading-none px-2 text-gray-neutral600"
+            className="text-2xl leading-none px-2"
+            style={{ color: getNeutral600Color() }}
           >
             ×
           </button>
@@ -141,27 +153,27 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
 
         {/* About this role */}
         <div className="px-6 pt-4">
-          <h3 className="text-[18px] font-semibold mb-2 text-gray-neutral900">
+          <h3 className="text-[18px] font-semibold mb-2" style={{ color: getBlackColor() }}>
             About this role
           </h3>
-          <p className="text-[14px] text-gray-neutral600">
+          <p className="text-[14px]" style={{ color: getNeutral600Color() }}>
             {description}
           </p>
         </div>
 
         {/* Requirements (always visible under About this role) */}
         <div className="px-6 pt-6">
-          <h3 className="text-[18px] font-semibold mb-2 text-gray-neutral900">
+          <h3 className="text-[18px] font-semibold mb-2" style={{ color: getBlackColor() }}>
             Requirements
           </h3>
           {requirements.length > 0 ? (
-            <ul className="space-y-1 text-[14px] text-gray-neutral600">
+            <ul className="space-y-1 text-[14px]" style={{ color: getNeutral600Color() }}>
               {requirements.map((item, idx) => (
                 <li key={`req-${idx}`}>• {item}</li>
               ))}
             </ul>
           ) : (
-            <p className="text-[14px] text-gray-neutral600">
+            <p className="text-[14px]" style={{ color: getNeutral600Color() }}>
               No specific requirements provided.
             </p>
           )}
@@ -170,7 +182,8 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
         {/* Profile container (between Requirements and footer) */}
         <div className="px-6 pt-6">
           <div
-            className="inline-flex items-center gap-3 px-4 py-2 rounded-lg border cursor-pointer bg-white border-gray-neutral300"
+            className="inline-flex items-center gap-3 px-4 py-2 rounded-lg border cursor-pointer"
+            style={{ backgroundColor: getWhiteColor(), borderColor: getNeutral300Color() }}
             onClick={() => setIsProfileOpen(true)}
           >
             <img
@@ -179,10 +192,10 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
               className="w-9 h-9 rounded-full object-cover"
             />
             <div className="leading-tight">
-              <div className="text-[14px] font-semibold text-gray-neutral900">
+              <div className="text-[14px] font-semibold" style={{ color: getBlackColor() }}>
                 {postedBy?.name ?? "Unknown Poster"}
               </div>
-              <div className="text-[12px] text-gray-neutral600">
+              <div className="text-[12px]" style={{ color: getNeutral600Color() }}>
                 {postedBy?.role ?? "Client"}
               </div>
             </div>
@@ -193,24 +206,28 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
         <div className="px-6 py-6">
           <div className={`flex items-center ${onApply ? 'justify-between' : 'justify-start'}`}>
             <div className="flex items-center gap-2">
-              <span className="text-[12px] font-medium text-gray-neutral600">
+              <span className="text-[12px] font-medium" style={{ color: getNeutral600Color() }}>
                 Posted on: {postedDate}
               </span>
-              <span className="text-gray-neutral400">•</span>
-              <span className="text-[12px] text-gray-neutral600">
+              <span className="text-gray-400">•</span>
+              <span className="text-[12px]" style={{ color: getNeutral600Color() }}>
                 {applicantCount} Applicants
               </span>
             </div>
             {onApply && (
               <button
                 onClick={() => onApply(id)}
-                className="px-4 py-2 rounded-lg text-white text-sm bg-primary-primary500 hover:bg-primary-primary600"
+                className="px-4 py-2 rounded-lg text-white text-sm"
+                style={{ backgroundColor: getPrimary500Color() }}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = getPrimary500Color(0.9))}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = getPrimary500Color())}
               >
                 Apply Now
               </button>
             )}
           </div>
         </div>
+
       </div>
     </div>
   );
