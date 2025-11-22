@@ -48,13 +48,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
     try {
       const result = await AuthService.login(email, password);
 
-      console.log('Login result:', {
-        success: result.success,
-        hasData: !!result.data,
-        needsConfirmation: result.needsConfirmation,
-        message: result.message
-      });
-
       // CRITICAL: Only navigate if BOTH success is true AND we have user data
       if (result.success === true && result.data) {
         console.log('✅ Login successful, redirecting to findJobs');
@@ -103,7 +96,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
   };
 
   return (
-    <div className="w-full max-w-sm mx-auto p-2">
+    <div className="w-full max-w-sm mx-auto p-2 sm:px-2 px-1">
       {/* Back Button */}
       {onBackClick && (
         <button
@@ -111,7 +104,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
           className="mb-1 hover:bg-gray-neutral100 rounded-full transition-colors"
           aria-label="Go back"
         >
-          <IoArrowBack className="w-6 h-6 text-gray-neutral800" />
+          <IoArrowBack className="w-6 h-6 text-white" />
         </button>
       )}
 
@@ -120,14 +113,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
         <Image
           src="/image/hanapbuhay-logo-notext.svg"
           alt="HanapBuhay Logo"
-          width={80}
-          height={80}
+          width={60}
+          height={60}
           priority
+          className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]"
         />
       </div>
 
       {/* Title */}
-      <h2 className="text-h3 font-bold text-gray-neutral900 text-center mb-4 font-alexandria">
+      <h2 className="text-h4 tablet: text-h3 font-bold text-white text-center mb-4 font-alexandria">
         Sign In
       </h2>
 
@@ -139,7 +133,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="p-3 rounded-lg text-small bg-error-50 text-error-700 border border-error-200">
+          <div 
+            className="p-3 rounded-lg text-small text-red-100 border"
+            style={{
+              background: 'rgba(239, 68, 68, 0.1)',
+              backdropFilter: 'blur(10px)',
+              borderColor: 'rgba(239, 68, 68, 0.3)'
+            }}
+          >
             {error}
           </div>
         )}
@@ -151,10 +152,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
             label="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
             autoComplete="email"
-            placeholder="juan.cruz@gmail.com"
+            placeholder="Email"
             disabled={loading}
+            variant="glassmorphism"
           />
         </div>
 
@@ -165,11 +166,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
             label="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
             autoComplete="current-password"
-            placeholder="••••••••"
+            placeholder="Password"
             enableValidation={false}
             disabled={loading}
+            variant="glassmorphism"
           />
         </div>
 
@@ -179,7 +180,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
             type="button"
             onClick={onForgotPassword}
             disabled={loading}
-            className="font-alexandria font-light text-small text-primary-primary600 hover:text-primary-primary700 font-light hover:underline disabled:opacity-50"
+            className="font-alexandria font-light text-mini sm:text-small text-primary-primary400 hover:text-primary-primary500 font-light hover:underline disabled:opacity-50"
           >
             Forgot Password?
           </button>
@@ -200,7 +201,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
         </Button>
 
         {needsConfirmation && (
-          <div className="border border-warning-200 rounded-lg text-small px-4 py-3 bg-warning-50 text-warning-800">
+          <div 
+            className="border rounded-lg text-small px-4 py-3 text-yellow-100"
+            style={{
+              background: 'rgba(245, 158, 11, 0.1)',
+              backdropFilter: 'blur(10px)',
+              borderColor: 'rgba(245, 158, 11, 0.3)'
+            }}
+          >
             <p className="font-medium mb-2">Email Verification Required</p>
             <p className="mb-3">Your email needs to be confirmed before you can sign in.</p>
             <Button
@@ -230,13 +238,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
         )}
 
         {/* Sign Up Link */}
-        <p className="text-center text-small text-gray-neutral600 mt-4 font-alexandria font-light">
+        <p className="text-center text-mini sm:text-small text-gray-300 mt-4 font-alexandria font-light">
           Don't have an account? Sign up {' '}
           <button
             type="button"
             onClick={onSignUpClick}
             disabled={loading}
-            className="font-alexandria font-light text-small text-primary-primary500 hover:text-primary-primary600 font-light hover:underline disabled:opacity-50"
+            className="font-alexandria font-light text-mini sm:text-small text-primary-primary400 hover:text-primary-primary500 font-light hover:underline disabled:opacity-50"
           >
             here
           </button>

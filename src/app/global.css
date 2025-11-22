@@ -9,6 +9,10 @@
   --font-alexandria: 'Alexandria', serif;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   @apply bg-gray-neutral100;
   font-family: var(--font-inter);

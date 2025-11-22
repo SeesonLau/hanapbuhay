@@ -3,12 +3,11 @@
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { FaSearch, FaUser, FaMapMarkerAlt } from 'react-icons/fa';
-import { getNeutral100Color, getBlueDarkColor } from '@/styles/colors';
 import { fontClasses } from '@/styles/fonts';
 
 export default function HowItWorksSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, amount: 0.2, margin: "-20% 0px -20% 0px" });
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -55,20 +54,19 @@ export default function HowItWorksSection() {
   return (
     <section 
       id="how-it-works" 
-      className="min-h-screen flex items-center justify-center relative py-24"
+      className="min-h-screen laptop:h-screen flex items-center justify-center relative py-24 laptop:snap-start laptop:snap-always"
       ref={ref}
     >
       <div className="container mx-auto px-4">
         {/* How It Works Heading - Centered above the content */}
         <motion.div 
-          className="text-center mb-20"
+          className="text-center mb-10 mobile-M:mb-12 tablet:mb-16 laptop:mb-20"
           initial={{ opacity: 0, y: -30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -30 }}
           transition={{ duration: 0.6 }}
         >
           <h2 
-            className={`text-6xl md:text-7xl font-bold ${fontClasses.heading}`}
-            style={{ color: getBlueDarkColor('default') }}
+            className={`text-h3 mobile-M:text-h2 tablet:text-h1 laptop:text-hero font-bold text-gray-neutral100 ${fontClasses.heading}`}
           >
             How It Works
           </h2>
@@ -76,7 +74,7 @@ export default function HowItWorksSection() {
         
         {/* Three Columns */}
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 max-w-7xl mx-auto"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mobile-M:gap-8 tablet:gap-10 laptop:gap-12 max-w-7xl mx-auto"
           variants={containerVariants}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
@@ -86,7 +84,7 @@ export default function HowItWorksSection() {
             return (
               <motion.div
                 key={index}
-                className="bg-white bg-opacity-10 backdrop-blur-md rounded-3xl p-10 border border-white border-opacity-20 flex flex-col items-center text-center"
+                className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl tablet:rounded-3xl p-6 mobile-M:p-8 tablet:p-10 border border-white border-opacity-20 flex flex-col items-center text-center"
                 style={{ 
                   backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
@@ -100,20 +98,19 @@ export default function HowItWorksSection() {
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 <motion.div 
-                  className="w-24 h-24 rounded-full bg-blue-500 bg-opacity-20 flex items-center justify-center mb-8"
+                  className="w-20 h-20 mobile-M:w-22 mobile-M:h-22 tablet:w-24 tablet:h-24 rounded-full bg-primary-primary500 bg-opacity-20 flex items-center justify-center mb-5 mobile-M:mb-6 tablet:mb-8"
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.6 }}
                 >
-                  <Icon className="text-4xl" style={{ color: getBlueDarkColor('default') }} />
+                  <Icon className="text-3xl mobile-M:text-[2.25rem] tablet:text-4xl text-blueDark-default" />
                 </motion.div>
                 <h3 
-                  className={`text-3xl font-bold mb-6 text-white ${fontClasses.heading}`}
+                  className={`text-body mobile-M:text-lead tablet:text-h3 laptop:text-h2 font-bold mb-4 mobile-M:mb-5 tablet:mb-6 text-white ${fontClasses.heading}`}
                 >
                   {step.title}
                 </h3>
                 <p 
-                  className={`text-xl ${fontClasses.body}`}
-                  style={{ color: getNeutral100Color() }}
+                  className={`text-small mobile-M:text-small tablet:text-body laptop:text-lead text-gray-neutral100 ${fontClasses.body}`}
                 >
                   {step.description}
                 </p>
