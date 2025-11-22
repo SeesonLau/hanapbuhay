@@ -140,7 +140,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
 
   return (
     <div 
-      className={`w-[420px] h-[250px] min-h-[250px] max-h-[250px] bg-white rounded-lg border border-gray-neutral200 shadow-sm p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300 cursor-pointer ${className}`}
+      className={`w-full min-h-[250px] bg-white rounded-lg border border-gray-neutral200 shadow-sm p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300 cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
       {/* Header */}
@@ -191,9 +191,9 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
       {/* Footer */}
       <div className="mt-auto space-y-[16px]">
         {/* Location and Salary */}
-        <div className="flex items-center gap-2">
-          <StaticLocationTag label={location} />
-          <StaticSalaryTag label={`${salary} /${salaryPeriod}`} />
+        <div className="flex flex-wrap items-center gap-2">
+          <StaticLocationTag label={location} className="whitespace-nowrap" />
+          <StaticSalaryTag label={`${salary} /${salaryPeriod}`} className="whitespace-nowrap" />
         </div>
 
         {/* Posted Date */}
