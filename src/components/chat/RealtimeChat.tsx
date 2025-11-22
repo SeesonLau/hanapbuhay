@@ -245,16 +245,6 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
         </div>
       )}
 
-      {isConnected ? (
-        <div className="bg-green-500 text-white text-center py-1 px-4 text-xs">
-          ✅ Real-time connected
-        </div>
-      ) : (
-        <div className="bg-red-500 text-white text-center py-1 px-4 text-xs">
-          ❌ Real-time disconnected
-        </div>
-      )}
-
       {/* Messages */}
       <div ref={containerRef} className="flex-1 overflow-y-auto p-4">
         {isLoading && (
