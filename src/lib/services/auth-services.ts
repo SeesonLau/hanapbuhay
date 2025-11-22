@@ -95,12 +95,26 @@ export class AuthService {
 
   static async login(email: string, password: string): Promise<AuthResponse> {
     try {
+      // Validate inputs
+      if (!email || !password) {
+        toast.error('Email and password are required');
+        return { success: false, message: 'Email and password are required' };
+      }
+
+      console.log('Attempting login for:', email);
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      console.log('Login response:', { hasData: !!data, hasError: !!error, hasSession: !!data?.session, hasUser: !!data?.user });
+
+      // CRITICAL: Check for errors first
       if (error) {
+        console.error('Login error:', error);
+        
+        // Handle specific error cases
         if (error.message.includes('Email not confirmed')) {
           return { 
             success: false, 
@@ -108,14 +122,41 @@ export class AuthService {
             needsConfirmation: true 
           };
         }
+        
+        if (error.message.includes('Invalid login credentials') || error.message.includes('Invalid')) {
+          toast.error('Invalid email or password');
+          return { success: false, message: 'Invalid email or password' };
+        }
+
         toast.error(error.message);
         return { success: false, message: error.message };
       }
 
+      // CRITICAL: Verify we actually have BOTH session AND user
+      if (!data?.session || !data?.user) {
+        console.error('Login failed - missing session or user:', { 
+          hasSession: !!data?.session, 
+          hasUser: !!data?.user 
+        });
+        toast.error('Login failed. Please try again.');
+        return { success: false, message: 'Login failed. No session created.' };
+      }
+
+      // Double-check the session is actually stored
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !sessionData?.session) {
+        console.error('Session validation error:', sessionError);
+        toast.error('Authentication failed. Please try again.');
+        return { success: false, message: 'Session validation failed.' };
+      }
+
+      console.log('Login successful for user:', data.user.email);
       return { success: true, data: data.user };
-    } catch (err) {
-      toast.error(AuthMessages.UNEXPECTED_ERROR);
-      return { success: false, message: AuthMessages.UNEXPECTED_ERROR };
+    } catch (err: any) {
+      console.error('Login exception:', err);
+      toast.error(err.message || AuthMessages.UNEXPECTED_ERROR);
+      return { success: false, message: err.message || AuthMessages.UNEXPECTED_ERROR };
     }
   }
 
@@ -170,7 +211,7 @@ export class AuthService {
                      'https://hanapbuhay.vercel.app';
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${siteUrl}/auth/callback?next=/reset-password`,
+        redirectTo: `${siteUrl}/reset-password`,
       });
 
       if (error) {
