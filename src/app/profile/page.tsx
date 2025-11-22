@@ -59,7 +59,7 @@ export default function ProfilePage() {
           {/* Fixed Banner */}
           <Banner variant="profile" showSearchBar={false} />
 
-          <main className="flex-grow flex p-3 pt-[14rem] ">
+          <main className="flex-grow flex p-3 pt-[14rem] mobile-M: pt-[9rem] mobile-L: pt-[10rem] tablet:pt-[12rem]">
             <div className="w-full h-full flex flex-col md:flex-row gap-10 md:gap-0">
               {user && <ProfileSection userId={user.userId} className="flex-1" />}
               <div className="hidden md:block w-px bg-gray-neutral300 md:-my-3"></div>
