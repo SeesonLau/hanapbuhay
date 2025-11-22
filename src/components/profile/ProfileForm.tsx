@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Profile } from "@/lib/models/profile";
 import { ProfileService } from "@/lib/services/profile-services";
 import { combineToStoredName } from "@/lib/utils/profile-utils";
-import upload2 from "@/assets/upload2.svg";
 import { FaUserCircle } from 'react-icons/fa';
 import { Edit3 } from 'lucide-react';
 import TextBox from "../ui/TextBox";
@@ -86,6 +85,12 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
     setPreviewUrl(URL.createObjectURL(file));
   };
 
+  const handleProfilePictureClick = () => {
+    if (isEditing) {
+      document.getElementById('profile-picture-input')?.click();
+    }
+  };
+
   const handleSave = async () => {
     if (!profile) return;
     setSaving(true);
@@ -125,7 +130,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className={`${className} relative py-7 px-10 bg-white rounded-xl shadow-md flex flex-col gap-6`}>
+    <div className={`${className} relative py-6 px-10 bg-white rounded-xl shadow-md flex flex-col gap-5`}>
 
       {/* Edit Icon */}
       <button
@@ -137,31 +142,30 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
 
       {/* Profile Picture Upload */}
       <div className="flex items-center justify-center gap-6">
-        <div className="relative flex-shrink-0">
+        <div 
+          className={`relative flex-shrink-0 ${isEditing ? 'cursor-pointer' : ''}`}
+          onClick={handleProfilePictureClick}
+        >
           {previewUrl ? (
             <img
               src={previewUrl}
               alt="Profile"
-              className="w-24 h-24 object-cover rounded-full border"
+              className={`w-24 h-24 object-cover rounded-full border ${isEditing ? 'hover:opacity-80 transition' : ''}`}
             />
           ) : (
-            <div className="w-24 h-24 flex items-center justify-center rounded-full bg-gray-neutral100">
+            <div className={`w-24 h-24 flex items-center justify-center rounded-full bg-gray-neutral100 ${isEditing ? 'hover:bg-gray-neutral200 transition' : ''}`}>
               <FaUserCircle className="w-24 h-24 text-gray-neutral400" />
             </div>
           )}
           
-          {/* Upload icon */}
-          {isEditing && (
-            <label className="absolute bottom-0 -right-5 p-2 rounded-full cursor-pointer flex items-center justify-center">
-              <img src={upload2.src} alt="Upload" className="w-5 h-5" />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-            </label>
-          )}
+          {/* Hidden file input */}
+          <input
+            id="profile-picture-input"
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
         </div>
 
         {displayName && (
@@ -280,20 +284,18 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
         />
       </div>
         
-      {/* Save Button */}
-      {isEditing && (
-        <div className="flex justify-center">
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            variant="primary400"
-            size="xl"
-            fullRounded={false}
-          > 
-            Save
-          </Button>
-        </div>
-      )}
+      {/* Save Button - Always rendered but only visible when editing */}
+      <div className={`flex justify-center transition-opacity duration-200 ${isEditing ? 'opacity-100' : 'opacity-0 pointer-events-none h-0'}`}>
+        <Button
+          onClick={handleSave}
+          disabled={saving}
+          variant="primary400"
+          size="xl"
+          fullRounded={false}
+        > 
+          Save
+        </Button>
+      </div>
     </div>
   );
 }
