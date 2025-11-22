@@ -1,8 +1,6 @@
 "use client";
 
 import React from 'react';
-import { getBlackColor, getNeutral600Color, getNeutral100Color, getNeutral400Color } from '@/styles/colors';
-import { fontClasses } from '@/styles/fonts';
 import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticLocationTag, StaticSalaryTag } from '@/components/ui/TagItem';
 import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
@@ -130,13 +128,13 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
 
   return (
     <div 
-      className={`w-[400px] h-[250px] min-h-[250px] max-h-[250px] bg-white rounded-lg border border-gray-200 shadow-sm p-[30px] flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-300 cursor-pointer ${className}`}
+      className={`w-[400px] h-[250px] min-h-[250px] max-h-[250px] bg-white rounded-lg border border-gray-neutral200 shadow-sm p-[30px] flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300 cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
       {/* Header */}
       <div className="flex-shrink-0 mb-[16px]">
-        <h3 className={`${fontClasses.heading} font-semibold text-[20px] mb-2 truncate`} style={{ color: getBlackColor() }}>{title}</h3>
-        <p className={`${fontClasses.body} font-light text-[12px] line-clamp-2`} style={{ color: getNeutral600Color() }}>{description}</p>
+        <h3 className={`font-alexandria font-semibold text-[20px] mb-2 truncate text-gray-neutral900`}>{title}</h3>
+        <p className={`font-inter font-light text-[12px] line-clamp-2 text-gray-neutral600`}>{description}</p>
       </div>
 
       {/* Tags Section - Single row that adapts to fit */}
@@ -154,7 +152,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
           ))}
         </div>
         {/* Measure overflow indicator width */}
-        <div ref={overflowMeasureRef} className="fixed -top-[9999px] -left-[9999px] inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]" style={{ backgroundColor: getNeutral100Color(), color: getNeutral400Color() }}>
+        <div ref={overflowMeasureRef} className="fixed -top-[9999px] -left-[9999px] inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
           99+
         </div>
 
@@ -170,8 +168,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
           ))}
           {extraCount > 0 && (
             <div
-              className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
-              style={{ backgroundColor: getNeutral100Color(), color: getNeutral400Color() }}
+              className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400"
             >
               {extraCount}+
             </div>
@@ -190,13 +187,13 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
         {/* Posted Date + Applicants + Apply Button (single row) */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className={`${fontClasses.body} font-medium text-[10px]`} style={{ color: getNeutral600Color() }}>Posted on: {postedDate}</span>
+            <span className={`font-inter font-medium text-[10px] text-gray-neutral600`}>Posted on: {postedDate}</span>
             <span className="text-gray-400">•</span>
-            <span className={`${fontClasses.body} text-[10px]`} style={{ color: getNeutral600Color() }}>{applicantCount} Applicants</span>
+            <span className={`font-inter text-[10px] text-gray-neutral600`}>{applicantCount} Applicants</span>
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); onApply?.(id); }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            className="px-4 py-2 bg-primary-primary500 text-white rounded-lg hover:bg-primary-primary600 transition-colors text-sm"
           >
             Apply Now
           </button>

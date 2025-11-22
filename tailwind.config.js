@@ -14,7 +14,7 @@ module.exports = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}", 
   ],
   theme: {
-  	extend: {
+   	extend: {
       screens: MinWidthScreens,
   		fontFamily: {
   			inter: [
@@ -40,7 +40,7 @@ module.exports = {
   			popup: '1.125rem',
   			mini: '0.6875rem'
   		},
-  		colors: {
+    		colors: {
   			blue: {
   				default: '#59ACFF',
   				hover: '#3289FF'
@@ -158,14 +158,28 @@ module.exports = {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
-  			chart: {
-  				'1': 'hsl(var(--chart-1))',
-  				'2': 'hsl(var(--chart-2))',
-  				'3': 'hsl(var(--chart-3))',
-  				'4': 'hsl(var(--chart-4))',
-  				'5': 'hsl(var(--chart-5))'
-  			}
-  		},
+    			chart: {
+        			'1': 'hsl(var(--chart-1))',
+        			'2': 'hsl(var(--chart-2))',
+        			'3': 'hsl(var(--chart-3))',
+        			'4': 'hsl(var(--chart-4))',
+        			'5': 'hsl(var(--chart-5))'
+        			}
+        ,
+        tag: {
+          genderText: '#968825',
+          genderBg: '#FDF38E',
+          genderSelectedBg: '#F2E559',
+          genderUnselectedBg: '#F5F0B7',
+          experienceText: '#297219',
+          experienceBg: '#B9F0A6',
+          experienceSelectedBg: '#8DE571',
+          experienceUnselectedBg: '#DBF7D0',
+          jobText: '#3289FF',
+          jobBg: '#D9ECFF',
+          jobUnselectedBg: '#BCDEFF'
+        }
+      },
   		backgroundColor: {
   			default: 'var(--background)'
   		},

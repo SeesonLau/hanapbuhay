@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { getWhiteColor, getBlackColor, getNeutral600Color, getBlueColor, getGreenColor, getYellowColor, getRedColor } from "@/styles/colors";
-import { fontClasses } from "@/styles/fonts";
+// Refactored to Tailwind theme tokens
 
 type ColorVariant = "blue" | "green" | "yellow" | "red";
 
@@ -21,16 +20,16 @@ const iconPathForTitle = (title: string): string => {
   return "/icons/stats-posted.svg";
 };
 
-const variantBg: Record<ColorVariant, string> = {
-  blue: getBlueColor(),
-  green: getGreenColor(),
-  yellow: getYellowColor(),
-  red: getRedColor(),
+const variantBgClass: Record<ColorVariant, string> = {
+  blue: "bg-blue-default",
+  green: "bg-success-success400", // use success tint for green
+  yellow: "bg-warning-warning300",
+  red: "bg-error-error500",
 };
 
 export const StatCardFindJobs: React.FC<StatCardFindJobsProps> = ({ title, value, variant = "blue", className = "" }) => {
   const iconSrc = iconPathForTitle(title);
-  const iconBg = variantBg[variant];
+  const iconBgClass = variantBgClass[variant];
 
   return (
     <div
@@ -45,7 +44,7 @@ export const StatCardFindJobs: React.FC<StatCardFindJobsProps> = ({ title, value
         style={{ 
           width: 'clamp(32px, 8vw, 40px)', 
           height: 'clamp(32px, 8vw, 40px)', 
-          backgroundColor: iconBg 
+          backgroundColor: iconBgClass 
         }}
       >
         <img 
