@@ -48,7 +48,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#141515' }}>
-        <div className="text-white">Loading...</div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
       </div>
     }>
       <ResetPasswordContent />

@@ -1,16 +1,14 @@
-// THIS IS login page
-
+// app/login/page.tsx
 'use client';
 
-import { useState } from 'react';
-import { LoginForm } from '@/components/auth/LoginForm';
-import { AuthService } from '@/lib/services/auth-services';
-import { ROUTES } from '@/lib/constants';
+import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { LoginForm } from '@/components/auth/LoginForm';
+import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const message = searchParams.get('message');
@@ -57,13 +55,13 @@ export default function LoginPage() {
           {/* Messages */}
           {message && (
             <div className="mb-6 p-3 rounded-lg bg-success-50 text-success-700 border border-success-200">
-              {message}
+              {decodeURIComponent(message)}
             </div>
           )}
           
           {error && (
             <div className="mb-6 p-3 rounded-lg bg-error-50 text-error-700 border border-error-200">
-              {error}
+              {decodeURIComponent(error)}
             </div>
           )}
 
@@ -74,5 +72,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#141515' }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

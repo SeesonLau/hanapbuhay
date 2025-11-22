@@ -1,12 +1,12 @@
-// THIS IS forgot-password page
-
+// app/forgot-password/page.tsx
 'use client';
 
+import { Suspense } from 'react';
 import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordContent() {
   return (
     <div className="min-h-screen flex" style={{ backgroundColor: '#141515' }}>
       {/* Left side - Illustration */}
@@ -42,6 +42,23 @@ export default function ForgotPasswordPage() {
           />
         </div>
       </div>
+    </div>
+  );
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
+      <Suspense fallback={
+        <div className="w-full max-w-md mx-auto p-6">
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-primary600 mx-auto"></div>
+            <p className="mt-4 text-gray-neutral600">Loading...</p>
+          </div>
+        </div>
+      }>
+        <ForgotPasswordContent />
+      </Suspense>
     </div>
   );
 }

@@ -1,11 +1,12 @@
-// THIS IS signup page
+// app/signup/page.tsx
 'use client';
 
+import { Suspense } from 'react';
 import { SignupForm } from '@/components/auth/SignupForm';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default function SignupPage() {
+function SignupContent() {
   return (
     <div className="min-h-screen flex" style={{ backgroundColor: '#141515' }}>
       {/* Left side - Signup Form */}
@@ -40,5 +41,17 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#141515' }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      </div>
+    }>
+      <SignupContent />
+    </Suspense>
   );
 }
