@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { inter, alexandria } from '@/styles/fonts';
 import '../app/global.css'
 import { Toaster } from 'react-hot-toast'
+import { SupabaseHashHandler } from '@/components/auth/SupabaseHashHandler';
 
 export const metadata: Metadata = {
   title: 'Hanapbuhay',
@@ -21,6 +22,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${alexandria.variable}`} >
       <body className="min-h-screen relative" suppressHydrationWarning>       
         <Toaster position="top-center" />
+        <SupabaseHashHandler />
         {children}
       </body>
     </html>
