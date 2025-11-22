@@ -1,17 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  getWhiteColor, 
-  getGrayColor, 
-  getNeutral100Color,
-  getNeutral300Color,
-  getNeutral600Color,
-  getPrimary500Color,
-  getRedColor
-} from '@/styles/colors';
-import { fontClasses } from '@/styles/fonts';
-import { TYPOGRAPHY } from '@/styles/typography';
+import { FiX, FiLock, FiGlobe, FiBell, FiCheck } from 'react-icons/fi';
+import { AuthService } from '@/lib/services/auth-services';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -34,17 +25,8 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
     language: 'en',
   });
 
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-
-  const [errors, setErrors] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
+  const [resetPasswordMessage, setResetPasswordMessage] = useState('');
+  const [isSendingResetEmail, setIsSendingResetEmail] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -66,77 +48,37 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
     }
   };
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPasswordData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // Clear error when user starts typing
-    setErrors(prev => ({
-      ...prev,
-      [name]: ''
-    }));
-  };
-
-  const validatePasswordForm = () => {
-    let isValid = true;
-    const newErrors = {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    };
-
-    // Validate current password
-    if (!passwordData.currentPassword.trim()) {
-      newErrors.currentPassword = 'Please enter your current password.';
-      isValid = false;
+  const handleSendResetEmail = async () => {
+    if (!user?.email) {
+      setResetPasswordMessage('User email not found. Please log in again.');
+      return;
     }
 
-    // Validate new password
-    if (!passwordData.newPassword.trim()) {
-      newErrors.newPassword = 'Please enter a new password.';
-      isValid = false;
-    } else if (passwordData.newPassword.length < 8 || passwordData.newPassword.length > 20) {
-      newErrors.newPassword = 'Password must be 8–20 characters.';
-      isValid = false;
-    }
+    setIsSendingResetEmail(true);
+    setResetPasswordMessage('');
 
-    // Validate confirm password
-    if (!passwordData.confirmPassword.trim()) {
-      newErrors.confirmPassword = 'Please confirm your password.';
-      isValid = false;
-    } else if (passwordData.confirmPassword !== passwordData.newPassword) {
-      newErrors.confirmPassword = 'Passwords do not match.';
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (validatePasswordForm()) {
-      // Here you would typically send the password change request to your backend
-      console.log('Password change submitted:', passwordData);
+    try {
+      const result = await AuthService.forgotPassword(user.email);
       
-      // Reset form after successful submission
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
+      if (result.success) {
+        setResetPasswordMessage('Password reset instructions have been sent to your email.');
+      } else {
+        setResetPasswordMessage(result.message || 'Failed to send reset instructions. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error sending reset email:', error);
+      setResetPasswordMessage('An error occurred. Please try again.');
+    } finally {
+      setIsSendingResetEmail(false);
       
-      // Show success message (you could add a state for this)
-      alert('Password changed successfully!');
+      // Hide message after 5 seconds
+      setTimeout(() => {
+        setResetPasswordMessage('');
+      }, 5000);
     }
   };
 
   const handleSave = () => {
-    // Here you would typically save the settings to your backend
     console.log('Saving settings:', settings);
     onClose();
   };
@@ -145,241 +87,104 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
 
   return (
     <div 
-      className="fixed inset-0 flex items-center justify-center z-50 p-4 transition-opacity duration-300"
-      style={{ backgroundColor: getWhiteColor(0.5) }}
+      className="fixed inset-0 flex items-center justify-center z-50 p-3 mobile-M:p-4 transition-opacity duration-300 animate-in fade-in bg-black/50"
       onClick={onClose}
     >
       <div 
-        className={`${fontClasses.body} rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto transition-transform duration-300`}
-        style={{ 
-          backgroundColor: getNeutral100Color(),
-          color: getGrayColor('neutral600')
-        }}
+        className="font-inter bg-white rounded-xl shadow-2xl w-full max-w-[280px] mobile-M:max-w-[320px] mobile-L:max-w-[380px] tablet:max-w-md animate-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 
-          className="text-xl font-semibold mb-6"
-          style={{ 
-            fontSize: TYPOGRAPHY.h3.fontSize,
-            fontFamily: TYPOGRAPHY.h3.fontFamily,
-            fontWeight: TYPOGRAPHY.h3.fontWeight,
-            color: getGrayColor('neutral600')
-          }}
-        >
-          Settings
-        </h2>
-        
-        {user && (
-          <div 
-            className="mb-6 p-4 rounded-lg border"
-            style={{ 
-              backgroundColor: getWhiteColor(),
-              borderColor: getGrayColor('border')
-            }}
+        {/* Header */}
+        <div className="flex items-center justify-between p-3 mobile-L:p-4 border-b border-gray-neutral200">
+          <h2 className="text-body mobile-L:text-lead font-semibold text-gray-neutral900">
+            Settings
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg transition-all hover:bg-gray-neutral100 active:scale-95"
+            aria-label="Close settings"
           >
-            <h3 
-              className="font-medium mb-3"
-              style={{ color: getGrayColor('neutral600') }}
-            >
-              User Information
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p 
-                  className="text-sm"
-                  style={{ color: getGrayColor('neutral600') }}
-                >
-                  <span className="font-medium">Email:</span> {user.email}
-                </p>
-              </div>
-              <div>
-                <p 
-                  className="text-sm"
-                  style={{ color: getGrayColor('neutral600') }}
-                >
-                  <span className="font-medium">User ID:</span> {user.userId}
-                </p>
-              </div>
-              <div>
-                <p 
-                  className="text-sm"
-                  style={{ color: getGrayColor('neutral600') }}
-                >
-                  <span className="font-medium">Role:</span> {user.role}
-                </p>
-              </div>
-              <div>
-                <p 
-                  className="text-sm"
-                  style={{ color: getGrayColor('neutral600') }}
-                >
-                  <span className="font-medium">Member since:</span> {new Date(user.createdAt).toLocaleDateString()}
-                </p>
-              </div>
+            <FiX size={20} className="text-gray-neutral600" />
+          </button>
+        </div>
+
+        {/* Content - No Scroll */}
+        <div className="p-3 mobile-L:p-4 space-y-3 mobile-L:space-y-4">
+          
+          {/* Reset Password Section */}
+          <div className="p-3 rounded-lg border border-gray-neutral200 bg-gray-neutral50">
+            <div className="flex items-center gap-2 mb-2">
+              <FiLock size={16} className="text-primary-primary500" />
+              <h3 className="text-small mobile-L:text-body font-semibold text-gray-neutral900">
+                Reset Password
+              </h3>
             </div>
-          </div>
-        )}
-        
-        <div className="space-y-6">
-          {/* Password Change Section */}
-          <div 
-            className="p-4 rounded-lg border"
-            style={{ 
-              backgroundColor: getWhiteColor(),
-              borderColor: getGrayColor('border')
-            }}
-          >
-            <h3 
-              className="font-medium mb-4"
-              style={{ color: getGrayColor('neutral600') }}
+
+            {resetPasswordMessage && (
+              <div 
+                className={`mb-2 p-2 rounded-lg flex items-center gap-2 animate-in slide-in-from-top-2 border ${
+                  resetPasswordMessage.includes('sent')
+                    ? 'bg-success-success50 border-success-success200'
+                    : 'bg-error-error50 border-error-error200'
+                }`}
+              >
+                <FiCheck 
+                  size={14} 
+                  className={resetPasswordMessage.includes('sent') ? 'text-success-success600' : 'text-error-error600'}
+                />
+                <span 
+                  className={`text-tiny mobile-L:text-small font-medium ${
+                    resetPasswordMessage.includes('sent') ? 'text-success-success700' : 'text-error-error700'
+                  }`}
+                >
+                  {resetPasswordMessage}
+                </span>
+              </div>
+            )}
+
+            <p className="text-tiny mobile-L:text-small mb-2 text-gray-neutral600">
+              Send reset instructions to {user?.email || 'your email'}
+            </p>
+
+            <button
+              type="button"
+              onClick={handleSendResetEmail}
+              disabled={isSendingResetEmail}
+              className="w-full px-3 py-2 rounded-lg transition-all font-medium text-tiny mobile-L:text-small active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-primary-primary500 hover:bg-primary-primary600 text-white"
             >
-              Change Password
-            </h3>
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
-              <div>
-                <label 
-                  className="block text-sm font-medium mb-1"
-                  style={{ color: getGrayColor('neutral600') }}
-                >
-                  Current Password
-                </label>
-                <input
-                  type="password"
-                  name="currentPassword"
-                  value={passwordData.currentPassword}
-                  onChange={handlePasswordChange}
-                  className={`w-full rounded-md border p-2 transition-colors duration-300`}
-                  style={{ 
-                    borderColor: errors.currentPassword ? getRedColor() : getGrayColor('border'),
-                    color: getGrayColor('neutral600'),
-                    backgroundColor: getWhiteColor()
-                  }}
-                  placeholder="Enter current password"
-                />
-                {errors.currentPassword && (
-                  <p 
-                    className="mt-1 text-sm"
-                    style={{ color: getRedColor() }}
-                  >
-                    {errors.currentPassword}
-                  </p>
-                )}
-              </div>
-              
-              <div>
-                <label 
-                  className="block text-sm font-medium mb-1"
-                  style={{ color: getGrayColor('neutral600') }}
-                >
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={passwordData.newPassword}
-                  onChange={handlePasswordChange}
-                  className={`w-full rounded-md border p-2 transition-colors duration-300`}
-                  style={{ 
-                    borderColor: errors.newPassword ? getRedColor() : getGrayColor('border'),
-                    color: getGrayColor('neutral600'),
-                    backgroundColor: getWhiteColor()
-                  }}
-                  placeholder="Enter new password (8-20 characters)"
-                />
-                {errors.newPassword && (
-                  <p 
-                    className="mt-1 text-sm"
-                    style={{ color: getRedColor() }}
-                  >
-                    {errors.newPassword}
-                  </p>
-                )}
-              </div>
-              
-              <div>
-                <label 
-                  className="block text-sm font-medium mb-1"
-                  style={{ color: getGrayColor('neutral600') }}
-                >
-                  Confirm New Password
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordChange}
-                  className={`w-full rounded-md border p-2 transition-colors duration-300`}
-                  style={{ 
-                    borderColor: errors.confirmPassword ? getRedColor() : getGrayColor('border'),
-                    color: getGrayColor('neutral600'),
-                    backgroundColor: getWhiteColor()
-                  }}
-                  placeholder="Confirm new password"
-                />
-                {errors.confirmPassword && (
-                  <p 
-                    className="mt-1 text-sm"
-                    style={{ color: getRedColor() }}
-                  >
-                    {errors.confirmPassword}
-                  </p>
-                )}
-              </div>
-              
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-md transition-colors duration-300"
-                  style={{ 
-                    backgroundColor: getPrimary500Color(),
-                    color: getWhiteColor()
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.backgroundColor = getPrimary500Color(0.8);
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.backgroundColor = getPrimary500Color();
-                  }}
-                >
-                  Change Password
-                </button>
-              </div>
-            </form>
+              {isSendingResetEmail ? (
+                <>
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <FiLock size={14} />
+                  Send Reset Instructions
+                </>
+              )}
+            </button>
           </div>
           
           {/* Preferences Section */}
-          <div 
-            className="p-4 rounded-lg border"
-            style={{ 
-              backgroundColor: getWhiteColor(),
-              borderColor: getGrayColor('border')
-            }}
-          >
-            <h3 
-              className="font-medium mb-4"
-              style={{ color: getGrayColor('neutral600') }}
-            >
-              Preferences
-            </h3>
+          <div className="p-3 rounded-lg border border-gray-neutral200 bg-gray-neutral50">
+            <div className="flex items-center gap-2 mb-3">
+              <FiGlobe size={16} className="text-primary-primary500" />
+              <h3 className="text-small mobile-L:text-body font-semibold text-gray-neutral900">
+                Preferences
+              </h3>
+            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 mobile-L:grid-cols-2 gap-2 mobile-L:gap-3 mb-3">
               <div>
-                <label 
-                  className="block text-sm font-medium mb-2"
-                  style={{ color: getGrayColor('neutral600') }}
-                >
+                <label className="block text-tiny mobile-L:text-small font-medium mb-1 text-gray-neutral700">
                   Theme
                 </label>
                 <select
                   name="theme"
                   value={settings.theme}
                   onChange={handleInputChange}
-                  className="w-full rounded-md border p-2 transition-colors duration-300"
-                  style={{ 
-                    borderColor: getGrayColor('border'),
-                    color: getGrayColor('neutral600'),
-                    backgroundColor: getWhiteColor()
-                  }}
+                  className="w-full rounded-lg border border-gray-neutral300 bg-white p-2 text-tiny mobile-L:text-small transition-all focus:ring-2 focus:ring-primary-primary500 focus:border-primary-primary500 outline-none text-gray-neutral900"
                 >
                   <option value="light">Light</option>
                   <option value="dark">Dark</option>
@@ -388,22 +193,14 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
               </div>
               
               <div>
-                <label 
-                  className="block text-sm font-medium mb-2"
-                  style={{ color: getGrayColor('neutral600') }}
-                >
+                <label className="block text-tiny mobile-L:text-small font-medium mb-1 text-gray-neutral700">
                   Language
                 </label>
                 <select
                   name="language"
                   value={settings.language}
                   onChange={handleInputChange}
-                  className="w-full rounded-md border p-2 transition-colors duration-300"
-                  style={{ 
-                    borderColor: getGrayColor('border'),
-                    color: getGrayColor('neutral600'),
-                    backgroundColor: getWhiteColor()
-                  }}
+                  className="w-full rounded-lg border border-gray-neutral300 bg-white p-2 text-tiny mobile-L:text-small transition-all focus:ring-2 focus:ring-primary-primary500 focus:border-primary-primary500 outline-none text-gray-neutral900"
                 >
                   <option value="en">English</option>
                   <option value="es">Spanish</option>
@@ -413,49 +210,35 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
               </div>
             </div>
             
-            <div className="mt-4">
-              <label 
-                className="block text-sm font-medium mb-2"
-                style={{ color: getGrayColor('neutral600') }}
-              >
-                Notifications
-              </label>
-              <div className="space-y-2">
-                <label className="flex items-center">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <FiBell size={14} className="text-primary-primary500" />
+                <label className="text-tiny mobile-L:text-small font-medium text-gray-neutral700">
+                  Notifications
+                </label>
+              </div>
+              <div className="space-y-2 pl-5">
+                <label className="flex items-center cursor-pointer group">
                   <input
                     type="checkbox"
                     name="email"
                     checked={settings.notifications.email}
                     onChange={handleInputChange}
-                    className="rounded border-gray-300 transition-colors duration-300"
-                    style={{ 
-                      color: getPrimary500Color(),
-                      borderColor: getGrayColor('border')
-                    }}
+                    className="w-4 h-4 rounded transition-all cursor-pointer accent-primary-primary500"
                   />
-                  <span 
-                    className="ml-2 text-sm"
-                    style={{ color: getGrayColor('neutral600') }}
-                  >
+                  <span className="ml-2 text-tiny mobile-L:text-small group-hover:translate-x-0.5 transition-transform text-gray-neutral700">
                     Email notifications
                   </span>
                 </label>
-                <label className="flex items-center">
+                <label className="flex items-center cursor-pointer group">
                   <input
                     type="checkbox"
                     name="push"
                     checked={settings.notifications.push}
                     onChange={handleInputChange}
-                    className="rounded border-gray-300 transition-colors duration-300"
-                    style={{ 
-                      color: getPrimary500Color(),
-                      borderColor: getGrayColor('border')
-                    }}
+                    className="w-4 h-4 rounded transition-all cursor-pointer accent-primary-primary500"
                   />
-                  <span 
-                    className="ml-2 text-sm"
-                    style={{ color: getGrayColor('neutral600') }}
-                  >
+                  <span className="ml-2 text-tiny mobile-L:text-small group-hover:translate-x-0.5 transition-transform text-gray-neutral700">
                     Push notifications
                   </span>
                 </label>
@@ -464,36 +247,17 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
           </div>
         </div>
         
-        <div className="mt-8 flex justify-end space-x-3">
+        {/* Footer */}
+        <div className="flex flex-col mobile-L:flex-row justify-end gap-2 p-3 mobile-L:p-4 border-t border-gray-neutral200">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-md transition-colors duration-300"
-            style={{ 
-              backgroundColor: getGrayColor('neutral300'),
-              color: getGrayColor('neutral600')
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = getGrayColor('neutral400');
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = getGrayColor('neutral300');
-            }}
+            className="w-full mobile-L:w-auto px-4 py-2 rounded-lg transition-all font-medium text-tiny mobile-L:text-small hover:bg-gray-neutral400 active:scale-[0.98] bg-gray-neutral300 text-gray-neutral900"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 rounded-md transition-colors duration-300"
-            style={{ 
-              backgroundColor: getPrimary500Color(),
-              color: getWhiteColor()
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = getPrimary500Color(0.8);
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = getPrimary500Color();
-            }}
+            className="w-full mobile-L:w-auto px-4 py-2 rounded-lg transition-all font-medium text-tiny mobile-L:text-small active:scale-[0.98] bg-primary-primary500 hover:bg-primary-primary600 text-white"
           >
             Save Preferences
           </button>
