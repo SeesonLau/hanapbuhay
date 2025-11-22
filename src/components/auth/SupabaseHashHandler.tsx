@@ -16,6 +16,8 @@ export function SupabaseHashHandler() {
         
         if (!hash) return;
 
+        console.log('📧 Hash detected in URL, processing...');
+
         // Parse hash parameters
         const hashParams = new URLSearchParams(hash.substring(1));
         const accessToken = hashParams.get('access_token');
@@ -26,7 +28,7 @@ export function SupabaseHashHandler() {
 
         // Handle errors
         if (error) {
-          console.error('Auth error from hash:', error, errorDescription);
+          console.error('❌ Auth error from hash:', error, errorDescription);
           window.history.replaceState(null, '', window.location.pathname);
           router.push(`/login?error=${encodeURIComponent(errorDescription || error)}`);
           return;
@@ -34,6 +36,8 @@ export function SupabaseHashHandler() {
 
         // Handle password recovery
         if (type === 'recovery' && accessToken) {
+          console.log('🔑 Password recovery detected, setting session...');
+          
           // Set the session using the tokens from the hash
           const { error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
@@ -41,12 +45,13 @@ export function SupabaseHashHandler() {
           });
 
           if (sessionError) {
-            console.error('Session error:', sessionError);
+            console.error('❌ Session error:', sessionError);
             window.history.replaceState(null, '', window.location.pathname);
             router.push(`/forgot-password?error=${encodeURIComponent('Session expired. Please request a new reset link.')}`);
             return;
           }
 
+          console.log('✅ Recovery session set, redirecting to reset-password');
           // Clear the hash and redirect to reset password page
           window.history.replaceState(null, '', window.location.pathname);
           router.push('/reset-password');
@@ -55,18 +60,21 @@ export function SupabaseHashHandler() {
 
         // Handle email confirmation (signup)
         if (type === 'signup' && accessToken) {
+          console.log('📧 Email confirmation detected, setting session...');
+          
           const { error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken || '',
           });
 
           if (sessionError) {
-            console.error('Session error:', sessionError);
+            console.error('❌ Session error:', sessionError);
             window.history.replaceState(null, '', window.location.pathname);
             router.push(`/login?error=${encodeURIComponent('Email confirmation failed. Please try again.')}`);
             return;
           }
 
+          console.log('✅ Signup session set, redirecting to findJobs');
           window.history.replaceState(null, '', window.location.pathname);
           router.push('/findJobs?message=Email confirmed! Welcome to HanapBuhay.');
           return;
@@ -74,25 +82,28 @@ export function SupabaseHashHandler() {
 
         // Handle magic link
         if (type === 'magiclink' && accessToken) {
+          console.log('🔗 Magic link detected, setting session...');
+          
           const { error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken || '',
           });
 
           if (sessionError) {
-            console.error('Session error:', sessionError);
+            console.error('❌ Session error:', sessionError);
             window.history.replaceState(null, '', window.location.pathname);
             router.push(`/login?error=${encodeURIComponent('Magic link expired. Please try again.')}`);
             return;
           }
 
+          console.log('✅ Magic link session set, redirecting to findJobs');
           window.history.replaceState(null, '', window.location.pathname);
           router.push('/findJobs');
           return;
         }
 
       } catch (error) {
-        console.error('Error handling hash:', error);
+        console.error('❌ Error handling hash:', error);
       }
     };
 
