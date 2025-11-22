@@ -1,0 +1,43 @@
+{
+  "title": "Settings",
+  "userInfo": {
+    "title": "User Information",
+    "email": "Email:",
+    "userId": "User ID:",
+    "role": "Role:",
+    "memberSince": "Member since:"
+  },
+  "password": {
+    "title": "Change Password",
+    "currentLabel": "Current Password",
+    "newLabel": "New Password",
+    "confirmLabel": "Confirm New Password",
+    "currentPlaceholder": "Enter current password",
+    "newPlaceholder": "Enter new password (8-20 characters)",
+    "confirmPlaceholder": "Confirm new password",
+    "submitButton": "Change Password",
+    "successMessage": "Password changed successfully!",
+    "errorCurrentRequired": "Please enter your current password.",
+    "errorNewRequired": "Please enter a new password.",
+    "errorLength": "Password must be 8–20 characters.",
+    "errorConfirmRequired": "Please confirm your password.",
+    "errorNoMatch": "Passwords do not match."
+  },
+  "preferences": {
+    "title": "Preferences",
+    "themeLabel": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "languageLabel": "Language",
+    "languageEnglish": "English",
+    "languageTagalog": "Tagalog",
+    "notificationsLabel": "Notifications",
+    "notificationsEmail": "Email notifications",
+    "notificationsPush": "Push notifications"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "save": "Save Preferences"
+  }
+}

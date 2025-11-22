@@ -254,7 +254,7 @@ export default function FindJobsPage() {
       </div>
 
       {/* Modal */}
-      <ViewProfileModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
       <JobPostViewModal
         isOpen={isJobViewOpen}
         onClose={() => setIsJobViewOpen(false)}

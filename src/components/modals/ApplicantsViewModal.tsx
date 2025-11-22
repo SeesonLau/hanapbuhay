@@ -102,9 +102,9 @@ export default function ApplicantsModal({
         {/* Header */}
         <div className="flex items-center justify-between border-b pb-3 gap-4 mb-3">
           <div className="flex items-center gap-2">
-            <h2 className="font-inter text-title font-semibold text-gray-neutral800">
+            <h3 className="font-inter font-semibold text-gray-neutral800">
               {truncateTitle(title)}
-            </h2>
+            </h3>
             <span className="font-inter font-semibold text-primary-primary400 text-small ml-2">
               • {applicantCount} Applicants
             </span>

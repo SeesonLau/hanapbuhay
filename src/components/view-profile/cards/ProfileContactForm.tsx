@@ -40,7 +40,7 @@ export default function ProfileContactForm({
           </div>
         )}
         <div>
-          <p className="font-alexandria font-medium description">{name}</p>
+          <p className="font-alexandria font-medium body">{name}</p>
           {gender && age && (
             <p className="text-primary-primary400 tiny">{gender} • {age} years old</p>
           )}
