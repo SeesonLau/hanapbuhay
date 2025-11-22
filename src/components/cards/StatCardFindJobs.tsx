@@ -40,11 +40,10 @@ export const StatCardFindJobs: React.FC<StatCardFindJobsProps> = ({ title, value
     >
       {/* Icon */}
       <div
-        className="flex items-center justify-center rounded-md tablet:rounded-lg flex-shrink-0"
+        className={`flex items-center justify-center rounded-md tablet:rounded-lg flex-shrink-0 ${iconBgClass}`}
         style={{ 
           width: 'clamp(32px, 8vw, 40px)', 
           height: 'clamp(32px, 8vw, 40px)', 
-          backgroundColor: iconBgClass 
         }}
       >
         <img 

@@ -128,17 +128,17 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
 
   return (
     <div 
-      className={`w-[400px] h-[250px] min-h-[250px] max-h-[250px] bg-white rounded-lg border border-gray-neutral200 shadow-sm p-[30px] flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300 cursor-pointer ${className}`}
+      className={`w-full h-auto min-h-[220px] mobile-M:min-h-[240px] mobile-L:min-h-[250px] tablet:min-h-[250px] bg-white rounded-lg border border-gray-neutral200 shadow-sm p-4 mobile-M:p-5 mobile-L:p-6 tablet:p-[30px] flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300 cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
       {/* Header */}
-      <div className="flex-shrink-0 mb-[16px]">
-        <h3 className={`font-alexandria font-semibold text-[20px] mb-2 truncate text-gray-neutral900`}>{title}</h3>
-        <p className={`font-inter font-light text-[12px] line-clamp-2 text-gray-neutral600`}>{description}</p>
+      <div className="flex-shrink-0 mb-3 mobile-M:mb-4 tablet:mb-[16px]">
+        <h3 className={`font-alexandria font-semibold text-body mobile-M:text-lead mobile-L:text-title tablet:text-[20px] mb-1 mobile-M:mb-2 line-clamp-1 text-gray-neutral900 h-[1.5em]`}>{title}</h3>
+        <p className={`font-inter font-light text-tiny mobile-M:text-small tablet:text-[12px] line-clamp-1 text-gray-neutral600 h-[1.2em]`}>{description}</p>
       </div>
 
       {/* Tags Section - Single row that adapts to fit */}
-      <div className="mb-[16px]">
+      <div className="mb-3 mobile-M:mb-4 tablet:mb-[16px]">
         {/* Hidden measurers to calculate widths without wrapping */}
         <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
           {allTags.map((tag, index) => (
@@ -156,7 +156,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
           99+
         </div>
 
-        <div ref={tagsRowRef} className="flex flex-nowrap gap-1 overflow-hidden whitespace-nowrap items-center">
+        <div ref={tagsRowRef} className="flex flex-wrap gap-1 items-center min-h-[17px]">
           {visibleTags.map((tag, index) => (
             tag.type === 'gender' ? (
               <StaticGenderTag key={`tag-${index}`} label={tag.label} />
@@ -177,23 +177,23 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
       </div>
 
       {/* Footer */}
-      <div className="mt-auto space-y-[16px]">
+      <div className="mt-auto space-y-3 mobile-M:space-y-4 tablet:space-y-[16px]">
         {/* Location and Salary */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <StaticLocationTag label={location} />
           <StaticSalaryTag label={`${salary} /${salaryPeriod}`} />
         </div>
 
-        {/* Posted Date + Applicants + Apply Button (single row) */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className={`font-inter font-medium text-[10px] text-gray-neutral600`}>Posted on: {postedDate}</span>
-            <span className="text-gray-400">•</span>
-            <span className={`font-inter text-[10px] text-gray-neutral600`}>{applicantCount} Applicants</span>
+        {/* Posted Date + Applicants + Apply Button */}
+        <div className="flex flex-col mobile-M:flex-row items-start mobile-M:items-center justify-between gap-2 mobile-M:gap-0">
+          <div className="flex items-center gap-1.5 mobile-M:gap-2 flex-wrap">
+            <span className={`font-inter font-medium text-[9px] mobile-M:text-[10px] text-gray-neutral600`}>Posted on: {postedDate}</span>
+            <span className="text-gray-400 hidden mobile-M:inline">•</span>
+            <span className={`font-inter text-[9px] mobile-M:text-[10px] text-gray-neutral600`}>{applicantCount} Applicants</span>
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); onApply?.(id); }}
-            className="px-4 py-2 bg-primary-primary500 text-white rounded-lg hover:bg-primary-primary600 transition-colors text-sm"
+            className="px-3 mobile-M:px-4 py-1.5 mobile-M:py-2 bg-primary-primary500 text-white rounded-lg hover:bg-primary-primary600 transition-colors text-tiny mobile-M:text-small whitespace-nowrap"
           >
             Apply Now
           </button>
