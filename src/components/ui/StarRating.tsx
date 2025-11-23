@@ -8,7 +8,7 @@
     variant?: Variant
     value?: number 
     onChange?: (v: number) => void 
-    size?: 'vs' | 'sm' | 'md' | 'lg' 
+    size?: 'vs' | 'sm' | 'md' | 'lg' | 'xlg' | 'xxlg'
     className?: string
     max?: number
     labelVariant?: LabelVariant
@@ -19,15 +19,15 @@
     vs: 'w-3 h-3',
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
-    lg: 'w-6 h-6',
+    lg: 'w-8 h-8',
+    xlg: 'w-9 h-9',
+    xxlg: 'w-10 h-10',
   }
 
   // star svg path
   function StarIcon(props: { className?: string }) {
     return (
       <svg
-        width="15"
-        height="14"
         viewBox="0 0 15 14"
         fill="currentColor"
         aria-hidden="true"
@@ -92,7 +92,7 @@
 
     return (
       <div
-        className={`inline-flex items-center space-x-2 ${className}`}
+        className={`inline-flex items-center ${labelVariant !== 'none' ? 'space-x-2' : ''} ${className}`}
         role={variant === 'rating' ? 'slider' : undefined}
         aria-valuemin={variant === 'rating' ? 1 : undefined}
         aria-valuemax={variant === 'rating' ? max : undefined}
@@ -101,7 +101,7 @@
         onKeyDown={onKeyDown}
         aria-label={variant === 'rating' ? `Rate ${max} stars` : undefined}
       >
-        <div className="flex items-center gap-1">
+        <div className={`flex items-center ${size === 'xlg' ? 'gap-3' : 'gap-1'}`}>
           {stars.map((star) => {
             const fillLevel = Math.max(0, Math.min(1, (displayed || 0) - (star - 1)))
             const isInteractive = variant === 'rating'
@@ -126,8 +126,8 @@
             // non-interactive display: render a span with no hover effects or pointer cursor
             if (!isInteractive) {
               return (
-                <span key={star} className={`relative p-0 leading-none ${SIZE_MAP[size]}`}>
-                  <div className="relative inline-block">
+                <span key={star} className={`relative flex-shrink-0 ${SIZE_MAP[size]}`}>
+                  <div className={`relative ${SIZE_MAP[size]}`}>
                     {/* Background gray star */}
                     <StarIcon className={`${SIZE_MAP[size]} text-gray-300`} />
                     {/* Yellow fill based on fillLevel */}
@@ -152,7 +152,7 @@
               <button
                 key={star}
                 type="button"
-                className={`relative p-0 leading-none cursor-pointer focus:outline-none ${SIZE_MAP[size]}`}
+                className={`relative p-0 leading-none cursor-pointer focus:outline-none flex-shrink-0 ${SIZE_MAP[size]}`}
                 onMouseEnter={() => setHover(star)}
                 onMouseLeave={() => setHover(null)}
                 onFocus={() => setFocusIndex(star)}
@@ -161,16 +161,15 @@
                 aria-label={`${star} star`}
                 aria-pressed={star <= Math.round(value || 0)}
               >
-                <div className="relative inline-block">
+                <div className={`relative ${SIZE_MAP[size]}`}>
                   {/* background empty star (gray) */}
-                  <StarIcon className={`text-gray-300 ${SIZE_MAP[size]} absolute inset-0`} />
+                  <StarIcon className={`${SIZE_MAP[size]} text-gray-300`} />
                   {/* filled star (yellow) - show full star when should be yellow */}
                   {shouldShowYellow && (
                     <div
-                      style={{ color: '#F9CE41' }}
-                      className="absolute top-0 left-0 h-full w-full"
+                      className={`absolute top-0 left-0 ${SIZE_MAP[size]}`}
                     >
-                      <StarIcon className={`${SIZE_MAP[size]} relative`} />
+                      <StarIcon className={`${SIZE_MAP[size]} text-[#F9CE41]`} />
                     </div>
                   )}
                 </div>
