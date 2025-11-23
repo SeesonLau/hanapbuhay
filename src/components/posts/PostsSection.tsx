@@ -95,21 +95,21 @@ const PostsSection: React.FC<Props> = ({
         <div className="relative">
           <div
             ref={scrollRef}
-            className="max-h-[600px] overflow-y-auto scrollbar-hide py-2 px-2 snap-y snap-mandatory scroll-smooth"
-            style={{ scrollPaddingTop: "0.5rem", scrollPaddingBottom: "0.5rem" }}
+            className={`${isManage ? 'py-2 px-2' : 'max-h-[600px] overflow-y-auto scrollbar-hide py-2 px-2 snap-y snap-mandatory scroll-smooth'}`}
+            style={isManage ? undefined : { scrollPaddingTop: '0.5rem', scrollPaddingBottom: '0.5rem' }}
           >
             <div 
               className={`${
                 isManage
-                  ? 'w-full grid grid-cols-1 mobile-L:grid-cols-2 tablet:grid-cols-3 laptop-L:grid-cols-4 gap-5'
+                  ? 'w-full grid grid-cols-1 tablet:grid-cols-2 laptop-L:grid-cols-3 gap-5 items-stretch'
                   : 'w-full grid grid-cols-1 tablet:grid-cols-2 laptop-L:grid-cols-3 gap-4 justify-items-center'
               }`}
               style={{
                 gridAutoRows: 'min-content'
               }}
             >
-              {jobs.map((job) => (
-                <div key={job.id} className="snap-start">
+              {jobs.map((job, idx) => (
+                <div key={`${job.id}-${idx}`} className="snap-start h-full">
                   {isManage ? (
                     <ManageJobPostCard
                       jobData={job as any}
@@ -149,10 +149,10 @@ const PostsSection: React.FC<Props> = ({
       ) : (
         <div className="w-full overflow-x-hidden">
           <div className={`flex flex-col items-start gap-4 mx-auto w-full`}>
-            {jobs.map((job) => (
+            {jobs.map((job, idx) => (
               isManage ? (
                 <ManageJobPostList
-                  key={job.id}
+                  key={`${job.id}-${idx}`}
                   jobData={job as any}
                   onOpen={onOpen}
                   onViewApplicants={onViewApplicants}
@@ -160,7 +160,7 @@ const PostsSection: React.FC<Props> = ({
                   onDelete={(data) => onDelete?.(((data as any).raw) ?? data)}
                 />
               ) : (
-                <JobPostList key={job.id} jobData={job as any} onOpen={onOpen} onApply={onApply} />
+                <JobPostList key={`${job.id}-${idx}`} jobData={job as any} onOpen={onOpen} onApply={onApply} />
               )
             ))}
           </div>

@@ -5,7 +5,7 @@ import { PostService } from '@/lib/services/posts-services';
 import { ApplicationService } from '@/lib/services/applications-services';
 import { ReviewService } from '@/lib/services/reviews-services';
 
-type Variant = 'findJobs' | 'appliedJobs';
+type Variant = 'findJobs' | 'appliedJobs' | 'manageJobs';
 
 type Stats = Record<string, number | null>;
 
@@ -28,7 +28,7 @@ export function useStats(options: { variant: Variant; userId?: string | null }) 
         ]);
 
         setStats({ totalJobs, completed: approvedCount, ratings: avgRating, posts: postsCount });
-      } else {
+      } else if (variant === 'appliedJobs') {
         // appliedJobs
         if (!userId) {
           setStats({ totalApplications: 0, pending: 0, approved: 0, rejected: 0 });
@@ -41,6 +41,13 @@ export function useStats(options: { variant: Variant; userId?: string | null }) 
           ]);
           setStats({ totalApplications: total, pending, approved, rejected });
         }
+      } else {
+        // manageJobs
+        const totalPosts = userId ? await PostService.getPostCountByUserId(userId) : 0;
+        const activePosts = totalPosts;
+        const inactivePosts = 0;
+        const resolvedPosts = 0;
+        setStats({ totalPosts, activePosts, inactivePosts, resolvedPosts });
       }
     } catch (err) {
       setError('Failed to load statistics');

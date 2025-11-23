@@ -83,6 +83,8 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
     ...normalizedExperiences.map((label) => ({ type: 'experience' as const, label })),
     ...normalizedGenders.map((label) => ({ type: 'gender' as const, label })),
   ];
+  const [isOpen, setIsOpen] = useState(true);
+  const tagMuted = isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100';
   // Dynamically determine how many tags fit on a single row
   const [visibleCount, setVisibleCount] = useState<number>(Math.min(allTags.length, 4));
   const measureRef = useRef<HTMLDivElement | null>(null);
@@ -140,26 +142,48 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
 
   return (
     <div 
-      className={`w-full min-h-[250px] bg-white rounded-lg border border-gray-neutral200 shadow-sm p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300 cursor-pointer ${className}`}
+      className={`w-full h-full min-h-[250px] ${isOpen ? 'bg-white' : 'bg-gray-neutral100'} rounded-lg border ${isOpen ? 'border-gray-neutral200' : 'border-gray-neutral300'} shadow-sm p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out ${isOpen ? 'hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300' : ''} cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
       {/* Header */}
-      <div className="flex-shrink-0 mb-[16px]">
-        <h3 className={`font-alexandria font-semibold text-[20px] mb-2 truncate text-gray-neutral900`}>{title}</h3>
-        <p className={`font-inter font-light text-[12px] line-clamp-1 text-gray-neutral600`}>{description}</p>
+      <div className={`flex-shrink-0 mb-[16px] flex items-start justify-between ${isOpen ? '' : 'filter grayscale'}`}>
+        <div className="min-w-0">
+          <h3 className={`font-alexandria font-semibold text-[20px] mb-2 truncate ${isOpen ? 'text-gray-neutral900' : 'text-gray-neutral700'}`}>{title}</h3>
+          <p className={`font-inter font-light text-[12px] line-clamp-1 ${isOpen ? 'text-gray-neutral600' : 'text-gray-neutral500'}`}>{description}</p>
+        </div>
+        <button
+          type="button"
+          aria-label={isOpen ? 'Open' : 'Closed'}
+          className={`inline-flex items-center justify-center h-8 w-8 bg-transparent ${isOpen ? 'text-success-success400' : 'text-gray-neutral500'}`}
+          onClick={(e) => { e.stopPropagation(); setIsOpen((v) => !v); }}
+        >
+          {isOpen ? (
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 10V7a5 5 0 019.5-2" />
+              <rect x="5" y="10" width="14" height="10" rx="2" />
+              <circle cx="12" cy="15" r="1.5" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 10V7a5 5 0 0110 0v3" />
+              <rect x="5" y="10" width="14" height="10" rx="2" />
+              <circle cx="12" cy="15" r="1.5" />
+            </svg>
+          )}
+        </button>
       </div>
 
       {/* Tags Section - Single row that adapts to fit */}
-      <div className="mb-[16px]">
+      <div className={`mb-[16px] ${isOpen ? '' : 'filter grayscale'}`}>
         {/* Hidden measurers to calculate widths without wrapping */}
         <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
           {allTags.map((tag, index) => (
             tag.type === 'gender' ? (
-              <StaticGenderTag key={`measure-${index}`} label={tag.label} />
+              <StaticGenderTag key={`measure-${index}`} label={tag.label} className={tagMuted} />
             ) : tag.type === 'experience' ? (
-              <StaticExperienceLevelTag key={`measure-${index}`} label={tag.label} />
+              <StaticExperienceLevelTag key={`measure-${index}`} label={tag.label} className={tagMuted} />
             ) : (
-              <StaticJobTypeTag key={`measure-${index}`} label={tag.label} />
+              <StaticJobTypeTag key={`measure-${index}`} label={tag.label} className={tagMuted} />
             )
           ))}
         </div>
@@ -171,11 +195,11 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
         <div ref={tagsRowRef} className="flex flex-nowrap gap-1 overflow-hidden whitespace-nowrap items-center">
           {visibleTags.map((tag, index) => (
             tag.type === 'gender' ? (
-              <StaticGenderTag key={`tag-${index}`} label={tag.label} />
+              <StaticGenderTag key={`tag-${index}`} label={tag.label} className={tagMuted} />
             ) : tag.type === 'experience' ? (
-              <StaticExperienceLevelTag key={`tag-${index}`} label={tag.label} />
+              <StaticExperienceLevelTag key={`tag-${index}`} label={tag.label} className={tagMuted} />
             ) : (
-              <StaticJobTypeTag key={`tag-${index}`} label={tag.label} />
+              <StaticJobTypeTag key={`tag-${index}`} label={tag.label} className={tagMuted} />
             )
           ))}
           {extraCount > 0 && (
@@ -191,14 +215,14 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
       {/* Footer */}
       <div className="mt-auto space-y-[16px]">
         {/* Location and Salary */}
-        <div className="flex flex-wrap items-center gap-2">
-          <StaticLocationTag label={location} className="whitespace-nowrap" />
-          <StaticSalaryTag label={`${salary} /${salaryPeriod}`} className="whitespace-nowrap" />
+        <div className={`flex flex-wrap items-center gap-2 ${isOpen ? '' : 'filter grayscale'}`}>
+          <StaticLocationTag label={location} className={`${isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'}`} />
+          <StaticSalaryTag label={`${salary} /${salaryPeriod}`} className={`whitespace-nowrap ${isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'}`} />
         </div>
 
         {/* Posted Date */}
-        <div className="flex justify-start">
-          <span className={`font-inter font-medium text-[10px] text-gray-neutral600`}>Posted on: {postedDate}</span>
+        <div className={`flex justify-start ${isOpen ? '' : 'filter grayscale'}`}>
+          <span className={`font-inter font-medium text-[10px] ${isOpen ? 'text-gray-neutral600' : 'text-gray-neutral500'}`}>Posted on: {postedDate}</span>
         </div>
         
         {/* Action Buttons */}
@@ -208,7 +232,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
           onEdit={() => onEdit?.(jobData)}
           onDelete={() => onDelete?.(jobData)}
           variant="horizontal"
-          className="w-full"
+          className={`w-full ${isOpen ? '' : ''}`}
         />
       </div>
     </div>

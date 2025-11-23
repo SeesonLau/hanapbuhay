@@ -145,38 +145,32 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
 
         {/* Location and Salary */}
         <div className="px-6 pb-2">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <StaticLocationTag label={location} />
-            <StaticSalaryTag label={`${salary} /${salaryPeriod}`} />
+            <StaticSalaryTag label={`${salary} /${salaryPeriod}`} className="whitespace-nowrap" />
           </div>
         </div>
 
-        {/* About this role */}
+        {/* About + Requirements panels side-by-side */}
         <div className="px-6 pt-4">
-          <h3 className="text-[18px] font-semibold mb-2" style={{ color: getBlackColor() }}>
-            About this role
-          </h3>
-          <p className="text-[14px]" style={{ color: getNeutral600Color() }}>
-            {description}
-          </p>
-        </div>
-
-        {/* Requirements (always visible under About this role) */}
-        <div className="px-6 pt-6">
-          <h3 className="text-[18px] font-semibold mb-2" style={{ color: getBlackColor() }}>
-            Requirements
-          </h3>
-          {requirements.length > 0 ? (
-            <ul className="space-y-1 text-[14px]" style={{ color: getNeutral600Color() }}>
-              {requirements.map((item, idx) => (
-                <li key={`req-${idx}`}>• {item}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-[14px]" style={{ color: getNeutral600Color() }}>
-              No specific requirements provided.
-            </p>
-          )}
+          <div className="grid grid-cols-1 tablet:grid-cols-2 gap-6">
+            <div className="rounded-xl border border-gray-neutral900/60 p-4">
+              <h3 className="text-[13px] font-semibold mb-2 text-gray-neutral900">About this role</h3>
+              <p className="text-[11px] text-gray-neutral600">{description}</p>
+            </div>
+            <div className="rounded-xl border border-gray-neutral900/60 p-4">
+              <h3 className="text-[13px] font-semibold mb-2 text-gray-neutral900">Requirements</h3>
+              {requirements.length > 0 ? (
+                <ul className="space-y-1 text-[11px] text-gray-neutral600">
+                  {requirements.map((item, idx) => (
+                    <li key={`req-${idx}`}>• {item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-[11px] text-gray-neutral600">No specific requirements provided.</p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Profile container (between Requirements and footer) */}
@@ -192,10 +186,10 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
               className="w-9 h-9 rounded-full object-cover"
             />
             <div className="leading-tight">
-              <div className="text-[14px] font-semibold" style={{ color: getBlackColor() }}>
+              <div className="text-[13px] font-semibold text-gray-neutral900">
                 {postedBy?.name ?? "Unknown Poster"}
               </div>
-              <div className="text-[12px]" style={{ color: getNeutral600Color() }}>
+              <div className="text-[11px] text-gray-neutral600">
                 {postedBy?.role ?? "Client"}
               </div>
             </div>
@@ -206,11 +200,11 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
         <div className="px-6 py-6">
           <div className={`flex items-center ${onApply ? 'justify-between' : 'justify-start'}`}>
             <div className="flex items-center gap-2">
-              <span className="text-[12px] font-medium" style={{ color: getNeutral600Color() }}>
+              <span className="text-[11px] font-medium text-gray-neutral600">
                 Posted on: {postedDate}
               </span>
-              <span className="text-gray-400">•</span>
-              <span className="text-[12px]" style={{ color: getNeutral600Color() }}>
+              <span className="text-gray-neutral400">•</span>
+              <span className="text-[11px] text-gray-neutral600">
                 {applicantCount} Applicants
               </span>
             </div>

@@ -48,7 +48,8 @@ export default function ProfilePage() {
   }, [loading, user]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-default overflow-x-hidden">
+      <div className="fixed inset-0 -z-10 bg-gray-default" />
       <Preloader
         message={PreloaderMessages.LOADING_PROFILE}
         isVisible={!contentReady}

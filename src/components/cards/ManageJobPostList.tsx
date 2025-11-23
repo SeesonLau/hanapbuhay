@@ -92,9 +92,10 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
   const extraCountLarge = Math.max(0, allTags.length - tagsTop2.length);
   const extraCountMedium = Math.max(0, allTags.length - tagsTop1.length);
 
+  const [isOpen, setIsOpen] = React.useState(true);
   return (
     <div 
-      className={`w-full h-[60px] bg-white border border-gray-neutral200 shadow-sm px-6 rounded-[10px] transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300 cursor-pointer ${className}`}
+      className={`w-full h-[60px] ${isOpen ? 'bg-white' : 'bg-gray-neutral100'} border ${isOpen ? 'border-gray-neutral200' : 'border-gray-neutral300'} shadow-sm px-6 rounded-[10px] transition-all duration-200 ease-out ${isOpen ? 'hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300' : ''} cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
       {/* Table-like aligned columns: Title | Tags | Location+Salary | Date | Actions */}
@@ -102,23 +103,43 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
         className="grid items-center h-full gap-6 grid-cols-2 mobile-L:grid-cols-3 laptop:grid-cols-4 laptop-L:grid-cols-5"
       >
         {/* Title */}
-        <div className="min-w-0">
-          <h3 className={`font-alexandria font-semibold text-[15px] truncate text-gray-neutral900`}>
+        <div className={`min-w-0 flex items-center gap-3 ${isOpen ? '' : 'filter grayscale'}`}>
+          <h3 className={`font-alexandria font-semibold text-[15px] truncate ${isOpen ? 'text-gray-neutral900' : 'text-gray-neutral700'}`}>
             {shortTitle}
           </h3>
+          <button
+            type="button"
+            aria-label={isOpen ? 'Open' : 'Closed'}
+            className={`inline-flex items-center justify-center h-7 w-7 bg-transparent ${isOpen ? 'text-success-success400' : 'text-gray-neutral500'}`}
+            onClick={(e) => { e.stopPropagation(); setIsOpen((v) => !v); }}
+          >
+            {isOpen ? (
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 10V7a5 5 0 019.5-2" />
+                <rect x="5" y="10" width="14" height="10" rx="2" />
+                <circle cx="12" cy="15" r="1.5" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 10V7a5 5 0 0110 0v3" />
+                <rect x="5" y="10" width="14" height="10" rx="2" />
+                <circle cx="12" cy="15" r="1.5" />
+              </svg>
+            )}
+          </button>
         </div>
 
         {/* Tags (responsive: fewer tags on smaller screens; hidden on very small) */}
-        <div className="min-w-0 hidden mobile-L:block">
+        <div className={`min-w-0 hidden mobile-L:block ${isOpen ? '' : 'filter grayscale'}`}>
           {/* Large (laptop and up): show up to 2 tags */}
           <div className="hidden laptop:flex items-center gap-3 whitespace-nowrap overflow-hidden">
             {tagsTop2.map((tag, index) => (
               tag.type === 'gender' ? (
-                <StaticGenderTag key={`tag-lg-${index}`} label={tag.label} />
+                <StaticGenderTag key={`tag-lg-${index}`} label={tag.label} className={isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'} />
               ) : tag.type === 'experience' ? (
-                <StaticExperienceLevelTag key={`tag-lg-${index}`} label={tag.label} />
+                <StaticExperienceLevelTag key={`tag-lg-${index}`} label={tag.label} className={isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'} />
               ) : (
-                <StaticJobTypeTag key={`tag-lg-${index}`} label={tag.label} />
+                <StaticJobTypeTag key={`tag-lg-${index}`} label={tag.label} className={isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'} />
               )
             ))}
             {extraCountLarge > 0 && (
@@ -134,11 +155,11 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
           <div className="flex laptop:hidden items-center gap-2 whitespace-nowrap overflow-hidden">
             {tagsTop1.map((tag, index) => (
               tag.type === 'gender' ? (
-                <StaticGenderTag key={`tag-md-${index}`} label={tag.label} />
+                <StaticGenderTag key={`tag-md-${index}`} label={tag.label} className={isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'} />
               ) : tag.type === 'experience' ? (
-                <StaticExperienceLevelTag key={`tag-md-${index}`} label={tag.label} />
+                <StaticExperienceLevelTag key={`tag-md-${index}`} label={tag.label} className={isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'} />
               ) : (
-                <StaticJobTypeTag key={`tag-md-${index}`} label={tag.label} />
+                <StaticJobTypeTag key={`tag-md-${index}`} label={tag.label} className={isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'} />
               )
             ))}
             {extraCountMedium > 0 && (
@@ -152,14 +173,14 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
         </div>
 
         {/* Location + Salary (hide below laptop) */}
-        <div className="hidden laptop:flex items-center gap-3 whitespace-nowrap overflow-hidden">
-          <StaticLocationTag label={location} />
-          <StaticSalaryTag label={`${salary} /${salaryPeriod}`} />
+        <div className={`hidden laptop:flex items-center gap-3 whitespace-nowrap overflow-hidden ${isOpen ? '' : 'filter grayscale'}`}>
+          <StaticLocationTag label={location} className={isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'} />
+          <StaticSalaryTag label={`${salary} /${salaryPeriod}`} className={isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'} />
         </div>
 
         {/* Posted Date (single line; hide below laptop-L for progressive collapse) */}
-        <div className="flex-shrink-0 hidden laptop-L:block">
-          <span className={`font-inter text-[10px] whitespace-nowrap text-gray-neutral600`}>Posted on: {postedDate}</span>
+        <div className={`flex-shrink-0 hidden laptop-L:block ${isOpen ? '' : 'filter grayscale'}`}>
+          <span className={`font-inter text-[10px] whitespace-nowrap ${isOpen ? 'text-gray-neutral600' : 'text-gray-neutral500'}`}>Posted on: {postedDate}</span>
         </div>
 
         {/* Action Buttons (flush right) */}
@@ -170,7 +191,7 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
             onEdit={() => onEdit?.(jobData)}
             onDelete={() => onDelete?.(jobData)}
             variant="horizontal"
-            className="w-[362px] laptop:w-[320px] tablet:w-[280px] mobile-L:w-[220px] mobile-M:w-[200px] mobile-S:w-[180px]"
+            className={`w-[362px] laptop:w-[320px] tablet:w-[280px] mobile-L:w-[220px] mobile-M:w-[200px] mobile-S:w-[180px]`}
           />
         </div>
       </div>
