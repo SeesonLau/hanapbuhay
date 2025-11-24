@@ -95,14 +95,13 @@ const PostsSection: React.FC<Props> = ({
         <div className="relative">
           <div
             ref={scrollRef}
-            className={`${isManage ? 'py-2 px-2' : 'max-h-[600px] overflow-y-auto scrollbar-hide py-2 px-2 snap-y snap-mandatory scroll-smooth'}`}
-            style={isManage ? undefined : { scrollPaddingTop: '0.5rem', scrollPaddingBottom: '0.5rem' }}
+            className={"py-2 px-2"}
           >
             <div 
               className={`${
                 isManage
                   ? 'w-full grid grid-cols-1 tablet:grid-cols-2 laptop-L:grid-cols-3 gap-5 items-stretch'
-                  : 'w-full grid grid-cols-1 tablet:grid-cols-2 laptop-L:grid-cols-3 gap-4 justify-items-center'
+                  : 'w-full grid grid-cols-1 tablet:grid-cols-2 laptop-L:grid-cols-3 gap-4 items-stretch'
               }`}
               style={{
                 gridAutoRows: 'min-content'

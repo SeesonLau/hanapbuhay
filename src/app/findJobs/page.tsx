@@ -182,7 +182,7 @@ export default function FindJobsPage() {
       <Banner variant="findJobs" onSearch={handleSearch} />
 
       {/* Main Container with VH layout below banner */}
-      <div className="mt-[200px] mobile-S:mt-[140px] mobile-M:mt-[145px] mobile-L:mt-[150px] tablet:mt-[180px] laptop:mt-[190px] laptop-L:mt-[200px] min-h-screen bg-gray-default">
+      <div className="mt-[200px] min-h-screen bg-gray-default">
         {/* Stats Section - Fixed on laptop, top on mobile/tablet */}
         <aside className="block laptop:hidden px-4 md:px-6">
           <StatsSection stats={stats} variant="findJobs" loading={statsLoading} error={statsError} />
@@ -190,13 +190,13 @@ export default function FindJobsPage() {
         
         {/* Stats Section - Fixed sidebar on laptop only */}
         { /*<aside className="hidden laptop:block fixed left-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[180px] laptop-L:w-[200px] z-20 px-3 bg-transparent">*/}
-        <aside className="hidden laptop:block fixed left-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[160px] laptop-L:w-[170px] z-20 px-2 bg-gray-50">
+        <aside className="hidden laptop:block fixed left-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[160px] laptop-L:w-[170px] z-20 px-2 bg-transparent">
 
           <StatsSection stats={stats} variant="findJobs" loading={statsLoading} error={statsError} />
         </aside>
 
         {/* Filter Section - Desktop Only (rightmost, no margin, full height) */}
-        <aside className="laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-20 border-l border-gray-200 flex flex-col">
+        <aside className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-40 border-l border-gray-200 flex flex-col pointer-events-auto">
           {/* Sort & View Controls */}
           <div className="flex-shrink-0 bg-white  border-b border-gray-200 px-3 py-2 z-10">
             <div className="flex items-center justify-between gap-3">

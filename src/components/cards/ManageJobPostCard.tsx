@@ -142,7 +142,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
 
   return (
     <div 
-      className={`w-full h-full min-h-[250px] ${isOpen ? 'bg-white' : 'bg-gray-neutral100'} rounded-lg border ${isOpen ? 'border-gray-neutral200' : 'border-gray-neutral300'} shadow-sm p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out ${isOpen ? 'hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300' : ''} cursor-pointer ${className}`}
+      className={`w-full h-full min-h-[250px] ${isOpen ? 'bg-white' : 'bg-gray-neutral100'} rounded-lg shadow-[0px_0px_10px_rgba(0,0,0,0.25)] p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out ${isOpen ? 'hover:shadow-lg hover:-translate-y-[2px]' : ''} cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
       {/* Header */}

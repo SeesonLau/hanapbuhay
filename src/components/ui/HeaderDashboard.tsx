@@ -344,10 +344,9 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                   <div 
                     className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300"
                     style={{ 
-                      background: userData.profilePicUrl 
-                        ? 'transparent' 
-                        : 'linear-gradient(to bottom right, #FF9F40, #FFD700)'
+                      background: 'transparent'
                     }}
+                    suppressHydrationWarning
                   >
                     {userData.profilePicUrl ? (
                       <Image
@@ -382,6 +381,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                   onClose={() => setIsProfileOpen(false)}
                   onOpenSettings={openSettings}
                   onSignOut={handleSignOut}
+                  anchorRect={profileRef.current ? profileRef.current.getBoundingClientRect() : null}
                 />
               </div>
 

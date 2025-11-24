@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { 
   getBlueColor, 
@@ -15,6 +16,7 @@ interface ProfileDropdownProps {
   onClose: () => void;
   onOpenSettings: () => void;
   onSignOut: () => void;
+  anchorRect?: DOMRect | null;
 }
 
 const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
@@ -22,17 +24,25 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   onClose,
   onOpenSettings,
   onSignOut,
+  anchorRect,
 }) => {
   if (!isOpen) return null;
 
-  return (
+  const top = anchorRect ? (anchorRect.bottom + 8) : 72;
+  const left = anchorRect ? Math.max(8, Math.min(window.innerWidth - 200, anchorRect.right - 192)) : undefined;
+  const right = left === undefined ? 8 : undefined;
+
+  return createPortal(
     <div 
-      className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 z-50 transition-all duration-300 ease-in-out"
+      className="fixed w-48 rounded-md shadow-lg py-1 z-[1000] transition-all duration-300 ease-in-out pointer-events-auto"
       style={{ 
         backgroundColor: getWhiteColor(),
         border: `1px solid ${getGrayColor('border')}`,
         backdropFilter: 'blur(10px)',
-        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+        top,
+        left,
+        right,
       }}
     >
       <Link
@@ -108,7 +118,8 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
       >
         Sign out
       </button>
-    </div>
+    </div>,
+    document.body
   );
 };
 

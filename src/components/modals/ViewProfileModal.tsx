@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect } from 'react';
 import ProfileContactSection from "../view-profile/ProfileContactSection";
 import JobListSection from "../view-profile/JobListSection";
 import ReviewListSection from "../view-profile/ReviewListSection";
@@ -13,6 +14,18 @@ interface ViewProfileModalProps {
 }
 
 export default function ViewProfileModal({ isOpen, onClose, userId, userType = 'applicant' }: ViewProfileModalProps) {
+  useEffect(() => {
+    if (isOpen) {
+      const prevHtml = document.documentElement.style.overflow;
+      const prevBody = document.body.style.overflow;
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.documentElement.style.overflow = prevHtml;
+        document.body.style.overflow = prevBody;
+      };
+    }
+  }, [isOpen]);
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
