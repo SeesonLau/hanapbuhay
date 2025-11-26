@@ -344,9 +344,9 @@ export default function ChatPage() {
     <div className="min-h-screen bg-gray-50" suppressHydrationWarning>
       <Banner variant="chat" showSearchBar={false} />
 
-      {/* Main content area - responsive padding */}
-      <div className="pt-[140px] mobile-L:pt-[160px] tablet:pt-[180px] min-h-screen">
-        <div className="h-[calc(100vh-140px)] mobile-L:h-[calc(100vh-160px)] tablet:h-[calc(100vh-180px)]">
+      {/* Main content area - spacing below the fixed banner */}
+      <div className="pt-[200px] min-h-screen">
+        <div className="h-[calc(100vh-200px)]">
           <div className="bg-white rounded-none tablet:rounded-lg shadow-none tablet:shadow-lg tablet:mx-4 h-full overflow-hidden">
             <div className="flex h-full relative">
 

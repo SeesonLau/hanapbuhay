@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   getWhiteColor,
   getNeutral100Color,
@@ -21,6 +21,7 @@ import { JobType, SubTypes } from "@/lib/constants/job-types";
 import { Gender } from "@/lib/constants/gender";
 import { ExperienceLevel } from "@/lib/constants/experience-level";
 import ViewProfileModal from "@/components/modals/ViewProfileModal";
+import { ProfileService } from "@/lib/services/profile-services";
 
 export interface JobPostViewData {
   id: string;
@@ -64,9 +65,45 @@ const normalizeExperience = (label: string): string | null => {
 };
 
 export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobPostViewModalProps) {
-  if (!isOpen || !job) return null;
-
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [poster, setPoster] = useState<{ name: string; role?: string; avatarUrl?: string } | null>(null);
+  const [posterUserId, setPosterUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const prevHtml = document.documentElement.style.overflow;
+    const prevBody = document.body.style.overflow;
+    if (isOpen) {
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.documentElement.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    }
+    return () => {
+      document.documentElement.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    const fetchPoster = async () => {
+      try {
+        const raw = (job as any)?.raw;
+        const userId = raw?.userId || raw?.createdBy;
+        if (!userId) return;
+        setPosterUserId(String(userId));
+        const info = await ProfileService.getNameProfilePic(String(userId));
+        if (info) {
+          setPoster({ name: info.name ?? "Unknown Poster", role: "Client", avatarUrl: info.profilePicUrl ?? undefined });
+        }
+      } catch (_) {}
+    };
+    if (isOpen && job) {
+      fetchPoster();
+    }
+  }, [isOpen, job]);
+
+  if (!isOpen || !job) return null;
 
   const {
     id,
@@ -83,6 +120,7 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
     jobTypeTags = [],
     postedBy,
   } = job;
+
 
   const normalizedJobTypes = jobTypeTags
     .map((label) => normalizeJobType(label))
@@ -181,16 +219,16 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
             onClick={() => setIsProfileOpen(true)}
           >
             <img
-              src={postedBy?.avatarUrl ?? "/image/phoebe.jpeg"}
-              alt={postedBy?.name ?? "Poster Avatar"}
+              src={(poster?.avatarUrl ?? postedBy?.avatarUrl) ?? "/image/phoebe.jpeg"}
+              alt={(poster?.name ?? postedBy?.name) ?? "Poster Avatar"}
               className="w-9 h-9 rounded-full object-cover"
             />
             <div className="leading-tight">
               <div className="text-[13px] font-semibold text-gray-neutral900">
-                {postedBy?.name ?? "Unknown Poster"}
+                {(poster?.name ?? postedBy?.name) ?? "Unknown Poster"}
               </div>
               <div className="text-[11px] text-gray-neutral600">
-                {postedBy?.role ?? "Client"}
+                {(poster?.role ?? postedBy?.role) ?? "Client"}
               </div>
             </div>
           </div>
@@ -223,6 +261,12 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
         </div>
 
       </div>
+      <ViewProfileModal
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        userId={posterUserId ?? ""}
+        userType={'employer'}
+      />
     </div>
   );
 }

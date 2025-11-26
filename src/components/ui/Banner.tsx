@@ -109,7 +109,7 @@ const Banner: React.FC<BannerProps> = ({
 
   return (
     <div 
-      className={`w-full font-inter fixed top-0 left-0 right-0 z-40 ${className}`}
+      className={`w-full h-[200px] font-inter fixed top-0 left-0 right-0 z-40 overflow-hidden ${className}`}
       style={{ 
         background: 'radial-gradient(55% 45% at 50% 70%, #666666 0%,  #000000 80.77%)'
       }}
@@ -126,7 +126,7 @@ const Banner: React.FC<BannerProps> = ({
       />
 
       {/* Banner Content Container - Left-aligned structure */}
-      <div className="flex flex-col pt-2 pb-2 px-4 mobile-M:pt-2 mobile-M:pb-2 mobile-L:pt-2 mobile-L:pb-3 tablet:pt-3 tablet:pb-3 laptop:pt-3 laptop:pb-4 laptop-L:pt-4 laptop-L:pb-4 mobile-M:px-6 tablet:px-16 laptop:px-32 w-full">
+      <div className="flex flex-col py-3 px-4 md:px-6 laptop:px-32 w-full h-full">
         {/* Banner Text Section - Left-aligned typography and spacing */}
         <div className={`text-start mb-1 w-full ${variant === 'profile' || variant === 'chat' ? 'mt-3 sm:mt-4' : 'mt-0'}`}>
           <h1 className="text-body sm:text-body md:text-description lg:text-lead font-bold font-alexandria text-white leading-tight mb-1.5 sm:mb-2">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Button from './Button';
 import { COLORS } from '@/styles/colors';
 import { TYPOGRAPHY } from '@/styles/typography';
@@ -76,6 +76,18 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
   cancelText = 'Cancel',
   isProcessing = false,
 }) => {
+  useEffect(() => {
+    if (isOpen) {
+      const prevHtml = document.documentElement.style.overflow;
+      const prevBody = document.body.style.overflow;
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.documentElement.style.overflow = prevHtml;
+        document.body.style.overflow = prevBody;
+      };
+    }
+  }, [isOpen]);
   // Render nothing if the modal is not open
   if (!isOpen) {
     return null;

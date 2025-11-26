@@ -270,7 +270,7 @@ export default function ManageJobPostsPage() {
         onSearch={handleSearch} 
         onPostClick={handleCreatePost}
       />
-      <div className="mt-[200px] mobile-S:mt-[140px] mobile-M:mt-[145px] mobile-L:mt-[150px] tablet:mt-[180px] laptop:mt-[190px] laptop-L:mt-[200px] min-h-screen bg-gray-default">
+      <div className="mt-[200px] min-h-screen bg-gray-default">
         {/* Stats Section - fixed left on laptop, top on mobile/tablet */}
         <aside className="block laptop:hidden px-4 md:px-6">
           <StatsSection stats={stats} variant="manageJobs" loading={statsLoading} error={statsError} />
@@ -282,7 +282,7 @@ export default function ManageJobPostsPage() {
         </aside>
 
         {/* Filter Section - Desktop Only (rightmost, fixed) */}
-        <aside className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-20 border-l border-gray-200 flex flex-col">
+        <aside className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-40 border-l border-gray-200 flex flex-col pointer-events-auto">
           {/* Sort & View Controls */}
           <div className="flex-shrink-0 bg-white border-b border-gray-200 px-3 py-2 z-10">
             <div className="flex items-center justify-between gap-3">

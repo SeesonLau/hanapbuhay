@@ -90,6 +90,19 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (isOpen) {
+      const prevHtml = document.documentElement.style.overflow;
+      const prevBody = document.body.style.overflow;
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.documentElement.style.overflow = prevHtml;
+        document.body.style.overflow = prevBody;
+      };
+    }
+  }, [isOpen]);
+
   const jobTypeOptions = useMemo(() => getJobTypeOptions(), []);
   const experienceOptions = useMemo(() => getExperienceOptions(), []);
   const genderOptions = useMemo(() => getGenderOptions(), []);

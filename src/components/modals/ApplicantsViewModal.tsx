@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import NewApplicantsSection from '@/components/applications/NewApplicantsSection';
 import AllApplicantsSection from '@/components/applications/AllApplicantsSection';
 import SearchBar from '@/components/ui/SearchBar';
@@ -65,6 +65,19 @@ export default function ApplicantsModal({
   const handleStatusChange = useCallback(() => {
     setRefreshTrigger(prev => prev + 1);
   }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      const prevHtml = document.documentElement.style.overflow;
+      const prevBody = document.body.style.overflow;
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.documentElement.style.overflow = prevHtml;
+        document.body.style.overflow = prevBody;
+      };
+    }
+  }, [isOpen]);
 
   // ✅ Single early return after all hooks
   if (!isOpen) return null;
