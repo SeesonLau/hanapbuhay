@@ -41,9 +41,16 @@ export default function ProjectViewModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-[10px] shadow-xl w-full max-w-md h-[550px] p-8 flex flex-col"
+        className="bg-white rounded-[10px] shadow-xl w-full max-w-md h-[550px] p-8 flex flex-col relative"
         onClick={(e) => e.stopPropagation()}
       >
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-4 z-10 text-2xl leading-none text-gray-neutral600 hover:text-gray-800 transition-colors"
+        >
+          ×
+        </button>
+        
         {/* Image Carousel */}
         {hasImages ? (
           <div className="relative w-full h-[180px] mb-4 flex-shrink-0">

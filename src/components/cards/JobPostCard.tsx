@@ -14,6 +14,7 @@ interface JobPostData {
   salary: string;
   salaryPeriod: string;
   postedDate: string;
+  employerId: string;  // Added: needed for notification
   applicantCount?: number;
   genderTags?: string[];
   experienceTags?: string[];
@@ -23,7 +24,7 @@ interface JobPostData {
 interface JobPostCardProps {
   jobData: JobPostData;
   className?: string;
-  onApply?: (id: string) => void;
+  onApply?: (id: string, employerId: string) => void; // Updated to pass employerId
   onOpen?: (data: JobPostData) => void;
 }
 
@@ -36,6 +37,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
     salary,
     salaryPeriod,
     postedDate,
+    employerId,
     applicantCount = 0,
     genderTags = [],
     experienceTags = [],
@@ -72,7 +74,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
     ...normalizedExperiences.map((label) => ({ type: 'experience' as const, label })),
     ...normalizedGenders.map((label) => ({ type: 'gender' as const, label })),
   ];
-  // Dynamically determine how many tags fit on a single row
+
   const [visibleCount, setVisibleCount] = React.useState<number>(Math.min(allTags.length, 4));
   const measureRef = React.useRef<HTMLDivElement | null>(null);
   const overflowMeasureRef = React.useRef<HTMLDivElement | null>(null);
@@ -90,8 +92,8 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
     const maxWidth = container.clientWidth;
     const children = Array.from(measure.children) as HTMLElement[];
     const widths = children.map((el) => el.offsetWidth);
-    const gapPx = 4; // gap-1
-    const overflowWidth = overflowMeasure ? overflowMeasure.offsetWidth : 24; // fallback
+    const gapPx = 4;
+    const overflowWidth = overflowMeasure ? overflowMeasure.offsetWidth : 24;
 
     let used = 0;
     let count = 0;
@@ -113,15 +115,13 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
 
   React.useLayoutEffect(() => {
     recomputeVisibleCount();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobData.title, jobData.description, jobData.location, jobData.salary, jobData.salaryPeriod, jobData.postedDate, allTags.length]);
+  }, [jobData.title, jobData.description, jobData.location, jobData.salary, jobData.salaryPeriod, jobData.postedDate, allTags.length, recomputeVisibleCount]);
 
   React.useEffect(() => {
     const onResize = () => recomputeVisibleCount();
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [recomputeVisibleCount]);
 
   const visibleTags = allTags.slice(0, Math.max(0, visibleCount));
   const extraCount = Math.max(0, allTags.length - visibleTags.length);
@@ -137,9 +137,8 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
         <p className={`font-inter font-light text-tiny mobile-M:text-small tablet:text-[12px] line-clamp-1 text-gray-neutral600 h-[1.2em]`}>{description}</p>
       </div>
 
-      {/* Tags Section - Single row that adapts to fit */}
+      {/* Tags Section */}
       <div className="mb-3 mobile-M:mb-4 tablet:mb-[16px]">
-        {/* Hidden measurers to calculate widths without wrapping */}
         <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
           {allTags.map((tag, index) => (
             tag.type === 'gender' ? (
@@ -151,7 +150,6 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
             )
           ))}
         </div>
-        {/* Measure overflow indicator width */}
         <div ref={overflowMeasureRef} className="fixed -top-[9999px] -left-[9999px] inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
           99+
         </div>
@@ -167,9 +165,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
             )
           ))}
           {extraCount > 0 && (
-            <div
-              className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400"
-            >
+            <div className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
               {extraCount}+
             </div>
           )}
@@ -178,13 +174,11 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
 
       {/* Footer */}
       <div className="mt-auto space-y-3 mobile-M:space-y-4 tablet:space-y-[16px]">
-        {/* Location and Salary */}
         <div className="flex items-center gap-2 flex-wrap">
           <StaticLocationTag label={location} />
           <StaticSalaryTag label={`${salary} /${salaryPeriod}`} />
         </div>
 
-        {/* Posted Date + Applicants + Apply Button */}
         <div className="flex flex-col mobile-M:flex-row items-start mobile-M:items-center justify-between gap-2 mobile-M:gap-0">
           <div className="flex items-center gap-1.5 mobile-M:gap-2 flex-wrap">
             <span className={`font-inter font-medium text-[9px] mobile-M:text-[10px] text-gray-neutral600`}>Posted on: {postedDate}</span>
@@ -192,7 +186,10 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
             <span className={`font-inter text-[9px] mobile-M:text-[10px] text-gray-neutral600`}>{applicantCount} Applicants</span>
           </div>
           <button
-            onClick={(e) => { e.stopPropagation(); onApply?.(id); }}
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              onApply?.(id, employerId); // Pass both job id and employer id
+            }}
             className="px-3 mobile-M:px-4 py-1.5 mobile-M:py-2 bg-primary-primary500 text-white rounded-lg hover:bg-primary-primary600 transition-colors text-tiny mobile-M:text-small whitespace-nowrap"
           >
             Apply Now

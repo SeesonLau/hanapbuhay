@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { ApplicationService } from '@/lib/services/applications-services';
+import { notifyEmployerOfApplication } from '@/lib/utils/notification-helper';
 import type { AppliedJob } from '@/components/cards/AppliedJobCardList';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
@@ -31,6 +32,7 @@ function formatAppliedDate(iso?: string) {
 export function useApplications(userId?: string | null, options: UseApplicationsOptions = {}) {
   const [applications, setApplications] = useState<AppliedJob[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isApplying, setIsApplying] = useState<boolean>(false); // New state for applying
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -116,22 +118,56 @@ export function useApplications(userId?: string | null, options: UseApplications
     load();
   }, [load, options.skip]);
 
-  const createApplication = useCallback(async (postId: string) => {
+  // UPDATED: Create application with notification
+  const createApplication = useCallback(
+  async (postId: string) => {
     if (!userId) {
       toast.error('Please log in to apply for jobs');
       return null;
     }
 
+    setIsApplying(true);
+
     try {
+      console.log('📝 Applying to job:', postId);
+
+      // 1. Create the application
       const result = await ApplicationService.createApplication(postId, userId);
-      // Refresh to reflect new application
-      await load();
+
+      if (result) {
+        console.log('✅ Application created:', result.applicationId);
+
+        // 2. Send notification to employer
+        try {
+          await notifyEmployerOfApplication({
+            postId,
+            applicantId: userId,
+            applicationId: result.applicationId,
+          });
+          console.log('🔔 Notification sent to employer');
+          toast.success('Employer has been notified!');
+        } catch (notifError) {
+          console.error('⚠️ Failed to send notification (non-critical):', notifError);
+          // Notification failure is non-critical
+        }
+
+        // 3. Refresh applications list
+        await load();
+      }
+
       return result;
-    } catch (error) {
-      console.error('Error applying to job:', error);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : JSON.stringify(err);
+      console.error('❌ Error applying to job:', errorMessage);
+      toast.error('Failed to apply to job');
       return null;
+    } finally {
+      setIsApplying(false);
     }
-  }, [userId, load]);
+  },
+  [userId, load]
+);
 
   const getAppliedPostIds = useCallback(async (): Promise<string[]> => {
     if (!userId) return [];
@@ -146,6 +182,7 @@ export function useApplications(userId?: string | null, options: UseApplications
   return {
     applications,
     loading,
+    isApplying, // New: expose applying state
     error,
     refresh: load,
     createApplication,

@@ -40,9 +40,16 @@ export default function ViewProfileModal({ isOpen, onClose, userId, userType = '
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-white rounded-lg shadow-lg w-full max-w-6xl h-[90vh] overflow-hidden"
+        className="bg-white rounded-lg shadow-lg w-full max-w-6xl h-[90vh] overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
       >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 text-2xl leading-none text-gray-neutral600 hover:text-gray-800 transition-colors"
+        >
+          ×
+        </button>
+        
         <div className="flex flex-col md:flex-row h-full overflow-hidden">
           <div className="flex flex-col flex-shrink-0 border-r border-gray-neutral200 overflow-y-auto">
             <ProfileContactSection userId={userId} />
