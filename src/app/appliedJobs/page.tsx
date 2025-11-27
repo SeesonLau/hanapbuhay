@@ -35,11 +35,9 @@ export default function AppliedJobsPage() {
 
   const handleSearch = (query: string) => {
     // Add your search logic here
-    console.log('Searching for:', query);
   };
 
   const handleStatFilter = (type: 'total' | 'pending' | 'approved' | 'rejected') => {
-    console.log('Selected stat:', type);
     // TODO: Filter applied jobs list by selected status (not implemented yet)
   };
 

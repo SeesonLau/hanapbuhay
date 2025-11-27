@@ -9,12 +9,16 @@ import { supabase } from '@/lib/services/supabase/client';
 interface UseApplicationsOptions {
   skip?: boolean;
   pageSize?: number;
+  /** Callback function to execute on successful application creation. */
+  onSuccess?: () => void;
 }
 
 export function useApplications(userId?: string | null, options: UseApplicationsOptions = {}) {
   const [applications, setApplications] = useState<AppliedJob[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [postIdToApply, setPostIdToApply] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!userId) {
@@ -62,22 +66,37 @@ export function useApplications(userId?: string | null, options: UseApplications
     load();
   }, [load, options.skip]);
 
-  const createApplication = useCallback(async (postId: string) => {
+  const createApplication = useCallback((postId: string) => {
     if (!userId) {
       toast.error('Please log in to apply for jobs');
-      return null;
+      return;
     }
+    // Set the post ID and open the confirmation modal
+    setPostIdToApply(postId);
+    setIsConfirming(true);
+  }, [userId]);
 
+  const confirmApplication = useCallback(async () => {
+    if (!postIdToApply || !userId) return;
     try {
-      const result = await ApplicationService.createApplication(postId, userId);
-      // Refresh to reflect new application
-      await load();
-      return result;
+      await ApplicationService.createApplication(postIdToApply, userId);
+      // If an onSuccess callback is provided, call it.
+      if (options.onSuccess) {
+        options.onSuccess();
+      }
     } catch (error) {
-      console.error('Error applying to job:', error);
-      return null;
+      
+    } finally {
+      // Close the modal and reset the state
+      setIsConfirming(false);
+      setPostIdToApply(null);
     }
-  }, [userId, load]);
+  }, [postIdToApply, userId, options.onSuccess]);
+
+  const cancelApplication = useCallback(() => {
+    setIsConfirming(false);
+    setPostIdToApply(null);
+  }, []);
 
   const getAppliedPostIds = useCallback(async (): Promise<string[]> => {
     if (!userId) return [];
@@ -95,6 +114,9 @@ export function useApplications(userId?: string | null, options: UseApplications
     error,
     refresh: load,
     createApplication,
+    isConfirming,
+    confirmApplication,
+    cancelApplication,
     getAppliedPostIds,
   };
 }
