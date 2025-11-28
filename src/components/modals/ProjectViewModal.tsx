@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 interface ProjectViewModalProps {
   projectId: string;
@@ -36,13 +37,18 @@ export default function ProjectViewModal({
   };
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-auto"
       onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      <div
+      <motion.div
         className="bg-white rounded-[10px] shadow-xl w-full max-w-md h-[550px] p-8 flex flex-col"
         onClick={(e) => e.stopPropagation()}
+        initial={{ y: 20, opacity: 0, scale: 0.98 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       >
         {/* Image Carousel */}
         {hasImages ? (
@@ -117,7 +123,7 @@ export default function ProjectViewModal({
             </p>
           </div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

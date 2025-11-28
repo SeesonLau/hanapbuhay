@@ -4,6 +4,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
 import Banner from '@/components/ui/Banner';
+import AddButtonIcon from '@/assets/add.svg';
 import StatsSection from '@/components/posts/StatsSection';
 import { useStats } from '@/hooks/useStats';
 import Sort from '@/components/ui/Sort';
@@ -385,6 +386,20 @@ export default function ManageJobPostsPage() {
         onClearAll={handleClearFilters}
         initialFilters={activeFilters}
       />
+
+      {/* Floating Add Post Button - Mobile only */}
+      <button
+        aria-label="Add Post"
+        onClick={handleCreatePost}
+        className="laptop:hidden fixed bottom-6 right-6 z-40 bg-transparent shadow-none p-0 flex items-center justify-center"
+      >
+        <img 
+          src={typeof AddButtonIcon === 'string' ? AddButtonIcon : (AddButtonIcon as any).src} 
+          alt="Add" 
+          className="w-16 h-16" 
+          style={{ filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.25))' }}
+        />
+      </button>
     </div>
   );
 }

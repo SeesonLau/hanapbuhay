@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Project } from '@/lib/models/profile';
 import { ProjectService } from '@/lib/services/project-services';
 import { toast } from 'react-hot-toast';
@@ -135,13 +136,18 @@ export default function ProjectAddModal({
   };
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      <div
+      <motion.div
         className="bg-white rounded-2xl w-[90%] max-w-[750px] max-h-[90vh] p-10 overflow-y-auto flex flex-col items-center scrollbar-hide"
         onClick={(e) => e.stopPropagation()}
+        initial={{ y: 20, opacity: 0, scale: 0.98 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       >
         <h3 className="font-inter font-bold text-2xl mb-6">
           {project ? 'Edit Project' : 'Add Project'}
@@ -315,8 +321,8 @@ export default function ProjectAddModal({
             </Button>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

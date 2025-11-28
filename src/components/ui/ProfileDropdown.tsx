@@ -34,6 +34,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
 
   return createPortal(
     <div 
+      id="profile-dropdown"
       className="fixed w-48 rounded-md shadow-lg py-1 z-[1000] transition-all duration-300 ease-in-out pointer-events-auto"
       style={{ 
         backgroundColor: getWhiteColor(),

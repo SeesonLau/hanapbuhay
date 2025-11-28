@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import TextBox from "@/components/ui/TextBox";
 import TextArea from "@/components/ui/TextArea";
 import AddButtonIcon from "@/assets/add.svg";
@@ -36,18 +37,6 @@ interface JobPostAddModalProps {
   onSubmit?: (data: JobPostAddFormData) => void;
 }
 
-const defaultAbout = "Having a well-kept garden makes the home more relaxing and welcoming; but it’s hard to manage with our busy schedule. We need someone who enjoys working with plants, keeping things tidy, and making sure our garden always looks fresh and alive.";
-const defaultQualifications = [
-  "Experience in gardening or landscaping",
-  "Knowledge of plant care and maintenance",
-  "Physically able to do outdoor tasks",
-  "Creative eye for arranging plants and outdoor spaces is a plus",
-  "Maintain the family’s backyard and front yard",
-  "Plant, water, prune, and take care of trees, flowers, or grass",
-  "Keep the garden clean and free of weeds",
-  "Suggest improvements for a more beautiful outdoor space",
-].map((s) => `- ${s}`).join("\n");
-
 export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAddModalProps) {
   const [title, setTitle] = useState("");
   const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>([]);
@@ -55,8 +44,8 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
   const [selectedExperience, setSelectedExperience] = useState<string[]>([]);
   const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
   const [country, setCountry] = useState("Philippines");
-  const [province, setProvince] = useState("Cebu");
-  const [city, setCity] = useState("Cebu City");
+  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [salary, setSalary] = useState("");
   const [salaryPeriod, setSalaryPeriod] = useState<'day' | 'week' | 'month'>("day");
@@ -72,8 +61,8 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
     setSelectedExperience([]);
     setSelectedGenders([]);
     setCountry("Philippines");
-    setProvince("Cebu");
-    setCity("Cebu City");
+    setProvince("");
+    setCity("");
     setAddress("");
     setSalary("");
     setSalaryPeriod("day");
@@ -116,6 +105,13 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
     setSelectedSubTypes(prev => prev.includes(subType) ? prev.filter(s => s !== subType) : [...prev, subType]);
   };
 
+  const clearSelectedTags = () => {
+    setSelectedJobTypes([]);
+    setSelectedSubTypes([]);
+    setSelectedExperience([]);
+    setSelectedGenders([]);
+  };
+
   const handleExperienceSelect = (value: string) => {
     setSelectedExperience(prev => (prev.includes(value) ? [] : [value]));
   };
@@ -142,13 +138,21 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
   const isFormValid = (() => {
     const t = title.trim();
     const d = about.trim();
-    const sNum = Number(salary);
-    return t.length > 0 && d.length > 0 && !Number.isNaN(sNum) && sNum >= 0;
+    const hasJobType = selectedJobTypes.length > 0;
+    const hasExperience = selectedExperience.length > 0;
+    const hasGender = selectedGenders.length > 0;
+    const salaryText = salary.trim();
+    const sNum = Number(salaryText);
+    const integerDigits = salaryText.replace(/\..*/, '').replace(/[^0-9]/g, '').length;
+    const withinMaxDigits = integerDigits > 0 && integerDigits <= 6;
+    const hasSalary = salaryText.length > 0 && !Number.isNaN(sNum) && sNum >= 0 && withinMaxDigits;
+    const hasRequirements = requirementsList.some((s) => s.trim().length > 0);
+    return t.length > 0 && d.length > 0 && hasJobType && hasExperience && hasGender && hasSalary && hasRequirements;
   })();
 
   const handleSubmit = () => {
     if (!isFormValid) {
-      alert('Please fill Job Title and About this role, and ensure Salary Rate is a non-negative number. Street address is optional.');
+      alert('Please complete: Job Title, About this role, select Job Type, Experience Level, and Preferred Gender, enter a valid Salary Rate, and add at least one requirement.');
       return;
     }
     const data: JobPostAddFormData = {
@@ -179,13 +183,18 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
   // Using Tailwind theme classes for colors and fonts
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center p-2 mobile-M:p-3 tablet:p-4 bg-black/50"
       onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      <div
+      <motion.div
         className={`font-inter w-[700px] max-w-[95vw] max-h-[90vh] overflow-y-auto scrollbar-hide rounded-2xl shadow-lg border bg-white border-gray-neutral300 text-gray-neutral600`}
         onClick={(e) => e.stopPropagation()}
+        initial={{ y: 20, opacity: 0, scale: 0.98 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
       >
         {/* Header */}
         <div className="px-4 mobile-M:px-5 tablet:px-[50px] pt-4 tablet:pt-6 pb-3 relative">
@@ -209,38 +218,62 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
             {/* Selected Tags Summary */}
             <div className="mb-3">
               <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Selected Tags</div>
-              <div
-                className="rounded-lg border px-3 py-2 min-h-[34px] flex flex-wrap gap-2 items-center border-gray-neutral300"
-              >
-                {selectedSubTypes.length === 0 && selectedExperience.length === 0 && selectedGenders.length === 0 ? (
-                  <span className="text-[12px] text-gray-neutral600">Selected tags</span>
-                ) : (
-                  <>
-                    {selectedSubTypes.map((label) => (
-                      <JobTypeTag 
-                        key={`sel-jt-${label}`} 
-                        label={label} 
-                        selected={true}
-                        onClick={() => toggleSubType(label)}
-                      />
-                    ))}
-                    {selectedExperience.map((label) => (
-                      <ExperienceLevelTag 
-                        key={`sel-exp-${label}`} 
-                        label={label} 
-                        selected={true}
-                        onClick={() => setSelectedExperience(prev => prev.filter(v => v !== label))}
-                      />
-                    ))}
-                    {selectedGenders.map((label) => (
-                      <GenderTag 
-                        key={`sel-gen-${label}`} 
-                        label={label} 
-                        selected={true}
-                        onClick={() => setSelectedGenders(prev => prev.filter(v => v !== label))}
-                      />
-                    ))}
-                  </>
+              <div className="flex items-center gap-2">
+                <div
+                  className="rounded-lg border px-3 py-2 min-h-[34px] flex-1 flex flex-wrap gap-2 items-center border-gray-neutral300"
+                >
+                  {selectedSubTypes.length === 0 && selectedExperience.length === 0 && selectedGenders.length === 0 ? (
+                    <span className="text-[12px] text-gray-neutral600">Selected tags</span>
+                  ) : (
+                    <>
+                      {selectedSubTypes.map((label) => (
+                        <JobTypeTag 
+                          key={`sel-jt-${label}`} 
+                          label={label} 
+                          selected={true}
+                          onClick={() => toggleSubType(label)}
+                        />
+                      ))}
+                      {selectedExperience.map((label) => (
+                        <ExperienceLevelTag 
+                          key={`sel-exp-${label}`} 
+                          label={label} 
+                          selected={true}
+                          onClick={() => setSelectedExperience(prev => prev.filter(v => v !== label))}
+                        />
+                      ))}
+                      {selectedGenders.map((label) => (
+                        <GenderTag 
+                          key={`sel-gen-${label}`} 
+                          label={label} 
+                          selected={true}
+                          onClick={() => setSelectedGenders(prev => prev.filter(v => v !== label))}
+                        />
+                      ))}
+                    </>
+                  )}
+                </div>
+                {(selectedSubTypes.length > 0 || selectedExperience.length > 0 || selectedGenders.length > 0) && (
+                  <button
+                    type="button"
+                    aria-label="Clear selected tags"
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-error-error500 hover:bg-error-error600 transition-colors"
+                    onClick={clearSelectedTags}
+                  >
+                    <div
+                      className="w-5 h-5 bg-white"
+                      style={{
+                        WebkitMaskImage: `url(${typeof DeleteButtonIcon === 'string' ? DeleteButtonIcon : (DeleteButtonIcon as any).src})`,
+                        maskImage: `url(${typeof DeleteButtonIcon === 'string' ? DeleteButtonIcon : (DeleteButtonIcon as any).src})`,
+                        WebkitMaskRepeat: 'no-repeat',
+                        maskRepeat: 'no-repeat',
+                        WebkitMaskSize: 'contain',
+                        maskSize: 'contain',
+                        WebkitMaskPosition: 'center',
+                        maskPosition: 'center',
+                      }}
+                    />
+                  </button>
                 )}
               </div>
             </div>
@@ -350,8 +383,8 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
                 placeholder="Enter specific street address" 
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                maxLength={100}
-                helperText={`${address.length}/100`}
+                maxLength={50}
+                helperText={`${address.length}/50`}
               />
             </div>
           </div>
@@ -366,10 +399,14 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
                 value={salary}
                 onChange={(e) => {
                   let v = e.target.value.replace(/[^0-9.]/g, '');
-                  const i = v.indexOf('.');
-                  if (i !== -1) {
-                    v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
+                  const firstDot = v.indexOf('.');
+                  if (firstDot !== -1) {
+                    v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '');
                   }
+                  const [intPartRaw, decPartRaw = ''] = v.split('.');
+                  const intPart = (intPartRaw || '').slice(0, 6);
+                  const decPart = (decPartRaw || '').slice(0, 2);
+                  v = decPart.length ? `${intPart}.${decPart}` : intPart;
                   setSalary(v);
                 }}
                 leftIcon={<img src="/icons/PHP.svg" alt="PHP" className="w-4 h-4" />}
@@ -399,7 +436,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
               value={about}
               onChange={(e) => setAbout(e.target.value)}
               height="100px"
-              maxLength={1000}
+              maxLength={500}
               showCharCount={true}
               required
             />
@@ -426,13 +463,14 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
                       }}
                       className="flex-1"
                     />
-                    {isLast ? (
+                    {isLast && requirementsList.length < 10 ? (
                       <button
                         type="button"
                         aria-label="Add requirement"
                         className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-transparent hover:opacity-90 transition-opacity"
                         onClick={() => {
                           setRequirementsList((prev) => {
+                            if (prev.length >= 10) return prev;
                             const next = [...prev];
                             next.splice(idx + 1, 0, "");
                             return next;
@@ -490,7 +528,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

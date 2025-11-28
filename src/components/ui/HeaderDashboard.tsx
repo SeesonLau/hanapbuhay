@@ -189,23 +189,21 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
+      const targetEl = event.target as HTMLElement;
+      const inMenu = menuRef.current && menuRef.current.contains(targetEl);
+      const onMenuButton = buttonRef.current && buttonRef.current.contains(targetEl);
+      const inProfileAnchor = profileRef.current && profileRef.current.contains(targetEl);
+      const inProfileDropdown = !!targetEl.closest('#profile-dropdown');
+
+      if (!inMenu && !onMenuButton) {
         setIsMenuOpen(false);
       }
-      
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target as Node)
-      ) {
+
+      if (!inProfileAnchor && !inProfileDropdown) {
         setIsProfileOpen(false);
       }
 
-      if (!(event.target as HTMLElement).closest('#notification-button')) {
+      if (!targetEl.closest('#notification-button')) {
         setShowNotifications(false);
       }
     };
@@ -217,7 +215,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isMenuOpen, isProfileOpen, showNotifications]);
+  }, [isMenuOpen, isProfileOpen]);
 
   const navigationLinks = [
     { id: 'find-jobs', label: 'Find Jobs', route: ROUTES.FINDJOBS },
