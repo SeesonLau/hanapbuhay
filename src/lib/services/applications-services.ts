@@ -3,8 +3,7 @@ import { supabase } from './supabase/client';
 import { ApplicationMessages } from '@/resources/messages/applications';
 import { ApplicationStatus } from '../constants/application-status';
 import { Application } from '../models/application';
-import { NotificationService } from './notifications-services';
-import { NotificationType } from '../constants/notification-types';
+import { notifyEmployerOfApplication, notifyApplicantOfAcceptance } from '../utils/notification-helper'; 
 
 interface ApplicationQueryParams {
   page?: number;
@@ -23,25 +22,9 @@ interface PaginatedApplications {
 export class ApplicationService {
   private static readonly DEFAULT_PAGE_SIZE = 10;
 
-  // Create new application with notification
+  // Create new application
   static async createApplication(postId: string, userId: string): Promise<Application | null> {
     try {
-      // First, fetch the post to get employer info and job title
-      const { data: post, error: postError } = await supabase
-        .from('posts')
-        .select('employerId, title, createdBy')
-        .eq('postId', postId)
-        .single();
-
-      if (postError || !post) {
-        toast.error('Job post not found');
-        throw postError;
-      }
-
-      // Get the employer ID (could be employerId or createdBy depending on your schema)
-      const employerId = post.employerId || post.createdBy;
-
-      // Create the application
       const { data, error } = await supabase
         .from('applications')
         .insert({
@@ -55,7 +38,6 @@ export class ApplicationService {
         .single();
 
       if (error) {
-        // Check if this is a unique constraint violation
         if (error.code === '23505') {
           toast.error(ApplicationMessages.DUPLICATE_APPLICATION_ERROR);
           return null;
@@ -63,15 +45,19 @@ export class ApplicationService {
         throw error;
       }
 
-      // Send notification to employer (don't await to avoid blocking)
-      this.notifyEmployerOfApplication(
-        employerId,
-        userId,
-        data.applicationId,
-        post.title
-      ).catch(err => {
-        console.error('Failed to send notification:', err);
-        // Don't throw - notification failure shouldn't break application creation
+      console.log('Application created successfully:', data);
+      console.log('About to send notification with:', {
+        postId,
+        applicantId: userId,
+        applicationId: data.applicationId
+      });
+      
+      notifyEmployerOfApplication({
+        postId,
+        applicantId: userId,
+        applicationId: data.applicationId
+      }).catch(err => {
+        console.error('Failed to send notification to employer:', err);
       });
 
       toast.success(ApplicationMessages.CREATE_APPLICATION_SUCCESS);
@@ -84,56 +70,13 @@ export class ApplicationService {
     }
   }
 
-  // Private helper: Notify employer of new application
-  private static async notifyEmployerOfApplication(
-    employerId: string,
-    applicantId: string,
-    applicationId: string,
-    jobTitle: string
-  ): Promise<void> {
-    try {
-      await NotificationService.createNotification({
-        userId: employerId,
-        createdBy: applicantId,
-        type: NotificationType.JOB_APPLICATION,
-        message: `applied to your "${jobTitle}" position`,
-        relatedId: applicationId,
-        isRead: false,
-        updatedBy: applicantId
-      });
-    } catch (error) {
-      console.error('Failed to create notification:', error);
-      // Don't throw - notification is not critical
-    }
-  }
-
-  // Update application status with notification for acceptance
+  // Update application status
   static async updateApplicationStatus(
     applicationId: string,
     status: ApplicationStatus,
     updatedBy: string
   ): Promise<Application> {
     try {
-      // Get application details before updating
-      const { data: application, error: fetchError } = await supabase
-        .from('applications')
-        .select(`
-          *,
-          posts (
-            title,
-            employerId,
-            createdBy
-          )
-        `)
-        .eq('applicationId', applicationId)
-        .is('deletedAt', null)
-        .single();
-
-      if (fetchError || !application) {
-        throw fetchError || new Error('Application not found');
-      }
-
-      // Update the status
       const { data, error } = await supabase
         .from('applications')
         .update({
@@ -148,19 +91,13 @@ export class ApplicationService {
 
       if (error) throw error;
 
-      // If application was accepted, notify the applicant
-      if (status === ApplicationStatus.ACCEPTED) {
-        const post = application.posts as any;
-        const employerId = post?.employerId || post?.createdBy;
-        
-        this.notifyApplicantOfAcceptance(
-          application.userId,
-          employerId,
+      if (status === ApplicationStatus.APPROVED) {
+        notifyApplicantOfAcceptance({  
           applicationId,
-          post?.title || 'a position'
-        ).catch(err => {
+          employerId: updatedBy
+        }).catch(err => {
           console.error('Failed to send acceptance notification:', err);
-        });
+        })
       }
 
       toast.success(ApplicationMessages.UPDATE_APPLICATION_SUCCESS);
@@ -171,82 +108,62 @@ export class ApplicationService {
     }
   }
 
-  // Private helper: Notify applicant of acceptance
-  private static async notifyApplicantOfAcceptance(
-    applicantId: string,
-    employerId: string,
-    applicationId: string,
-    jobTitle: string
-  ): Promise<void> {
-    try {
-      await NotificationService.createNotification({
-        userId: applicantId,
-        createdBy: employerId,
-        type: NotificationType.APPLICATION_ACCEPTED,
-        message: `accepted your application for "${jobTitle}"`,
-        relatedId: applicationId,
-        isRead: false,
-        updatedBy: employerId
-      });
-    } catch (error) {
-      console.error('Failed to create acceptance notification:', error);
-    }
-  }
-
   // Get applications by user ID
   static async getApplicationsByUserId(
-    userId: string,
-    params: ApplicationQueryParams = {}
-  ): Promise<PaginatedApplications> {
-    try {
-      const {
-        page = 1,
-        pageSize = this.DEFAULT_PAGE_SIZE,
-        status,
-        sortBy = 'createdAt',
-        sortOrder = 'desc'
-      } = params;
+  userId: string,
+  params: ApplicationQueryParams = {}
+): Promise<PaginatedApplications> {
+  try {
+    const {
+      page = 1,
+      pageSize = this.DEFAULT_PAGE_SIZE,
+      status,
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
+    } = params;
 
-      let query = supabase
-        .from('applications')
-        .select(`
-          *,
-          posts (
-            postId,
-            title,
-            description,
-            price,
-            location,
-            type,
-            subType
-          )
-        `, { count: 'exact' })
-        .eq('userId', userId)
-        .is('deletedAt', null);
+    let query = supabase
+      .from('applications')
+      .select(`
+        *,
+        posts (
+          postId,
+          title,
+          description,
+          price,
+          location,
+          type,
+          subType
+        )
+      `, { count: 'exact' })
+      .eq('userId', userId)
+      .is('deletedAt', null);
 
-      if (status?.length) {
-        query = query.in('status', status);
-      }
-
-      const from = (page - 1) * pageSize;
-      const to = from + pageSize - 1;
-
-      const { data, count, error } = await query
-        .order(sortBy, { ascending: sortOrder === 'asc' })
-        .range(from, to);
-
-      if (error) throw error;
-
-      return {
-        applications: data || [],
-        count: count || 0,
-        hasMore: count ? from + (data?.length || 0) < count : false
-      };
-    } catch (error) {
-      toast.error(ApplicationMessages.FETCH_APPLICATIONS_ERROR);
-      throw error;
+    if (status?.length) {
+      query = query.in('status', status);
     }
+
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, count, error } = await query
+      .order(sortBy, { ascending: sortOrder === 'asc' })
+      .range(from, to);
+
+    if (error) throw error;
+
+    console.log('ApplicationService - Raw data from Supabase:', data);
+
+    return {
+      applications: data || [],
+      count: count || 0,
+      hasMore: count ? from + (data?.length || 0) < count : false
+    };
+  } catch (error) {
+    toast.error(ApplicationMessages.FETCH_APPLICATIONS_ERROR);
+    throw error;
   }
+}
 
   // Get array of postIds that the user has applied for
   static async getAppliedPostIdsByUser(userId: string): Promise<string[]> {
@@ -262,6 +179,7 @@ export class ApplicationService {
       if (!data) return [];
       return data.map((row: any) => row.postId).filter(Boolean);
     } catch (error) {
+      // don't toast here to avoid noisy UI, let caller decide
       throw error;
     }
   }

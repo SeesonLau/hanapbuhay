@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import NotificationCard from "./NotificationCard";
 import { Notification } from "@/lib/models/notification";
-import { NotificationService } from "@/lib/services/notifications-services";
+import { useNotifications } from "@/hooks/useNotification";
 import { AuthService } from "@/lib/services/auth-services";
 import { getNotificationRoute } from "@/lib/utils/notification-router";
 import { HiBell } from "react-icons/hi";
@@ -14,115 +14,50 @@ interface NotificationPopUpProps {
   isScrolled?: boolean;
 }
 
-interface EnrichedNotification extends Notification {
-  actorName?: string;
-  actorAvatar?: string;
-}
-
 const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = false }) => {
   const router = useRouter();
   const [showAll, setShowAll] = useState(false);
-  const [notifications, setNotifications] = useState<EnrichedNotification[]>([]);
-  const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [userLoading, setUserLoading] = useState(true);
 
-  // Fetch current user and notifications
   useEffect(() => {
-    const fetchNotifications = async () => {
+    const fetchUser = async () => {
       try {
-        setLoading(true);
-        
-        // Get current user
+        setUserLoading(true);
         const currentUser = await AuthService.getCurrentUser();
-        if (!currentUser) {
-          setLoading(false);
-          return;
+        if (currentUser) {
+          setUserId(currentUser.id);
         }
-        
-        setUserId(currentUser.id);
-
-        // Fetch notifications
-        const { notifications: fetchedNotifications } = await NotificationService.getNotificationsByUserId(
-          currentUser.id,
-          {
-            page: 1,
-            pageSize: showAll ? 50 : 6,
-            sortBy: 'createdAt',
-            sortOrder: 'desc',
-          }
-        );
-
-        // Enrich notifications with actor data
-        const enrichedNotifications = await enrichWithActorData(fetchedNotifications);
-        setNotifications(enrichedNotifications);
       } catch (error) {
-        console.error('Error fetching notifications:', error);
+        console.error('Error fetching current user:', error);
       } finally {
-        setLoading(false);
+        setUserLoading(false);
       }
     };
 
-    fetchNotifications();
-  }, [showAll]);
+    fetchUser();
+  }, []);
 
-  // Enrich notifications with actor information
-  const enrichWithActorData = async (notifs: Notification[]): Promise<EnrichedNotification[]> => {
-    // Get unique actor IDs
-    const actorIds = [...new Set(notifs.map(n => n.createdBy))];
-    
-    // TODO: Replace with your actual user service
-    // const actors = await UserService.getUsersByIds(actorIds);
-    // const actorMap = new Map(actors.map(a => [a.id, a]));
+  const {
+    notifications,
+    loading,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications(userId, {
+    skip: userLoading || !userId, 
+    autoRefresh: true, 
+    pageSize: showAll ? 50 : 6,
+  });
 
-    // For now, return without enrichment
-    // In production, you'd fetch user data and map it
-    return notifs.map(notif => ({
-      ...notif,
-      // actorName: actorMap.get(notif.createdBy)?.name,
-      // actorAvatar: actorMap.get(notif.createdBy)?.avatar,
-    }));
-  };
-
-  // Subscribe to real-time notifications
-  useEffect(() => {
-    if (!userId) return;
-
-    const unsubscribe = NotificationService.subscribeToNotifications(
-      userId,
-      async (newNotification) => {
-        // Enrich the new notification
-        const enriched = await enrichWithActorData([newNotification]);
-        
-        // Add new notification to the top of the list
-        setNotifications((prev) => [enriched[0], ...prev]);
-      }
-    );
-
-    return () => {
-      unsubscribe();
-    };
-  }, [userId]);
-
-  // Handle notification click
-  const handleNotificationClick = async (notif: Notification) => {
+  const handleNotificationClick = async (notif: Notification & { actorName?: string; actorAvatar?: string }) => {
     try {
       if (!userId) return;
 
-      // Mark as read if unread
       if (!notif.isRead) {
-        await NotificationService.markAsRead(notif.notificationId, userId);
-        
-        // Update local state
-        setNotifications((prev) =>
-          prev.map((n) =>
-            n.notificationId === notif.notificationId
-              ? { ...n, isRead: true }
-              : n
-          )
-        );
+        await markAsRead(notif.notificationId);
       }
 
-      // Navigate to related page using relatedId
       const route = getNotificationRoute(notif);
       router.push(route);
       
@@ -144,19 +79,42 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
         boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
       }}
     >
-      <div className="p-3 border-b border-gray-200 flex items-center justify-center gap-2">
-        <HiBell className="w-5 h-5 text-gray-700" />
-        <span className="font-semibold text-gray-700">Notifications</span>
+      {/* Header */}
+      <div className="p-3 border-b border-gray-200 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <HiBell className="w-5 h-5 text-gray-neutral700" />
+          <span className="font-bold text-gray-neutral700 text-lead">
+            Notifications
+            {unreadCount > 0 && (
+              <span className="ml-2 px-2 py-0.5 text-xs font-medium text-white bg-blue-600 rounded-full">
+                {unreadCount}
+              </span>
+            )}
+          </span>
+        </div>
+        {unreadCount > 0 && (
+          <button
+            onClick={markAllAsRead}
+            className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Mark all read
+          </button>
+        )}
       </div>
       
+      {/* Notifications List */}
       <div className={`overflow-y-auto overflow-x-hidden ${showAll ? 'max-h-[30.75rem]' : 'max-h-fit'}`}>
-        {loading ? (
-          <div className="p-8 text-center text-gray-500">
+        {(userLoading || loading) && notifications.length === 0 ? (
+          <div className="p-8 text-center text-gray-neutral500">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
             <p className="mt-2 text-sm">Loading notifications...</p>
           </div>
+        ) : !userId ? (
+          <div className="p-8 text-center text-gray-neutral500">
+            <p className="text-sm">Please log in to view notifications</p>
+          </div>
         ) : notifications.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-gray-neutral500">
             <HiBell className="w-12 h-12 mx-auto mb-2 opacity-30" />
             <p className="text-sm">No notifications yet</p>
           </div>
@@ -173,6 +131,7 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
         )}
       </div>
 
+      {/* Show More Button */}
       {notifications.length > 6 && !showAll && (
         <div className="p-3 border-t border-gray-200">
           <Button
@@ -183,6 +142,18 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
           >
             See previous notifications ({notifications.length - 6} more)
           </Button>
+        </div>
+      )}
+
+      {/* View All Link */}
+      {showAll && (
+        <div className="p-3 border-t border-gray-200 text-center">
+          <button
+            onClick={() => router.push('/notifications')}
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          >
+            View all notifications
+          </button>
         </div>
       )}
     </div>

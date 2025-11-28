@@ -13,9 +13,7 @@ interface NotificationParams {
 }
 
 export class NotificationService {
-  /**
-   * Fetches all notifications for a specific user with pagination and filtering.
-   */
+ 
   static async getNotificationsByUserId(
     userId: string,
     params: NotificationParams
@@ -34,9 +32,8 @@ export class NotificationService {
       .from('notifications')
       .select('*', { count: 'exact' })
       .eq('userId', userId)
-      .is('deletedAt', null); // Exclude soft-deleted notifications
+      .is('deletedAt', null); 
 
-    // Apply notification type filter
     if (type) {
       if (Array.isArray(type)) {
         query = query.in('type', type);
@@ -45,12 +42,10 @@ export class NotificationService {
       }
     }
 
-    // Apply read/unread filter
     if (isRead !== undefined) {
       query = query.eq('isRead', isRead);
     }
 
-    // Apply ordering and pagination
     query = query
       .order(sortBy, { ascending: sortOrder === 'asc' })
       .range(offset, offset + pageSize - 1);
@@ -67,9 +62,6 @@ export class NotificationService {
     return { notifications: data as Notification[], hasMore };
   }
 
-  /**
-   * Gets the count of unread notifications for a specific user.
-   */
   static async getUnreadCount(userId: string): Promise<number> {
     const { count, error } = await supabase
       .from('notifications')
@@ -84,9 +76,6 @@ export class NotificationService {
     return count ?? 0;
   }
 
-  /**
-   * Gets the count of unread notifications by type for a specific user.
-   */
   static async getUnreadCountByType(
     userId: string,
     type: NotificationType
@@ -105,35 +94,33 @@ export class NotificationService {
     return count ?? 0;
   }
 
-  /**
-   * Creates a new notification.
-   */
   static async createNotification(
     notificationData: Omit<Notification, 'notificationId' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'deletedBy'>
   ): Promise<Notification> {
     const now = new Date().toISOString();
     
+    const payload = {
+      ...notificationData,
+      createdAt: now,
+      updatedAt: now,
+    };
+    
+    const { deletedAt, deletedBy, ...cleanPayload } = payload as any;
+    
     const { data, error } = await supabase
       .from('notifications')
-      .insert({
-        ...notificationData,
-        createdAt: now,
-        updatedAt: now,
-        // createdBy and updatedBy should be included in notificationData
-      })
+      .insert(cleanPayload)
       .select()
       .single();
 
     if (error) {
+      console.error('Notification creation error:', error);
       toast.error('Failed to create notification');
       throw new Error('Could not create notification.');
     }
     return data as Notification;
   }
 
-  /**
-   * Marks a specific notification as read.
-   */
   static async markAsRead(notificationId: string, updatedBy: string): Promise<Notification> {
     const { data, error } = await supabase
       .from('notifications')
@@ -154,9 +141,6 @@ export class NotificationService {
     return data as Notification;
   }
 
-  /**
-   * Marks all notifications as read for a specific user.
-   */
   static async markAllAsRead(userId: string): Promise<void> {
     const { error } = await supabase
       .from('notifications')
@@ -175,9 +159,6 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Marks notifications of a specific type as read for a user.
-   */
   static async markTypeAsRead(
     userId: string,
     type: NotificationType
@@ -200,9 +181,6 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Soft-deletes a specific notification.
-   */
   static async deleteNotification(notificationId: string, userId: string): Promise<void> {
     const { error } = await supabase
       .from('notifications')
@@ -220,9 +198,6 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Soft-deletes all notifications for a specific user.
-   */
   static async deleteAllNotifications(userId: string): Promise<void> {
     const { error } = await supabase
       .from('notifications')
@@ -241,9 +216,6 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Soft-deletes all read notifications for a specific user.
-   */
   static async deleteReadNotifications(userId: string): Promise<void> {
     const { error } = await supabase
       .from('notifications')
@@ -263,9 +235,6 @@ export class NotificationService {
     }
   }
 
-  /**
-   * Gets a single notification by ID.
-   */
   static async getNotificationById(
     notificationId: string
   ): Promise<Notification | null> {
@@ -282,9 +251,6 @@ export class NotificationService {
     return data as Notification;
   }
 
-  /**
-   * Gets recent notifications for a user (last N notifications).
-   */
   static async getRecentNotifications(
     userId: string,
     limit: number = 5
@@ -303,12 +269,9 @@ export class NotificationService {
     return data as Notification[];
   }
 
-  /**
-   * Gets notifications by related ID (e.g., all notifications for a specific job application).
-   */
   static async getNotificationsByRelatedId(
     userId: string,
-    relatedId: number
+    relatedId: string
   ): Promise<Notification[]> {
     const { data, error } = await supabase
       .from('notifications')
@@ -324,9 +287,6 @@ export class NotificationService {
     return data as Notification[];
   }
 
-  /**
-   * Batch create multiple notifications (useful for sending to multiple users).
-   */
   static async createBatchNotifications(
     notificationsData: Omit<Notification, 'notificationId' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'deletedBy'>[]
   ): Promise<Notification[]> {
@@ -336,6 +296,8 @@ export class NotificationService {
       ...notification,
       createdAt: now,
       updatedAt: now,
+      deletedAt: null,
+      deletedBy: null,
     }));
 
     const { data, error } = await supabase
@@ -350,10 +312,6 @@ export class NotificationService {
     return data as Notification[];
   }
 
-  /**
-   * Subscribe to real-time notification updates for a user.
-   * Returns an unsubscribe function.
-   */
   static subscribeToNotifications(
     userId: string,
     onNotification: (notification: Notification) => void
@@ -379,10 +337,6 @@ export class NotificationService {
     };
   }
 
-  /**
-   * Subscribe to real-time notification updates (for read status changes).
-   * Returns an unsubscribe function.
-   */
   static subscribeToNotificationUpdates(
     userId: string,
     onUpdate: (notification: Notification) => void

@@ -7,11 +7,11 @@ export function getNotificationRoute(notif: Notification): string {
     // Fallback to generic routes if no relatedId
     switch (notif.type) {
       case NotificationType.JOB_APPLICATION:
-        return '/jobs/applications';
+        return '/manageJobPosts';
       case NotificationType.APPLICATION_ACCEPTED:
-        return '/jobs/my-applications';
+        return '/appliedJobs';
       case NotificationType.NEW_MESSAGE:
-        return '/messages';
+        return '/chat';
       default:
         return '/notifications';
     }
@@ -20,13 +20,13 @@ export function getNotificationRoute(notif: Notification): string {
   // Specific routes with relatedId
   switch (notif.type) {
     case NotificationType.JOB_APPLICATION:
-      return `/applications/${notif.relatedId}`;
+      return `/manageJobPosts`;
       
     case NotificationType.APPLICATION_ACCEPTED:
-      return `/my-applications/${notif.relatedId}`;
+      return `/appliedJobs`;
       
     case NotificationType.NEW_MESSAGE:
-      return `/messages/${notif.relatedId}`;
+      return `/chat`;
       
     default:
       return '/notifications';

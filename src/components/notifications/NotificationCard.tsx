@@ -88,7 +88,7 @@ export default function NotificationCard({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className={`text-sm truncate ${notif.isRead ? "text-gray-600" : "text-gray-900"}`}>
+        <p className={`text-small truncate ${notif.isRead ? "text-gray-neutral600" : "text-gray-neutral900"}`}>
           {actorName && (
             <span className="font-semibold">{actorName} </span>
           )}
@@ -97,7 +97,7 @@ export default function NotificationCard({
       </div>
 
       {/* Time */}
-      <div className={`flex-shrink-0 text-xs whitespace-nowrap ${
+      <div className={`flex-shrink-0 text-xs whitespace-nowrap text-mini ${
         notif.isRead ? "text-gray-400" : "text-blue-600 font-medium"
       }`}>
         {timeAgo}
