@@ -17,7 +17,7 @@ interface ApplicantStatusCardProps {
   dateApplied: string;
   status: 'Accepted' | 'Denied' | 'Completed';
   profilePicUrl?: string | null;
-  onProfileClick?: () => void; // modal trigger
+  onProfileClick?: () => void; 
 }
 
 export default function ApplicantStatusCard({
@@ -34,18 +34,17 @@ export default function ApplicantStatusCard({
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 
   const handleChatClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
+    e.stopPropagation(); 
     router.push('/chat');
   };
 
   const handleReviewClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click
+    e.stopPropagation(); 
     setIsRatingModalOpen(true);
   };
 
   const handleSubmitRating = (rating: number, comment: string) => {
     console.log('Rating submitted:', { userId, rating, comment });
-    // TODO: Implement API call to submit rating
   };
 
   const statusClasses =
@@ -56,7 +55,7 @@ export default function ApplicantStatusCard({
   return (
     <div
       className="bg-white rounded-xl shadow-md p-4 w-full max-w-[300px] aspect-[300/172] flex flex-col justify-between border border-gray-neutral200 transition-transform duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg hover:bg-gray-50 cursor-pointer"
-      onClick={onProfileClick} // entire card clickable
+      onClick={onProfileClick} 
     >
       {/* Profile + Chat + Review */}
       <div className="flex justify-between items-center">

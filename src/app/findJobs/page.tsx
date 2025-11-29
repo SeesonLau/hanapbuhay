@@ -1,4 +1,3 @@
-// src/app/findJobs/page.tsx
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
@@ -177,26 +176,23 @@ export default function FindJobsPage() {
 
   return (
     <div className="overflow-x-hidden">
-      <div className="fixed inset-0 -z-10 bg-gray-default" />
       {/* Banner Section with Header and Search */}
       <Banner variant="findJobs" onSearch={handleSearch} />
 
       {/* Main Container with VH layout below banner */}
-      <div className="mt-[200px] min-h-screen bg-gray-default">
+      <div className="mt-[200px] mobile-S:mt-[140px] mobile-M:mt-[145px] mobile-L:mt-[150px] tablet:mt-[180px] laptop:mt-[190px] laptop-L:mt-[200px] min-h-screen bg-gray-50">
         {/* Stats Section - Fixed on laptop, top on mobile/tablet */}
         <aside className="block laptop:hidden px-4 md:px-6">
           <StatsSection stats={stats} variant="findJobs" loading={statsLoading} error={statsError} />
         </aside>
         
         {/* Stats Section - Fixed sidebar on laptop only */}
-        { /*<aside className="hidden laptop:block fixed left-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[180px] laptop-L:w-[200px] z-20 px-3 bg-transparent">*/}
-        <aside className="hidden laptop:block fixed left-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[160px] laptop-L:w-[170px] z-20 px-2 bg-transparent">
-
+        <aside className="hidden laptop:block fixed left-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[180px] laptop-L:w-[200px] z-20 px-3 bg-gray-50">
           <StatsSection stats={stats} variant="findJobs" loading={statsLoading} error={statsError} />
         </aside>
 
         {/* Filter Section - Desktop Only (rightmost, no margin, full height) */}
-        <aside className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-40 border-l border-gray-200 flex flex-col pointer-events-auto">
+        <aside className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-20 border-l border-gray-200 flex flex-col">
           {/* Sort & View Controls */}
           <div className="flex-shrink-0 bg-white  border-b border-gray-200 px-3 py-2 z-10">
             <div className="flex items-center justify-between gap-3">
@@ -219,8 +215,8 @@ export default function FindJobsPage() {
         className="flex-1 min-h-0"
       />
     </aside>        {/* Main Content Area - Job posts only */}
-        <main className="w-full laptop:w-[calc(100%-440px)] laptop:ml-[160px] laptop-L:w-[calc(100%-450px)] laptop-L:ml-[170px]">
-          <div className="px-2 md:px-4 laptop:px-4 pt-2 pb-6 max-w-full">
+        <main className="w-full laptop:w-[calc(100%-460px)] laptop:ml-[180px] laptop-L:w-[calc(100%-480px)] laptop-L:ml-[200px]">
+          <div className="px-4 md:px-6 laptop:px-6 pt-2 pb-6 max-w-full">
             <div className="space-y-4">
               {/* Controls Row with Filter Button - Mobile/Tablet Only */}
               <div className="laptop:hidden flex items-center justify-between gap-1.5 mobile-M:gap-3 bg-white rounded-lg px-2 mobile-M:px-4 py-2 mobile-M:py-3 shadow-sm">
@@ -258,7 +254,6 @@ export default function FindJobsPage() {
       </div>
 
       {/* Modal */}
-
       <JobPostViewModal
         isOpen={isJobViewOpen}
         onClose={() => setIsJobViewOpen(false)}

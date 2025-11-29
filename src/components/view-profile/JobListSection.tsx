@@ -120,7 +120,7 @@ export default function JobListSection({ userId, userType }: JobListSectionProps
   if (jobs.length === 0) {
     return (
       <div className="p-6">
-        <p className="font-inter font-semibold -mt-6 body mb-4">
+        <p className="font-inter font-semibold -mt-3 body mb-4">
           {userType === 'applicant' ? 'Previous Applied Jobs at' : 'Previous Posted Jobs at'}{" "}
           <span className="font-inter font-extrabold text-primary-primary500 transition duration-200 ease-in-out hover:text-primary-600 hover:scale-105 inline-block cursor-pointer">
             HANAPBUHAY
@@ -135,7 +135,7 @@ export default function JobListSection({ userId, userType }: JobListSectionProps
 
   return (
     <div className="p-6 relative">
-      <p className="font-inter font-semibold -mt-6 body">
+      <p className="font-inter font-semibold -mt-4 body">
         {userType === 'applicant' ? 'Previous Applied Jobs at' : 'Previous Posted Jobs at'}{" "}
         <span className="font-inter font-extrabold text-primary-primary500 transition duration-200 ease-in-out hover:text-primary-600 hover:scale-105 inline-block cursor-pointer">
           HANAPBUHAY
@@ -145,7 +145,7 @@ export default function JobListSection({ userId, userType }: JobListSectionProps
       {/* Jobs container */}
       <div
         ref={scrollRef}
-        className="rounded-lg max-h-[275px] overflow-y-auto scrollbar-hide py-2 px-2 snap-y snap-mandatory scroll-smooth"
+        className="rounded-lg max-h-[330px] overflow-y-auto scrollbar-hide py-2 px-2 snap-y snap-mandatory scroll-smooth"
         style={{
           scrollPaddingTop: '0.5rem',
           scrollPaddingBottom: '0.5rem'

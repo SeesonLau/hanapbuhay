@@ -3,6 +3,7 @@ import { supabase } from './supabase/client';
 import { ApplicationMessages } from '@/resources/messages/applications';
 import { ApplicationStatus } from '../constants/application-status';
 import { Application } from '../models/application';
+import { notifyEmployerOfApplication, notifyApplicantOfAcceptance } from '../utils/notification-helper'; 
 
 interface ApplicationQueryParams {
   page?: number;
@@ -24,7 +25,6 @@ export class ApplicationService {
   // Create new application
   static async createApplication(postId: string, userId: string): Promise<Application | null> {
     try {
-      // The unique constraint will handle duplicate applications
       const { data, error } = await supabase
         .from('applications')
         .insert({
@@ -38,18 +38,32 @@ export class ApplicationService {
         .single();
 
       if (error) {
-        // Check if this is a unique constraint violation
-        if (error.code === '23505') { // PostgreSQL unique violation code
+        if (error.code === '23505') {
           toast.error(ApplicationMessages.DUPLICATE_APPLICATION_ERROR);
           return null;
         }
         throw error;
       }
 
+      console.log('Application created successfully:', data);
+      console.log('About to send notification with:', {
+        postId,
+        applicantId: userId,
+        applicationId: data.applicationId
+      });
+      
+      notifyEmployerOfApplication({
+        postId,
+        applicantId: userId,
+        applicationId: data.applicationId
+      }).catch(err => {
+        console.error('Failed to send notification to employer:', err);
+      });
+
       toast.success(ApplicationMessages.CREATE_APPLICATION_SUCCESS);
       return data;
-    } catch (error: any) { // Type assertion for database error
-      if (error?.code !== '23505') { // Don't show general error for duplicates
+    } catch (error: any) {
+      if (error?.code !== '23505') {
         toast.error(ApplicationMessages.CREATE_APPLICATION_ERROR);
       }
       throw error;
@@ -76,6 +90,15 @@ export class ApplicationService {
         .single();
 
       if (error) throw error;
+
+      if (status === ApplicationStatus.APPROVED) {
+        notifyApplicantOfAcceptance({  
+          applicationId,
+          employerId: updatedBy
+        }).catch(err => {
+          console.error('Failed to send acceptance notification:', err);
+        })
+      }
 
       toast.success(ApplicationMessages.UPDATE_APPLICATION_SUCCESS);
       return data;
