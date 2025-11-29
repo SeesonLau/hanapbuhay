@@ -18,6 +18,7 @@ import {
 import { fontClasses } from '@/styles/fonts';
 import { TYPOGRAPHY } from '@/styles/typography';
 import { AuthService } from '@/lib/services/auth-services';
+import { NotificationService } from '@/lib/services/notifications-services';
 import { ROUTES } from '@/lib/constants';
 import SettingsModal from '@/components/modals/SettingsModal';
 import NotificationPopUp from '../notifications/NotificationPopUp';
@@ -33,7 +34,6 @@ interface HeaderDashboardProps {
   userRole?: string;
   userId?: string;
   userCreatedAt?: string;
-  notificationCount?: number;
 }
 
 const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
@@ -43,7 +43,6 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   userRole = 'Job Seeker',
   userId = '',
   userCreatedAt = new Date().toISOString(),
-  notificationCount = 1,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -75,6 +74,9 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     };
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  // State for unread notification count
+  const [unreadCount, setUnreadCount] = useState(0);
 
   //Logout animation state
   const [showGoodbye, setShowGoodbye] = useState(false);
@@ -141,6 +143,54 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     fetchUserData();
   }, [userName, userEmail, userAvatar, userId]);
 
+   // Fetch unread notification count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const currentUser = await AuthService.getCurrentUser();
+        if (currentUser) {
+          const count = await NotificationService.getUnreadCount(currentUser.id);
+          setUnreadCount(count);
+        }
+      } catch (error) {
+        console.error('Error fetching unread count:', error);
+        setUnreadCount(0);
+      }
+    };
+
+    fetchUnreadCount();
+
+    // Set up real-time subscription for notification updates
+    let unsubscribe: (() => void) | null = null;
+    
+    const setupSubscription = async () => {
+      try {
+        const currentUser = await AuthService.getCurrentUser();
+        if (currentUser) {
+          // Subscribe to new notifications
+          unsubscribe = NotificationService.subscribeToNotifications(
+            currentUser.id,
+            () => {
+              // Refetch count when new notification arrives
+              fetchUnreadCount();
+            }
+          );
+        }
+      } catch (error) {
+        console.error('Error setting up notification subscription:', error);
+      }
+    };
+
+    setupSubscription();
+
+    // Cleanup subscription on unmount
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, []);
+
   // Determine active link based on current path
   useEffect(() => {
     if (pathname === ROUTES.FINDJOBS) setActiveLink('find-jobs');
@@ -148,7 +198,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     else if (pathname === ROUTES.APPLIEDJOBS) setActiveLink('applied-jobs');
     else if (pathname === ROUTES.CHAT) setActiveLink('chat');
     else setActiveLink('find-jobs');
-  }, [pathname]);
+  }, [pathname]);  
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -314,12 +364,12 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                   onClick={() => setShowNotifications(!showNotifications)}
                 >
                   <HiBell className="w-6 h-6" />
-                  {notificationCount && notificationCount > 0 && (
+                  {unreadCount > 0 && (
                     <span
                       className="absolute -top-1 -right-1 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
                       style={{ backgroundColor: getRedColor() }}
                     >
-                      {notificationCount}
+                      {unreadCount}
                     </span>
                   )}
                 </button>

@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import NotificationCard from "./NotificationCard";
 import { Notification } from "@/lib/models/notification";
-import { NotificationType } from "@/lib/constants/notification-types";
+import { useNotifications } from "@/hooks/useNotification";
+import { AuthService } from "@/lib/services/auth-services";
+import { getNotificationRoute } from "@/lib/utils/notification-router";
 import { HiBell } from "react-icons/hi";
 import Button from "@/components/ui/Button";
 
@@ -12,23 +15,112 @@ interface NotificationPopUpProps {
 }
 
 const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = false }) => {
-  const [showAll, setShowAll] = useState(false);
+  const router = useRouter();
+  const [displayCount, setDisplayCount] = useState(5);
+  const [maxHeight, setMaxHeight] = useState(380); // 5 cards * 76px = 380px
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [enableScrollLoad, setEnableScrollLoad] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userLoading, setUserLoading] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isLoadingRef = useRef(false);
 
-  const notifications: Notification[] = [
-    { notificationId: "1", name: "John Doe", type: NotificationType.NEW_MESSAGE, message: "sent you a message", time: "2m ago", isRead: false },
-    { notificationId: "2", name: "Jane Smith", type: NotificationType.JOB_APPLICATION, message: "applied to your job post", time: "10m ago", isRead: true },
-    { notificationId: "3", name: "Alex Johnson", type: NotificationType.APPLICATION_ACCEPTED, message: "accepted your application", time: "30m ago", isRead: false },
-    { notificationId: "4", name: "Chris Brown", type: NotificationType.NEW_MESSAGE, message: "sent you a message", time: "1h ago", isRead: true },
-    { notificationId: "5", name: "Emily Davis", type: NotificationType.JOB_APPLICATION, message: "applied to your job post", time: "2h ago", isRead: false },
-    { notificationId: "6", name: "Michael Wilson", type: NotificationType.APPLICATION_ACCEPTED, message: "accepted your application", time: "5h ago", isRead: true },
-    { notificationId: "7", name: "Sarah Lee", type: NotificationType.NEW_MESSAGE, message: "sent you a message", time: "1d ago", isRead: false },
-  ];
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        setUserLoading(true);
+        const currentUser = await AuthService.getCurrentUser();
+        if (currentUser) {
+          setUserId(currentUser.id);
+        }
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      } finally {
+        setUserLoading(false);
+      }
+    };
 
-  const displayedNotifications = showAll ? notifications : notifications.slice(0, 6);
+    fetchUser();
+  }, []);
+
+  const {
+    notifications,
+    loading,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications(userId, {
+    skip: userLoading || !userId, 
+    autoRefresh: true, 
+    pageSize: 50,
+  });
+
+  const handleNotificationClick = async (notif: Notification & { actorName?: string; actorAvatar?: string }) => {
+    try {
+      if (!userId) return;
+
+      if (!notif.isRead) {
+        await markAsRead(notif.notificationId);
+      }
+
+      const route = getNotificationRoute(notif);
+      router.push(route);
+      
+    } catch (error) {
+      console.error('Error handling notification click:', error);
+    }
+  };
+
+  const loadOneNotification = async () => {
+    if (isLoadingRef.current || displayCount >= notifications.length) return;
+    
+    isLoadingRef.current = true;
+    setIsLoadingMore(true);
+    
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    setDisplayCount(prev => prev + 1);
+    setIsLoadingMore(false);
+    isLoadingRef.current = false;
+  };
+
+  useEffect(() => {
+    const scrollElement = scrollRef.current;
+    if (!scrollElement || !enableScrollLoad) return;
+
+    const handleScroll = () => {
+      if (isLoadingRef.current) return;
+
+      const scrollTop = scrollElement.scrollTop;
+      const scrollHeight = scrollElement.scrollHeight;
+      const clientHeight = scrollElement.clientHeight;
+
+      const bottomReached = scrollTop + clientHeight >= scrollHeight - 40;
+
+      if (bottomReached && displayCount < notifications.length) {
+        loadOneNotification();
+      }
+    };
+
+    scrollElement.addEventListener("scroll", handleScroll);
+    return () => scrollElement.removeEventListener("scroll", handleScroll);
+  }, [enableScrollLoad, displayCount, notifications.length]);
+
+  const handleSeePrevious = () => {
+    setMaxHeight(456);
+    setEnableScrollLoad(true);
+
+    setDisplayCount(prev => Math.min(6, notifications.length));
+  };
+
+  const displayedNotifications = notifications.slice(0, displayCount);
+  const hasMore = displayCount < notifications.length;
+  const remainingCount = notifications.length - displayCount;
+  const showSeePreviousButton = !enableScrollLoad && notifications.length > 5;
 
   return (
     <div 
-      className={`fixed right-4 w-[500px] max-w-[calc(100vw-2rem)] bg-white shadow-lg rounded-2xl border border-gray-neutral200 z-50 overflow-hidden transition-all duration-300 ${
+      className={`fixed right-4 w-[500px] max-w-[calc(100vw-2rem)] bg-white shadow-lg rounded-2xl border border-gray-200 z-50 overflow-hidden transition-all duration-300 ${
         isScrolled ? 'top-14' : 'top-16'
       }`}
       style={{
@@ -37,25 +129,101 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
         boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
       }}
     >
-      <div className="p-3 border-b border-gray-neutral200 flex items-center justify-center gap-2">
-        <HiBell className="w-5 h-5 text-gray-neutral700" />
-        <span className="font-semibold text-gray-700">Notifications</span>
+      {/* Header */}
+      <div className="relative p-3 border-b border-gray-200 flex items-center justify-center">
+
+        <div className="flex items-center gap-2">
+          <HiBell className="w-5 h-5 text-gray-neutral700" />
+          <span className="font-bold text-gray-neutral700 text-lead">
+            Notifications
+            {unreadCount > 0 && (
+              <span className="ml-2 px-2 py-0.5 text-xs font-medium text-white bg-blue-600 rounded-full">
+                {unreadCount}
+              </span>
+            )}
+          </span>
+        </div>
+
+        {unreadCount > 0 && (
+          <button
+            onClick={markAllAsRead}
+            className="absolute right-3 text-xs text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Mark all read
+          </button>
+        )}
       </div>
-      <div className={`overflow-y-auto overflow-x-hidden ${showAll ? 'max-h-[30.75rem]' : 'max-h-fit'}`}>
-        {displayedNotifications.map((notif) => (
-          <NotificationCard key={notif.notificationId} notif={notif} />
-        ))}
+      
+      {/* Notifications List */}
+      <div
+        ref={scrollRef}
+        className={`
+          overflow-x-hidden 
+          snap-y snap-mandatory scroll-smooth
+          ${enableScrollLoad ? "overflow-y-scroll" : "overflow-y-hidden"}
+        `}
+        style={{
+          maxHeight: `${maxHeight}px`,
+          transition: "max-height 0.3s ease-in-out",
+        }}
+      >
+        {(userLoading || loading) && notifications.length === 0 ? (
+          <div className="p-8 text-center text-gray-neutral500">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-2 text-sm">Loading notifications...</p>
+          </div>
+        ) : !userId ? (
+          <div className="p-8 text-center text-gray-neutral500">
+            <p className="text-sm">Please log in to view notifications</p>
+          </div>
+        ) : notifications.length === 0 ? (
+          <div className="p-8 text-center text-gray-neutral500">
+            <HiBell className="w-12 h-12 mx-auto mb-2 opacity-30" />
+            <p className="text-sm">No notifications yet</p>
+          </div>
+        ) : (
+          <>
+            {displayedNotifications.map((notif, index) => (
+              <div 
+                key={notif.notificationId} 
+                className="snap-start"
+                style={{
+                  animation: index >= displayCount - 1 && enableScrollLoad ? 'fadeIn 0.3s ease-in-out both' : 'none'
+                }}
+              >
+                <NotificationCard 
+                  notif={notif}
+                  actorName={notif.actorName}
+                  actorAvatar={notif.actorAvatar}
+                  onClick={() => handleNotificationClick(notif)}
+                />
+              </div>
+            ))}
+            
+            {/* Loading indicator */}
+            {isLoadingMore && enableScrollLoad && (
+              <div className="mx-2 my-2 flex items-center justify-center min-h-[60px] gap-4 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 animate-pulse snap-start">
+                <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
-      {notifications.length > 6 && !showAll && (
-        <div className="p-3 border-t border-gray-neutral200">
+      {/* See Previous Notifications Button */}
+      {showSeePreviousButton && (
+        <div className="p-3 border-t border-gray-200">
           <Button
             variant="neutral300"
             size="tiny"
-            onClick={() => setShowAll(true)}
+            onClick={handleSeePrevious}
             className="w-full"
           >
-            See previous notifications
+            See previous notifications ({remainingCount} more)
           </Button>
         </div>
       )}

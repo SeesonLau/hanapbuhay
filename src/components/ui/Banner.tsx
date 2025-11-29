@@ -122,7 +122,6 @@ const Banner: React.FC<BannerProps> = ({
         userRole={userRole}
         userId={userId}
         userCreatedAt={userCreatedAt}
-        notificationCount={notificationCount}
       />
 
       {/* Banner Content Container - Left-aligned structure */}

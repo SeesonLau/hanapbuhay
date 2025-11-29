@@ -140,9 +140,16 @@ export default function ProjectAddModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-[90%] max-w-[750px] max-h-[90vh] p-10 overflow-y-auto flex flex-col items-center scrollbar-hide"
+        className="bg-white rounded-2xl w-[90%] max-w-[750px] max-h-[90vh] p-10 overflow-y-auto flex flex-col items-center scrollbar-hide relative"
         onClick={(e) => e.stopPropagation()}
       >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 text-2xl leading-none text-gray-neutral600 hover:text-gray-800 transition-colors"
+        >
+          ×
+        </button>
+
         <h3 className="font-inter font-bold text-2xl mb-6">
           {project ? 'Edit Project' : 'Add Project'}
         </h3>
@@ -319,4 +326,3 @@ export default function ProjectAddModal({
     </div>
   );
 }
-

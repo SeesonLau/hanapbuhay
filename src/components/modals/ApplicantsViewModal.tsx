@@ -123,7 +123,7 @@ export default function ApplicantsModal({
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 mr-10">
             <div className="w-full max-w-lg">
               <SearchBar
                 variant="simple"
@@ -134,9 +134,9 @@ export default function ApplicantsModal({
             
             <button
               onClick={onClose}
-              className="ml-4 -mt-8 text-gray-neutral500 hover:text-gray-neutral700 text-xl flex-shrink-0"
+              className="absolute top-4 right-4 z-10 text-2xl leading-none text-gray-neutral600 hover:text-gray-800 transition-colors"
             >
-              ✕
+              ×
             </button>
           </div>
         </div>
