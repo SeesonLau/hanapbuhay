@@ -152,3 +152,49 @@ export async function notifyApplicantOfAcceptance({
     console.error('Failed to notify applicant of acceptance:', error);
   }
 }
+
+interface NotifyNewMessageParams {
+  roomId: string;
+  senderId: string;
+  recipientId: string;
+  messagePreview: string;
+}
+
+export async function notifyNewMessage({
+  roomId,
+  senderId,
+  recipientId,
+  messagePreview
+}: NotifyNewMessageParams): Promise<void> {
+  try {
+    if (!roomId || !senderId || !recipientId || !messagePreview) {
+      console.error('Missing required parameters for message notification');
+      return;
+    }
+
+    if (senderId === recipientId) {
+      console.log('Skipping notification - sender is the recipient');
+      return;
+    }
+
+    console.log('Creating message notification for user:', recipientId);
+
+    const preview = messagePreview.length > 50 
+      ? messagePreview.substring(0, 50) + '...' 
+      : messagePreview;
+
+    await NotificationService.createNotification({
+      userId: recipientId,
+      createdBy: senderId,
+      type: NotificationType.NEW_MESSAGE,
+      message: `sent you a message: "${preview}"`,
+      relatedId: roomId, 
+      isRead: false,
+      updatedBy: senderId
+    });
+
+    console.log('Message notification created successfully');
+  } catch (error) {
+    console.error('Failed to notify user of new message:', error);
+  }
+}

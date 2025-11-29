@@ -167,82 +167,118 @@ export class ChatService {
   }
   // 4. Send a Message
   static async sendMessage(roomId: string, senderId: string, content: string): Promise<ChatMessage | null> {
-  try {
-    // Validate inputs
-    if (!roomId || !senderId || !content?.trim()) {
-      console.error('❌ Invalid parameters for sendMessage:', { roomId, senderId, content });
-      return null;
-    }
+    try {
+      // Validate inputs
+      if (!roomId || !senderId || !content?.trim()) {
+        console.error('❌ Invalid parameters for sendMessage:', { roomId, senderId, content });
+        return null;
+      }
 
-    console.log('📤 Sending message:', { 
-      roomId, 
-      senderId, 
-      content: content.trim(),
-      roomIdType: typeof roomId,
-      senderIdType: typeof senderId
-    });
-
-    const { data, error, status, statusText } = await supabase
-      .from('messages')
-      .insert({
-        room_id: roomId,
-        sender_id: senderId,
+      console.log('📤 Sending message:', { 
+        roomId, 
+        senderId, 
         content: content.trim(),
-        is_read_by: [senderId],
-      })
-      .select('*, sender:profiles(name, profilePictureUrl)') 
-      .single();
-
-    console.log('📩 Send message response:', { 
-      data: data ? 'Has data' : 'No data',
-      error: error ? {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-        stack: error.stack
-      } : 'No error',
-      status,
-      statusText
-    });
-
-    if (error) {
-      console.error('❌ Error sending message - FULL ERROR OBJECT:', JSON.stringify(error, null, 2));
-      console.error('❌ Error details:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-        stack: error.stack
+        roomIdType: typeof roomId,
+        senderIdType: typeof senderId
       });
+
+      const { data, error, status, statusText } = await supabase
+        .from('messages')
+        .insert({
+          room_id: roomId,
+          sender_id: senderId,
+          content: content.trim(),
+          is_read_by: [senderId],
+        })
+        .select('*, sender:profiles(name, profilePictureUrl)') 
+        .single();
+
+      console.log('📩 Send message response:', { 
+        data: data ? 'Has data' : 'No data',
+        error: error ? {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+          stack: error.stack
+        } : 'No error',
+        status,
+        statusText
+      });
+
+      if (error) {
+        console.error('❌ Error sending message - FULL ERROR OBJECT:', JSON.stringify(error, null, 2));
+        return null;
+      }
+
+      if (!data) {
+        console.error('❌ No data returned after sending message');
+        return null;
+      }
+
+      console.log('✅ Message sent successfully:', data);
+      
+      const sentMsg = data as any;
+      const chatMessage: ChatMessage = {
+        id: sentMsg.id,
+        room_id: sentMsg.room_id,
+        sender_id: sentMsg.sender_id,
+        content: sentMsg.content,
+        created_at: sentMsg.created_at,
+        is_read_by: sentMsg.is_read_by,
+        sender_name: sentMsg.sender?.name || 'Unknown',
+        sender_profile_pic_url: sentMsg.sender?.profilePictureUrl,
+      };
+
+      // Send notification to recipient (don't await - fire and forget)
+      this.notifyRecipient(roomId, senderId, content).catch(err => {
+        console.error('Failed to send message notification:', err);
+      });
+
+      return chatMessage;
+    } catch (error) {
+      console.error('💥 Unexpected error in sendMessage:', error);
       return null;
     }
-
-    if (!data) {
-      console.error('❌ No data returned after sending message');
-      return null;
-    }
-
-    console.log('✅ Message sent successfully:', data);
-    
-    // Map data to ChatMessage model for consistency
-    const sentMsg = data as any;
-    return {
-      id: sentMsg.id,
-      room_id: sentMsg.room_id,
-      sender_id: sentMsg.sender_id,
-      content: sentMsg.content,
-      created_at: sentMsg.created_at,
-      is_read_by: sentMsg.is_read_by,
-      sender_name: sentMsg.sender?.name || 'Unknown',
-      sender_profile_pic_url: sentMsg.sender?.profilePictureUrl,
-    };
-  } catch (error) {
-    console.error('💥 Unexpected error in sendMessage:', error);
-    console.error('💥 Error stack:', error instanceof Error ? error.stack : 'No stack');
-    return null;
   }
-}
+
+  // Helper method to notify recipient of new message
+  private static async notifyRecipient(roomId: string, senderId: string, content: string): Promise<void> {
+    try {
+      const { notifyNewMessage } = await import('@/lib/utils/notification-helper');
+      
+      // Get the room to find the recipient
+      const { data: room, error } = await supabase
+        .from('chat_rooms')
+        .select('participants')
+        .eq('id', roomId)
+        .single();
+
+      if (error || !room) {
+        console.error('Failed to fetch room for notification:', error);
+        return;
+      }
+
+      // Find the recipient (the other participant)
+      const recipientId = room.participants.find((id: string) => id !== senderId);
+      
+      if (!recipientId) {
+        console.log('No recipient found for notification');
+        return;
+      }
+
+      // Send notification
+      await notifyNewMessage({
+        roomId,
+        senderId,
+        recipientId,
+        messagePreview: content
+      });
+    } catch (error) {
+      console.error('Error in notifyRecipient:', error);
+    }
+  }
+
   // 6. Mark Messages as Read
   static async markMessagesAsRead(messageIds: string[], currentUserId: string): Promise<boolean> {
     try {
