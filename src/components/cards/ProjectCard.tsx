@@ -90,13 +90,14 @@ export default function ProjectCard({
         </button>
 
         {/* Image Carousel */}
-        <div className="relative w-1/2 h-full flex-shrink-0 overflow-hidden rounded-lg bg-gray-neutral200 group">
+        <div className="relative aspect-square w-[45%] flex-shrink-0 overflow-hidden rounded-lg bg-gray-neutral200 group">
+
           {images && images.length > 0 ? (
             <>
               <img
                 src={images[currentImageIndex]}
                 alt={`${project.title} image ${currentImageIndex + 1}`}
-                className="w-full h-full object-cover transition-all duration-300"
+                className="w-full h-full object-contain bg-white transition-all duration-300"
               />
 
               {/* Navigation arrows */}
@@ -105,14 +106,14 @@ export default function ProjectCard({
                   <button
                     type="button"
                     onClick={prevImage}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 text-gray-neutral700 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-white transition opacity-0 group-hover:opacity-100"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-gray-800 hover:bg-gray-700 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-white transition opacity-0 group-hover:opacity-100"
                   >
                     ←
                   </button>
                   <button
                     type="button"
                     onClick={nextImage}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 text-gray-neutral700 rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-white transition opacity-0 group-hover:opacity-100"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-gray-800 hover:bg-gray-700 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md hover:bg-white transition opacity-0 group-hover:opacity-100"
                   >
                     →
                   </button>
@@ -126,12 +127,13 @@ export default function ProjectCard({
                     <div
                       key={i}
                       className={`w-2.5 h-2.5 rounded-full transition-all ${
-                        i === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                        i === currentImageIndex ? 'bg-gray-800' : 'bg-gray-400'
                       }`}
                     ></div>
                   ))}
                 </div>
               )}
+
             </>
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-neutral500">

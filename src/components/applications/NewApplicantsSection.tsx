@@ -39,9 +39,12 @@ export default function NewApplicantsSection({
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
-
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isScrollable, setIsScrollable] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(false);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const openProfileModal = (userId: string) => {
     setSelectedUserId(userId);
@@ -120,10 +123,6 @@ export default function NewApplicantsSection({
     });
   }, [applicants, sortOrder, searchQuery]);
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [isScrollable, setIsScrollable] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(false);
-
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -139,13 +138,16 @@ export default function NewApplicantsSection({
     return () => el.removeEventListener('scroll', handleScroll);
   }, [filteredAndSortedApplicants]);
 
-  const handleCardStatusChange = useCallback((status: ApplicationStatus) => {
-    console.log('Status changed to:', status); 
-    if (onStatusChange) {
-      console.log('Calling parent onStatusChange'); 
-      onStatusChange();
-    }
-  }, [onStatusChange]);
+  const handleCardStatusChange = useCallback(
+    (status: ApplicationStatus) => {
+      console.log('Status changed to:', status);
+      if (onStatusChange) {
+        console.log('Calling parent onStatusChange');
+        onStatusChange();
+      }
+    },
+    [onStatusChange]
+  );
 
   if (loading) {
     return (
@@ -159,36 +161,29 @@ export default function NewApplicantsSection({
     <div className="relative">
       <div
         ref={scrollRef}
-        className="rounded-lg max-h-[500px] overflow-y-auto scrollbar-hide py-2 px-2 snap-y snap-mandatory scroll-smooth"
-        style={{
-          scrollPaddingTop: '0.5rem',
-          scrollPaddingBottom: '0.5rem',
-        }}
+        className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 justify-items-center p-2 max-h-[500px] overflow-y-auto scrollbar-hide scroll-smooth"
       >
         {filteredAndSortedApplicants.length === 0 ? (
-          <div className="text-center py-8 text-gray-neutral400">
+          <div className="col-span-full text-center py-8 text-gray-neutral400">
             {searchQuery.trim()
               ? `No applicants found matching "${searchQuery}"`
               : 'No pending applicants yet'}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4 justify-items-center">
-            {filteredAndSortedApplicants.map((applicant, index) => (
-              <div key={`${applicant.applicationId}-${index}`} className="snap-start">
-                <ApplicantCard
-                  applicationId={applicant.applicationId} 
-                  userId={applicant.userId}
-                  name={applicant.name}
-                  rating={applicant.rating}
-                  reviewCount={applicant.reviewCount}
-                  dateApplied={applicant.dateApplied}
-                  profilePicUrl={applicant.profilePicUrl}
-                  onStatusChange={handleCardStatusChange}
-                  onProfileClick={() => openProfileModal(applicant.userId)}
-                />
-              </div>
-            ))}
-          </div>
+          filteredAndSortedApplicants.map((applicant, index) => (
+            <ApplicantCard
+              key={`${applicant.applicationId}-${index}`}
+              applicationId={applicant.applicationId}
+              userId={applicant.userId}
+              name={applicant.name}
+              rating={applicant.rating}
+              reviewCount={applicant.reviewCount}
+              dateApplied={applicant.dateApplied}
+              profilePicUrl={applicant.profilePicUrl}
+              onStatusChange={handleCardStatusChange}
+              onProfileClick={() => openProfileModal(applicant.userId)}
+            />
+          ))
         )}
       </div>
 
@@ -207,4 +202,4 @@ export default function NewApplicantsSection({
       )}
     </div>
   );
-} 
+}

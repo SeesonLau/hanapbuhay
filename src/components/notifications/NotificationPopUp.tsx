@@ -132,12 +132,12 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
       {/* Header */}
       <div className="relative p-3 border-b border-gray-200 flex items-center justify-center">
 
-        <div className="flex items-center gap-2">
-          <HiBell className="w-5 h-5 text-gray-neutral700" />
-          <span className="font-bold text-gray-neutral700 text-lead">
+        <div className="flex items-center gap-2 pr-16 sm:pr-20">
+          <HiBell className="w-4 h-4 sm:w-5 sm:h-5 text-gray-neutral700" />
+          <span className="font-bold text-gray-neutral700 text-base sm:text-lead">
             Notifications
             {unreadCount > 0 && (
-              <span className="ml-2 px-2 py-0.5 text-xs font-medium text-white bg-blue-600 rounded-full">
+              <span className="ml-2 px-1.5 py-0.5 text-[10px] sm:text-xs font-medium text-white bg-blue-600 rounded-full">
                 {unreadCount}
               </span>
             )}
@@ -147,7 +147,7 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
         {unreadCount > 0 && (
           <button
             onClick={markAllAsRead}
-            className="absolute right-3 text-xs text-blue-600 hover:text-blue-700 font-medium"
+            className="absolute right-3 text-[10px] sm:text-xs text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap"
           >
             Mark all read
           </button>

@@ -27,18 +27,19 @@ module.exports = {
   			]
   		},
   		fontSize: {
-  			hero: '3.125rem',
-  			h1: '2.5rem',
-  			h2: '2rem',
-  			h3: '1.625rem',
-  			lead: '1.25rem',
-  			title: '1.875rem',
-  			description: '1.25rem',
-  			body: '1rem',
-  			small: '0.8125rem',
-  			tiny: '0.75rem',
-  			popup: '1.125rem',
-  			mini: '0.6875rem'
+  			hero: '3.125rem',       // 50px
+			h1: '2.5rem',           // 40px
+			h2: '2rem',             // 32px
+			title: '1.875rem',      // 30px
+			subtitle: '1.5rem',     // 24px
+			h3: '1.625rem',         // 26px 
+			lead: '1.25rem',        // 20px
+			description: '1.25rem', // 20px
+			popup: '1.125rem',      // 18px
+			body: '1rem',           // 16px
+			small: '0.8125rem',     // 13px
+			tiny: '0.75rem',        // 12px
+			mini: '0.6875rem'       // 11px
   		},
     		colors: {
   			blue: {
