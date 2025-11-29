@@ -57,7 +57,7 @@ export default function ProjectViewModal({
               <img
                 src={projectPictureUrls[currentImageIndex]}
                 alt={`${title} ${currentImageIndex + 1}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain bg-white"
               />
 
               {/* Carousel Navigation */}
@@ -69,7 +69,7 @@ export default function ProjectViewModal({
                       e.stopPropagation();
                       prevImage();
                     }}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-neutral800 rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-gray-800 hover:bg-gray-700 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
                   >
                     ←
                   </button>
@@ -79,7 +79,7 @@ export default function ProjectViewModal({
                       e.stopPropagation();
                       nextImage();
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-neutral800 rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-800 hover:bg-gray-700 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
                   >
                     →
                   </button>
@@ -98,7 +98,7 @@ export default function ProjectViewModal({
                         setCurrentImageIndex(index);
                       }}
                       className={`w-2 h-2 rounded-full transition-all ${
-                        index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                        index === currentImageIndex ? 'bg-gray-800' : 'bg-gray-400'
                       }`}
                     />
                   ))}

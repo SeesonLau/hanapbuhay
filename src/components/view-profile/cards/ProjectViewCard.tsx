@@ -30,7 +30,7 @@ export default function ProjectViewCard({
         <img
           src={projectPictureUrl}
           alt={title}
-          className="w-[150px] h-[94px] object-cover rounded-[10px] mx-auto mt-2"
+          className="w-[150px] h-[94px] object-contain bg-white rounded-[10px] mx-auto mt-2"
         />
       ) : (
         <div className="w-[150px] h-[94px] bg-gray-200 rounded-[10px] flex items-center justify-center text-gray-neutral500 mx-auto mt-2">

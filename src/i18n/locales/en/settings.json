@@ -1,41 +1,40 @@
 {
   "title": "Settings",
-  "userInfo": {
-    "title": "User Information",
-    "email": "Email:",
-    "userId": "User ID:",
-    "role": "Role:",
-    "memberSince": "Member since:"
+  "close": "Close settings",
+  
+  "resetPassword": {
+    "title": "Reset Password",
+    "description": "Send reset instructions to {{email}}",
+    "button": "Send Reset Instructions",
+    "sending": "Sending...",
+    "success": "Password reset instructions have been sent to your email.",
+    "error": "Failed to send reset instructions. Please try again.",
+    "noEmail": "User email not found. Please log in again.",
+    "genericError": "An error occurred. Please try again."
   },
-  "password": {
-    "title": "Change Password",
-    "currentLabel": "Current Password",
-    "newLabel": "New Password",
-    "confirmLabel": "Confirm New Password",
-    "currentPlaceholder": "Enter current password",
-    "newPlaceholder": "Enter new password (8-20 characters)",
-    "confirmPlaceholder": "Confirm new password",
-    "submitButton": "Change Password",
-    "successMessage": "Password changed successfully!",
-    "errorCurrentRequired": "Please enter your current password.",
-    "errorNewRequired": "Please enter a new password.",
-    "errorLength": "Password must be 8–20 characters.",
-    "errorConfirmRequired": "Please confirm your password.",
-    "errorNoMatch": "Passwords do not match."
-  },
+  
   "preferences": {
     "title": "Preferences",
-    "themeLabel": "Theme",
-    "themeLight": "Light",
-    "themeDark": "Dark",
-    "themeSystem": "System",
-    "languageLabel": "Language",
-    "languageEnglish": "English",
-    "languageTagalog": "Tagalog",
-    "notificationsLabel": "Notifications",
-    "notificationsEmail": "Email notifications",
-    "notificationsPush": "Push notifications"
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "label": "Language",
+      "en": "English",
+      "es": "Spanish",
+      "fr": "French",
+      "de": "German"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "email": "Email notifications",
+      "push": "Push notifications"
+    }
   },
+  
   "actions": {
     "cancel": "Cancel",
     "save": "Save Preferences"

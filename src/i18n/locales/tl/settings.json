@@ -1,41 +1,40 @@
 {
   "title": "Mga Setting",
-  "userInfo": {
-    "title": "Impormasyon ng Gumagamit",
-    "email": "Email:",
-    "userId": "User ID:",
-    "role": "Tungkulin:",
-    "memberSince": "Miyembro mula:"
+  "close": "Isara ang mga setting",
+  
+  "resetPassword": {
+    "title": "I-reset ang Password",
+    "description": "Magpadala ng mga tagubilin sa pag-reset sa {{email}}",
+    "button": "Magpadala ng Mga Tagubilin sa Pag-reset",
+    "sending": "Nagpapadala...",
+    "success": "Ang mga tagubilin sa pag-reset ng password ay naipadala na sa iyong email.",
+    "error": "Nabigo ang pagpadala ng mga tagubilin sa pag-reset. Pakisubukan ulit.",
+    "noEmail": "Hindi nahanap ang email ng user. Mangyaring mag-log in ulit.",
+    "genericError": "May naganap na error. Pakisubukan ulit."
   },
-  "password": {
-    "title": "Baguhin ang Password",
-    "currentLabel": "Kasalukuyang Password",
-    "newLabel": "Bagong Password",
-    "confirmLabel": "Kumpirmahin ang Bagong Password",
-    "currentPlaceholder": "Ilagay ang kasalukuyang password",
-    "newPlaceholder": "Ilagay ang bagong password (8-20 character)",
-    "confirmPlaceholder": "Kumpirmahin ang bagong password",
-    "submitButton": "Baguhin ang Password",
-    "successMessage": "Matagumpay na nabago ang password!",
-    "errorCurrentRequired": "Pakiusap ilagay ang iyong kasalukuyang password.",
-    "errorNewRequired": "Pakiusap ilagay ang bagong password.",
-    "errorLength": "Ang password ay dapat 8–20 character.",
-    "errorConfirmRequired": "Pakiusap kumpirmahin ang iyong password.",
-    "errorNoMatch": "Hindi tumutugma ang mga password."
-  },
+  
   "preferences": {
     "title": "Mga Kagustuhan",
-    "themeLabel": "Tema",
-    "themeLight": "Maliwanag",
-    "themeDark": "Madilim",
-    "themeSystem": "Sistema",
-    "languageLabel": "Wika",
-    "languageEnglish": "Ingles",
-    "languageTagalog": "Tagalog",
-    "notificationsLabel": "Mga Notipikasyon",
-    "notificationsEmail": "Email notifications",
-    "notificationsPush": "Push notifications"
+    "theme": {
+      "label": "Tema",
+      "light": "Maliwanag",
+      "dark": "Madilim",
+      "system": "Sistema"
+    },
+    "language": {
+      "label": "Wika",
+      "en": "Ingles",
+      "es": "Espanyol",
+      "fr": "Pranses",
+      "de": "Aleman"
+    },
+    "notifications": {
+      "title": "Mga Abiso",
+      "email": "Mga abiso sa email",
+      "push": "Mga push notification"
+    }
   },
+  
   "actions": {
     "cancel": "Kanselahin",
     "save": "I-save ang Mga Kagustuhan"

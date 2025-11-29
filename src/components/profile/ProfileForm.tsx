@@ -9,6 +9,7 @@ import { Edit3 } from 'lucide-react';
 import TextBox from "../ui/TextBox";
 import SelectBox from "../ui/SelectBox";
 import Button from "../ui/Button";
+import { getProvinces, getCitiesByProvince } from "@/lib/constants/philippines-locations";
 
 interface ProfileFormProps {
   userId: string;
@@ -27,6 +28,11 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
   const [displayName, setDisplayName] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
 
+  // Location states
+  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("");
+  const [streetAddress, setStreetAddress] = useState("");
+
   useEffect(() => {
     const fetchProfileAndEmail = async () => {
       try {
@@ -40,6 +46,20 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
         if (profileData) {
           setProfile(profileData);
           setPreviewUrl(profileData.profilePictureUrl ?? null);
+          
+          if (profileData.address) {
+            const addressParts = profileData.address.split(' | ');
+            if (addressParts.length >= 3) {
+              setProvince(addressParts[0]);
+              setCity(addressParts[1]);
+              setStreetAddress(addressParts.slice(2).join(' | '));
+            } else if (addressParts.length === 2) {
+              setProvince(addressParts[0]);
+              setCity(addressParts[1]);
+            } else if (addressParts.length === 1) {
+              setProvince(addressParts[0]);
+            }
+          }
         }
 
         if (parsedName) {
@@ -107,11 +127,17 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
         uploadedUrl = result;
       }
 
+      // Combine location into a single address string (format: "province | city | specificaddress")
+      const fullAddress = [province, city, streetAddress]
+        .filter(Boolean)
+        .join(' | ');
+
       const storedName = combineToStoredName(firstName, lastName);
       const success = await ProfileService.upsertProfile({ 
         ...profile, 
         name: storedName, 
-        profilePictureUrl: uploadedUrl 
+        profilePictureUrl: uploadedUrl,
+        address: fullAddress
       });
       
       if (success) {
@@ -130,18 +156,18 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className={`${className} relative py-6 px-10 bg-white rounded-xl shadow-md flex flex-col gap-5`}>
+    <div className={`${className} relative h-full py-3 max-[425px]:py-2 md:py-6 lg:py-8 px-3 max-[425px]:px-2 md:px-10 lg:px-12 bg-white rounded-xl shadow-md flex flex-col gap-2.5 max-[425px]:gap-2 md:gap-5 overflow-y-auto`}>
 
       {/* Edit Icon */}
       <button
         onClick={() => setIsEditing(!isEditing)}
-        className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-neutral100 transition"
+        className="absolute top-3 right-3 max-[425px]:top-2 max-[425px]:right-2 p-1.5 max-[425px]:p-1 rounded-full hover:bg-gray-neutral100 transition z-10"
       >
-        <Edit3 size={20} className="text-gray-neutral600" />
+        <Edit3 size={18} className="text-gray-neutral600 max-[425px]:w-3.5 max-[425px]:h-3.5" />
       </button>
 
       {/* Profile Picture Upload */}
-      <div className="flex items-center justify-center gap-6">
+      <div className="flex items-center justify-center gap-3 max-[425px]:gap-2 -pt-4">
         <div 
           className={`relative flex-shrink-0 ${isEditing ? 'cursor-pointer' : ''}`}
           onClick={handleProfilePictureClick}
@@ -150,11 +176,11 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
             <img
               src={previewUrl}
               alt="Profile"
-              className={`w-24 h-24 object-cover rounded-full border ${isEditing ? 'hover:opacity-80 transition' : ''}`}
+              className={`w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 object-cover rounded-full border ${isEditing ? 'hover:opacity-80 transition' : ''}`}
             />
           ) : (
-            <div className={`w-24 h-24 flex items-center justify-center rounded-full bg-gray-neutral100 ${isEditing ? 'hover:bg-gray-neutral200 transition' : ''}`}>
-              <FaUserCircle className="w-24 h-24 text-gray-neutral400" />
+            <div className={`w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 flex items-center justify-center rounded-full bg-gray-neutral100 ${isEditing ? 'hover:bg-gray-neutral200 transition' : ''}`}>
+              <FaUserCircle className="w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 text-gray-neutral400" />
             </div>
           )}
           
@@ -169,11 +195,11 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
         </div>
 
         {displayName && (
-          <div className="flex flex-col gap-1">
-            <p className="font-alexandria font-bold text-gray-neutral700 text-lead">
+          <div className="flex flex-col gap-0.5 max-[425px]:gap-0">
+            <p className="font-alexandria font-bold text-gray-neutral700 text-body max-[425px]:text-sm">
               {displayName}
             </p>
-            <p className="font-alexandria text-gray-neutral400 text-body">
+            <p className="font-alexandria text-gray-neutral400 text-xs max-[425px]:text-[10px] max-[425px]:leading-tight">
               {email}
             </p>
           </div>
@@ -181,7 +207,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
       </div>
 
       {/* First & Last Name */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-[425px]:gap-2 md:gap-10">
         <TextBox
           label="First Name"
           placeholder="First name"
@@ -203,30 +229,8 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
         />
       </div>
 
-      {/* Address & Email */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        <TextBox
-          label="Address"
-          placeholder="Address"
-          value={profile?.address ?? ''}
-          onChange={(e) => handleChange('address', e.target.value)}
-          width="100%"
-          readOnly={!isEditing}
-          disabled={!isEditing}
-        />
-
-        <TextBox
-          label="Email"
-          type="email"
-          value={email}
-          readOnly
-          width="100%"
-          disabled
-        />
-      </div>
-
       {/* Phone Number & Birthdate */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-[425px]:gap-2 md:gap-10">
         <TextBox
           label="Phone Number"
           type="tel"
@@ -259,7 +263,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
       </div>
 
       {/* Age & Sex */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-[425px]:gap-2 md:gap-10">
         <TextBox
           label="Age"
           type="number"
@@ -282,6 +286,42 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
           width="100%"
           disabled={!isEditing}
         />
+      </div>
+
+      {/* Address Section*/}
+      <div>
+        <div className="text-small max-[425px]:text-xs font-semibold mb-1.5 max-[425px]:mb-1 text-gray-neutral900">Address</div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-[425px]:gap-2">
+          <SelectBox 
+            options={getProvinces().map((prov) => ({ value: prov, label: prov }))}
+            value={province}
+            onChange={(e) => {
+              setProvince(e.target.value);
+              const cities = getCitiesByProvince(e.target.value);
+              setCity(cities.length > 0 ? cities[0] : "");
+            }}
+            placeholder="Select province"
+            disabled={!isEditing}
+            width="100%"
+          />
+          <SelectBox 
+            options={getCitiesByProvince(province).map((city_name) => ({ value: city_name, label: city_name }))}
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="Select city or municipality"
+            disabled={!isEditing || !province}
+            width="100%"
+          />
+          <TextBox 
+            placeholder="Specific address" 
+            value={streetAddress}
+            onChange={(e) => setStreetAddress(e.target.value)}
+            maxLength={50}
+            width="100%"
+            readOnly={!isEditing}
+            disabled={!isEditing}
+          />
+        </div>
       </div>
         
       {/* Save Button - Always rendered but only visible when editing */}

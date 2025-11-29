@@ -43,12 +43,21 @@ export default function ViewProfileModal({ isOpen, onClose, userId, userType = '
       animate={{ opacity: 1 }}
     >
       <motion.div
-        className="bg-white rounded-lg shadow-lg w-full max-w-6xl h-[90vh] overflow-hidden"
+        className="bg-white rounded-lg shadow-lg w-full max-w-6xl h-[90vh] overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
         initial={{ y: 20, opacity: 0, scale: 0.98 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-2xl text-gray-neutral600 hover:text-gray-800 transition-colors"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+
         <div className="flex flex-col md:flex-row h-full overflow-hidden">
           <div className="flex flex-col flex-shrink-0 border-r border-gray-neutral200 overflow-y-auto">
             <ProfileContactSection userId={userId} />
