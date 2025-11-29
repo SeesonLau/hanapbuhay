@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import NewApplicantsSection from '@/components/applications/NewApplicantsSection';
 import AllApplicantsSection from '@/components/applications/AllApplicantsSection';
 import SearchBar from '@/components/ui/SearchBar';
@@ -104,13 +105,18 @@ export default function ApplicantsModal({
   }
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
       onClick={handleOverlayClick}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      <div
+      <motion.div
         className="bg-white rounded-lg shadow-lg w-full max-w-6xl p-4 relative"
         onClick={(e) => e.stopPropagation()}
+        initial={{ y: 20, opacity: 0, scale: 0.98 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b pb-3 gap-4 mb-3">
@@ -199,7 +205,7 @@ export default function ApplicantsModal({
             />
           </section>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

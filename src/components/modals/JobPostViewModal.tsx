@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   getWhiteColor,
   getNeutral100Color,
@@ -22,6 +23,7 @@ import { Gender } from "@/lib/constants/gender";
 import { ExperienceLevel } from "@/lib/constants/experience-level";
 import ViewProfileModal from "@/components/modals/ViewProfileModal";
 import { ProfileService } from "@/lib/services/profile-services";
+import { formatDisplayName } from "@/lib/utils/profile-utils";
 
 export interface JobPostViewData {
   id: string;
@@ -94,7 +96,8 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
         setPosterUserId(String(userId));
         const info = await ProfileService.getNameProfilePic(String(userId));
         if (info) {
-          setPoster({ name: info.name ?? "Unknown Poster", role: "Client", avatarUrl: info.profilePicUrl ?? undefined });
+          const displayName = formatDisplayName(info.name ?? "");
+          setPoster({ name: displayName || "Unknown Poster", role: "Client", avatarUrl: info.profilePicUrl ?? undefined });
         }
       } catch (_) {}
     };
@@ -141,15 +144,20 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
   ];
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: getBlackColor(0.5) }}
       onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      <div
+      <motion.div
         className={`${fontClasses.body} w-[600px] max-w-[95vw] max-h-[90vh] overflow-y-auto rounded-2xl shadow-lg border`}
         style={{ backgroundColor: getWhiteColor(), borderColor: getNeutral300Color(), color: getNeutral600Color() }}
         onClick={(e) => e.stopPropagation()}
+        initial={{ y: 20, opacity: 0, scale: 0.98 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
       >
         {/* Header */}
         <div className="px-6 pt-6 pb-3 flex items-start justify-between">
@@ -260,13 +268,13 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
           </div>
         </div>
 
-      </div>
+      </motion.div>
       <ViewProfileModal
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
         userId={posterUserId ?? ""}
         userType={'employer'}
       />
-    </div>
+    </motion.div>
   );
 }

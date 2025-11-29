@@ -85,7 +85,7 @@ export const StaticSalaryTag: React.FC<StaticSalaryTagProps> = ({ label, classNa
         alt="Salary icon" 
         className="w-[15px] h-[15px] mr-2" 
       />
-      {label}
+      {label.replace(/₱/g, '')}
     </div>
   );
 };
