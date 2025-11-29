@@ -7,8 +7,8 @@ import { NotificationType } from "@/lib/constants/notification-types";
 
 interface NotificationCardProps {
   notif: Notification;
-  actorName?: string;      // Fetched using createdBy
-  actorAvatar?: string;    // Fetched using createdBy
+  actorName?: string;
+  actorAvatar?: string;
   onClick?: () => void;
 }
 
@@ -54,6 +54,18 @@ function getColorScheme(type: NotificationType, isRead: boolean) {
   }
 }
 
+function parseMessageWithBoldItalic(message: string) {
+  const parts = message.split(/(\*\*\*[^*]+\*\*\*)/g);
+  
+  return parts.map((part, index) => {
+    if (part.startsWith('***') && part.endsWith('***')) {
+      const text = part.slice(3, -3);
+      return <strong key={index}><em>{text}</em></strong>;
+    }
+    return <span key={index}>{part}</span>;
+  });
+}
+
 export default function NotificationCard({ 
   notif, 
   actorName, 
@@ -92,7 +104,7 @@ export default function NotificationCard({
           {actorName && (
             <span className="font-semibold">{actorName} </span>
           )}
-          {notif.message}
+          {parseMessageWithBoldItalic(notif.message)}
         </p>
       </div>
 

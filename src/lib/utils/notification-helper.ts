@@ -75,7 +75,7 @@ export async function notifyEmployerOfApplication({
       userId: employerId,
       createdBy: applicantId,
       type: NotificationType.JOB_APPLICATION,
-      message: `applied to your "${post.title}" job post`,
+      message: `applied to your *${post.title}* job post`,
       relatedId: applicationId,
       isRead: false,
       updatedBy: applicantId
@@ -141,7 +141,7 @@ export async function notifyApplicantOfAcceptance({
       userId: application.userId,
       createdBy: employerId,
       type: NotificationType.APPLICATION_ACCEPTED,
-      message: `accepted your application for "${jobTitle}"`,
+      message: `accepted your application for *${jobTitle}*`,
       relatedId: applicationId,
       isRead: false,
       updatedBy: employerId

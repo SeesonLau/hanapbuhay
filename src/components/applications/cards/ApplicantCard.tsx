@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaUserCircle } from 'react-icons/fa';
 import Image from 'next/image';
@@ -9,19 +9,19 @@ import Button from '@/components/ui/Button';
 import StarRating from '@/components/ui/StarRating';
 import { ApplicationService } from '@/lib/services/applications-services';
 import { ApplicationStatus } from '@/lib/constants/application-status';
+import { AuthService } from '@/lib/services/auth-services';
 import { toast } from 'react-hot-toast';
 
 interface ApplicantCardProps {
   applicationId: string;
   userId: string;
-  currentUserId: string;
   name: string;
   rating: number;
   reviewCount: number;
   dateApplied: string;
   profilePicUrl?: string | null;
   onStatusChange?: (status: ApplicationStatus) => void;
-  onProfileClick?: () => void; 
+  onProfileClick?: () => void;
 }
 
 export default function ApplicantCard({
@@ -36,12 +36,34 @@ export default function ApplicantCard({
   onProfileClick
 }: ApplicantCardProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string>('');
   const router = useRouter();
 
+  // Get current user (employer) on mount
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const user = await AuthService.getCurrentUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
+
   const handleStatusChange = async (newStatus: ApplicationStatus) => {
+    if (!currentUserId) {
+      toast.error('Unable to identify current user');
+      return;
+    }
+
     try {
       setIsLoading(true);
-      await ApplicationService.updateApplicationStatus(applicationId, newStatus, userId);
+      
+      await ApplicationService.updateApplicationStatus(
+        applicationId, 
+        newStatus, 
+        currentUserId // Current logged-in user (employer)
+      );
 
       if (onStatusChange) onStatusChange(newStatus);
     } catch (error) {
@@ -53,14 +75,14 @@ export default function ApplicantCard({
   };
 
   const handleChatClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     router.push('/chat');
   };
 
   return (
     <div
       className="bg-white rounded-xl shadow-md p-4 w-full max-w-[300px] aspect-[300/172] flex flex-col justify-between border border-gray-neutral200 transition-transform duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg hover:bg-gray-50 cursor-pointer"
-      onClick={onProfileClick} 
+      onClick={onProfileClick}
     >
       {/* Profile + Chat */}
       <div className="flex justify-between items-center">
@@ -89,7 +111,6 @@ export default function ApplicantCard({
           </div>
         </div>
 
-        {/* Chat icon */}
         <Image
           src={ChatIcon}
           alt="Chat"

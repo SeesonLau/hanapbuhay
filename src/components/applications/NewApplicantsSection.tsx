@@ -6,7 +6,6 @@ import ApplicantCard from './cards/ApplicantCard';
 import { ApplicationService } from '@/lib/services/applications-services';
 import { ProfileService } from '@/lib/services/profile-services';
 import { ReviewService } from '@/lib/services/reviews-services';
-import { AuthService } from '@/lib/services/auth-services'; // Add this import
 import { ApplicationStatus } from '@/lib/constants/application-status';
 import ViewProfileModal from '../modals/ViewProfileModal';
 
@@ -40,26 +39,9 @@ export default function NewApplicantsSection({
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null); // Add this state
 
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Fetch current user
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const currentUser = await AuthService.getCurrentUser();
-        if (currentUser) {
-          setCurrentUserId(currentUser.id);
-        }
-      } catch (error) {
-        console.error('Error fetching current user:', error);
-      }
-    };
-
-    fetchCurrentUser();
-  }, []);
 
   const openProfileModal = (userId: string) => {
     setSelectedUserId(userId);
@@ -196,7 +178,6 @@ export default function NewApplicantsSection({
                 <ApplicantCard
                   applicationId={applicant.applicationId} 
                   userId={applicant.userId}
-                  currentUserId={currentUserId || ''} 
                   name={applicant.name}
                   rating={applicant.rating}
                   reviewCount={applicant.reviewCount}
