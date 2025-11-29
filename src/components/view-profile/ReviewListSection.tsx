@@ -141,7 +141,7 @@ export default function ReviewListSection({ userId }: ReviewListSectionProps) {
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[200px]">
+      <div className="px-6 pb-6 pt-10 sm:pt-6 flex items-center justify-center min-h-[200px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400"></div>
       </div>
     );
@@ -149,7 +149,7 @@ export default function ReviewListSection({ userId }: ReviewListSectionProps) {
 
   if (reviews.length === 0) {
     return (
-      <div className="p-6 flex-1 flex flex-col">
+      <div className="px-6 pb-6 pt-10 sm:pt-6 flex-1 flex flex-col">
         <div className="flex items-center justify-between -mt-6 mb-4">
           <p className="font-inter font-semibold text-gray-neutral900">Reviews</p>
           <StarRating
@@ -168,7 +168,7 @@ export default function ReviewListSection({ userId }: ReviewListSectionProps) {
   }
 
   return (
-    <div ref={containerRef} className="p-6 relative flex-1 flex flex-col min-h-0">
+    <div ref={containerRef} className="px-6 pb-6 pt-10 sm:pt-6 relative flex-1 flex flex-col min-h-0">
       <div className="flex items-center justify-between -mt-6 mb-2 flex-shrink-0">
         <p className="font-inter font-semibold text-gray-neutral900">Reviews</p>
 

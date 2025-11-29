@@ -37,6 +37,11 @@ export default function ProfileContactSection({ userId }: ProfileContactSectionP
     fetchProfile();
   }, [userId]);
 
+  const formatAddress = (address: string | null): string => {
+    if (!address) return "Not provided";
+    return address.split('|').map(part => part.trim()).join(', ');
+  };
+
   if (loading) {
     return (
       <div className="p-3 flex items-center justify-center max-w-[356px]">
@@ -65,7 +70,7 @@ export default function ProfileContactSection({ userId }: ProfileContactSectionP
         age={profile.age || 0}
         email={profile.email || "Not provided"}
         phoneNumber={profile.phoneNumber || "Not provided"}
-        address={profile.address || "Not provided"}
+        address={formatAddress(profile.address)}
       />
     </div>
   );

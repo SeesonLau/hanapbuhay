@@ -44,12 +44,21 @@ export default function ProjectViewModal({
       animate={{ opacity: 1 }}
     >
       <motion.div
-        className="bg-white rounded-[10px] shadow-xl w-full max-w-md h-[550px] p-8 flex flex-col"
+        className="bg-white rounded-[10px] shadow-xl w-full max-w-md h-[550px] p-8 flex flex-col relative"
         onClick={(e) => e.stopPropagation()}
         initial={{ y: 20, opacity: 0, scale: 0.98 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       >
+
+        <button
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          className="absolute top-4 right-4 text-2xl text-gray-neutral600 hover:text-gray-800 transition-colors"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+
         {/* Image Carousel */}
         {hasImages ? (
           <div className="relative w-full h-[180px] mb-4 flex-shrink-0">

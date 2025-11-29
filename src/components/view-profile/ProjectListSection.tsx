@@ -59,7 +59,7 @@ export default function ProjectListSection({ userId }: ProjectListSectionProps) 
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center w-full">
+      <div className="p-6 flex items-center justify-center w-full h-[348px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400"></div>
       </div>
     );
@@ -67,15 +67,17 @@ export default function ProjectListSection({ userId }: ProjectListSectionProps) 
 
   if (projects.length === 0) {
     return (
-      <div className="p-6 w-full">
+      <div className="p-6 w-full h-[348px] flex flex-col">
         <p className="font-inter font-semibold body">Work Experiences</p>
-        <p className="text-center text-gray-neutral400 py-8">No projects yet</p>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-center text-gray-neutral400">No work experiences added</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 relative -mb-4 w-full max-w-[795px]">
+    <div className="p-6 relative -mb-4 w-full max-w-[795px] h-[348px]">
       <p className="font-inter font-semibold body mb-2">Work Experiences</p>
 
       <div

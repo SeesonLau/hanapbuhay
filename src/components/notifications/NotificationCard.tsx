@@ -54,13 +54,13 @@ function getColorScheme(type: NotificationType, isRead: boolean) {
   }
 }
 
-function parseMessageWithBoldItalic(message: string) {
-  const parts = message.split(/(\*\*\*[^*]+\*\*\*)/g);
+function parseMessageWithItalic(message: string) {
+  const parts = message.split(/(\*[^*]+\*)/g);
   
   return parts.map((part, index) => {
-    if (part.startsWith('***') && part.endsWith('***')) {
-      const text = part.slice(3, -3);
-      return <strong key={index}><em>{text}</em></strong>;
+    if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+      const text = part.slice(1, -1);
+      return <em key={index} className="font-semibold not-italic">{text}</em>;
     }
     return <span key={index}>{part}</span>;
   });
@@ -104,7 +104,7 @@ export default function NotificationCard({
           {actorName && (
             <span className="font-semibold">{actorName} </span>
           )}
-          {parseMessageWithBoldItalic(notif.message)}
+          {parseMessageWithItalic(notif.message)}
         </p>
       </div>
 
