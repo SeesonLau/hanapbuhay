@@ -108,9 +108,9 @@ export default function ProfilePage() {
               </div>
 
               {/* Desktop View (above 768px) */}
-              <div className="hidden lg:flex w-full gap-0">
+              <div className="hidden lg:flex w-full">
                 {user && <ProfileSection userId={user.userId} className="flex-1" />}
-                <div className="w-px bg-gray-neutral300 -my-3"></div>
+                <div className="w-px bg-gray-neutral300 -my-3 flex-shrink-0"></div>
                 {user && <ProjectsSection userId={user.userId} className="flex-1" />}
               </div>
             </div>

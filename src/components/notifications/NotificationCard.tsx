@@ -60,7 +60,7 @@ function parseMessageWithItalic(message: string) {
   return parts.map((part, index) => {
     if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
       const text = part.slice(1, -1);
-      return <em key={index} className="font-semibold not-italic">{text}</em>;
+      return <em key={index} className="font-semibold">{text}</em>;
     }
     return <span key={index}>{part}</span>;
   });

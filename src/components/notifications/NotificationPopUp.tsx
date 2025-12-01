@@ -8,6 +8,7 @@ import { useNotifications } from "@/hooks/useNotification";
 import { AuthService } from "@/lib/services/auth-services";
 import { getNotificationRoute } from "@/lib/utils/notification-router";
 import { HiBell } from "react-icons/hi";
+import { IoClose } from "react-icons/io5";
 import Button from "@/components/ui/Button";
 
 interface NotificationPopUpProps {
@@ -22,6 +23,7 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
   const [enableScrollLoad, setEnableScrollLoad] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [userLoading, setUserLoading] = useState(true);
+  const [hoveredNotifId, setHoveredNotifId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isLoadingRef = useRef(false);
 
@@ -49,6 +51,7 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
     unreadCount,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
   } = useNotifications(userId, {
     skip: userLoading || !userId, 
     autoRefresh: true, 
@@ -69,6 +72,11 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
     } catch (error) {
       console.error('Error handling notification click:', error);
     }
+  };
+
+  const handleDeleteClick = async (e: React.MouseEvent, notificationId: string) => {
+    e.stopPropagation(); // Prevent notification click
+    await deleteNotification(notificationId);
   };
 
   const loadOneNotification = async () => {
@@ -130,9 +138,9 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
       }}
     >
       {/* Header */}
-      <div className="relative p-3 border-b border-gray-200 flex items-center justify-center">
+      <div className="relative p-3 border-b border-gray-200 flex items-center sm:justify-center">
 
-        <div className="flex items-center gap-2 pr-16 sm:pr-20">
+        <div className="flex items-center gap-2 ">
           <HiBell className="w-4 h-4 sm:w-5 sm:h-5 text-gray-neutral700" />
           <span className="font-bold text-gray-neutral700 text-base sm:text-lead">
             Notifications
@@ -186,10 +194,12 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
             {displayedNotifications.map((notif, index) => (
               <div 
                 key={notif.notificationId} 
-                className="snap-start"
+                className="snap-start relative group"
                 style={{
                   animation: index >= displayCount - 1 && enableScrollLoad ? 'fadeIn 0.3s ease-in-out both' : 'none'
                 }}
+                onMouseEnter={() => setHoveredNotifId(notif.notificationId)}
+                onMouseLeave={() => setHoveredNotifId(null)}
               >
                 <NotificationCard 
                   notif={notif}
@@ -197,6 +207,22 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
                   actorAvatar={notif.actorAvatar}
                   onClick={() => handleNotificationClick(notif)}
                 />
+                
+                {/* Delete button - shows on hover */}
+                <button
+                  onClick={(e) => handleDeleteClick(e, notif.notificationId)}
+                  className={`
+                    absolute top-2 right-2 
+                    p-1.5 rounded-full 
+                    bg-white shadow-md
+                    hover:bg-red-50 hover:shadow-lg
+                    transition-all duration-200
+                    ${hoveredNotifId === notif.notificationId ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}
+                  `}
+                  aria-label="Delete notification"
+                >
+                  <IoClose className="w-4 h-4 text-gray-600 hover:text-red-600" />
+                </button>
               </div>
             ))}
             
