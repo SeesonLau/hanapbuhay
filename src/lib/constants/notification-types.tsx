@@ -8,4 +8,4 @@ export const NOTIFICATION_ROUTES: Record<NotificationType, string> = {
   [NotificationType.JOB_APPLICATION]: "/manageJobPosts",
   [NotificationType.APPLICATION_ACCEPTED]: "/appliedJobs",
   [NotificationType.NEW_MESSAGE]: "/chat"
-};
+};  
