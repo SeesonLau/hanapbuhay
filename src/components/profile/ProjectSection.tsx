@@ -61,7 +61,7 @@ export default function ProjectsSection({ userId, className }: ProjectsSectionPr
 
   return (
     <>
-      <div className={`${className} flex flex-col gap-2 px-5 relative`}>
+      <div className={`${className} flex flex-col gap-3 px-5 relative`}>
         <div className="flex items-center justify-center gap-4 lg:justify-start">
           <h3 className="text-description font-inter font-bold text-gray-neutral700">
             Work Experience
