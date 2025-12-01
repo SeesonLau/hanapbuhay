@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   getWhiteColor,
   getNeutral100Color,
@@ -21,6 +22,8 @@ import { JobType, SubTypes } from "@/lib/constants/job-types";
 import { Gender } from "@/lib/constants/gender";
 import { ExperienceLevel } from "@/lib/constants/experience-level";
 import ViewProfileModal from "@/components/modals/ViewProfileModal";
+import { ProfileService } from "@/lib/services/profile-services";
+import { formatDisplayName } from "@/lib/utils/profile-utils";
 
 export interface JobPostViewData {
   id: string;
@@ -64,9 +67,46 @@ const normalizeExperience = (label: string): string | null => {
 };
 
 export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobPostViewModalProps) {
-  if (!isOpen || !job) return null;
-
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [poster, setPoster] = useState<{ name: string; role?: string; avatarUrl?: string } | null>(null);
+  const [posterUserId, setPosterUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const prevHtml = document.documentElement.style.overflow;
+    const prevBody = document.body.style.overflow;
+    if (isOpen) {
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.documentElement.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    }
+    return () => {
+      document.documentElement.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    const fetchPoster = async () => {
+      try {
+        const raw = (job as any)?.raw;
+        const userId = raw?.userId || raw?.createdBy;
+        if (!userId) return;
+        setPosterUserId(String(userId));
+        const info = await ProfileService.getNameProfilePic(String(userId));
+        if (info) {
+          const displayName = formatDisplayName(info.name ?? "");
+          setPoster({ name: displayName || "Unknown Poster", role: "Client", avatarUrl: info.profilePicUrl ?? undefined });
+        }
+      } catch (_) {}
+    };
+    if (isOpen && job) {
+      fetchPoster();
+    }
+  }, [isOpen, job]);
+
+  if (!isOpen || !job) return null;
 
   const {
     id,
@@ -83,6 +123,7 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
     jobTypeTags = [],
     postedBy,
   } = job;
+
 
   const normalizedJobTypes = jobTypeTags
     .map((label) => normalizeJobType(label))
@@ -103,15 +144,20 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
   ];
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: getBlackColor(0.5) }}
       onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      <div
+      <motion.div
         className={`${fontClasses.body} w-[600px] max-w-[95vw] max-h-[90vh] overflow-y-auto rounded-2xl shadow-lg border`}
         style={{ backgroundColor: getWhiteColor(), borderColor: getNeutral300Color(), color: getNeutral600Color() }}
         onClick={(e) => e.stopPropagation()}
+        initial={{ y: 20, opacity: 0, scale: 0.98 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
       >
         {/* Header */}
         <div className="px-6 pt-6 pb-3 flex items-start justify-between">
@@ -145,38 +191,32 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
 
         {/* Location and Salary */}
         <div className="px-6 pb-2">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <StaticLocationTag label={location} />
-            <StaticSalaryTag label={`${salary} /${salaryPeriod}`} />
+            <StaticSalaryTag label={`${salary} /${salaryPeriod}`} className="whitespace-nowrap" />
           </div>
         </div>
 
-        {/* About this role */}
+        {/* About + Requirements panels side-by-side */}
         <div className="px-6 pt-4">
-          <h3 className="text-[18px] font-semibold mb-2" style={{ color: getBlackColor() }}>
-            About this role
-          </h3>
-          <p className="text-[14px]" style={{ color: getNeutral600Color() }}>
-            {description}
-          </p>
-        </div>
-
-        {/* Requirements (always visible under About this role) */}
-        <div className="px-6 pt-6">
-          <h3 className="text-[18px] font-semibold mb-2" style={{ color: getBlackColor() }}>
-            Requirements
-          </h3>
-          {requirements.length > 0 ? (
-            <ul className="space-y-1 text-[14px]" style={{ color: getNeutral600Color() }}>
-              {requirements.map((item, idx) => (
-                <li key={`req-${idx}`}>• {item}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-[14px]" style={{ color: getNeutral600Color() }}>
-              No specific requirements provided.
-            </p>
-          )}
+          <div className="grid grid-cols-1 tablet:grid-cols-2 gap-6">
+            <div className="rounded-xl border border-gray-neutral900/60 p-4">
+              <h3 className="text-[13px] font-semibold mb-2 text-gray-neutral900">About this role</h3>
+              <p className="text-[11px] text-gray-neutral600">{description}</p>
+            </div>
+            <div className="rounded-xl border border-gray-neutral900/60 p-4">
+              <h3 className="text-[13px] font-semibold mb-2 text-gray-neutral900">Requirements</h3>
+              {requirements.length > 0 ? (
+                <ul className="space-y-1 text-[11px] text-gray-neutral600">
+                  {requirements.map((item, idx) => (
+                    <li key={`req-${idx}`}>• {item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-[11px] text-gray-neutral600">No specific requirements provided.</p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Profile container (between Requirements and footer) */}
@@ -187,16 +227,16 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
             onClick={() => setIsProfileOpen(true)}
           >
             <img
-              src={postedBy?.avatarUrl ?? "/image/phoebe.jpeg"}
-              alt={postedBy?.name ?? "Poster Avatar"}
+              src={(poster?.avatarUrl ?? postedBy?.avatarUrl) ?? "/image/phoebe.jpeg"}
+              alt={(poster?.name ?? postedBy?.name) ?? "Poster Avatar"}
               className="w-9 h-9 rounded-full object-cover"
             />
             <div className="leading-tight">
-              <div className="text-[14px] font-semibold" style={{ color: getBlackColor() }}>
-                {postedBy?.name ?? "Unknown Poster"}
+              <div className="text-[13px] font-semibold text-gray-neutral900">
+                {(poster?.name ?? postedBy?.name) ?? "Unknown Poster"}
               </div>
-              <div className="text-[12px]" style={{ color: getNeutral600Color() }}>
-                {postedBy?.role ?? "Client"}
+              <div className="text-[11px] text-gray-neutral600">
+                {(poster?.role ?? postedBy?.role) ?? "Client"}
               </div>
             </div>
           </div>
@@ -206,11 +246,11 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
         <div className="px-6 py-6">
           <div className={`flex items-center ${onApply ? 'justify-between' : 'justify-start'}`}>
             <div className="flex items-center gap-2">
-              <span className="text-[12px] font-medium" style={{ color: getNeutral600Color() }}>
+              <span className="text-[11px] font-medium text-gray-neutral600">
                 Posted on: {postedDate}
               </span>
-              <span className="text-gray-400">•</span>
-              <span className="text-[12px]" style={{ color: getNeutral600Color() }}>
+              <span className="text-gray-neutral400">•</span>
+              <span className="text-[11px] text-gray-neutral600">
                 {applicantCount} Applicants
               </span>
             </div>
@@ -228,9 +268,13 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
           </div>
         </div>
 
-        {/* Embedded ViewProfileModal */}
-        <ViewProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
-      </div>
-    </div>
+      </motion.div>
+      <ViewProfileModal
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        userId={posterUserId ?? ""}
+        userType={'employer'}
+      />
+    </motion.div>
   );
 }

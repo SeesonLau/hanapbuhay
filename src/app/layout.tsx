@@ -3,6 +3,7 @@ import { inter, alexandria } from '@/styles/fonts';
 import '../app/global.css'
 import { Toaster } from 'react-hot-toast'
 import { SupabaseHashHandler } from '@/components/auth/SupabaseHashHandler';
+import EllipseBackground from '@/components/ui/EllipseBackground';
 
 export const metadata: Metadata = {
   title: 'Hanapbuhay',
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body className="min-h-screen relative" suppressHydrationWarning>       
         <Toaster position="top-center" />
         <SupabaseHashHandler />
+        <EllipseBackground />
         {children}
       </body>
     </html>

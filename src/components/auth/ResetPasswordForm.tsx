@@ -85,10 +85,10 @@ export default function ResetPasswordForm() {
 
   if (checkingAuth) {
     return (
-      <div className="w-full max-w-md mx-auto p-6">
+      <div className="w-full max-w-md mx-auto px-1 sm:px-2">
         <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-primary600 mx-auto"></div>
-          <p className="mt-4 text-gray-neutral600">Verifying session...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+          <p className="mt-4 text-gray-300 text-small">Verifying session...</p>
         </div>
       </div>
     );
@@ -96,25 +96,32 @@ export default function ResetPasswordForm() {
 
   if (!isAuthenticated) {
     return (
-      <div className="w-full max-w-md mx-auto p-6">
+      <div className="w-full max-w-md mx-auto px-1 sm:px-2">
         <div className="flex justify-center mb-4">
           <Image
             src="/image/hanapbuhay-logo-notext.svg"
             alt="HanapBuhay Logo"
-            width={80}
-            height={80}
+            width={60}
+            height={60}
             priority
+            className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]"
           />
         </div>
 
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-error-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-error-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div 
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{
+              background: 'rgba(239, 68, 68, 0.1)',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <svg className="w-8 h-8 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h1 className="text-h3 font-bold mb-2 font-alexandria">Session Expired</h1>
-          <p className="text-gray-neutral600 mb-6 font-alexandria">
+          <h1 className="text-h4 sm:text-h3 font-bold mb-2 font-alexandria text-white">Session Expired</h1>
+          <p className="text-gray-300 text-small sm:text-body mb-6 font-alexandria">
             {error || 'This password reset link has expired or is invalid.'}
           </p>
         </div>
@@ -132,33 +139,41 @@ export default function ResetPasswordForm() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto p-6">
+    <div className="w-full max-w-md mx-auto px-1 sm:px-2">
       {/* Logo */}
-      <div className="flex justify-center mb-4">
+      <div className="flex justify-center mb-1 sm:mb-4">
         <Image
           src="/image/hanapbuhay-logo-notext.svg"
           alt="HanapBuhay Logo"
-          width={80}
-          height={80}
+          width={60}
+          height={60}
           priority
+          className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]"
         />
       </div>
 
       {/* Title */}
-      <h1 className="text-h3 font-bold text-gray-neutral900 text-center mb-2 font-alexandria">
+      <h1 className="text-h3 tablet:text-h2 font-bold text-white text-center mb-2 font-alexandria">
         Reset Password
       </h1>
-      <p className="text-gray-neutral600 text-center mb-8 font-alexandria">
-        Enter your new password below.
+      <p className="text-gray-neutral100 font-light text-small sm:text-body text-center mb-2 sm:mb-4 font-alexandria">
+        Enter a new password to change your password
       </p>
 
       {error && (
-        <div className="mb-6 p-3 rounded-lg bg-error-50 text-error-700 border border-error-200 text-small">
+        <div 
+          className="mb-6 p-3 rounded-lg border text-small text-red-100"
+          style={{
+            background: 'rgba(239, 68, 68, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderColor: 'rgba(239, 68, 68, 0.3)'
+          }}
+        >
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* New Password */}
         <div>
           <TextBox
@@ -169,15 +184,22 @@ export default function ResetPasswordForm() {
               setPassword(e.target.value);
               checkPasswordRequirements(e.target.value);
             }}
-            required
-            placeholder="••••••••"
+            placeholder="Password"
             enableValidation={false}
+            variant="glassmorphism"
           />
 
           {/* Password Requirements List */}
           {password.length > 0 && (
-            <div className="mt-3 p-3 rounded-lg bg-gray-neutral50 border border-gray-neutral200">
-              <p className="text-small font-medium text-gray-neutral700 mb-2 font-inter">
+            <div 
+              className="mt-3 p-3 rounded-lg border"
+              style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(10px)',
+                borderColor: 'rgba(255, 255, 255, 0.1)'
+              }}
+            >
+              <p className="text-small font-medium text-white mb-2 font-inter">
                 Password must contain:
               </p>
               <ul className="space-y-1 text-small font-inter">
@@ -215,9 +237,9 @@ export default function ResetPasswordForm() {
             label="Confirm New Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            placeholder="••••••••"
+            placeholder="Password"
             enableValidation={false}
+            variant="glassmorphism"
           />
         </div>
 
@@ -235,12 +257,12 @@ export default function ResetPasswordForm() {
         </Button>
 
         {/* Back to Login */}
-        <p className="text-center text-small text-gray-neutral600 mt-4 font-alexandria">
+        <p className="text-center text-small sm:text-body text-gray-300 mt-4 font-alexandria">
           Remember your password?{' '}
           <button
             type="button"
             onClick={() => router.push(ROUTES.LOGIN)}
-            className="text-primary-primary500 hover:text-primary-primary600 hover:underline"
+            className="text-blue-300 hover:text-blue-200 hover:underline"
           >
             Sign in
           </button>

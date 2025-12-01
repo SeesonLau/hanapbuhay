@@ -11,6 +11,8 @@ export async function GET(request: NextRequest) {
   const error = requestUrl.searchParams.get('error');
   const error_description = requestUrl.searchParams.get('error_description');
 
+  console.log('Auth callback - params:', { code: !!code, next, error, error_description });
+
   // Handle errors from Supabase
   if (error) {
     console.error('Auth callback error:', error, error_description);
@@ -53,6 +55,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (data?.session) {
+      console.log('✅ Session created successfully, redirecting to:', next);
+      
       // Successful authentication
       const redirectUrl = new URL(next, request.url);
       
@@ -68,6 +72,7 @@ export async function GET(request: NextRequest) {
   }
 
   // No code provided or session creation failed
+  console.error('❌ No code or session creation failed');
   return NextResponse.redirect(
     new URL('/login?error=Could not authenticate user', request.url)
   );

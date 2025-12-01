@@ -109,12 +109,13 @@ const Banner: React.FC<BannerProps> = ({
 
   return (
     <div 
-      className={`w-full font-inter fixed top-0 left-0 right-0 z-40 ${className}`}
+      className={`w-full h-[200px] font-inter fixed top-0 left-0 right-0 z-50 overflow-visible pointer-events-none ${className}`}
       style={{ 
         background: 'radial-gradient(55% 45% at 50% 70%, #666666 0%,  #000000 80.77%)'
       }}
     >
       {/* Header Dashboard */}
+      <div className="pointer-events-auto">
       <HeaderDashboard
         userName={userName}
         userAvatar={userAvatar}
@@ -122,14 +123,14 @@ const Banner: React.FC<BannerProps> = ({
         userRole={userRole}
         userId={userId}
         userCreatedAt={userCreatedAt}
-        notificationCount={notificationCount}
       />
+      </div>
 
       {/* Banner Content Container - Left-aligned structure */}
-      <div className="flex flex-col pt-2 pb-2 px-4 sm:pt-4 sm:px-6 md:px-16 lg:px-32 w-full min-h-[130px] max-h-[130px]">
+      <div className="flex flex-col py-3 px-4 md:px-6 laptop:px-32 w-full h-full">
         {/* Banner Text Section - Left-aligned typography and spacing */}
-        <div className={`text-start mb-2 sm:mb-2 w-full ${variant === 'profile' || variant === 'chat' ? 'mt-6' : 'mt-0'}`}>
-          <h1 className="text-body sm:text-body md:text-description lg:text-lead font-bold font-alexandria text-white leading-tight mb-2">
+        <div className={`text-start mb-1 w-full ${variant === 'profile' || variant === 'chat' ? 'mt-3 sm:mt-4' : 'mt-0'} pointer-events-none`}>
+          <h1 className="text-body sm:text-body md:text-description lg:text-lead font-bold font-alexandria text-white leading-tight mb-1.5 sm:mb-2">
             {bannerContent.title}{' '}
             <span className="bg-gradient-to-r from-primary-primary400 to-primary-primary600 bg-clip-text text-transparent">
               {bannerContent.highlight}
@@ -147,7 +148,7 @@ const Banner: React.FC<BannerProps> = ({
             )}
             {/* Post Button for Manage Job Posts - Inline with text */}
             {bannerContent.showPostButton && (
-              <span className="inline-block ml-3 align-middle">
+              <span className="hidden laptop:inline-block ml-3 align-middle pointer-events-auto">
                 <Button
                   variant="primary"
                   size="sm"
@@ -164,7 +165,7 @@ const Banner: React.FC<BannerProps> = ({
 
         {/* Search Bar Section - Full width and left-aligned (hidden for profile and chat variants) */}
         {variant !== 'profile' && variant !== 'chat' && (
-          <div className="w-full flex items-center">
+          <div className="w-full flex items-center pointer-events-auto">
             {shouldShowSearch && (
               <SearchBar
                 variant={bannerContent.searchVariant}

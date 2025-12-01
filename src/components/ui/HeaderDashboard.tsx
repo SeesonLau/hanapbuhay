@@ -18,10 +18,12 @@ import {
 import { fontClasses } from '@/styles/fonts';
 import { TYPOGRAPHY } from '@/styles/typography';
 import { AuthService } from '@/lib/services/auth-services';
+import { NotificationService } from '@/lib/services/notifications-services';
 import { ROUTES } from '@/lib/constants';
 import SettingsModal from '@/components/modals/SettingsModal';
 import NotificationPopUp from '../notifications/NotificationPopUp';
 import { Preloader, PreloaderMessages } from "./Preloader";
+import ProfileDropdown from './ProfileDropdown';
 
 import { ProfileService } from "@/lib/services/profile-services";
 
@@ -32,7 +34,6 @@ interface HeaderDashboardProps {
   userRole?: string;
   userId?: string;
   userCreatedAt?: string;
-  notificationCount?: number;
 }
 
 const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
@@ -42,7 +43,6 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   userRole = 'Job Seeker',
   userId = '',
   userCreatedAt = new Date().toISOString(),
-  notificationCount = 1,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -54,13 +54,29 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
   
   // State for user data
-  const [userData, setUserData] = useState({
-    name: userName,
-    email: userEmail,
-    profilePicUrl: userAvatar,
-    userId: userId
+  const [userData, setUserData] = useState(() => {
+    // Try to get cached data from sessionStorage first
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem('headerUserData');
+      if (cached) {
+        try {
+          return JSON.parse(cached);
+        } catch (e) {
+          // If parsing fails, fall back to props
+        }
+      }
+    }
+    return {
+      name: userName,
+      email: userEmail,
+      profilePicUrl: userAvatar,
+      userId: userId
+    };
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // State for unread notification count
+  const [unreadCount, setUnreadCount] = useState(0);
 
   //Logout animation state
   const [showGoodbye, setShowGoodbye] = useState(false);
@@ -73,7 +89,10 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        setIsLoading(true);
+        // Only show loading if we don't have any cached data
+        if (!userData.name && !userData.email) {
+          setIsLoading(true);
+        }
         
         // Get current user from AuthService
         const currentUser = await AuthService.getCurrentUser();
@@ -87,22 +106,35 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
           // Fetch email using ProfileService
           const userEmail = await ProfileService.getEmailByUserId(userId);
           
-          setUserData({
+          const newUserData = {
             name: profileData?.name || 'User',
             email: userEmail || '',
             profilePicUrl: profileData?.profilePicUrl || '',
             userId: userId
-          });
+          };
+          
+          setUserData(newUserData);
+          
+          // Cache the data in sessionStorage
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('headerUserData', JSON.stringify(newUserData));
+          }
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
         // Fallback to props if available
-        setUserData({
+        const fallbackData = {
           name: userName || 'User',
           email: userEmail || '',
           profilePicUrl: userAvatar || '',
           userId: userId || ''
-        });
+        };
+        setUserData(fallbackData);
+        
+        // Cache fallback data
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('headerUserData', JSON.stringify(fallbackData));
+        }
       } finally {
         setIsLoading(false);
       }
@@ -111,6 +143,54 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     fetchUserData();
   }, [userName, userEmail, userAvatar, userId]);
 
+   // Fetch unread notification count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const currentUser = await AuthService.getCurrentUser();
+        if (currentUser) {
+          const count = await NotificationService.getUnreadCount(currentUser.id);
+          setUnreadCount(count);
+        }
+      } catch (error) {
+        console.error('Error fetching unread count:', error);
+        setUnreadCount(0);
+      }
+    };
+
+    fetchUnreadCount();
+
+    // Set up real-time subscription for notification updates
+    let unsubscribe: (() => void) | null = null;
+    
+    const setupSubscription = async () => {
+      try {
+        const currentUser = await AuthService.getCurrentUser();
+        if (currentUser) {
+          // Subscribe to new notifications
+          unsubscribe = NotificationService.subscribeToNotifications(
+            currentUser.id,
+            () => {
+              // Refetch count when new notification arrives
+              fetchUnreadCount();
+            }
+          );
+        }
+      } catch (error) {
+        console.error('Error setting up notification subscription:', error);
+      }
+    };
+
+    setupSubscription();
+
+    // Cleanup subscription on unmount
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, []);
+
   // Determine active link based on current path
   useEffect(() => {
     if (pathname === ROUTES.FINDJOBS) setActiveLink('find-jobs');
@@ -118,7 +198,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     else if (pathname === ROUTES.APPLIEDJOBS) setActiveLink('applied-jobs');
     else if (pathname === ROUTES.CHAT) setActiveLink('chat');
     else setActiveLink('find-jobs');
-  }, [pathname]);
+  }, [pathname]);  
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -145,6 +225,12 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const handleSignOut = async () => {
     setIsProfileOpen(false);
     setShowGoodbye(true);
+    
+    // Clear cached user data on sign out
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('headerUserData');
+    }
+    
     setTimeout(async () => {
       await AuthService.signOut();
       router.push(ROUTES.HOME);
@@ -153,23 +239,21 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
+      const targetEl = event.target as HTMLElement;
+      const inMenu = menuRef.current && menuRef.current.contains(targetEl);
+      const onMenuButton = buttonRef.current && buttonRef.current.contains(targetEl);
+      const inProfileAnchor = profileRef.current && profileRef.current.contains(targetEl);
+      const inProfileDropdown = !!targetEl.closest('#profile-dropdown');
+
+      if (!inMenu && !onMenuButton) {
         setIsMenuOpen(false);
       }
-      
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target as Node)
-      ) {
+
+      if (!inProfileAnchor && !inProfileDropdown) {
         setIsProfileOpen(false);
       }
 
-      if (!(event.target as HTMLElement).closest('#notification-button')) {
+      if (!targetEl.closest('#notification-button')) {
         setShowNotifications(false);
       }
     };
@@ -181,7 +265,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isMenuOpen, isProfileOpen, showNotifications]);
+  }, [isMenuOpen, isProfileOpen]);
 
   const navigationLinks = [
     { id: 'find-jobs', label: 'Find Jobs', route: ROUTES.FINDJOBS },
@@ -278,12 +362,12 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                   onClick={() => setShowNotifications(!showNotifications)}
                 >
                   <HiBell className="w-6 h-6" />
-                  {notificationCount && notificationCount > 0 && (
+                  {unreadCount > 0 && (
                     <span
                       className="absolute -top-1 -right-1 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
                       style={{ backgroundColor: getRedColor() }}
                     >
-                      {notificationCount}
+                      {unreadCount}
                     </span>
                   )}
                 </button>
@@ -308,10 +392,9 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                   <div 
                     className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300"
                     style={{ 
-                      background: userData.profilePicUrl 
-                        ? 'transparent' 
-                        : 'linear-gradient(to bottom right, #FF9F40, #FFD700)'
+                      background: 'transparent'
                     }}
+                    suppressHydrationWarning
                   >
                     {userData.profilePicUrl ? (
                       <Image
@@ -341,92 +424,13 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                 </button>
 
                 {/* Profile Dropdown */}
-                {isProfileOpen && (
-                  <div 
-                    className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 z-50 transition-all duration-300 ease-in-out"
-                    style={{ 
-                      backgroundColor: getWhiteColor(),
-                      border: `1px solid ${getGrayColor('border')}`,
-                      backdropFilter: 'blur(10px)',
-                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
-                    }}
-                  >
-                    <Link
-                      href={ROUTES.PROFILE}
-                      className="block px-4 py-2 text-sm transition-colors duration-300"
-                      style={{ 
-                        color: getGrayColor('neutral600'),
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = getNeutral100Color();
-                        e.currentTarget.style.color = getBlueColor();
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = getWhiteColor();
-                        e.currentTarget.style.color = getGrayColor('neutral600');
-                      }}
-                      onClick={() => setIsProfileOpen(false)}
-                    >
-                      Profile
-                    </Link>
-
-                    <Link
-                      href={ROUTES.QUERY}
-                      className="block px-4 py-2 text-sm transition-colors duration-300"
-                      style={{ 
-                        color: getGrayColor('neutral600'),
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = getNeutral100Color();
-                        e.currentTarget.style.color = getBlueColor();
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = getWhiteColor();
-                        e.currentTarget.style.color = getGrayColor('neutral600');
-                      }}
-                      onClick={() => setIsProfileOpen(false)}
-                    >
-                      Query Test
-                    </Link>
-
-
-
-                    <button
-                      onClick={openSettings}
-                      className="block w-full text-left px-4 py-2 text-sm transition-colors duration-300"
-                      style={{ 
-                        color: getGrayColor('neutral600'),
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = getNeutral100Color();
-                        e.currentTarget.style.color = getBlueColor();
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = getWhiteColor();
-                        e.currentTarget.style.color = getGrayColor('neutral600');
-                      }}
-                    >
-                      Settings
-                    </button>
-                    <button
-                      onClick={handleSignOut}
-                      className="block w-full text-left px-4 py-2 text-sm transition-colors duration-300"
-                      style={{ 
-                        color: getGrayColor('neutral600'),
-                      }}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = getNeutral100Color();
-                        e.currentTarget.style.color = getBlueColor();
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = getWhiteColor();
-                        e.currentTarget.style.color = getGrayColor('neutral600');
-                      }}
-                    >
-                      Sign out
-                    </button>
-                  </div>
-                )}
+                <ProfileDropdown 
+                  isOpen={isProfileOpen}
+                  onClose={() => setIsProfileOpen(false)}
+                  onOpenSettings={openSettings}
+                  onSignOut={handleSignOut}
+                  anchorRect={profileRef.current ? profileRef.current.getBoundingClientRect() : null}
+                />
               </div>
 
               {/* Mobile Menu Button */}
@@ -477,26 +481,6 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                   </button>
                 </Link>
               ))}
-              {/* Settings in Mobile Menu */}
-              <button
-                onClick={() => {
-                  openSettings();
-                  setIsMenuOpen(false);
-                }}
-                className="w-full text-left px-3 py-2 text-base font-medium transition-all duration-300 focus:outline-none text-neutral-200 hover:bg-blue-default hover:text-white rounded-lg"
-              >
-                Settings
-              </button>
-              {/* Sign Out in Mobile Menu */}
-              <button
-                onClick={() => {
-                  handleSignOut();
-                  setIsMenuOpen(false);
-                }}
-                className="w-full text-left px-3 py-2 text-base font-medium transition-all duration-300 focus:outline-none text-neutral-200 hover:bg-red-default hover:text-white rounded-lg"
-              >
-                Sign Out
-              </button>
             </div>
           </div>
         )}

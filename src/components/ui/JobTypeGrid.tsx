@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { getNeutral300Color, getWhiteColor, getColor } from "@/styles/colors";
 import { SubTypes, JobType } from "@/lib/constants/job-types";
 import { JobTypeTag, StaticJobTypeTag } from "@/components/ui/TagItem";
 
@@ -18,28 +17,12 @@ interface JobTypeGridProps {
   onToggleSubType?: (subType: string) => void;
 }
 
-function getSelectedTileHeight(type: string): number {
-  // Keep selected tiles within a 3-row max (3 * 120 = 360)
-  // Service previously used 4 rows (380). Clamp to 360 to avoid extra grid height.
-  // Use explicit pixel heights requested: non-Service 252px (2 rows combined), Service 385px (3 rows combined)
-  return type === JobType.SERVICE ? 385 : 252;
+function getSelectedTileRows(type: string): number {
+  return type === JobType.SERVICE ? 3 : 2;
 }
 
 export default function JobTypeGrid({ options, selected, onToggle, selectedSubTypes = [], onToggleSubType }: JobTypeGridProps) {
-  // Measure selected tile content to avoid extra inner space below tags
   const contentRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>({});
-
-  useEffect(() => {
-    const current = selected[0];
-    if (!current) return;
-    const el = contentRefs.current[current];
-    if (el) {
-      // Measure inner content height including padding
-      const h = el.scrollHeight;
-      setMeasuredHeights(prev => ({ ...prev, [current]: h }));
-    }
-  }, [selected, selectedSubTypes]);
   // Reorder tiles conditionally to achieve one-way exchanges:
   // - When Skilled is selected, swap Skilled with Creative.
   // - When Service is selected, swap Service with IT.
@@ -79,18 +62,12 @@ export default function JobTypeGrid({ options, selected, onToggle, selectedSubTy
   // Fixed row spans when selected: non-Service => 2 rows, Service => 3 rows
   return (
     <div
-      className="grid gap-3 mx-auto"
-      style={{
-        gridTemplateColumns: 'repeat(3, 180px)',
-        gridAutoRows: '120px',
-        gridAutoFlow: 'dense',
-        minWidth: '564px',
-        width: '564px'
-      }}
+      className="grid gap-3 mx-auto w-full grid-cols-2 tablet:grid-cols-3 auto-rows-[minmax(72px,auto)] mobile-L:auto-rows-[minmax(82px,auto)] tablet:auto-rows-[minmax(120px,auto)]"
+      style={{ gridAutoFlow: 'dense' }}
     >
       {displayOptions.map((opt) => {
         const isSelected = selected.includes(opt.value);
-        const measured = measuredHeights[opt.value] ?? getSelectedTileHeight(opt.value);
+        const rowsForSelected = getSelectedTileRows(opt.value);
         const subTypes = SubTypes[opt.value as JobType] || [];
         const isCreative = opt.value === JobType.CREATIVE;
         const isSkilled = opt.value === JobType.SKILLED;
@@ -100,23 +77,26 @@ export default function JobTypeGrid({ options, selected, onToggle, selectedSubTy
           opt.value === JobType.SERVICE ? 3 : isSkilled ? 1 : 2
         ) : 1;
         // Explicit heights: Unselected 120px, Selected non-Service 252px, Selected Service 385px, Selected Skilled 120px
-        const selectedHeight = isSelected ? (
-          opt.value === JobType.SERVICE ? 385 : isSkilled ? 120 : 252
-        ) : 120;
-        const needsScroll = isSelected && measured > selectedHeight;
+        const baseHeightClass = isSelected
+          ? (opt.value === JobType.SERVICE
+              ? 'h-[320px] mobile-S:h-[324px] mobile-M:h-[324px] mobile-L:h-[354px] tablet:h-[385px] laptop:h-[385px]'
+              : isSkilled
+                ? 'h-auto'
+                : 'h-[210px] mobile-L:h-[230px] tablet:h-[252px] laptop:h-[252px]')
+          : 'h-[100px] mobile-L:h-[110px] tablet:h-[120px]';
+
+        const rowSpanClass = isSelected
+          ? (opt.value === JobType.SERVICE
+              ? 'row-span-3'
+              : isSkilled
+                ? 'row-span-2 tablet:row-span-1'
+                : 'row-span-2')
+          : 'row-span-1';
         return (
           <button
             key={opt.value}
             type="button"
-            className="group relative w-[180px] rounded-lg border overflow-hidden transition-all duration-300 ease-out hover:scale-[1.03] hover:shadow-md"
-            style={{ 
-              borderColor: getNeutral300Color(), 
-              backgroundColor: getWhiteColor(),
-              height: `${selectedHeight}px`,
-              width: isSelected && isSkilled ? '370px' : '180px',
-              gridRowEnd: `span ${targetRows}`,
-              gridColumnEnd: isSelected && isSkilled ? 'span 2' : 'span 1'
-            }}
+            className={`group relative w-full rounded-lg border border-gray-neutral300 ${isSelected && isSkilled ? 'bg-primary-primary100' : 'bg-white'} ${opt.value === JobType.SKILLED ? 'overflow-visible' : 'overflow-hidden'} transition-all duration-300 ease-out hover:scale-[1.03] hover:shadow-md ${baseHeightClass} ${rowSpanClass} ${isSelected && isSkilled ? 'col-span-2 tablet:col-span-2' : ''} ${isSelected && opt.value === JobType.SERVICE ? 'mobile-S:col-start-2 mobile-M:col-start-2 mobile-L:col-start-2 tablet:col-start-3 laptop:col-start-3 laptop-L:col-start-3' : ''}`}
             onClick={() => onToggle(opt.value)}
             aria-pressed={isSelected}
             aria-label={opt.label}
@@ -138,12 +118,7 @@ export default function JobTypeGrid({ options, selected, onToggle, selectedSubTy
                 </div>
                 {/* Hover overlay */}
                 <div
-                  className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out"
-                  style={{
-                    backgroundColor: getColor('primary', 'primary100'),
-                    color: getColor('tag', 'jobText'),
-                    willChange: 'opacity, transform'
-                  }}
+                  className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out bg-primary-primary100 text-tag-jobText"
                 >
                   <img
                     src={`/icons/${opt.value}.svg`}
@@ -154,11 +129,7 @@ export default function JobTypeGrid({ options, selected, onToggle, selectedSubTy
                     }}
                   />
                   <div
-                    className="text-[12px] font-medium text-center opacity-0 transform transition-all duration-300 ease-out translate-y-2 group-hover:opacity-100 group-hover:translate-y-0"
-                    style={{
-                      color: getColor('tag', 'jobText'),
-                      backgroundColor: 'transparent',
-                    }}
+                    className="text-[12px] font-medium text-center opacity-0 transform transition-all duration-300 ease-out translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 text-tag-jobText"
                   >
                     {opt.label}
                   </div>
@@ -166,30 +137,25 @@ export default function JobTypeGrid({ options, selected, onToggle, selectedSubTy
               </>
             )}
 
-            {/* Selected: smoothly replace with subtype tags grid */}
-            {isSelected && (
-              <div
-                className={`absolute inset-0 p-3 transition-all duration-300 ease-out ${needsScroll ? 'overflow-y-auto' : ''} ${(isCreative || isSkilled) && needsScroll ? 'scrollbar-hide' : ''}`}
-                style={{ 
-                  backgroundColor: getColor('primary', 'primary100')
-                }}
-                ref={(el) => { if (isSelected) contentRefs.current[opt.value] = el; }}
-              >
-                <div className="mb-2">
-                  <StaticJobTypeTag label={opt.label} />
-                </div>
-                <div className={`${isSkilled ? 'grid grid-cols-2 gap-2 items-start' : 'flex flex-col gap-2 items-start'}`}>
-                  {subTypes.map((sub) => (
-                    <JobTypeTag
-                      key={`${opt.value}-${sub}`}
-                      label={sub}
-                      selected={selectedSubTypes.includes(sub)}
-                      onClick={() => onToggleSubType?.(sub)}
-                    />
-                  ))}
-                </div>
+            {/* Subtype grid: always rendered; animates open/close */}
+            <div
+              className={`${opt.value === JobType.SKILLED ? 'relative' : 'absolute inset-0'} p-2 mobile-L:p-2 tablet:p-3 transition-all duration-300 ease-out ${opt.value === JobType.SKILLED ? '' : 'overflow-y-auto'} ${(isCreative || isSkilled) ? 'scrollbar-hide' : ''} bg-primary-primary100 ${isSelected ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}`}
+              ref={(el) => { if (isSelected) contentRefs.current[opt.value] = el; }}
+            >
+              <div className="mb-2">
+                <StaticJobTypeTag label={opt.label} />
               </div>
-            )}
+              <div className={`${isSkilled ? 'grid grid-cols-2 gap-2 items-start' : 'flex flex-col gap-2 items-start'}`}>
+                {subTypes.map((sub) => (
+                  <JobTypeTag
+                    key={`${opt.value}-${sub}`}
+                    label={sub}
+                    selected={selectedSubTypes.includes(sub)}
+                    onClick={() => onToggleSubType?.(sub)}
+                  />
+                ))}
+              </div>
+            </div>
           </button>
         );
       })}

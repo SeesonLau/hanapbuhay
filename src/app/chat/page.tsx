@@ -14,6 +14,7 @@ import { ProfileService } from "@/lib/services/profile-services";
 import { ChatService } from "@/lib/services/chat/chat-services";
 import { toast } from 'react-hot-toast';
 import { supabase } from '@/lib/services/supabase/client';
+import { FiArrowLeft, FiMenu } from 'react-icons/fi';
 
 // --- Custom Hook to Fetch Profile Data ---
 interface UserProfile {
@@ -65,6 +66,7 @@ export default function ChatPage() {
   const [activeRoom, setActiveRoom] = useState<ChatRoom | null>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
+  const [showMobileChatView, setShowMobileChatView] = useState(false);
 
   // Fix hydration by waiting for component to mount
   useEffect(() => {
@@ -261,6 +263,9 @@ export default function ChatPage() {
       if (prevRoom?.id === room.id) return prevRoom;
       return room;
     });
+
+    // On mobile, show chat view
+    setShowMobileChatView(true);
   }, []);
 
   // Stable handler for starting DMs
@@ -289,12 +294,21 @@ export default function ChatPage() {
 
       // 3. Set the new room as active
       setActiveRoom(newRoom);
+      
+      // On mobile, show chat view
+      setShowMobileChatView(true);
+      
       console.log('✅ DM room created/selected:', newRoom.id);
     } else {
       toast.error(`Could not start chat with ${contact.name}.`);
       console.error('❌ Failed to create DM room');
     }
   }, [profile]);
+
+  // Handle back button on mobile
+  const handleBackToList = () => {
+    setShowMobileChatView(false);
+  };
 
   // Memoize active contact
   const activeContact = useMemo(() => {
@@ -330,42 +344,70 @@ export default function ChatPage() {
     <div className="min-h-screen bg-gray-50" suppressHydrationWarning>
       <Banner variant="chat" showSearchBar={false} />
 
-      {/* Main content area - starts below the fixed banner */}
-      <div className="pt-[220px] min-h-screen">
-        <div className="h-[calc(100vh-220px)]">
-          <div className="bg-white rounded-lg shadow-lg mx-4 h-full overflow-hidden">
-            <div className="flex flex-col md:flex-row h-full">
+      {/* Main content area - spacing below the fixed banner */}
+      <div className="pt-[200px] min-h-screen">
+        <div className="h-[calc(100vh-200px)]">
+          <div className="bg-white rounded-none tablet:rounded-lg shadow-none tablet:shadow-lg tablet:mx-4 h-full overflow-hidden">
+            <div className="flex h-full relative">
 
-              {/* 1. Chat List Sidebar (Rooms and Search) */}
-              <div className="w-full md:w-1/3 border-b md:border-r border-gray-200 flex flex-col">
-                <div className="p-4 border-b border-gray-200 bg-white">
-                  <h2 className="text-xl font-semibold text-gray-800">Messages</h2>
+              {/* 1. Chat List Sidebar - Shows on mobile when chat is NOT open */}
+              <div 
+                className={`
+                  ${showMobileChatView ? 'hidden' : 'flex'}
+                  tablet:flex
+                  w-full tablet:w-1/3 laptop:w-1/4
+                  bg-white
+                  border-b tablet:border-b-0 tablet:border-r border-gray-200 
+                  flex-col
+                `}
+              >
+                <div className="p-3 mobile-L:p-4 border-b border-gray-200 bg-white flex-shrink-0">
+                  <h2 className="text-lg mobile-L:text-xl font-semibold text-gray-800 mb-3">Messages</h2>
                   <SearchUsers currentUserId={profile.id} onUserSelect={handleUserSelectForDM} />
                 </div>
 
-                <ChatRoomList
-                  currentUserId={profile.id}
-                  activeRoomId={activeRoom?.id || ''}
-                  contacts={userContacts}
-                  onSelectRoom={handleSelectRoom}
-                />
+                <div className="flex-1 overflow-y-auto">
+                  <ChatRoomList
+                    currentUserId={profile.id}
+                    activeRoomId={activeRoom?.id || ''}
+                    contacts={userContacts}
+                    onSelectRoom={handleSelectRoom}
+                  />
+                </div>
               </div>
 
-              {/* 2. Chat Messages Area */}
-              <div className="flex-1 flex flex-col">
+              {/* 2. Chat Messages Area - Shows on mobile when chat IS open */}
+              <div className={`
+                ${showMobileChatView ? 'flex' : 'hidden'}
+                tablet:flex
+                flex-1 flex-col
+                w-full
+              `}>
                 
-                <div className="p-4 border-b border-gray-200 bg-white">
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-10 w-10">
+                {/* Chat Header */}
+                <div className="p-3 mobile-L:p-4 border-b border-gray-200 bg-white flex-shrink-0">
+                  <div className="flex items-center space-x-2 mobile-L:space-x-3">
+                    {/* Back button for mobile */}
+                    <button
+                      onClick={handleBackToList}
+                      className="tablet:hidden p-2 hover:bg-gray-100 rounded-lg -ml-2 transition-colors"
+                      aria-label="Back to conversations"
+                    >
+                      <FiArrowLeft size={20} className="text-gray-700" />
+                    </button>
+
+                    <Avatar className="h-8 w-8 mobile-L:h-10 mobile-L:w-10 flex-shrink-0">
                       <AvatarImage src={activeContact.profilePicUrl || undefined} alt={activeContact.name} />
-                      <AvatarFallback className="bg-gray-300 text-gray-700">
+                      <AvatarFallback className="bg-gray-300 text-gray-700 text-xs mobile-L:text-sm">
                         {activeContact.name ? activeContact.name.substring(0, 2).toUpperCase() : '??'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-gray-800 truncate">{activeContact.name}</h3>
+                      <h3 className="text-base mobile-L:text-lg font-semibold text-gray-800 truncate">
+                        {activeContact.name}
+                      </h3>
                       {activeRoom && (
-                        <p className="text-sm text-gray-500 truncate">
+                        <p className="text-xs mobile-L:text-sm text-gray-500 truncate">
                           {activeRoom.type === 'global' ? 'Global chat room' : 'Direct message'}
                         </p>
                       )}
@@ -373,7 +415,8 @@ export default function ChatPage() {
                   </div>
                 </div>
 
-                <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Chat Content */}
+                <div className="flex-1 flex flex-col overflow-hidden min-h-0">
                   {activeRoom ? (
                     <RealtimeChat
                       key={activeRoom.id}
@@ -385,14 +428,14 @@ export default function ChatPage() {
                       onNewMessage={handleNewMessage}
                     />
                   ) : (
-                    <div className="flex-1 flex items-center justify-center text-gray-500">
-                      <div className="text-center">
-                        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                          <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex-1 flex items-center justify-center text-gray-500 p-4">
+                      <div className="text-center max-w-sm">
+                        <div className="w-12 h-12 mobile-L:w-16 mobile-L:h-16 mx-auto mb-3 mobile-L:mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                          <svg className="w-6 h-6 mobile-L:w-8 mobile-L:h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                           </svg>
                         </div>
-                        <p>Select a conversation to start messaging</p>
+                        <p className="text-sm mobile-L:text-base">Select a conversation to start messaging</p>
                       </div>
                     </div>
                   )}

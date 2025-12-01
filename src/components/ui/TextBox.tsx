@@ -21,6 +21,8 @@ export interface TextBoxProps extends Omit<React.InputHTMLAttributes<HTMLInputEl
   label?: string;
   /** Error message to display below the input */
   error?: string;
+  /** Phone prefix to display (e.g., '+63') - only for tel type */
+  phonePrefix?: string;
   /** Helper text to display below the input */
   helperText?: string;
   /** Icon component to display on the left side */
@@ -41,10 +43,10 @@ export interface TextBoxProps extends Omit<React.InputHTMLAttributes<HTMLInputEl
   className?: string;
   /** Enable real-time validation (default: true) */
   enableValidation?: boolean;
-  /** Minimum value for number inputs */
-  min?: number;
-  /** Maximum value for number inputs */
-  max?: number;
+  /** Minimum value for number inputs or date string for date inputs */
+  min?: number | string;
+  /** Maximum value for number inputs or date string for date inputs */
+  max?: number | string;
   /** Minimum length for password validation */
   minPasswordLength?: number;
   /** Custom validation function */
@@ -59,6 +61,8 @@ export interface TextBoxProps extends Omit<React.InputHTMLAttributes<HTMLInputEl
   showLoadingIcon?: boolean;
   /** Icon size: 'sm' (12px) | 'md' (16px) or explicit number (px) */
   iconSize?: 'sm' | 'md' | number;
+  /** Visual variant: 'default' or 'glassmorphism' */
+  variant?: 'default' | 'glassmorphism';
 }
 
 const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
@@ -84,11 +88,13 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
   successIcon,
   showLoadingIcon = false,
   iconSize = 'md',
+  variant = 'default',
   placeholder,
   value,
   defaultValue,
   onChange,
   onBlur,
+  phonePrefix,
   ...props
 }, ref) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -96,6 +102,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
   const [validationError, setValidationError] = useState<string | undefined>();
   const [touched, setTouched] = useState(false);
   const [isValid, setIsValid] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
   
   const inputType = type === 'password' && showPassword ? 'text' : type;
 
@@ -119,7 +126,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
         case 'tel':
           return validatePhone(inputValue);
         case 'number':
-          return validateNumber(inputValue, min, max);
+          return validateNumber(inputValue, typeof min === 'number' ? min : undefined, typeof max === 'number' ? max : undefined);
         case 'url':
           return validateUrl(inputValue);
         case 'password':
@@ -150,7 +157,18 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
   }, [value]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
+    let newValue = e.target.value;
+    
+    // For phone type, only allow numbers and limit to 11 digits
+    if (type === 'tel') {
+      // Remove any non-digit characters
+      newValue = newValue.replace(/\D/g, '');
+      // Limit to 11 digits
+      newValue = newValue.slice(0, 11);
+      // Update the event value
+      e.target.value = newValue;
+    }
+    
     setInternalValue(newValue);
     onChange?.(e);
   };
@@ -185,25 +203,48 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
                       (showSuccessIcon && isValid && touched && !currentError) || 
                       showLoadingIcon;
 
-  const inputClasses = `
-    w-full 
-    ${responsive ? 'h-10 sm:h-10' : 'h-10'}
-    ${responsive ? 'px-4 py-1 sm:px-5 sm:py-2' : 'px-5 py-2'}
-    border rounded-[10px] 
-    ${responsive ? 'text-small sm:text-small' : 'text-small'}
-    font-inter font-normal 
-    bg-white 
-    transition-all duration-200
-    focus:outline-none focus:ring-2 focus:ring-primary-primary400 focus:border-transparent
-    disabled:bg-gray-neutral50 disabled:cursor-not-allowed
-    ${leftIcon ? (responsive ? 'pl-9 sm:pl-9' : 'pl-9') : (responsive ? 'pl-4 sm:pl-5' : 'pl-5')}
-    ${hasRightIcon ? (responsive ? 'pr-9 sm:pr-9' : 'pr-9') : (responsive ? 'pr-4 sm:pr-5' : 'pr-5')}
-    ${isInErrorState ? 
-      'border-error-error500 focus:ring-error-error200' : 
-      'border-gray-neutral300 hover:border-gray-neutral400 focus:border-primary-primary500'
-    }
-    placeholder:text-gray-neutral400 placeholder:font-inter placeholder:font-normal placeholder:text-small
-  `.trim();
+  const hasPhonePrefix = type === 'tel' && phonePrefix;
+  
+  const inputClasses = variant === 'glassmorphism' 
+    ? `
+      w-full 
+      ${responsive ? 'h-10 sm:h-10' : 'h-10'}
+      ${responsive ? 'px-4 py-1 sm:px-5 sm:py-2' : 'px-5 py-2'}
+      border rounded-[10px] 
+      ${responsive ? 'text-small sm:text-small' : 'text-small'}
+      font-inter font-normal 
+      text-white
+      transition-all duration-200
+      focus:outline-none focus:ring-2 focus:border-transparent
+      disabled:cursor-not-allowed
+      ${leftIcon ? (responsive ? 'pl-9 sm:pl-9' : 'pl-9') : (responsive ? 'pl-4 sm:pl-5' : 'pl-5')}
+      ${hasRightIcon ? (responsive ? 'pr-9 sm:pr-9' : 'pr-9') : (responsive ? 'pr-4 sm:pr-5' : 'pr-5')}
+      ${isInErrorState ? 
+        'border-red-400/50 focus:ring-red-400/20 bg-red-500/10 backdrop-blur-[10px]' : 
+        'border-white/20 hover:border-white/30 focus:border-blue-300/50 focus:ring-blue-300/20 bg-white/10 backdrop-blur-[10px] hover:bg-white/15'
+      }
+      placeholder:text-white/50 placeholder:font-inter placeholder:font-normal placeholder:text-small
+      disabled:bg-white/5 disabled:opacity-50
+    `.trim()
+    : `
+      w-full 
+      ${responsive ? 'h-10 sm:h-10' : 'h-10'}
+      ${responsive ? 'px-4 py-1 sm:px-5 sm:py-2' : 'px-5 py-2'}
+      border rounded-[10px] 
+      ${responsive ? 'text-small sm:text-small' : 'text-small'}
+      font-inter font-normal 
+      bg-white 
+      transition-all duration-200
+      focus:outline-none focus:ring-2 focus:ring-primary-primary400 focus:border-transparent
+      disabled:bg-gray-neutral50 disabled:cursor-not-allowed
+      ${leftIcon ? (responsive ? 'pl-9 sm:pl-9' : 'pl-9') : (responsive ? 'pl-4 sm:pl-5' : 'pl-5')}
+      ${hasRightIcon ? (responsive ? 'pr-9 sm:pr-9' : 'pr-9') : (responsive ? 'pr-4 sm:pr-5' : 'pr-5')}
+      ${isInErrorState ? 
+        'border-error-error500 focus:ring-error-error200' : 
+        'border-gray-neutral300 hover:border-gray-neutral400 focus:border-primary-primary500'
+      }
+      placeholder:text-gray-neutral400 placeholder:font-inter placeholder:font-normal placeholder:text-small
+    `.trim();
 
   // CSS to hide browser's default password toggle
   const passwordInputStyles = type === 'password' ? {
@@ -211,14 +252,23 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
     WebkitTextSecurity: showPassword ? 'none' : 'disc',
   } as React.CSSProperties : {};
 
-  const labelClasses = `
-    ${responsive ? 'text-body sm:text-body' : 'text-body'}
-    font-semibold font-inter text-black
-    ${isInErrorState ? 'text-error-error600' : ''}
-    ${required ? 'after:content-["*"] after:text-error-error500 after:ml-1' : ''}
-  `.trim();
+  const labelClasses = variant === 'glassmorphism'
+    ? `
+      ${responsive ? 'text-body sm:text-body' : 'text-body'}
+      font-semibold font-inter text-white
+      ${isInErrorState ? 'text-red-300' : ''}
+      ${required ? 'after:content-["*"] after:text-red-300 after:ml-1' : ''}
+    `.trim()
+    : `
+      ${responsive ? 'text-body sm:text-body' : 'text-body'}
+      font-semibold font-inter text-black
+      ${isInErrorState ? 'text-error-error600' : ''}
+      ${required ? 'after:content-["*"] after:text-error-error500 after:ml-1' : ''}
+    `.trim();
 
-  const iconClasses = `absolute top-1/2 transform -translate-y-1/2 text-gray-neutral400 flex items-center justify-center ${responsive ? 'w-4 h-4 sm:w-4 sm:h-4' : 'w-4 h-4'}`;
+  const iconClasses = variant === 'glassmorphism'
+    ? `absolute top-1/2 transform -translate-y-1/2 text-white/60 flex items-center justify-center ${responsive ? 'w-4 h-4 sm:w-4 sm:h-4' : 'w-4 h-4'}`
+    : `absolute top-1/2 transform -translate-y-1/2 text-gray-neutral400 flex items-center justify-center ${responsive ? 'w-4 h-4 sm:w-4 sm:h-4' : 'w-4 h-4'}`;
 
   const errorTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter text-error-error600 mt-1`;
   const helperTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter text-gray-neutral500 mt-1`;
@@ -239,7 +289,11 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
       )}
 
       {/* Input Container */}
-      <div className={inputWrapperClasses}>
+      <div 
+        className={inputWrapperClasses}
+        onMouseEnter={() => currentError && setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
         {/* Left Icon */}
         {leftIcon && (
           <div className={`${iconClasses} ${responsive ? 'left-3 sm:left-3' : 'left-3'}`}>
@@ -266,6 +320,17 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
           {...props}
         />
 
+        {/* Validation Error Tooltip */}
+        {currentError && showTooltip && (
+          <div className="absolute right-0 bottom-full mb-2 z-50 pointer-events-none">
+            <div className="relative bg-error-error600 text-white px-2 py-1 rounded shadow-lg text-mini font-inter whitespace-nowrap max-w-xs">
+              {currentError}
+              {/* Arrow pointing down */}
+              <div className="absolute right-4 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-error-error600"></div>
+            </div>
+          </div>
+        )}
+
         {/* Right Icon or Password Toggle */}
         {hasRightIcon && (
           <div className={`${iconClasses} ${responsive ? 'right-3 sm:right-3' : 'right-3'}`}>
@@ -274,7 +339,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className={`text-gray-neutral400 hover:text-gray-neutral600 transition-colors duration-200 ${computedIconSizeClass} flex items-center justify-center`}
+                  className={`${variant === 'glassmorphism' ? 'text-white/60 hover:text-white/90' : 'text-gray-neutral400 hover:text-gray-neutral600'} transition-colors duration-200 ${computedIconSizeClass} flex items-center justify-center`}
                   tabIndex={-1}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
@@ -285,7 +350,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
                   )}
                 </button>
               ) : showLoadingIcon ? (
-                <div className={`${computedIconSizeClass} border border-gray-400 border-t-transparent rounded-full animate-spin`} style={computedIconInlineStyle}></div>
+                <div className={`${computedIconSizeClass} border ${variant === 'glassmorphism' ? 'border-white/40 border-t-transparent' : 'border-gray-400 border-t-transparent'} rounded-full animate-spin`} style={computedIconInlineStyle}></div>
               ) : showSuccessIcon && isValid && touched && !currentError ? (
                 successIcon || (
                   <FaCheck className={`${computedIconSizeClass} text-success-success500`} style={computedIconInlineStyle} />
@@ -298,13 +363,8 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
         )}
       </div>
 
-      {/* Error or Helper Text */}
-      {currentError && (
-        <span className={errorTextClasses}>
-          {currentError}
-        </span>
-      )}
-      {!currentError && helperText && (
+      {/* Helper Text (errors now shown in tooltip on hover) */}
+      {helperText && (
         <span className={helperTextClasses}>
           {helperText}
         </span>

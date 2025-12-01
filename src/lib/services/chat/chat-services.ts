@@ -7,10 +7,7 @@ const GLOBAL_ROOM_ID_UUID = '00000000-0000-0000-0000-000000000000';
 const MESSAGES_LIMIT = 50; 
 
 export class ChatService {
-
-  /**
-   * 1. Get or Create a Private Chat Room (DM)
-   */
+  // 1. Get or Create a Private Chat Room (DM)
   static async getOrCreatePrivateRoom(currentUserId: string, targetUserId: string): Promise<{ room: ChatRoom, isNew: boolean } | null> {
     try {
       // Sort IDs to ensure consistent array order for the unique index
@@ -55,10 +52,7 @@ export class ChatService {
       return null;
     }
   }
-
-  /**
-   * Get existing chat rooms for a user
-   */
+  // Get existing chat rooms for a user
   static async getExistingChatRooms(currentUserId: string): Promise<UserContact[]> {
     try {
       const { data: privateRooms, error: roomsError } = await supabase
@@ -122,10 +116,7 @@ export class ChatService {
       return [];
     }
   }
-
-  /**
-   * 2 & 5. Fetch Chat History
-   */
+  // 2 & 5. Fetch Chat History
   static async getMessageHistory(roomId: string, offset: number = 0, limit: number = MESSAGES_LIMIT): Promise<ChatMessage[]> {
     try {
       // Validate roomId
@@ -174,91 +165,121 @@ export class ChatService {
       return [];
     }
   }
-
-  /**
-   * 4. Send a Message
-   */
+  // 4. Send a Message
   static async sendMessage(roomId: string, senderId: string, content: string): Promise<ChatMessage | null> {
-  try {
-    // Validate inputs
-    if (!roomId || !senderId || !content?.trim()) {
-      console.error('❌ Invalid parameters for sendMessage:', { roomId, senderId, content });
-      return null;
-    }
+    try {
+      // Validate inputs
+      if (!roomId || !senderId || !content?.trim()) {
+        console.error('❌ Invalid parameters for sendMessage:', { roomId, senderId, content });
+        return null;
+      }
 
-    console.log('📤 Sending message:', { 
-      roomId, 
-      senderId, 
-      content: content.trim(),
-      roomIdType: typeof roomId,
-      senderIdType: typeof senderId
-    });
-
-    const { data, error, status, statusText } = await supabase
-      .from('messages')
-      .insert({
-        room_id: roomId,
-        sender_id: senderId,
+      console.log('📤 Sending message:', { 
+        roomId, 
+        senderId, 
         content: content.trim(),
-        is_read_by: [senderId],
-      })
-      .select('*, sender:profiles(name, profilePictureUrl)') 
-      .single();
-
-    console.log('📩 Send message response:', { 
-      data: data ? 'Has data' : 'No data',
-      error: error ? {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-        stack: error.stack
-      } : 'No error',
-      status,
-      statusText
-    });
-
-    if (error) {
-      console.error('❌ Error sending message - FULL ERROR OBJECT:', JSON.stringify(error, null, 2));
-      console.error('❌ Error details:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-        stack: error.stack
+        roomIdType: typeof roomId,
+        senderIdType: typeof senderId
       });
+
+      const { data, error, status, statusText } = await supabase
+        .from('messages')
+        .insert({
+          room_id: roomId,
+          sender_id: senderId,
+          content: content.trim(),
+          is_read_by: [senderId],
+        })
+        .select('*, sender:profiles(name, profilePictureUrl)') 
+        .single();
+
+      console.log('📩 Send message response:', { 
+        data: data ? 'Has data' : 'No data',
+        error: error ? {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+          stack: error.stack
+        } : 'No error',
+        status,
+        statusText
+      });
+
+      if (error) {
+        console.error('❌ Error sending message - FULL ERROR OBJECT:', JSON.stringify(error, null, 2));
+        return null;
+      }
+
+      if (!data) {
+        console.error('❌ No data returned after sending message');
+        return null;
+      }
+
+      console.log('✅ Message sent successfully:', data);
+      
+      const sentMsg = data as any;
+      const chatMessage: ChatMessage = {
+        id: sentMsg.id,
+        room_id: sentMsg.room_id,
+        sender_id: sentMsg.sender_id,
+        content: sentMsg.content,
+        created_at: sentMsg.created_at,
+        is_read_by: sentMsg.is_read_by,
+        sender_name: sentMsg.sender?.name || 'Unknown',
+        sender_profile_pic_url: sentMsg.sender?.profilePictureUrl,
+      };
+
+      // Send notification to recipient (don't await - fire and forget)
+      this.notifyRecipient(roomId, senderId, content).catch(err => {
+        console.error('Failed to send message notification:', err);
+      });
+
+      return chatMessage;
+    } catch (error) {
+      console.error('💥 Unexpected error in sendMessage:', error);
       return null;
     }
-
-    if (!data) {
-      console.error('❌ No data returned after sending message');
-      return null;
-    }
-
-    console.log('✅ Message sent successfully:', data);
-    
-    // Map data to ChatMessage model for consistency
-    const sentMsg = data as any;
-    return {
-      id: sentMsg.id,
-      room_id: sentMsg.room_id,
-      sender_id: sentMsg.sender_id,
-      content: sentMsg.content,
-      created_at: sentMsg.created_at,
-      is_read_by: sentMsg.is_read_by,
-      sender_name: sentMsg.sender?.name || 'Unknown',
-      sender_profile_pic_url: sentMsg.sender?.profilePictureUrl,
-    };
-  } catch (error) {
-    console.error('💥 Unexpected error in sendMessage:', error);
-    console.error('💥 Error stack:', error instanceof Error ? error.stack : 'No stack');
-    return null;
   }
-}
 
-  /**
-   * 6. Mark Messages as Read
-   */
+  // Helper method to notify recipient of new message
+  private static async notifyRecipient(roomId: string, senderId: string, content: string): Promise<void> {
+    try {
+      const { notifyNewMessage } = await import('@/lib/utils/notification-helper');
+      
+      // Get the room to find the recipient
+      const { data: room, error } = await supabase
+        .from('chat_rooms')
+        .select('participants')
+        .eq('id', roomId)
+        .single();
+
+      if (error || !room) {
+        console.error('Failed to fetch room for notification:', error);
+        return;
+      }
+
+      // Find the recipient (the other participant)
+      const recipientId = room.participants.find((id: string) => id !== senderId);
+      
+      if (!recipientId) {
+        console.log('No recipient found for notification');
+        return;
+      }
+
+      // Send notification
+      await notifyNewMessage({
+        roomId,
+        senderId,
+        recipientId,
+        messagePreview: content
+      });
+    } catch (error) {
+      console.error('Error in notifyRecipient:', error);
+    }
+  }
+
+  // 6. Mark Messages as Read
   static async markMessagesAsRead(messageIds: string[], currentUserId: string): Promise<boolean> {
     try {
       for (const id of messageIds) {
@@ -274,44 +295,42 @@ export class ChatService {
       return false;
     }
   }
-  
-  /**
-   * 3. Search Users
-   */
+  // 3. Search Users
   static async searchUsers(query: string, currentUserId: string): Promise<UserContact[]> {
-    try {
-      if (!query || query.length < 2) return [];
+  try {
+    // Allow searching with just 1 character
+    if (!query || query.trim().length < 1) return [];
 
-      // Use Full-Text Search on the 'name_search' column
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('userId, name, profilePictureUrl')
-        .textSearch('name_search', `'${query.trim()}'`) 
-        .neq('userId', currentUserId) 
-        .limit(10); 
+    const searchTerm = query.trim().toLowerCase();
 
-      if (error) {
-        console.error('Error searching users:', error);
-        return [];
-      }
+    // Use ILIKE for case-insensitive partial matching (searches anywhere in the name)
+    const { data: profiles, error } = await supabase
+      .from('profiles')
+      .select('userId, name, profilePictureUrl')
+      .ilike('name', `${searchTerm}%`)
+      .neq('userId', currentUserId) 
+      .limit(10); 
 
-      return (profiles || []).map(p => ({
-        userId: p.userId,
-        name: p.name || 'Unknown User',
-        profilePicUrl: p.profilePictureUrl,
-        unreadCount: 0, 
-      }));
-    } catch (error) {
-      console.error('Unexpected error in searchUsers:', error);
+    if (error) {
+      console.error('Error searching users:', error);
       return [];
     }
-  }
 
+    return (profiles || []).map(p => ({
+      userId: p.userId,
+      name: p.name || 'Unknown User',
+      profilePicUrl: p.profilePictureUrl,
+      unreadCount: 0, 
+    }));
+  } catch (error) {
+    console.error('Unexpected error in searchUsers:', error);
+    return [];
+  }
+}
   // Helper to get the constant global room UUID
   static getGlobalRoomId(): string {
     return GLOBAL_ROOM_ID_UUID;
   }
-
   // Add this temporary method to ChatService to verify the room
 static async verifyRoomExists(roomId: string): Promise<boolean> {
   try {
@@ -329,5 +348,4 @@ static async verifyRoomExists(roomId: string): Promise<boolean> {
     return false;
   }
 }
-
 }

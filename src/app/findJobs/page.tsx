@@ -190,50 +190,62 @@ export default function FindJobsPage() {
       <Banner variant="findJobs" onSearch={handleSearch} />
 
       {/* Main Container with VH layout below banner */}
-      <div className="pt-[220px] min-h-screen">
-        <div className="h-[calc(100vh-220px)]">
-          {/* Filter Section - Desktop Only (leftmost, no margin, full height) */}
-          <aside className="hidden lg:block fixed left-0 top-[220px] bottom-0 w-[240px] bg-white shadow-lg overflow-y-auto z-20">
-            <FilterSection
-              initialFilters={activeFilters}
-              onApply={handleApplyFilters}
-              onClearAll={handleClearFilters}
-              className="h-full"
-            />
-          </aside>
+      <div className="mt-[200px] mobile-S:mt-[140px] mobile-M:mt-[145px] mobile-L:mt-[150px] tablet:mt-[180px] laptop:mt-[190px] laptop-L:mt-[200px] min-h-screen bg-gray-50">
+        {/* Stats Section - Fixed on laptop, top on mobile/tablet */}
+        <aside className="block laptop:hidden px-4 md:px-6">
+          <StatsSection stats={stats} variant="findJobs" loading={statsLoading} error={statsError} />
+        </aside>
+        
+        {/* Stats Section - Fixed sidebar on laptop only */}
+        <aside className="hidden laptop:block fixed left-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[180px] laptop-L:w-[200px] z-20 px-3 bg-gray-50">
+          <StatsSection stats={stats} variant="findJobs" loading={statsLoading} error={statsError} />
+        </aside>
 
-          {/* Main Content Area */}
-          <main className="w-full lg:w-[calc(100%-240px)] lg:ml-[240px]">
-            <div className="px-4 md:px-6 lg:px-8 pb-8 max-w-full">
-              {/* Stats Row */}
-              <StatsSection stats={stats} variant="findJobs" loading={statsLoading} error={statsError} />
-
-              {/* Job Posts Section */}
-              <div className="mt-8 space-y-6">
-                {/* Controls Row with Filter Button */}
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  {/* Left side - Filter Button (Mobile) & Showing count */}
-                  <div className="flex items-center gap-3">
-                    {/* Filter Button - Mobile Only */}
-                    <div className="lg:hidden">
-                      <FilterButton
-                        onClick={() => setIsFilterModalOpen(true)}
-                        filterCount={activeFilterCount}
-                      />
-                    </div>
-                    <span className="text-small text-gray-neutral600 whitespace-nowrap">Showing: {jobs.length}</span>
-                  </div>
-                  
-                  {/* Right side - Sort & View Toggle */}
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-small text-gray-neutral600 whitespace-nowrap">Sort by</span>
-                    <Sort variant="findJobs" onChange={handleSortChange} />
-                    <ViewToggle value={viewMode} onChange={setViewMode} />
-                  </div>
+        {/* Filter Section - Desktop Only (rightmost, no margin, full height) */}
+        <aside className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-20 border-l border-gray-200 flex flex-col">
+          {/* Sort & View Controls */}
+          <div className="flex-shrink-0 bg-white  border-b border-gray-200 px-3 py-2 z-10">
+            <div className="flex items-center justify-between gap-3">
+              {/* Sort By */}
+              <div className="flex items-center gap-2">
+                <span className="text-small text-gray-neutral600 whitespace-nowrap font-medium">Sort by</span>
+                <Sort variant="findJobs" onChange={handleSortChange} />
+              </div>
+              
+          {/* View Toggle */}
+          <ViewToggle value={viewMode} onChange={setViewMode} />
+        </div>
+      </div>
+      
+      {/* Filter Section - takes remaining height */}
+      <FilterSection
+        initialFilters={activeFilters}
+        onApply={handleApplyFilters}
+        onClearAll={handleClearFilters}
+        className="flex-1 min-h-0"
+      />
+    </aside>        {/* Main Content Area - Job posts only */}
+        <main className="w-full laptop:w-[calc(100%-460px)] laptop:ml-[180px] laptop-L:w-[calc(100%-480px)] laptop-L:ml-[200px]">
+          <div className="px-4 md:px-6 laptop:px-6 pt-2 pb-6 max-w-full">
+            <div className="space-y-4">
+              {/* Controls Row with Filter Button - Mobile/Tablet Only */}
+              <div className="laptop:hidden flex items-center justify-between gap-1.5 mobile-M:gap-3 bg-white rounded-lg px-2 mobile-M:px-4 py-2 mobile-M:py-3 shadow-sm">
+                {/* Filter Button */}
+                <FilterButton
+                  onClick={() => setIsFilterModalOpen(true)}
+                  filterCount={activeFilterCount}
+                />
+                
+                {/* Sort By and View Toggle */}
+                <div className="flex items-center gap-1.5 mobile-M:gap-3">
+                  <span className="text-tiny mobile-M:text-small text-gray-neutral600 whitespace-nowrap hidden mobile-S:inline">Sort by</span>
+                  <Sort variant="findJobs" onChange={handleSortChange} />
+                  <ViewToggle value={viewMode} onChange={setViewMode} />
                 </div>
+              </div>
 
-                {/* Display */}
-                <PostsSection
+              {/* Display */}
+              <PostsSection
                   jobs={jobs}
                   variant="find"
                   loading={jobsLoading}
@@ -246,14 +258,12 @@ export default function FindJobsPage() {
                   onOpen={(data: any) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
                   onApply={handleApplyNow}
                 />
-              </div>
             </div>
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
 
       {/* Modal */}
-      <ViewProfileModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       <JobPostViewModal
         isOpen={isJobViewOpen}
         onClose={() => setIsJobViewOpen(false)}

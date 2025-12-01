@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { HiChevronLeft, HiChevronRight } from 'react-icons/hi';
 import NewApplicantsSection from '@/components/applications/NewApplicantsSection';
 import AllApplicantsSection from '@/components/applications/AllApplicantsSection';
 import SearchBar from '@/components/ui/SearchBar';
@@ -16,6 +18,7 @@ interface ApplicantsModalProps {
 }
 
 type SortOrder = 'newest' | 'oldest';
+type MobileSection = 'new' | 'all';
 
 export default function ApplicantsModal({ 
   postId,
@@ -27,6 +30,7 @@ export default function ApplicantsModal({
   const [newApplicantsSort, setNewApplicantsSort] = useState<SortOrder>('newest');
   const [allApplicantsSort, setAllApplicantsSort] = useState<SortOrder>('newest');
   const [searchQuery, setSearchQuery] = useState('');
+  const [mobileSection, setMobileSection] = useState<MobileSection>('new');
   
   // Refresh triggers for both sections
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -61,12 +65,27 @@ export default function ApplicantsModal({
     }
   };
 
-   // ✅ Move all hooks before any return
   const handleStatusChange = useCallback(() => {
     setRefreshTrigger(prev => prev + 1);
   }, []);
 
-  // ✅ Single early return after all hooks
+  const toggleMobileSection = () => {
+    setMobileSection(prev => prev === 'new' ? 'all' : 'new');
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      const prevHtml = document.documentElement.style.overflow;
+      const prevBody = document.body.style.overflow;
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.documentElement.style.overflow = prevHtml;
+        document.body.style.overflow = prevBody;
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   // Show error if postId is missing
@@ -91,52 +110,88 @@ export default function ApplicantsModal({
   }
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
       onClick={handleOverlayClick}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      <div
-        className="bg-white rounded-lg shadow-lg w-full max-w-6xl p-4 relative"
+      <motion.div
+        className="bg-white rounded-lg shadow-lg w-full max-w-6xl p-4 md:p-4 p-2 relative mx-4"
         onClick={(e) => e.stopPropagation()}
+        initial={{ y: 20, opacity: 0, scale: 0.98 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b pb-3 gap-4 mb-3">
-          <div className="flex items-center gap-2">
-            <h2 className="font-inter text-title font-semibold text-gray-neutral800">
-              {truncateTitle(title)}
-            </h2>
-            <span className="font-inter font-semibold text-primary-primary400 text-small ml-2">
-              • {applicantCount} Applicants
-            </span>
+        <div className="border-b pb-3 mb-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <h3 className="font-inter font-semibold text-gray-neutral800 text-sm sm:text-subtitle md:text-subtitle">
+                {truncateTitle(title, 20)}
+              </h3>
+              <span className="font-inter font-semibold text-primary-primary400 text-xs sm:text-small md:text-small ml-2">
+                • {applicantCount} Applicants
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4 mr-10">
+              <div className="w-full max-w-lg hidden sm:block">
+                <SearchBar
+                  variant="simple"
+                  placeholder="Search applicants..."
+                  onSearch={handleSearch}
+                />
+              </div>
+              
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-4 z-10 text-2xl leading-none text-gray-neutral600 hover:text-gray-800 transition-colors"
+              >
+                ×
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="w-full max-w-lg">
-              <SearchBar
-                variant="simple"
-                placeholder="Search applicants..."
-                onSearch={handleSearch}
-              />
-            </div>
-            
-            <button
-              onClick={onClose}
-              className="ml-4 -mt-8 text-gray-neutral500 hover:text-gray-neutral700 text-xl flex-shrink-0"
-            >
-              ✕
-            </button>
+          <div className="w-full mt-3 sm:hidden">
+            <SearchBar
+              variant="simple"
+              placeholder="Search applicants..."
+              onSearch={handleSearch}
+            />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 overflow-y-auto max-h-[70vh] min-h-[60vh]">
-          <section className="border-r border-gray-neutral200 pr-4">
+        {/* Mobile Section Navigation */}
+        <div className="sm:hidden flex items-center justify-center gap-3 mb-3">
+          <button
+            onClick={toggleMobileSection}
+            disabled={mobileSection === 'new'}
+            className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <HiChevronLeft className="w-5 h-5 text-gray-neutral600" />
+          </button>
+          <span className="font-inter font-semibold text-gray-neutral800 text-sm">
+            {mobileSection === 'new' ? 'New Applicants' : 'All Applicants'}
+          </span>
+          <button
+            onClick={toggleMobileSection}
+            disabled={mobileSection === 'all'}
+            className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <HiChevronRight className="w-5 h-5 text-gray-neutral600" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 overflow-y-auto max-h-[70vh] min-h-[60vh] px-4 md:px-0">
+          <section className={`md:pr-4 md:border-r border-gray-neutral200 ${mobileSection === 'new' ? 'block' : 'hidden'} sm:block`}>
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-inter text-lead font-semibold text-gray-neutral800">
+              <h3 className="font-inter text-sm sm:text-lead font-semibold text-gray-neutral800 hidden sm:block">
                 New Applicants
               </h3>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-gray-neutral400 text-small font-medium whitespace-nowrap">
+              <div className="flex items-center gap-2 shrink-0 sm:ml-auto">
+                <span className="text-gray-neutral400 text-xs sm:text-small font-medium whitespace-nowrap">
                   Sort by
                 </span>
                 <div className="w-auto px-2">
@@ -158,14 +213,14 @@ export default function ApplicantsModal({
             />
           </section>
 
-          <section className="pl-4">
+          <section className={`md:pl-4 ${mobileSection === 'all' ? 'block' : 'hidden'} sm:block`}>
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-inter text-lead font-semibold text-gray-neutral800">
+              <h3 className="font-inter text-sm sm:text-lead font-semibold text-gray-neutral800 hidden sm:block">
                 All Applicants
               </h3>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-gray-neutral400 text-small font-medium whitespace-nowrap">
+              <div className="flex items-center gap-2 shrink-0 sm:ml-auto">
+                <span className="text-gray-neutral400 text-xs sm:text-small font-medium whitespace-nowrap">
                   Sort by
                 </span>
                 <div className="w-auto px-2">
@@ -186,7 +241,7 @@ export default function ApplicantsModal({
             />
           </section>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { AuthService } from '@/lib/services/auth-services';
 import Button from '@/components/ui/Button';
 import TextBox from '@/components/ui/TextBox';
+import Image from 'next/image';
 import { IoArrowBack } from "react-icons/io5";
 
 interface ForgotPasswordFormProps {
@@ -36,24 +37,44 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4">
+    <div className="w-full max-w-md mx-auto px-1 sm:px-2">
+      {/* Logo */}
+      <div className="flex justify-center mb-1">
+        <Image
+          src="/image/hanapbuhay-logo-notext.svg"
+          alt="HanapBuhay Logo"
+          width={60}
+          height={60}
+          priority
+          className="w-[60px] h-[60px] sm:w-[80px] sm:h-[80px]"
+        />
+      </div>
+
       {/* Title */}
-      <h2 className="text-h3 font-bold text-gray-neutral900 text-center mb-4 font-alexandria">
+      <h2 className="text-h3 tablet: text-h2 font-bold text-white text-center mb-2 font-alexandria">
         Forgot Password?
       </h2>
 
       {/* Subtitle */}
-      <p className="text-body text-gray-neutral600 text-center mb-8 font-alexandria font-light">
+      <p className="text-small sm:text-body text-gray-300 text-center mb-6 sm:mb-8 font-alexandria font-light">
         Enter your email address and we'll send you reset instructions!
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {message && (
-          <div className={`p-3 rounded-lg text-small ${
-            message.includes('sent') 
-              ? 'bg-success-50 text-success-700 border border-success-200' 
-              : 'bg-error-50 text-error-700 border border-error-200'
-          }`}>
+          <div 
+            className="p-3 rounded-lg text-small border"
+            style={{
+              background: message.includes('sent') 
+                ? 'rgba(16, 185, 129, 0.1)' 
+                : 'rgba(239, 68, 68, 0.1)',
+              backdropFilter: 'blur(10px)',
+              borderColor: message.includes('sent') 
+                ? 'rgba(16, 185, 129, 0.3)' 
+                : 'rgba(239, 68, 68, 0.3)',
+              color: message.includes('sent') ? '#6EE7B7' : '#FCA5A5'
+            }}
+          >
             {message}
           </div>
         )}
@@ -62,10 +83,11 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }
         <div>
           <TextBox
             type="email"
+            label="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="juan.delacruz@gmail.com"
+            placeholder="Email"
+            variant="glassmorphism"
           />
         </div>
 
@@ -82,20 +104,6 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }
         >
           {loading ? 'Sending...' : 'Send Reset Instructions'}
         </Button>
-
-        {/* Back to Login Link */}
-        {onBackToLogin && (
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={onBackToLogin}
-              className="inline-flex items-center gap-2 font-alexandria font-light text-body text-primary-primary500 hover:text-primary-primary600 font-light hover:underline"
-            >
-              <IoArrowBack className="w-5 h-5 font-light" />
-              Back to login
-            </button>
-          </div>
-        )}
       </form>
     </div>
   );

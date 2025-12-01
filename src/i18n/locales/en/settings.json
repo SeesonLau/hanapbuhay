@@ -1,0 +1,42 @@
+{
+  "title": "Settings",
+  "close": "Close settings",
+  
+  "resetPassword": {
+    "title": "Reset Password",
+    "description": "Send reset instructions to {{email}}",
+    "button": "Send Reset Instructions",
+    "sending": "Sending...",
+    "success": "Password reset instructions have been sent to your email.",
+    "error": "Failed to send reset instructions. Please try again.",
+    "noEmail": "User email not found. Please log in again.",
+    "genericError": "An error occurred. Please try again."
+  },
+  
+  "preferences": {
+    "title": "Preferences",
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "label": "Language",
+      "en": "English",
+      "es": "Spanish",
+      "fr": "French",
+      "de": "German"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "email": "Email notifications",
+      "push": "Push notifications"
+    }
+  },
+  
+  "actions": {
+    "cancel": "Cancel",
+    "save": "Save Preferences"
+  }
+}

@@ -168,25 +168,25 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
         aria-expanded={open}
         onClick={toggleOpen}
         onKeyDown={onTriggerKeyDown}
-        className={`flex items-center justify-start ${fullWidth ? 'w-full' : 'w-auto'} px-2 py-2 bg-white hover:bg-gray-neutral50 shadow rounded-md text-body font-medium text-gray-neutral900 border border-gray-neutral200 transition-all duration-150 focus:outline-none focus:border-gray-neutral400 focus:shadow-md ${open ? 'border-gray-neutral400 shadow-md' : ''}`}
+        className={`flex items-center justify-start ${fullWidth ? 'w-full' : 'w-auto'} px-1.5 mobile-M:px-2 py-1.5 mobile-M:py-2 bg-white hover:bg-gray-neutral50 shadow rounded-md text-body font-medium text-gray-neutral900 border border-gray-neutral200 transition-all duration-150 focus:outline-none focus:border-gray-neutral400 focus:shadow-md ${open ? 'border-gray-neutral400 shadow-md' : ''}`}
       >
-        <div className="flex items-center gap-2 truncate">
+        <div className="flex items-center gap-1 mobile-M:gap-2 truncate">
           {selected ? (
             <>
               {selected.icon && (
-                <span className="w-5 h-5 flex-shrink-0 text-gray-neutral600">{selected.icon}</span>
+                <span className="w-4 h-4 mobile-M:w-5 mobile-M:h-5 flex-shrink-0 text-gray-neutral600">{selected.icon}</span>
               )}
-              <span className="truncate text-small font-inter">{selected.label}</span>
+              <span className="truncate text-tiny mobile-M:text-small font-inter">{selected.label}</span>
               {selected.id.includes('salary') && (
-                <SortIcon flipped={selected.id.includes('desc')} className="w-5 h-5 text-gray-neutral600" />
+                <SortIcon flipped={selected.id.includes('desc')} className="w-4 h-4 mobile-M:w-5 mobile-M:h-5 text-gray-neutral600" />
               )}
             </>
           ) : (
-            <span className="truncate text-small font-inter">{placeholder}</span>
+            <span className="truncate text-tiny mobile-M:text-small font-inter">{placeholder}</span>
           )}
         </div>
-        <span className="ml-2">
-          <CaretIcon className="w-3 h-3 text-gray-neutral600 transition-colors duration-150" isOpen={open} />
+        <span className="ml-1 mobile-M:ml-2">
+          <CaretIcon className="w-2.5 h-2.5 mobile-M:w-3 mobile-M:h-3 text-gray-neutral600 transition-colors duration-150" isOpen={open} />
         </span>
       </button>
 

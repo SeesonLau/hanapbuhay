@@ -1,0 +1,42 @@
+{
+  "title": "Mga Setting",
+  "close": "Isara ang mga setting",
+  
+  "resetPassword": {
+    "title": "I-reset ang Password",
+    "description": "Magpadala ng mga tagubilin sa pag-reset sa {{email}}",
+    "button": "Magpadala ng Mga Tagubilin sa Pag-reset",
+    "sending": "Nagpapadala...",
+    "success": "Ang mga tagubilin sa pag-reset ng password ay naipadala na sa iyong email.",
+    "error": "Nabigo ang pagpadala ng mga tagubilin sa pag-reset. Pakisubukan ulit.",
+    "noEmail": "Hindi nahanap ang email ng user. Mangyaring mag-log in ulit.",
+    "genericError": "May naganap na error. Pakisubukan ulit."
+  },
+  
+  "preferences": {
+    "title": "Mga Kagustuhan",
+    "theme": {
+      "label": "Tema",
+      "light": "Maliwanag",
+      "dark": "Madilim",
+      "system": "Sistema"
+    },
+    "language": {
+      "label": "Wika",
+      "en": "Ingles",
+      "es": "Espanyol",
+      "fr": "Pranses",
+      "de": "Aleman"
+    },
+    "notifications": {
+      "title": "Mga Abiso",
+      "email": "Mga abiso sa email",
+      "push": "Mga push notification"
+    }
+  },
+  
+  "actions": {
+    "cancel": "Kanselahin",
+    "save": "I-save ang Mga Kagustuhan"
+  }
+}

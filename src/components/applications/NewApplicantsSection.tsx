@@ -5,15 +5,18 @@ import { HiArrowDown } from 'react-icons/hi';
 import ApplicantCard from './cards/ApplicantCard';
 import { ApplicationService } from '@/lib/services/applications-services';
 import { ProfileService } from '@/lib/services/profile-services';
+import { ReviewService } from '@/lib/services/reviews-services';
 import { ApplicationStatus } from '@/lib/constants/application-status';
-import { toast } from 'react-hot-toast';
+import ViewProfileModal from '../modals/ViewProfileModal';
 
 interface Applicant {
   userId: string;
   name: string;
   rating: number;
+  reviewCount: number;
   dateApplied: string;
   applicationId: string;
+  profilePicUrl: string | null;
 }
 
 type SortOrder = 'newest' | 'oldest';
@@ -36,6 +39,22 @@ export default function NewApplicantsSection({
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isScrollable, setIsScrollable] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(false);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const openProfileModal = (userId: string) => {
+    setSelectedUserId(userId);
+    setIsModalOpen(true);
+  };
+
+  const closeProfileModal = () => {
+    setSelectedUserId(null);
+    setIsModalOpen(false);
+  };
 
   const fetchApplicants = useCallback(async () => {
     try {
@@ -52,24 +71,30 @@ export default function NewApplicantsSection({
 
       const applicantsWithProfiles = await Promise.all(
         applications.map(async (app) => {
+          const displayName = await ProfileService.getDisplayNameByUserId(app.userId);
           const profileData = await ProfileService.getNameProfilePic(app.userId);
+          const averageRating = await ReviewService.getAverageRating(app.userId);
+          const totalReviews = await ReviewService.getTotalReviewsCountByUserId(app.userId);
 
           return {
             userId: app.userId,
-            name: profileData?.name || 'Unknown Applicant',
-            rating: 0, // placeholder
+            name: displayName || 'Unknown Applicant',
+            rating: averageRating || 0,
+            reviewCount: totalReviews || 0,
             dateApplied: new Date(app.createdAt).toLocaleDateString('en-US', {
               month: 'short',
               day: 'numeric',
               year: 'numeric',
             }),
             applicationId: app.applicationId,
+            profilePicUrl: profileData?.profilePicUrl || null,
           };
         })
       );
 
       setApplicants(applicantsWithProfiles);
     } catch (error) {
+      console.error('Error fetching applicants:', error);
     } finally {
       setLoading(false);
     }
@@ -98,10 +123,6 @@ export default function NewApplicantsSection({
     });
   }, [applicants, sortOrder, searchQuery]);
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [isScrollable, setIsScrollable] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(false);
-
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -117,13 +138,16 @@ export default function NewApplicantsSection({
     return () => el.removeEventListener('scroll', handleScroll);
   }, [filteredAndSortedApplicants]);
 
-  const handleCardStatusChange = useCallback((status: ApplicationStatus) => {
-    console.log('Status changed to:', status); 
-    if (onStatusChange) {
-      console.log('Calling parent onStatusChange'); 
-      onStatusChange();
-    }
-  }, [onStatusChange]);
+  const handleCardStatusChange = useCallback(
+    (status: ApplicationStatus) => {
+      console.log('Status changed to:', status);
+      if (onStatusChange) {
+        console.log('Calling parent onStatusChange');
+        onStatusChange();
+      }
+    },
+    [onStatusChange]
+  );
 
   if (loading) {
     return (
@@ -137,33 +161,29 @@ export default function NewApplicantsSection({
     <div className="relative">
       <div
         ref={scrollRef}
-        className="rounded-lg max-h-[500px] overflow-y-auto scrollbar-hide py-2 px-2 snap-y snap-mandatory scroll-smooth"
-        style={{
-          scrollPaddingTop: '0.5rem',
-          scrollPaddingBottom: '0.5rem',
-        }}
+        className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 justify-items-center p-2 max-h-[500px] overflow-y-auto scrollbar-hide scroll-smooth"
       >
         {filteredAndSortedApplicants.length === 0 ? (
-          <div className="text-center py-8 text-gray-neutral400">
+          <div className="col-span-full text-center py-8 text-gray-neutral400">
             {searchQuery.trim()
               ? `No applicants found matching "${searchQuery}"`
               : 'No pending applicants yet'}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4 justify-items-center">
-            {filteredAndSortedApplicants.map((applicant, index) => (
-              <div key={`${applicant.applicationId}-${index}`} className="snap-start">
-                <ApplicantCard
-                  applicationId={applicant.applicationId} 
-                  userId={applicant.userId}
-                  name={applicant.name}
-                  rating={applicant.rating}
-                  dateApplied={applicant.dateApplied}
-                  onStatusChange={handleCardStatusChange}
-                />
-              </div>
-            ))}
-          </div>
+          filteredAndSortedApplicants.map((applicant, index) => (
+            <ApplicantCard
+              key={`${applicant.applicationId}-${index}`}
+              applicationId={applicant.applicationId}
+              userId={applicant.userId}
+              name={applicant.name}
+              rating={applicant.rating}
+              reviewCount={applicant.reviewCount}
+              dateApplied={applicant.dateApplied}
+              profilePicUrl={applicant.profilePicUrl}
+              onStatusChange={handleCardStatusChange}
+              onProfileClick={() => openProfileModal(applicant.userId)}
+            />
+          ))
         )}
       </div>
 
@@ -171,6 +191,14 @@ export default function NewApplicantsSection({
         <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center">
           <HiArrowDown className="w-4 h-4 animate-bounce text-gray-neutral500" />
         </div>
+      )}
+
+      {selectedUserId && (
+        <ViewProfileModal
+          userId={selectedUserId}
+          isOpen={isModalOpen}
+          onClose={closeProfileModal}
+        />
       )}
     </div>
   );

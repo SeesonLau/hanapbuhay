@@ -36,8 +36,20 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  const pathname = request.nextUrl.pathname;
+
+  // CRITICAL: Allow /reset-password to load without auth checks
+  // The SupabaseHashHandler will process the tokens from the URL hash
+  if (pathname === '/reset-password') {
+    return supabaseResponse;
+  }
+
+  // Get both session and user to verify authentication
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+  // Check if user is actually authenticated (must have BOTH valid session AND user)
+  const isAuthenticated = !sessionError && !userError && !!session && !!user;
 
   const protectedRoutes = [
     '/findJobs', 
@@ -51,40 +63,23 @@ export async function middleware(request: NextRequest) {
   const authRoutes = ['/login', '/signup', '/forgot-password'];
   const publicRoutes = ['/', '/auth/callback'];
 
-  const pathname = request.nextUrl.pathname;
-
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
   const isPublicRoute = publicRoutes.some(route => pathname === route || pathname.startsWith('/auth/'));
-  const isResetPasswordRoute = pathname === '/reset-password';
 
   // Allow public routes
   if (isPublicRoute) {
     return supabaseResponse;
   }
 
-  // Allow reset-password route only if user is authenticated
-  // (they get authenticated via the email link callback)
-  if (isResetPasswordRoute) {
-    if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/forgot-password';
-      url.searchParams.set('error', 'Session expired. Please request a new reset link.');
-
-      const redirectResponse = NextResponse.redirect(url);
-      supabaseResponse.cookies.getAll().forEach(cookie => {
-        redirectResponse.cookies.set(cookie);
-      });
-      return redirectResponse;
-    }
-    return supabaseResponse;
-  }
-
-  // Redirect unauthenticated users from protected routes
-  if (isProtectedRoute && !user) {
+  // CRITICAL: Redirect unauthenticated users from protected routes
+  if (isProtectedRoute && !isAuthenticated) {
+    console.log('🚫 Blocking access to protected route:', pathname, 'Auth status:', isAuthenticated);
+    
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('redirectedFrom', pathname);
+    url.searchParams.set('error', 'Please log in to access this page');
 
     const redirectResponse = NextResponse.redirect(url);
     supabaseResponse.cookies.getAll().forEach(cookie => {
@@ -94,7 +89,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect authenticated users away from auth pages
-  if (isAuthRoute && user) {
+  if (isAuthRoute && isAuthenticated) {
     const url = request.nextUrl.clone();
     url.pathname = '/findJobs';
 

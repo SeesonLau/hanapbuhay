@@ -14,7 +14,7 @@ module.exports = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}", 
   ],
   theme: {
-  	extend: {
+   	extend: {
       screens: MinWidthScreens,
   		fontFamily: {
   			inter: [
@@ -27,20 +27,21 @@ module.exports = {
   			]
   		},
   		fontSize: {
-  			hero: '3.125rem',
-  			h1: '2.5rem',
-  			h2: '2rem',
-  			h3: '1.625rem',
-  			lead: '1.25rem',
-  			title: '1.875rem',
-  			description: '1.25rem',
-  			body: '1rem',
-  			small: '0.8125rem',
-  			tiny: '0.75rem',
-  			popup: '1.125rem',
-  			mini: '0.6875rem'
+  			hero: '3.125rem',       // 50px
+			h1: '2.5rem',           // 40px
+			h2: '2rem',             // 32px
+			title: '1.875rem',      // 30px
+			subtitle: '1.5rem',     // 24px
+			h3: '1.625rem',         // 26px 
+			lead: '1.25rem',        // 20px
+			description: '1.25rem', // 20px
+			popup: '1.125rem',      // 18px
+			body: '1rem',           // 16px
+			small: '0.8125rem',     // 13px
+			tiny: '0.75rem',        // 12px
+			mini: '0.6875rem'       // 11px
   		},
-  		colors: {
+    		colors: {
   			blue: {
   				default: '#59ACFF',
   				hover: '#3289FF'
@@ -158,14 +159,28 @@ module.exports = {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
-  			chart: {
-  				'1': 'hsl(var(--chart-1))',
-  				'2': 'hsl(var(--chart-2))',
-  				'3': 'hsl(var(--chart-3))',
-  				'4': 'hsl(var(--chart-4))',
-  				'5': 'hsl(var(--chart-5))'
-  			}
-  		},
+    			chart: {
+        			'1': 'hsl(var(--chart-1))',
+        			'2': 'hsl(var(--chart-2))',
+        			'3': 'hsl(var(--chart-3))',
+        			'4': 'hsl(var(--chart-4))',
+        			'5': 'hsl(var(--chart-5))'
+        			}
+        ,
+        tag: {
+          genderText: '#968825',
+          genderBg: '#FDF38E',
+          genderSelectedBg: '#F2E559',
+          genderUnselectedBg: '#F5F0B7',
+          experienceText: '#297219',
+          experienceBg: '#B9F0A6',
+          experienceSelectedBg: '#8DE571',
+          experienceUnselectedBg: '#DBF7D0',
+          jobText: '#3289FF',
+          jobBg: '#D9ECFF',
+          jobUnselectedBg: '#BCDEFF'
+        }
+      },
   		backgroundColor: {
   			default: 'var(--background)'
   		},
