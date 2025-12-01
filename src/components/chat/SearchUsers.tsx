@@ -38,11 +38,9 @@ export const SearchUsers: React.FC<SearchUsersProps> = ({ currentUserId, onUserS
             setIsSearching(true);
             ChatService.searchUsers(debouncedSearchTerm, currentUserId)
                 .then(results => {
-                    console.log('Search results for', debouncedSearchTerm, ':', results);
                     setSearchResults(results);
                 })
                 .catch(err => {
-                    console.error('User search failed:', err);
                     toast.error('Failed to search users.');
                     setSearchResults([]);
                 })

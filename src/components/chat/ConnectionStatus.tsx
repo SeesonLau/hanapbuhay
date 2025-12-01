@@ -12,11 +12,9 @@ export const ConnectionStatus: React.FC = () => {
     
     channel
       .on('system', { event: 'disconnect' }, () => {
-        console.log('🔴 Disconnected from Supabase')
         setIsOnline(false)
       })
       .on('system', { event: 'connect' }, () => {
-        console.log('🟢 Connected to Supabase')
         setIsOnline(true)
       })
       .subscribe()

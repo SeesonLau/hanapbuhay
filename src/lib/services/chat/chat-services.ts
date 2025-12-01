@@ -23,7 +23,6 @@ export class ChatService {
         .single();
 
       if (searchError && searchError.code !== 'PGRST116') { // PGRST116 is 'No rows found'
-        console.error('Error searching for existing private room:', searchError);
         return null;
       }
 
@@ -42,7 +41,6 @@ export class ChatService {
         .single();
 
       if (createError) {
-        console.error('Error creating new private room:', createError);
         return null;
       }
 
@@ -62,7 +60,6 @@ export class ChatService {
         .contains('participants', [currentUserId]);
 
       if (roomsError) {
-        console.error('Error fetching private rooms:', roomsError);
         return [];
       }
 
@@ -112,7 +109,6 @@ export class ChatService {
 
       return contacts;
     } catch (error) {
-      console.error('Error in getExistingChatRooms:', error);
       return [];
     }
   }
@@ -121,7 +117,6 @@ export class ChatService {
     try {
       // Validate roomId
       if (!roomId) {
-        console.error('Invalid roomId provided to getMessageHistory');
         return [];
       }
 
@@ -131,19 +126,6 @@ export class ChatService {
         .eq('room_id', roomId)
         .order('created_at', { ascending: false }) 
         .range(offset, offset + limit - 1);
-
-      if (error) {
-        console.error('Error fetching chat history:', {
-          error,
-          roomId,
-          status,
-          statusText,
-          details: error.details,
-          hint: error.hint,
-          message: error.message
-        });
-        return [];
-      }
 
       // Handle case where data is null or undefined
       if (!data) {
@@ -161,7 +143,6 @@ export class ChatService {
         sender_profile_pic_url: msg.sender?.profilePictureUrl,
       })).reverse(); 
     } catch (error) {
-      console.error('Unexpected error in getMessageHistory:', error);
       return [];
     }
   }
@@ -170,18 +151,8 @@ export class ChatService {
     try {
       // Validate inputs
       if (!roomId || !senderId || !content?.trim()) {
-        console.error('❌ Invalid parameters for sendMessage:', { roomId, senderId, content });
         return null;
       }
-
-      console.log('📤 Sending message:', { 
-        roomId, 
-        senderId, 
-        content: content.trim(),
-        roomIdType: typeof roomId,
-        senderIdType: typeof senderId
-      });
-
       const { data, error, status, statusText } = await supabase
         .from('messages')
         .insert({
@@ -193,30 +164,13 @@ export class ChatService {
         .select('*, sender:profiles(name, profilePictureUrl)') 
         .single();
 
-      console.log('📩 Send message response:', { 
-        data: data ? 'Has data' : 'No data',
-        error: error ? {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code,
-          stack: error.stack
-        } : 'No error',
-        status,
-        statusText
-      });
-
       if (error) {
-        console.error('❌ Error sending message - FULL ERROR OBJECT:', JSON.stringify(error, null, 2));
         return null;
       }
 
       if (!data) {
-        console.error('❌ No data returned after sending message');
         return null;
       }
-
-      console.log('✅ Message sent successfully:', data);
       
       const sentMsg = data as any;
       const chatMessage: ChatMessage = {
@@ -232,12 +186,11 @@ export class ChatService {
 
       // Send notification to recipient (don't await - fire and forget)
       this.notifyRecipient(roomId, senderId, content).catch(err => {
-        console.error('Failed to send message notification:', err);
       });
 
       return chatMessage;
     } catch (error) {
-      console.error('💥 Unexpected error in sendMessage:', error);
+      console.error('Unexpected error in sendMessage:', error);
       return null;
     }
   }
@@ -334,17 +287,14 @@ export class ChatService {
   // Add this temporary method to ChatService to verify the room
 static async verifyRoomExists(roomId: string): Promise<boolean> {
   try {
-    console.log('🔍 Verifying room exists:', roomId);
     const { data, error } = await supabase
       .from('chat_rooms')
       .select('id, type, name')
       .eq('id', roomId)
       .single();
-
-    console.log('🔍 Room verification result:', { data, error });
     return !!data && !error;
   } catch (error) {
-    console.error('❌ Error verifying room:', error);
+    console.error('Error verifying room:', error);
     return false;
   }
 }

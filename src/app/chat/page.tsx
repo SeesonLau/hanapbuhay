@@ -45,7 +45,6 @@ const useCurrentProfile = () => {
           setProfile(null);
         }
       } catch (error) {
-        console.error('Error fetching user profile for chat:', error);
         setProfile({ id: 'unknown-id', name: 'Guest User', profilePicUrl: null });
       } finally {
         setIsLoading(false);
@@ -77,8 +76,6 @@ export default function ChatPage() {
   useEffect(() => {
     if (!profile?.id) return;
 
-    console.log('🔔 Setting up global real-time subscription for user:', profile.id);
-
     const channel = supabase
       .channel('global-messages')
       .on(
@@ -90,13 +87,11 @@ export default function ChatPage() {
         },
         async (payload) => {
           const newMessage = payload.new as any;
-          console.log('🆕 Global new message received:', newMessage);
 
           // Update the contact list with new message
           setUserContactsMap(prev => {
             const contact = prev[newMessage.room_id];
             if (!contact) {
-              console.log('Contact not found for room:', newMessage.room_id);
               return prev;
             }
 
@@ -131,11 +126,9 @@ export default function ChatPage() {
         }
       )
       .subscribe((status) => {
-        console.log('Global subscription status:', status);
       });
 
     return () => {
-      console.log('🧹 Cleaning up global subscription');
       supabase.removeChannel(channel);
     };
   }, [profile?.id, activeRoom?.id]);
@@ -160,7 +153,6 @@ export default function ChatPage() {
 
     const loadRooms = async () => {
       try {
-        console.log('🔄 Loading chat rooms for user:', profile.id);
         const existingRooms = await ChatService.getExistingChatRooms(profile.id);
 
         const initialMap: Record<string, UserContact> = {};
@@ -193,9 +185,7 @@ export default function ChatPage() {
         });
 
         setIsInitialLoad(false);
-        console.log('✅ Rooms loaded:', Object.keys(initialMap).length);
       } catch (error) {
-        console.error('❌ Error loading rooms:', error);
         // Fallback with just global room
         setUserContactsMap({
           [GLOBAL_ROOM_ID]: {
@@ -222,7 +212,6 @@ export default function ChatPage() {
 
   // Handler for new messages from RealtimeChat
   const handleNewMessage = useCallback((message: ChatMessage) => {
-    console.log('📨 New message callback from RealtimeChat:', message);
     
     // Update the contact list when a new message is sent
     setUserContactsMap(prev => {
@@ -251,7 +240,6 @@ export default function ChatPage() {
 
   // Stable handler to switch the active chat room
   const handleSelectRoom = useCallback((room: ChatRoom, contact: UserContact) => {
-    console.log('💬 Switching to room:', room.id, room.name);
     
     // Reset unread count when switching to this room
     setUserContactsMap(prev => ({
@@ -271,8 +259,6 @@ export default function ChatPage() {
   // Stable handler for starting DMs
   const handleUserSelectForDM = useCallback(async (contact: UserContact) => {
     if (!profile) return;
-
-    console.log('🤝 Starting DM with user:', contact.userId, contact.name);
 
     // 1. Get or Create the Private Room
     const result = await ChatService.getOrCreatePrivateRoom(profile.id, contact.userId);
@@ -297,11 +283,9 @@ export default function ChatPage() {
       
       // On mobile, show chat view
       setShowMobileChatView(true);
-      
-      console.log('✅ DM room created/selected:', newRoom.id);
+
     } else {
       toast.error(`Could not start chat with ${contact.name}.`);
-      console.error('❌ Failed to create DM room');
     }
   }, [profile]);
 
