@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { toast } from 'react-hot-toast';
 import Banner from '@/components/ui/Banner';
 import StatsSection from '@/components/posts/StatsSection';
 import { useStats } from '@/hooks/useStats';
@@ -12,11 +11,9 @@ import Sort from '@/components/ui/Sort';
 import FilterSection, { FilterOptions } from '@/components/ui/FilterSection';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterModal from '@/components/ui/FilterModal';
-import DeleteModal from '@/components/ui/DeleteModal';
-import { ApplicationStatus, AppliedJob } from '@/components/cards/AppliedJobCardList';
+import { ApplicationStatus } from '@/components/cards/AppliedJobCardList';
 import useApplications from '@/hooks/useApplications';
 import ApplicationsSection from '@/components/applications/ApplicationsSection';
-import { ApplicationService } from '@/lib/services/applications-services';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
 import { JobType, SubTypes } from '@/lib/constants/job-types';
@@ -30,11 +27,8 @@ export default function AppliedJobsPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'total' | null>(null);
   const [sortOption, setSortOption] = useState<string>('latest');
-  const [selectedApplication, setSelectedApplication] = useState<AppliedJob | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [activeFilters, setActiveFilters] = useState<FilterOptions>({
     jobTypes: {},
     salaryRange: {
@@ -144,29 +138,8 @@ export default function AppliedJobsPage() {
   };
 
   const handleDeleteApplication = (jobId: string) => {
-    const app = filteredAndSortedApplications.find(a => a.id === jobId);
-    if (app) {
-      setSelectedApplication(app);
-      setIsDeleteModalOpen(true);
-    }
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!selectedApplication || !currentUserId) return;
-    try {
-      setIsDeleting(true);
-      await ApplicationService.deleteApplication(selectedApplication.id, currentUserId);
-      toast.success('Application deleted successfully');
-      setIsDeleteModalOpen(false);
-      setSelectedApplication(null);
-      // Refresh applications
-      window.location.reload();
-    } catch (error) {
-      console.error('Error deleting application:', error);
-      toast.error('Failed to delete application');
-    } finally {
-      setIsDeleting(false);
-    }
+    console.log('Delete application:', jobId);
+    // TODO: Implement delete functionality
   };
 
   const handleOpenJobView = (job: any) => {
@@ -456,18 +429,6 @@ export default function AppliedJobsPage() {
         isOpen={isJobViewOpen}
         onClose={() => setIsJobViewOpen(false)}
         job={selectedJob}
-      />
-
-      {/* Delete Modal */}
-      <DeleteModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => {
-          setIsDeleteModalOpen(false);
-          setSelectedApplication(null);
-        }}
-        onConfirm={handleConfirmDelete}
-        modalType="withdrawApplication"
-        isProcessing={isDeleting}
       />
     </div>
   );
