@@ -80,7 +80,7 @@ export const MODAL_CONTENT: Record<ModalType, ModalContent> = {
     confirmText: 'Delete',
   },
   withdrawApplication: {
-    variant: 'apply',
+    variant: 'delete',
     title: 'Job Application Withdrawal',
     description: 'Are you sure you want to withdraw from this job?',
     confirmText: 'Withdraw',
