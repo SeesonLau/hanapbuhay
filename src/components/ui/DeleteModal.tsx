@@ -34,9 +34,81 @@ export const UserReviewIcon = ({ className, style }: IconProps) => (
 
 // A map to easily select the icon component based on the variant prop
 const iconMap = {
-  trash: TrashIcon,
-  briefcase: BriefcaseIcon,
+  delete: TrashIcon,
+  apply: BriefcaseIcon,
   review: UserReviewIcon,
+};
+
+/**
+ * Defines the unique identifier for each type of modal.
+ * This ensures type safety and enables autocompletion.
+ */
+export type ModalType =
+  | 'deleteJobPost'
+  | 'deleteAccount'
+  | 'withdrawApplication'
+  | 'deleteWorkExperience'
+  | 'deleteWorkerReview'
+  | 'createApplication'
+  | 'deleteProject';
+
+/**
+ * Defines the structure for the content of each modal variant.
+ */
+interface ModalContent {
+  variant: 'delete' | 'apply' | 'review'; // Determines which icon and color scheme to use
+  title: string;
+  description: string;
+  confirmText: string;
+}
+
+/**
+ * A centralized constant object that holds all the text and configuration
+ * for the different modal variants.
+ */
+export const MODAL_CONTENT: Record<ModalType, ModalContent> = {
+  deleteJobPost: {
+    variant: 'delete',
+    title: 'Delete Job Post?',
+    description: 'This action cannot be undone.',
+    confirmText: 'Delete',
+  },
+  deleteAccount: {
+    variant: 'delete',
+    title: 'Deleting Account',
+    description: 'Are you sure you want to delete your account?',
+    confirmText: 'Delete',
+  },
+  withdrawApplication: {
+    variant: 'apply',
+    title: 'Job Application Withdrawal',
+    description: 'Are you sure you want to withdraw from this job?',
+    confirmText: 'Withdraw',
+  },
+  deleteWorkExperience: {
+    variant: 'apply',
+    title: 'Deleting Work Experience',
+    description: 'Are you sure you want to delete this work experience?',
+    confirmText: 'Delete',
+  },
+  deleteWorkerReview: {
+    variant: 'review',
+    title: 'Deleting Worker Review',
+    description: 'Are you sure you want to delete this worker review?',
+    confirmText: 'Delete',
+  },
+  createApplication: {
+    variant: 'apply',
+    title: 'Confirm Application',
+    description: 'Are you sure you want to proceed with this job application?',
+    confirmText: 'Proceed',
+  },
+  deleteProject: {
+    variant: 'delete',
+    title: 'Delete Project',
+    description: 'Are you sure you want to delete this project? This action cannot be undone.',
+    confirmText: 'Delete',
+  },
 };
 
 // --- Component Props ---
@@ -47,14 +119,8 @@ export interface DeleteModalProps {
   onClose: () => void;
   /** Function to call when the confirmation button is clicked */
   onConfirm: () => void;
-  /** The main title of the modal */
-  title: string;
-  /** The descriptive text below the title */
-  description: string;
-  /** The text for the confirmation button (e.g., "Delete", "Withdraw") */
-  confirmText: string;
-  /** The variant determines which icon is displayed. 'trash' for deletion, 'briefcase' for job-related actions, 'review' for user reviews. */
-  variant: 'trash' | 'briefcase' | 'review';
+  /** The type of modal to display, which determines the text, icon, and color scheme. */
+  modalType: ModalType;
   /** Optional text for the cancel button */
   cancelText?: string;
   /** Optional flag to show a loading state on the confirm button */
@@ -69,10 +135,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
-  title,
-  description,
-  confirmText,
-  variant,
+  modalType,
   cancelText = 'Cancel',
   isProcessing = false,
 }) => {
@@ -93,8 +156,41 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
     return null;
   }
 
+  // Get the content for the specified modal type
+  const { title, description, confirmText, variant } = MODAL_CONTENT[modalType];
+
   // Select the appropriate icon component based on the variant prop
   const IconComponent = iconMap[variant];
+
+  // Define color schemes for each variant based on tailwind.config.js
+  const colorSchemes = {
+    delete: {
+      gradientFrom: COLORS.error.error100, // #FEE2E2
+      gradientTo: COLORS.error.error400,     // #F87172
+      iconBg: COLORS.error.error200,         // #FECACA
+      iconColor: COLORS.error.error500,      // #EE4546
+      confirmBg: COLORS.error.error500,      // #EE4546
+      confirmHoverBg: COLORS.error.error600, // #DD3031
+    },
+    apply: {
+      gradientFrom: COLORS.primary.primary100, // #D9ECFF
+      gradientTo: COLORS.primary.primary400,   // #59ACFF
+      iconBg: COLORS.primary.primary200,       // #BCDEFF
+      iconColor: COLORS.primary.primary500,    // #3289FF
+      confirmBg: COLORS.primary.primary500,    // #3289FF
+      confirmHoverBg: COLORS.primary.primary600, // #1C6AF4
+    },
+    review: {
+      gradientFrom: COLORS.secondary.secondary100, // #DDE4FF
+      gradientTo: COLORS.secondary.secondary400,   // #757CFF
+      iconBg: COLORS.secondary.secondary200,       // #C2CCFF
+      iconColor: COLORS.secondary.secondary500,    // #4A46FF
+      confirmBg: COLORS.secondary.secondary500,    // #4A46FF
+      confirmHoverBg: COLORS.secondary.secondary600, // #4936F5
+    },
+  };
+
+  const colors = colorSchemes[variant];
 
   return (
     // Backdrop overlay
@@ -104,37 +200,36 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
     >
       {/* Modal Content */}
       <div
-        className="flex flex-col items-center w-[650px] bg-white rounded-[30px] overflow-hidden"
-        style={{ boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.25)' }}
+        className="relative mx-auto flex h-auto w-[90%] min-w-[280px] max-w-[360px] flex-col items-center overflow-hidden rounded-[20px] bg-white shadow-[0px_0px_10px_rgba(0,0,0,0.25)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Red gradient bar */}
         <div 
-          className="w-full h-[20px]"
+          className="h-[12px] w-full self-stretch"
           style={{
-            background: `linear-gradient(270deg, ${COLORS.red.neutral100} 0%, ${COLORS.red.neutral600} 100%)`
+            background: `linear-gradient(270deg, ${colors.gradientFrom} 0%, ${colors.gradientTo} 100%)`
           }} 
         />
 
         {/* Content wrapper with padding and gap */}
-        <div className="flex flex-col items-center w-full pt-[41px] px-[27px] pb-[30px]">
+        <div className="flex flex-col items-center w-full gap-3 pb-6">
           {/* Icon container */}
           <div 
-            className="flex items-center justify-center w-[100px] h-[100px] rounded-full mb-[41px]"
-            style={{ backgroundColor: COLORS.red.neutral200 }}
+            className="mt-3 flex h-14 w-14 flex-row items-center justify-center gap-[10px] rounded-[50px] p-0"
+            style={{ backgroundColor: colors.iconBg }}
           >
-            <IconComponent className="w-[53px] h-[53px]" style={{ color: COLORS.red.neutral500 }} />
+            <IconComponent className="h-6 w-6 flex-none" style={{ color: colors.iconColor }} />
           </div>
 
           {/* Title */}
           <h3 
-            className="text-center mb-[20px]"
+            className="h-auto w-auto self-stretch text-center"
             style={{ 
-              color: COLORS.red.neutral500,
-              fontFamily: TYPOGRAPHY.title.fontFamily,
-              fontWeight: TYPOGRAPHY.title.fontWeight,
-              fontSize: TYPOGRAPHY.title.fontSize,
-              lineHeight: TYPOGRAPHY.title.lineHeight
+              fontFamily: 'Inter',
+              fontWeight: 600,
+              fontSize: '18px',
+              lineHeight: '22px',
+              color: colors.iconColor,
             }}
           >
             {title}
@@ -142,47 +237,45 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
 
           {/* Description */}
           <p 
-            className="text-center mb-[41px]"
+            className="h-auto w-auto self-stretch text-center"
             style={{ 
-              color: COLORS.gray.neutral700,
-              fontFamily: TYPOGRAPHY.description.fontFamily,
-              fontWeight: TYPOGRAPHY.description.fontWeight,
-              fontSize: TYPOGRAPHY.description.fontSize,
-              lineHeight: TYPOGRAPHY.description.lineHeight
+              fontFamily: 'Alexandria',
+              fontWeight: 300,
+              fontSize: '12px',
+              lineHeight: '15px',
+              color: '#444645', // Neutral/800
             }}
           >
             {description}
           </p>
 
           {/* Action Buttons */}
-          <div className="flex flex-row items-center gap-[30px] w-full">
+          <div className="box-border mt-2 flex h-8 w-full flex-row items-center self-stretch px-6 gap-3">
             <Button
               onClick={onClose}
               disabled={isProcessing}
               variant="secondary"
               size="lg"
-              className="flex-1 h-[58px] rounded-[10px]"
+              className="h-8 flex-1 cursor-pointer rounded-[5px]"
               style={{
-                backgroundColor: COLORS.gray.default,
-                border: `1px solid ${COLORS.gray.default}`,
-                color: COLORS.gray.neutral300,
-                fontFamily: TYPOGRAPHY.popups.fontFamily,
-                fontWeight: TYPOGRAPHY.popups.fontWeight,
-                fontSize: TYPOGRAPHY.popups.fontSize,
-                lineHeight: TYPOGRAPHY.popups.lineHeight
+                backgroundColor: '#E6E7E7', // gray.default
+                color: '#858B8A', // gray.neutral400
+                fontFamily: 'Inter',
+                fontWeight: 500,
+                fontSize: '12px',
+                lineHeight: '15px',
+                border: 'none',
               }}
               onMouseEnter={(e) => {
                 if (!isProcessing) {
-                  e.currentTarget.style.backgroundColor = COLORS.gray.neutral300;
-                  e.currentTarget.style.borderColor = COLORS.gray.neutral300;
-                  e.currentTarget.style.color = COLORS.gray.neutral100;
+                  e.currentTarget.style.backgroundColor = COLORS.gray.hover;
+                  e.currentTarget.style.color = COLORS.gray.neutral50;
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isProcessing) {
-                  e.currentTarget.style.backgroundColor = COLORS.gray.default;
-                  e.currentTarget.style.borderColor = COLORS.gray.default;
-                  e.currentTarget.style.color = COLORS.gray.neutral300;
+                  e.currentTarget.style.backgroundColor = '#E6E7E7';
+                  e.currentTarget.style.color = '#858B8A';
                 }
               }}
             >
@@ -193,23 +286,23 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
               isLoading={isProcessing}
               variant="danger"
               size="lg"
-              className="flex-1 h-[58px] rounded-[10px]"
+              className="h-8 flex-1 cursor-pointer rounded-[5px]"
               style={{
-                backgroundColor: COLORS.red.default,
-                color: '#FAFAFA',
-                fontFamily: TYPOGRAPHY.popups.fontFamily,
-                fontWeight: TYPOGRAPHY.popups.fontWeight,
-                fontSize: TYPOGRAPHY.popups.fontSize,
-                lineHeight: TYPOGRAPHY.popups.lineHeight
+                backgroundColor: colors.confirmBg,
+                color: '#FAFAFA', // gray.neutral50
+                fontFamily: 'Inter',
+                fontWeight: 500,
+                fontSize: '12px',
+                lineHeight: '15px',
               }}
               onMouseEnter={(e) => {
                 if (!isProcessing) {
-                  e.currentTarget.style.backgroundColor = COLORS.red.hover;
+                  e.currentTarget.style.backgroundColor = colors.confirmHoverBg;
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isProcessing) {
-                  e.currentTarget.style.backgroundColor = COLORS.red.default;
+                  e.currentTarget.style.backgroundColor = colors.confirmBg;
                 }
               }}
             >
