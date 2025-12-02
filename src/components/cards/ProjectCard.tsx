@@ -162,12 +162,10 @@ export default function ProjectCard({
 
       <DeleteModal
         isOpen={showDeleteModal}
+        isProcessing={isDeleting}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleConfirmDelete}
-        title="Delete Project"
-        description="Are you sure you want to delete this project? This action cannot be undone."
-        confirmText="Delete"
-        variant="trash"
+        modalType="deleteProject"
       />
     </>
   );

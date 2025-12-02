@@ -49,7 +49,8 @@ export type ModalType =
   | 'withdrawApplication'
   | 'deleteWorkExperience'
   | 'deleteWorkerReview'
-  | 'createApplication';
+  | 'createApplication'
+  | 'deleteProject';
 
 /**
  * Defines the structure for the content of each modal variant.
@@ -101,6 +102,12 @@ export const MODAL_CONTENT: Record<ModalType, ModalContent> = {
     title: 'Confirm Application',
     description: 'Are you sure you want to proceed with this job application?',
     confirmText: 'Proceed',
+  },
+  deleteProject: {
+    variant: 'delete',
+    title: 'Delete Project',
+    description: 'Are you sure you want to delete this project? This action cannot be undone.',
+    confirmText: 'Delete',
   },
 };
 
