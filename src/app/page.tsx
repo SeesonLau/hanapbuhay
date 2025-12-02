@@ -8,12 +8,11 @@ import TestimonialsSection from '@/components/home/TestimonialsSection';
 import Footer from '@/components/ui/Footer';
 import Image from 'next/image';
 import Button from '@/components/ui/Button';
-import { 
-  getBlueDarkColor, 
+import {
+  getBlueDarkColor,
   TYPOGRAPHY,
-  fontClasses 
+  fontClasses
 } from '@/styles';
-import LiquidEther from '@/components/ui/LiquidEther';
 import Link from 'next/link';
 
 export default function HomePage() {
@@ -62,28 +61,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-y-auto laptop:snap-y laptop:snap-proximity" style={{ backgroundColor: '#141515' }}>
-      {/* Ellipse Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <LiquidEther
-          colors={[ '#5227FF', '#FF9FFC', '#B19EEF' ]}
-          mouseForce={20}
-          cursorSize={100}
-          isViscous={false}
-          viscous={30}
-          iterationsViscous={32}
-          iterationsPoisson={32}
-          resolution={0.5}
-          isBounce={false}
-          autoDemo={true}
-          autoSpeed={0.5}
-          autoIntensity={2.2}
-          takeoverDuration={0.25}
-          autoResumeDelay={3000}
-          autoRampDuration={0.6}
-        />
-      </div>
-      
+    <div className="min-h-screen relative overflow-y-auto laptop:snap-y laptop:snap-proximity bg-white">
       {/* Header Section */}
       <HeaderHome 
         onNavigateToSection={scrollToSection}
@@ -102,12 +80,12 @@ export default function HomePage() {
       >
         <div className="container mx-auto flex flex-col tablet:flex-row items-center justify-center gap-8 mobile-M:gap-10 tablet:gap-12 laptop:gap-14">
           {/* Left side - Hero Text */}
-          <motion.div 
-            className="flex-1 text-white space-y-4 mobile-M:space-y-5 tablet:space-y-6 max-w-full tablet:max-w-lg laptop:max-w-xl text-center tablet:text-left"
+          <motion.div
+            className="flex-1 text-gray-neutral900 space-y-4 mobile-M:space-y-5 tablet:space-y-6 max-w-full tablet:max-w-lg laptop:max-w-xl text-center tablet:text-left"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: 0.8, 
+            transition={{
+              duration: 0.8,
               delay: 0.2,
               ease: [0.16, 1, 0.3, 1]
             }}
@@ -147,12 +125,12 @@ export default function HomePage() {
                 Creating Opportunities
               </motion.span>
             </motion.h1>
-            <motion.p 
-              className={`${fontClasses.body} font-alexandria font-normal text-gray-300 text-sm mobile-M:text-base mobile-L:text-lg tablet:text-xl laptop:text-[1.25rem] leading-relaxed`}
+            <motion.p
+              className={`${fontClasses.body} font-alexandria font-normal text-gray-neutral600 text-sm mobile-M:text-base mobile-L:text-lg tablet:text-xl laptop:text-[1.25rem] leading-relaxed`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ 
-                duration: 0.6, 
+              transition={{
+                duration: 0.6,
                 delay: 0.7,
                 ease: [0.16, 1, 0.3, 1]
               }}
