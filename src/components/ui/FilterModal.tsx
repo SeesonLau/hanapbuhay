@@ -7,6 +7,7 @@ export interface FilterModalProps {
   onApply?: (filters: FilterOptions) => void;
   onClearAll?: () => void;
   initialFilters?: Partial<FilterOptions>;
+  variant?: 'default' | 'appliedJobs';
 }
 
 const FilterModal: React.FC<FilterModalProps> = ({
@@ -15,6 +16,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
   onApply,
   onClearAll,
   initialFilters,
+  variant = 'default',
 }) => {
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -87,6 +89,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
             onClearAll={onClearAll}
             initialFilters={initialFilters}
             className="w-full h-full"
+            variant={variant}
           />
         </div>
 

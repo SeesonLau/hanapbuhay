@@ -37,13 +37,15 @@ export interface FilterSectionProps {
   onApply?: (filters: FilterOptions) => void;
   onClearAll?: () => void;
   className?: string;
+  variant?: 'default' | 'appliedJobs'; // Add variant to control which filters to show
 }
 
 const FilterSection: React.FC<FilterSectionProps> = ({
   initialFilters,
   onApply,
   onClearAll,
-  className = ''
+  className = '',
+  variant = 'default'
 }) => {
   const [jobTypes, setJobTypes] = useState<JobTypeSelection>(initialFilters?.jobTypes || {});
   const [salaryRange, setSalaryRange] = useState<SalaryRange>(
@@ -70,9 +72,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     }
   );
 
-  // Accordion states - All closed by default
+  // Accordion states - All closed by default, except Salary Range for appliedJobs variant
   const [isJobTypeOpen, setIsJobTypeOpen] = useState(false);
-  const [isSalaryOpen, setIsSalaryOpen] = useState(false);
+  const [isSalaryOpen, setIsSalaryOpen] = useState(variant === 'appliedJobs');
   const [isExperienceOpen, setIsExperienceOpen] = useState(false);
   const [isGenderOpen, setIsGenderOpen] = useState(false);
 
@@ -242,89 +244,93 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           )}
         </div>
 
-        {/* Experience Level Section */}
-        <div className="">
-          <button
-            onClick={() => setIsExperienceOpen(!isExperienceOpen)}
-            className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
-          >
-            <h3 className="text-body font-inter font-normal text-gray-neutral900">
-              Experience level
-            </h3>
-            <IoChevronForward
-              className={`h-5 w-5 text-gray-neutral600 transition-transform duration-200 ${
-                isExperienceOpen ? 'rotate-90' : ''
-              }`}
-            />
-          </button>
-          {isExperienceOpen && (
-            <div className="px-4 pb-3 space-y-2">
-              <Checkbox
-                label="Entry level"
-                checked={experienceLevel.entryLevel}
-                onChange={(checked) => handleExperienceChange('entryLevel', checked)}
-                size="sm"
+        {/* Experience Level Section - Hidden for appliedJobs variant */}
+        {variant !== 'appliedJobs' && (
+          <div className="">
+            <button
+              onClick={() => setIsExperienceOpen(!isExperienceOpen)}
+              className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="text-body font-inter font-normal text-gray-neutral900">
+                Experience level
+              </h3>
+              <IoChevronForward
+                className={`h-5 w-5 text-gray-neutral600 transition-transform duration-200 ${
+                  isExperienceOpen ? 'rotate-90' : ''
+                }`}
               />
-              <Checkbox
-                label="Intermediate"
-                checked={experienceLevel.intermediate}
-                onChange={(checked) => handleExperienceChange('intermediate', checked)}
-                size="sm"
-              />
-              <Checkbox
-                label="Professional"
-                checked={experienceLevel.professional}
-                onChange={(checked) => handleExperienceChange('professional', checked)}
-                size="sm"
-              />
-            </div>
-          )}
-        </div>
+            </button>
+            {isExperienceOpen && (
+              <div className="px-4 pb-3 space-y-2">
+                <Checkbox
+                  label="Entry level"
+                  checked={experienceLevel.entryLevel}
+                  onChange={(checked) => handleExperienceChange('entryLevel', checked)}
+                  size="sm"
+                />
+                <Checkbox
+                  label="Intermediate"
+                  checked={experienceLevel.intermediate}
+                  onChange={(checked) => handleExperienceChange('intermediate', checked)}
+                  size="sm"
+                />
+                <Checkbox
+                  label="Professional"
+                  checked={experienceLevel.professional}
+                  onChange={(checked) => handleExperienceChange('professional', checked)}
+                  size="sm"
+                />
+              </div>
+            )}
+          </div>
+        )}
 
-        {/* Preferred Gender Section */}
-        <div className="">
-          <button
-            onClick={() => setIsGenderOpen(!isGenderOpen)}
-            className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
-          >
-            <h3 className="text-body font-inter font-normal text-gray-neutral900">
-              Preferred Gender
-            </h3>
-            <IoChevronForward
-              className={`h-5 w-5 text-gray-neutral600 transition-transform duration-200 ${
-                isGenderOpen ? 'rotate-90' : ''
-              }`}
-            />
-          </button>
-          {isGenderOpen && (
-            <div className="px-4 pb-3 space-y-2">
-              <Checkbox
-                label="Any"
-                checked={preferredGender.any}
-                onChange={(checked) => handleGenderChange('any', checked)}
-                size="sm"
+        {/* Preferred Gender Section - Hidden for appliedJobs variant */}
+        {variant !== 'appliedJobs' && (
+          <div className="">
+            <button
+              onClick={() => setIsGenderOpen(!isGenderOpen)}
+              className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="text-body font-inter font-normal text-gray-neutral900">
+                Preferred Gender
+              </h3>
+              <IoChevronForward
+                className={`h-5 w-5 text-gray-neutral600 transition-transform duration-200 ${
+                  isGenderOpen ? 'rotate-90' : ''
+                }`}
               />
-              <Checkbox
-                label="Female"
-                checked={preferredGender.female}
-                onChange={(checked) => handleGenderChange('female', checked)}
-                size="sm"
-              />
-              <Checkbox
-                label="Male"
-                checked={preferredGender.male}
-                onChange={(checked) => handleGenderChange('male', checked)}
-                size="sm"
-              />
-              <Checkbox
-                label="Others"
-                checked={preferredGender.others}
-                onChange={(checked) => handleGenderChange('others', checked)}
-                size="sm"
-              />
-            </div>
-          )}
-        </div>
+            </button>
+            {isGenderOpen && (
+              <div className="px-4 pb-3 space-y-2">
+                <Checkbox
+                  label="Any"
+                  checked={preferredGender.any}
+                  onChange={(checked) => handleGenderChange('any', checked)}
+                  size="sm"
+                />
+                <Checkbox
+                  label="Female"
+                  checked={preferredGender.female}
+                  onChange={(checked) => handleGenderChange('female', checked)}
+                  size="sm"
+                />
+                <Checkbox
+                  label="Male"
+                  checked={preferredGender.male}
+                  onChange={(checked) => handleGenderChange('male', checked)}
+                  size="sm"
+                />
+                <Checkbox
+                  label="Others"
+                  checked={preferredGender.others}
+                  onChange={(checked) => handleGenderChange('others', checked)}
+                  size="sm"
+                />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Scroll indicator - shows when there's more content below */}
         {hasScroll && !isAtBottom && (
