@@ -33,6 +33,7 @@ export interface AppliedJobCardProps {
   job: AppliedJob;
   variant?: 'card' | 'list';
   onDelete?: (jobId: string) => void;
+  onClick?: (job: AppliedJob) => void;
   className?: string;
 }
 
@@ -64,17 +65,24 @@ const statusConfig = {
   },
 };
 
-export default function AppliedJobCard({ 
-  job, 
-  variant = 'card', 
-  onDelete, 
-  className = '' 
+export default function AppliedJobCard({
+  job,
+  variant = 'card',
+  onDelete,
+  onClick,
+  className = ''
 }: AppliedJobCardProps) {
   const status = statusConfig[job.status] || statusConfig.unknown;
-  
+
   const handleDelete = () => {
     if (onDelete) {
       onDelete(job.id);
+    }
+  };
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick(job);
     }
   };
 
@@ -202,6 +210,7 @@ export default function AppliedJobCard({
   if (variant === 'list') {
     return (
       <div
+        onClick={handleClick}
         className={`w-full h-[60px] bg-white border border-gray-neutral200 shadow-sm px-6 rounded-[10px] transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300 cursor-pointer ${className}`}
       >
         {/* Grid layout: Title | Tags | Salary | Date | Status+Delete */}
@@ -277,6 +286,7 @@ export default function AppliedJobCard({
   // Card variant
   return (
     <div
+      onClick={handleClick}
       className={`w-full h-full min-h-[250px] bg-white rounded-lg shadow-[0px_0px_10px_rgba(0,0,0,0.25)] p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-[2px] cursor-pointer ${className}`}
     >
       {/* Header with Title */}

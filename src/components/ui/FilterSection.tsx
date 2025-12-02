@@ -72,9 +72,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     }
   );
 
-  // Accordion states - All closed by default
+  // Accordion states - All closed by default, except Salary Range for appliedJobs variant
   const [isJobTypeOpen, setIsJobTypeOpen] = useState(false);
-  const [isSalaryOpen, setIsSalaryOpen] = useState(false);
+  const [isSalaryOpen, setIsSalaryOpen] = useState(variant === 'appliedJobs');
   const [isExperienceOpen, setIsExperienceOpen] = useState(false);
   const [isGenderOpen, setIsGenderOpen] = useState(false);
 
