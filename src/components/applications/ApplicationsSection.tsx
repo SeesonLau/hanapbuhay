@@ -11,6 +11,7 @@ interface Props {
   error?: string | null;
   viewMode: "card" | "list";
   onDelete?: (jobId: string) => void;
+  onOpen?: (job: AppliedJob) => void;
 }
 
 const ApplicationsSection: React.FC<Props> = ({
@@ -19,6 +20,7 @@ const ApplicationsSection: React.FC<Props> = ({
   error,
   viewMode,
   onDelete,
+  onOpen,
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [isScrollable, setIsScrollable] = React.useState(false);
@@ -69,6 +71,7 @@ const ApplicationsSection: React.FC<Props> = ({
                     job={app}
                     variant="card"
                     onDelete={onDelete}
+                    onClick={onOpen}
                   />
                 </div>
               ))}
@@ -89,6 +92,7 @@ const ApplicationsSection: React.FC<Props> = ({
                 job={app}
                 variant="list"
                 onDelete={onDelete}
+                onClick={onOpen}
               />
             ))}
           </div>
