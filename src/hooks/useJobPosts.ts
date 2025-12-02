@@ -395,7 +395,6 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     if (!userId) throw new Error("User not authenticated");
     try {
       await PostService.deletePost(postId, userId);
-      toast.success("Post deleted successfully");
       // refresh
       await load({ page: 1 });
     } catch (err) {

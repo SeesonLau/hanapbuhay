@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Profile } from "@/lib/models/profile";
 import { ProfileService } from "@/lib/services/profile-services";
 import { combineToStoredName } from "@/lib/utils/profile-utils";
 import { FaUserCircle } from 'react-icons/fa';
-import { Edit3 } from 'lucide-react';
+import { Edit3, Camera } from 'lucide-react';
 import TextBox from "../ui/TextBox";
 import SelectBox from "../ui/SelectBox";
 import Button from "../ui/Button";
@@ -17,6 +17,9 @@ interface ProfileFormProps {
 }
 
 export default function ProfileForm({ userId, className }: ProfileFormProps) {
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [profile, setProfile] = useState<Profile & { email?: string | null } | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -107,7 +110,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
 
   const handleProfilePictureClick = () => {
     if (isEditing) {
-      document.getElementById('profile-picture-input')?.click();
+      fileInputRef.current?.click();
     }
   };
 
@@ -167,26 +170,38 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
       </button>
 
       {/* Profile Picture Upload */}
-      <div className="flex items-center justify-center gap-3 max-[425px]:gap-2 -pt-4">
+      <div className="flex items-center justify-center gap-3 max-[425px]:gap-2">
         <div 
-          className={`relative flex-shrink-0 ${isEditing ? 'cursor-pointer' : ''}`}
+          className={`relative flex-shrink-0 group ${isEditing ? 'cursor-pointer' : ''}`}
           onClick={handleProfilePictureClick}
         >
           {previewUrl ? (
-            <img
-              src={previewUrl}
-              alt="Profile"
-              className={`w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 object-cover rounded-full border ${isEditing ? 'hover:opacity-80 transition' : ''}`}
-            />
+            <>
+              <img
+                src={previewUrl}
+                alt="Profile"
+                className={`w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 object-cover rounded-full border ${isEditing ? 'group-hover:brightness-75 transition-all duration-200' : ''}`}
+              />
+              {isEditing && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <Camera className="w-8 h-8 max-[425px]:w-5 max-[425px]:h-5 text-white drop-shadow-lg" />
+                </div>
+              )}
+            </>
           ) : (
-            <div className={`w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 flex items-center justify-center rounded-full bg-gray-neutral100 ${isEditing ? 'hover:bg-gray-neutral200 transition' : ''}`}>
+            <div className={`w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 flex items-center justify-center rounded-full bg-gray-neutral100 relative ${isEditing ? 'group-hover:bg-gray-neutral200 transition' : ''}`}>
               <FaUserCircle className="w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 text-gray-neutral400" />
+              {isEditing && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <Camera className="w-8 h-8 max-[425px]:w-5 max-[425px]:h-5 text-gray-neutral600" />
+                </div>
+              )}
             </div>
           )}
           
           {/* Hidden file input */}
           <input
-            id="profile-picture-input"
+            ref={fileInputRef}
             type="file"
             accept="image/*"
             onChange={handleFileSelect}

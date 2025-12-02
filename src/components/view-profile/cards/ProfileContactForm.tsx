@@ -85,7 +85,7 @@ export default function ProfileContactForm({
         />
       </div>
       
-      {/* Contact Information - Larger on Mobile */}
+      {/* Contact Information */}
       <div className="flex flex-col gap-5 sm:gap-3 w-full">
         {/* Email */}
         <div className="flex items-center gap-3">

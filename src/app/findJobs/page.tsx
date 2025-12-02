@@ -22,6 +22,7 @@ import Sort from "@/components/ui/Sort";
 import FilterSection, { FilterOptions } from "@/components/ui/FilterSection";
 import FilterButton from "@/components/ui/FilterButton";
 import FilterModal from "@/components/ui/FilterModal";
+import DeleteModal from "@/components/ui/DeleteModal";
 
 export default function FindJobsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,11 +65,20 @@ export default function FindJobsPage() {
     handleSearch: hookHandleSearch,
     handleSort: hookHandleSort,
     loadMore,
+    refresh,
     applyFilters,
   } = useJobPosts(currentUserId ?? undefined, { excludeMine: true, excludeApplied: true });
 
   // Applications hook for apply functionality
-  const { createApplication } = useApplications(currentUserId, { skip: !currentUserId });
+  const { 
+    createApplication,
+    isConfirming,
+    confirmApplication,
+    cancelApplication,
+  } = useApplications(currentUserId, { 
+    skip: !currentUserId,
+    onSuccess: refresh, // 🚀 Pass the refresh function here
+  });
 
   // Count active filters
   const activeFilterCount = useMemo(() => {
@@ -158,7 +168,7 @@ export default function FindJobsPage() {
   };
 
   const handleApplyNow = useCallback(async (postId: string) => {
-    await createApplication(postId);
+    createApplication(postId);
   }, [createApplication]);
 
   useEffect(() => {
@@ -269,6 +279,13 @@ export default function FindJobsPage() {
         onApply={handleApplyFilters}
         onClearAll={handleClearFilters}
         initialFilters={activeFilters}
+      />
+
+      <DeleteModal
+        isOpen={isConfirming}
+        onClose={cancelApplication}
+        onConfirm={confirmApplication}
+        modalType="createApplication"
       />
     </div>
   );

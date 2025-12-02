@@ -1,5 +1,5 @@
 import React from 'react';
-import { HiLocationMarker } from 'react-icons/hi';
+import Image from 'next/image';
 
 interface PastJobCardProps {
   postId: string;
@@ -9,9 +9,25 @@ interface PastJobCardProps {
   className?: string;
 }
 
+// Helper function to format location
+function formatLocation(address: string): string {
+  const parts = address.split(' > ').map(part => part.trim());
+  
+  // Return only province and city (first 2 parts)
+  if (parts.length >= 2) {
+    return `${parts[0]}, ${parts[1]}`;
+  } else if (parts.length === 1) {
+    return parts[0];
+  }
+  
+  return address;
+}
+
 export default function PastJobCard({ postId, title, address, hiredDate, className = '' }: PastJobCardProps) {
   const dateString =
     hiredDate instanceof Date ? hiredDate.toLocaleDateString() : new Date(hiredDate).toLocaleDateString();
+  
+  const formattedLocation = formatLocation(address);
 
   return (
     <article
@@ -27,8 +43,15 @@ export default function PastJobCard({ postId, title, address, hiredDate, classNa
 
       {/* Location */}
       <div className="flex items-center gap-2 flex-1">
-        <HiLocationMarker className="w-5 h-5 shrink-0" aria-hidden="true" />
-        <p className="font-alexandria text-gray-neutral600 truncate tiny">{address}</p>
+        <Image 
+          src="/icons/Location.svg" 
+          alt="" 
+          width={20} 
+          height={20} 
+          className="shrink-0"
+          aria-hidden="true"
+        />
+        <p className="font-alexandria text-gray-neutral600 truncate tiny">{formattedLocation}</p>
       </div>
 
       {/* Hired Date */}

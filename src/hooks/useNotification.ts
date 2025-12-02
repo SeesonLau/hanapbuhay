@@ -107,7 +107,7 @@ export function useNotifications(
         setNotifications(prev => [...prev, ...notificationsWithActors]);
       }
 
-      setHasMore(result.hasMore);
+    setHasMore(result.hasMore);
       setCurrentPage(page);
 
       // Fetch unread count using NotificationService

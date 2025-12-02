@@ -144,7 +144,7 @@ export default function ProjectCard({
 
         {/* Text Content */}
         <div className="flex flex-col flex-1 min-w-0 min-h-0 gap-2 pr-2 justify-center">
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0"> 
             <p className="font-inter font-bold text-xl line-clamp-2 break-words">
               {truncateChars(project.title ?? '', titleCharLimit)}
             </p>
@@ -162,12 +162,10 @@ export default function ProjectCard({
 
       <DeleteModal
         isOpen={showDeleteModal}
+        isProcessing={isDeleting}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleConfirmDelete}
-        title="Delete Project"
-        description="Are you sure you want to delete this project? This action cannot be undone."
-        confirmText="Delete"
-        variant="trash"
+        modalType="deleteProject"
       />
     </>
   );
