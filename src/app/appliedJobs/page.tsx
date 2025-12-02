@@ -72,7 +72,43 @@ export default function AppliedJobsPage() {
   }, []);
 
   const { stats, error: statsError } = useStats({ variant: 'appliedJobs', userId: currentUserId });
-  const { applications, loading: appsLoading, error: appsError } = useApplications(currentUserId);
+  const { 
+    applications, 
+    loading: appsLoading, 
+    error: appsError,
+    setSelectedApplicationId,
+    setFiltersInUrl,
+    setSortInUrl,
+    parseUrlParams,
+  } = useApplications(currentUserId);
+
+  // On mount, restore sort and filters from URL to UI state
+  useEffect(() => {
+    const { sort, parsedFilters, applicationId } = parseUrlParams();
+    if (sort) {
+      // map sort back to UI value
+      const uiSort = sort === 'date_desc' ? 'latest' : sort === 'date_asc' ? 'oldest' : sort === 'salary_asc' ? 'salary-asc' : sort === 'salary_desc' ? 'salary-desc' : 'latest';
+      setSortOption(uiSort as string);
+    }
+    if (parsedFilters) {
+      setActiveFilters(parsedFilters);
+    }
+    // If an applicationId exists in the URL, only honor it when navigation originated from inside the app.
+    if (applicationId) {
+      try {
+        const ref = document.referrer || '';
+        const isInternalRef = ref.startsWith(window.location.origin);
+        if (isInternalRef) {
+          setSelectedApplicationId?.(applicationId);
+        } else {
+          // Remove externally-typed applicationId and restore default state
+          setSelectedApplicationId?.(null, false);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, []);
 
   // Count active filters
   const activeFilterCount = useMemo(() => {
@@ -108,10 +144,14 @@ export default function AppliedJobsPage() {
   const handleSortChange = useCallback((opt: any) => {
     const val = String(opt?.value ?? 'latest');
     setSortOption(val);
-  }, []);
+    // Update URL with sort param
+    setSortInUrl?.(val === 'latest' ? 'date_desc' : val === 'oldest' ? 'date_asc' : val === 'salary-asc' ? 'salary_asc' : val === 'salary-desc' ? 'salary_desc' : undefined);
+  }, [setSortInUrl]);
 
   const handleApplyFilters = (filters: FilterOptions) => {
     setActiveFilters(filters);
+    // Update URL with filters
+    setFiltersInUrl?.(filters);
   };
 
   const handleClearFilters = () => {
@@ -135,6 +175,8 @@ export default function AppliedJobsPage() {
         others: false,
       },
     });
+    // Clear filters from URL
+    setFiltersInUrl?.(null);
   };
 
   const handleDeleteApplication = (jobId: string) => {
@@ -143,6 +185,8 @@ export default function AppliedJobsPage() {
   };
 
   const handleOpenJobView = (job: any) => {
+    // Update URL with application ID
+    setSelectedApplicationId?.(job.id);
     // Transform AppliedJob to JobPostViewData format
     const jobData: JobPostViewData = {
       id: job.id,
@@ -427,7 +471,7 @@ export default function AppliedJobsPage() {
       {/* Job Post View Modal */}
       <JobPostViewModal
         isOpen={isJobViewOpen}
-        onClose={() => setIsJobViewOpen(false)}
+        onClose={() => { setSelectedApplicationId?.(null, false); setIsJobViewOpen(false); }}
         job={selectedJob}
       />
     </div>

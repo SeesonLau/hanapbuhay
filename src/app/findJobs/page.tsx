@@ -67,6 +67,7 @@ export default function FindJobsPage() {
     loadMore,
     refresh,
     applyFilters,
+    setSelectedPostId,
   } = useJobPosts(currentUserId ?? undefined, { excludeMine: true, excludeApplied: true });
 
   // Applications hook for apply functionality
@@ -256,7 +257,7 @@ export default function FindJobsPage() {
                   viewMode={viewMode}
                   onViewModeChange={(v: 'card' | 'list') => setViewMode(v)}
                   onLoadMore={loadMore as () => void}
-                  onOpen={(data: any) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
+                  onOpen={(data: any) => { setSelectedPostId?.(data.id); setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
                   onApply={handleApplyNow}
                 />
             </div>
@@ -267,7 +268,7 @@ export default function FindJobsPage() {
       {/* Modal */}
       <JobPostViewModal
         isOpen={isJobViewOpen}
-        onClose={() => setIsJobViewOpen(false)}
+        onClose={() => { setSelectedPostId?.(null, false); setIsJobViewOpen(false); }}
         job={selectedJob}
         onApply={handleApplyNow}
       />

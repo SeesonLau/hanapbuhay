@@ -182,15 +182,50 @@ export default function ChatPage() {
         });
 
         setUserContactsMap(initialMap);
-        
-        // Set active room to Global Chat initially
-        setActiveRoom({
-          id: GLOBAL_ROOM_ID,
-          type: 'global',
-          name: GLOBAL_ROOM_NAME,
-          participants: null,
-          created_at: new Date().toISOString(),
-        });
+
+        // Decide active room based on URL param when navigation originated internally.
+        try {
+          const url = new URL(window.location.href);
+          const roomIdParam = url.searchParams.get('roomId') || '';
+          const ref = document.referrer || '';
+          const isInternalRef = ref.startsWith(window.location.origin);
+
+          if (roomIdParam && isInternalRef && initialMap[roomIdParam]) {
+            // Use the room from URL (internal navigation)
+            const contact = initialMap[roomIdParam];
+            setActiveRoom({
+              id: contact.room_id ?? GLOBAL_ROOM_ID,
+              type: contact.room_id === GLOBAL_ROOM_ID ? 'global' : 'private',
+              name: contact.name,
+              participants: null,
+              created_at: new Date().toISOString(),
+            });
+          } else {
+            // Remove roomId from URL if navigation was manual/typed or room not found
+            if (roomIdParam && !isInternalRef) {
+              url.searchParams.delete('roomId');
+              window.history.replaceState({}, '', url.toString());
+            }
+
+            // Default to Global Chat
+            setActiveRoom({
+              id: GLOBAL_ROOM_ID,
+              type: 'global',
+              name: GLOBAL_ROOM_NAME,
+              participants: null,
+              created_at: new Date().toISOString(),
+            });
+          }
+        } catch (e) {
+          // Fallback: set global
+          setActiveRoom({
+            id: GLOBAL_ROOM_ID,
+            type: 'global',
+            name: GLOBAL_ROOM_NAME,
+            participants: null,
+            created_at: new Date().toISOString(),
+          });
+        }
 
         setIsInitialLoad(false);
         console.log('✅ Rooms loaded:', Object.keys(initialMap).length);
@@ -219,6 +254,25 @@ export default function ChatPage() {
     
     loadRooms();
   }, [profile, isInitialLoad]);
+
+  // Helper to update roomId in URL
+  const updateRoomInUrl = (roomId?: string | null, push = true) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const url = new URL(window.location.href);
+      if (!roomId || roomId === GLOBAL_ROOM_ID) {
+        url.searchParams.delete('roomId');
+      } else {
+        url.searchParams.set('roomId', String(roomId));
+      }
+      const newUrl = url.toString();
+      if (newUrl === window.location.href) return;
+      const method = push ? 'pushState' : 'replaceState';
+      window.history[method]({}, '', newUrl);
+    } catch (e) {
+      /* ignore */
+    }
+  };
 
   // Handler for new messages from RealtimeChat
   const handleNewMessage = useCallback((message: ChatMessage) => {
@@ -264,6 +318,10 @@ export default function ChatPage() {
       return room;
     });
 
+    // Update URL to reflect selected room. For global room remove param using replaceState.
+    if (room.id === GLOBAL_ROOM_ID) updateRoomInUrl(null, false);
+    else updateRoomInUrl(room.id, true);
+
     // On mobile, show chat view
     setShowMobileChatView(true);
   }, []);
@@ -294,10 +352,13 @@ export default function ChatPage() {
 
       // 3. Set the new room as active
       setActiveRoom(newRoom);
-      
+
+      // Update URL to include roomId for direct DM
+      updateRoomInUrl(newRoom.id, true);
+
       // On mobile, show chat view
       setShowMobileChatView(true);
-      
+
       console.log('✅ DM room created/selected:', newRoom.id);
     } else {
       toast.error(`Could not start chat with ${contact.name}.`);

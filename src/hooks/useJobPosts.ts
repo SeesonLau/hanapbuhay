@@ -98,6 +98,8 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     };
   };
 
+  
+
   const load = useCallback(async (params: { page?: number; isLoadMore?: boolean; searchTerm?: string; location?: string; sortBy?: string; sortOrder?: 'asc' | 'desc'; filters?: FilterOptions | null } = {}) => {
     const page = params.page ?? 1;
     const isLoadMore = params.isLoadMore ?? false;
@@ -247,10 +249,117 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     }
   }, [userId, sort.sortBy, sort.sortOrder]);
 
+  // Helper to flatten filter object into URL params
+  const flattenFiltersToParams = (filters: FilterOptions | null): Record<string, any> => {
+    if (!filters) {
+      return { jobTypes: undefined, experience: undefined, gender: undefined, salary: undefined };
+    }
+
+    const { jobTypes, experienceLevel, preferredGender, salaryRange } = filters;
+
+    const selectedJobTypes = Object.values(jobTypes || {}).flat();
+    const selectedExperience = Object.keys(experienceLevel || {}).filter(k => experienceLevel[k as keyof typeof experienceLevel]);
+    const selectedGender = Object.keys(preferredGender || {}).filter(k => preferredGender[k as keyof typeof preferredGender]);
+    const selectedSalary = Object.keys(salaryRange || {}).filter(k => salaryRange[k as keyof typeof salaryRange]);
+
+    return {
+      jobTypes: selectedJobTypes.length > 0 ? selectedJobTypes.join(',') : undefined,
+      experience: selectedExperience.length > 0 ? selectedExperience.join(',') : undefined,
+      gender: selectedGender.length > 0 ? selectedGender.join(',') : undefined,
+      salary: selectedSalary.length > 0 ? selectedSalary.join(',') : undefined,
+    };
+  };
+
   const applyFilters = useCallback(async (f: FilterOptions | null) => {
     setFilters(f);
     await load({ page: 1, filters: f });
+    
+    // Update URL with flattened filter params
+    const paramsToUpdate = flattenFiltersToParams(f);
+
+    // We also need to clear the old 'filters' param if it exists
+    paramsToUpdate.filters = undefined; 
+
+    // Use replaceState to avoid polluting browser history when only clearing old param
+    const hasOldFilterParam = new URL(window.location.href).searchParams.has('filters');
+    const onlyClearingOldParam = hasOldFilterParam && Object.values(paramsToUpdate).every(v => v === undefined);
+
+    updateQueryParams(paramsToUpdate, !onlyClearingOldParam);
   }, [load]);
+
+  // URL utility functions - these don't depend on state and can be called directly
+  const updateQueryParams = (params: Record<string, any>, push = true) => {
+    if (typeof window === 'undefined') return;
+    
+    const url = new URL(window.location.href);
+    
+    // Update or delete parameters
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === undefined || value === null) {
+        url.searchParams.delete(key);
+      } else {
+        url.searchParams.set(key, String(value));
+      }
+    });
+    
+    const newUrl = url.toString();
+
+    // No-op if URL would not change
+    if (newUrl === window.location.href) return;
+
+    const method = push ? 'pushState' : 'replaceState';
+    window.history[method]({}, '', newUrl);
+  };
+
+  const parseUrlParams = () => {
+    if (typeof window === 'undefined') return { q: '', location: '', sortVal: '', parsedFilters: null, postId: '' };
+    
+    const url = new URL(window.location.href);
+    const q = url.searchParams.get('q') || '';
+    const location = url.searchParams.get('location') || '';
+    const sortVal = url.searchParams.get('sort') || '';
+    const postId = url.searchParams.get('postId') || '';
+    
+    // Parse flattened filter params
+    const jobTypesParam = url.searchParams.get('jobTypes')?.split(',') || [];
+    const experienceParam = url.searchParams.get('experience')?.split(',') || [];
+    const genderParam = url.searchParams.get('gender')?.split(',') || [];
+    const salaryParam = url.searchParams.get('salary')?.split(',') || [];
+
+    const parsedFilters: FilterOptions = {
+      jobTypes: {}, // Note: This simplified parsing doesn't restore the original job type category structure
+      experienceLevel: {
+        entryLevel: experienceParam.includes('entryLevel'),
+        intermediate: experienceParam.includes('intermediate'),
+        professional: experienceParam.includes('professional'),
+      },
+      preferredGender: {
+        any: genderParam.includes('any'),
+        male: genderParam.includes('male'),
+        female: genderParam.includes('female'),
+        others: genderParam.includes('others'),
+      },
+      salaryRange: {
+        lessThan5000: salaryParam.includes('lessThan5000'),
+        range10to20: salaryParam.includes('range10to20'),
+        moreThan20000: salaryParam.includes('moreThan20000'),
+        custom: salaryParam.includes('custom'),
+      },
+    };
+
+    // A simple way to reconstruct jobTypes. This loses the parent category but works for filtering.
+    // A more complex mapping would be needed to fully restore the UI state.
+    if (jobTypesParam.length > 0) {
+      parsedFilters.jobTypes['all'] = jobTypesParam;
+    }
+    
+    return { q, location, sortVal, parsedFilters, postId };
+  };
+
+  const setSelectedPostId = (id?: string | null, push = true) => {
+    updateQueryParams({ postId: id || undefined }, push);
+  };
+
 
   // Client-side filtering for experience level and preferred gender
   const getFilteredJobsByTags = (jobsToFilter: JobPostData[], filterOptions: FilterOptions | null): JobPostData[] => {
@@ -308,34 +417,57 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     load({ page: 1 });
   }, [load, options.skip]);
 
+  // Mount effect to restore state from URL
+  useEffect(() => {
+    const { q, location: loc, sortVal, parsedFilters } = parseUrlParams();
+
+    // Determine sort state from URL; default is createdAt desc (no param)
+    let sortBy = 'createdAt';
+    let sortOrder: 'asc' | 'desc' = 'desc';
+    if (sortVal) {
+      const parts = sortVal.split('_');
+      sortBy = parts[0] || 'createdAt';
+      sortOrder = parts[1] === 'asc' ? 'asc' : 'desc';
+    }
+
+    // Reflect URL sort into hook state so UI stays in sync
+    setSort({ sortBy, sortOrder });
+
+    if (q || loc || sortVal || parsedFilters) {
+      load({
+        page: 1,
+        searchTerm: q,
+        location: loc,
+        sortBy,
+        sortOrder,
+        filters: parsedFilters,
+      });
+    }
+  }, []);
+
   const handleSearch = useCallback((query: string, location?: string) => {
-    // First fetch from server with search term
     (async () => {
       await load({ page: 1, searchTerm: query, location });
+
+      // Update URL with search params
+      updateQueryParams({ q: query || undefined, location: location || undefined });
 
       // Then apply fuzzy search ranking on client-side for better relevance
       setJobs((prevJobs) => {
         if (!query.trim()) return prevJobs;
 
         const queryLower = query.toLowerCase();
-        const queryWords = queryLower.split(/\s+/).filter(Boolean);
 
-        // Calculate fuzzy match score using Levenshtein-like algorithm
         const calculateFuzzyScore = (text: string, searchTerm: string): number => {
           const textLower = text.toLowerCase();
-          
-          // Exact match gets highest score
+
           if (textLower.includes(searchTerm)) return 1000;
-          
-          // Check if all words are present
+
           const words = searchTerm.split(/\s+/).filter(Boolean);
           if (words.every(w => textLower.includes(w))) return 500;
-          
-          // Fuzzy matching: count character matches and position similarity
-          let score = 0;
-          let textIdx = 0;
+
           let matchedChars = 0;
-          
+          let textIdx = 0;
           for (let i = 0; i < searchTerm.length && textIdx < textLower.length; i++) {
             const searchChar = searchTerm[i];
             while (textIdx < textLower.length && textLower[textIdx] !== searchChar) {
@@ -346,17 +478,11 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
               textIdx++;
             }
           }
-          
-          // Score based on character match ratio
-          score = (matchedChars / searchTerm.length) * 300;
-          
-          // Bonus if word starts match (e.g., "desc" matches "description")
+
+          let score = (matchedChars / Math.max(1, searchTerm.length)) * 300;
           words.forEach(word => {
-            if (textLower.includes(word.substring(0, 3))) {
-              score += 50;
-            }
+            if (textLower.includes(word.substring(0, 3))) score += 50;
           });
-          
           return score;
         };
 
@@ -366,10 +492,7 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
             const titleLower = job.title.toLowerCase();
             const descLower = job.description.toLowerCase();
 
-            // Title match (higher weight)
             score += calculateFuzzyScore(titleLower, queryLower) * 1.5;
-            
-            // Description match (lower weight)
             score += calculateFuzzyScore(descLower, queryLower) * 0.5;
 
             return { job, score };
@@ -382,8 +505,31 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
   }, [load]);
 
   const handleSort = useCallback(async (sortBy: string, sortOrder: 'asc' | 'desc') => {
-    setSort({ sortBy, sortOrder });
+    const requested = { sortBy, sortOrder };
+
+    // Update state and reload
+    setSort(requested);
     await load({ page: 1, sortBy, sortOrder });
+
+    // Determine current sort value in URL
+    const { sortVal: currentSortVal } = parseUrlParams();
+    const requestedSortParam = sortOrder === 'asc' ? `${sortBy}_asc` : `${sortBy}_desc`;
+
+    // Default sort is createdAt desc -> treated as absence of `sort` param
+    const isDefault = sortBy === 'createdAt' && sortOrder === 'desc';
+
+    if (isDefault) {
+      // If URL already doesn't have sort, avoid updating
+      if (!currentSortVal) return;
+
+      // Remove sort param using replaceState so we don't add history entries
+      updateQueryParams({ sort: undefined }, false);
+      return;
+    }
+
+    // For non-default: only update URL if it differs
+    if (currentSortVal === requestedSortParam) return;
+    updateQueryParams({ sort: requestedSortParam });
   }, [load]);
 
   const loadMore = useCallback(async () => {
@@ -450,5 +596,8 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     updatePost,
     createPost,
     applyFilters,
+    setSelectedPostId,
+    parseUrlParams,
+    updateQueryParams,
   };
 }

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { ApplicationService } from '@/lib/services/applications-services';
 import type { AppliedJob } from '@/components/cards/AppliedJobCardList';
+import type { FilterOptions } from '@/components/ui/FilterSection';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
 import { JobType, SubTypes } from '@/lib/constants/job-types';
@@ -162,6 +163,88 @@ export function useApplications(userId?: string | null, options: UseApplications
     }
   }, [userId]);
 
+  // URL management helpers
+  const updateQueryParams = useCallback((params: Record<string, any>, push = true) => {
+    if (typeof window === 'undefined') return;
+    
+    const url = new URL(window.location.href);
+    
+    // Update or delete parameters
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === undefined || value === null) {
+        url.searchParams.delete(key);
+      } else {
+        url.searchParams.set(key, String(value));
+      }
+    });
+    
+    const newUrl = url.toString();
+
+    // No-op if URL would not change
+    if (newUrl === window.location.href) return;
+
+    const method = push ? 'pushState' : 'replaceState';
+    window.history[method]({}, '', newUrl);
+  }, []);
+
+  const parseUrlParams = useCallback(() => {
+    if (typeof window === 'undefined') return { sort: '', parsedFilters: null, applicationId: '' };
+    
+    const url = new URL(window.location.href);
+    const sortVal = url.searchParams.get('sort') || '';
+    const filtersJson = url.searchParams.get('filters');
+    const applicationId = url.searchParams.get('applicationId') || '';
+    
+    let parsedFilters: FilterOptions | null = null;
+    if (filtersJson) {
+      try {
+        parsedFilters = JSON.parse(filtersJson);
+      } catch {
+        parsedFilters = null;
+      }
+    }
+    
+    return { sort: sortVal, parsedFilters, applicationId };
+  }, []);
+
+  const setSelectedApplicationId = useCallback((id?: string | null, push = true) => {
+    updateQueryParams({ applicationId: id || undefined }, push);
+  }, [updateQueryParams]);
+
+  const isFiltersEmpty = (f: FilterOptions | null) => {
+    if (!f) return true;
+    // jobTypes: object with arrays
+    const { jobTypes, salaryRange, experienceLevel, preferredGender } = f as any;
+    const hasJobTypes = Object.values(jobTypes || {}).some((arr: any) => Array.isArray(arr) && arr.length > 0);
+    const hasSalary = Object.values(salaryRange || {}).some(Boolean);
+    const hasExp = Object.values(experienceLevel || {}).some(Boolean);
+    const hasGender = Object.values(preferredGender || {}).some(Boolean);
+    return !(hasJobTypes || hasSalary || hasExp || hasGender);
+  };
+
+  const setFiltersInUrl = useCallback((f: FilterOptions | null) => {
+    if (!f || isFiltersEmpty(f)) {
+      updateQueryParams({ filters: undefined });
+      return;
+    }
+    updateQueryParams({ filters: JSON.stringify(f) });
+  }, [updateQueryParams]);
+
+  const setSortInUrl = useCallback((sort?: string) => {
+    // Default sorts treated as absence of `sort` param
+    const defaultSorts = new Set(['createdAt_desc', 'date_desc']);
+    const { sort: currentSort } = parseUrlParams();
+
+    if (!sort || defaultSorts.has(sort)) {
+      if (!currentSort) return;
+      updateQueryParams({ sort: undefined }, false);
+      return;
+    }
+
+    if (currentSort === sort) return;
+    updateQueryParams({ sort });
+  }, [updateQueryParams, parseUrlParams]);
+
   return {
     applications,
     loading,
@@ -172,6 +255,11 @@ export function useApplications(userId?: string | null, options: UseApplications
     confirmApplication,
     cancelApplication,
     getAppliedPostIds,
+    setSelectedApplicationId,
+    setFiltersInUrl,
+    setSortInUrl,
+    parseUrlParams,
+    updateQueryParams,
   };
 }
 
