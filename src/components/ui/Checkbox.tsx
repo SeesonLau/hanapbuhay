@@ -49,13 +49,9 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
     const newChecked = e.target.checked;
     if (!isControlled) setInternalChecked(newChecked);
     onChange?.(newChecked, e);
-    // Reset hover state after change to prevent sticky hover
-    setIsHover(false);
   };
 
   const s = sizeMap[size] || sizeMap.md;
-  const [isHover, setIsHover] = useState(false);
-  const [isFocus, setIsFocus] = useState(false);
 
   return (
     <label
@@ -63,18 +59,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
       className={`inline-flex items-center gap-1 select-none ${responsive ? 'w-full sm:w-auto' : ''} ${className}`}
     >
       <div
-        onMouseEnter={() => !disabled && setIsHover(true)}
-        onMouseLeave={() => setIsHover(false)}
-        onClick={() => {
-          // Reset hover state on click to prevent sticky hover
-          setTimeout(() => setIsHover(false), 0);
-        }}
         className={`flex items-center w-full px-3 py-1 gap-1 transition-colors duration-150 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-        style={{
-          transform: isHover || isFocus ? 'scale(1.06)' : 'scale(1)',
-          transitionProperty: 'transform, background-color, border-color',
-          transitionDuration: '150ms'
-        }}
       >
         {/* Visual checkbox */}
         <div
@@ -82,23 +67,19 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
           className={`flex items-center justify-center transition-all duration-150 ${s.icon}`}
         >
           {checked ? (
-            <ImCheckboxChecked 
+            <ImCheckboxChecked
               className={`${s.icon} transition-all duration-150 ${
-                disabled 
-                  ? 'text-gray-neutral300' 
-                  : isHover 
-                    ? 'text-primary-primary600' 
-                    : 'text-primary-primary500'
+                disabled
+                  ? 'text-gray-neutral300'
+                  : 'text-primary-primary500'
               }`}
             />
           ) : (
-            <ImCheckboxUnchecked 
+            <ImCheckboxUnchecked
               className={`${s.icon} transition-all duration-150 ${
-                disabled 
-                  ? 'text-gray-neutral300' 
-                  : isHover 
-                    ? 'text-gray-neutral500' 
-                    : 'text-gray-neutral400'
+                disabled
+                  ? 'text-gray-neutral300'
+                  : 'text-gray-neutral400'
               }`}
             />
           )}
@@ -117,8 +98,6 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
           onChange={handleChange}
           disabled={disabled}
           className="sr-only"
-          onFocus={() => setIsFocus(true)}
-          onBlur={() => setIsFocus(false)}
           {...rest}
         />
       </div>

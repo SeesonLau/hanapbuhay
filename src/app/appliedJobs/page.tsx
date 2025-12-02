@@ -20,6 +20,7 @@ import { ApplicationService } from '@/lib/services/applications-services';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
 import { JobType, SubTypes } from '@/lib/constants/job-types';
+import JobPostViewModal, { JobPostViewData } from '@/components/modals/JobPostViewModal';
 
 export default function AppliedJobsPage() {
   const [user, setUser] = useState<any | null>(null);
@@ -27,6 +28,8 @@ export default function AppliedJobsPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isJobViewOpen, setIsJobViewOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'total' | null>(null);
   const [sortOption, setSortOption] = useState<string>('latest');
@@ -164,6 +167,24 @@ export default function AppliedJobsPage() {
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  const handleOpenJobView = (job: any) => {
+    // Transform AppliedJob to JobPostViewData format
+    const jobData: JobPostViewData = {
+      id: job.id,
+      title: job.title,
+      description: job.description,
+      location: job.location,
+      salary: job.salary,
+      salaryPeriod: job.salaryPeriod,
+      postedDate: job.appliedOn, // Using appliedOn as postedDate
+      genderTags: job.genderTags,
+      experienceTags: job.experienceTags,
+      jobTypeTags: job.jobTypeTags,
+    };
+    setSelectedJob(jobData);
+    setIsJobViewOpen(true);
   };
 
   // Filter and sort applications
@@ -331,7 +352,7 @@ export default function AppliedJobsPage() {
   }
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden">
       <div className="fixed inset-0 -z-10 bg-gray-default" />
       {/* Banner Section with Header and Search */}
       <Banner variant="appliedJobs" onSearch={handleSearch} />
@@ -382,6 +403,7 @@ export default function AppliedJobsPage() {
             onApply={handleApplyFilters}
             onClearAll={handleClearFilters}
             className="flex-1 min-h-0"
+            variant="appliedJobs"
           />
         </aside>
 
@@ -412,6 +434,7 @@ export default function AppliedJobsPage() {
                 error={appsError}
                 viewMode={viewMode}
                 onDelete={handleDeleteApplication}
+                onOpen={handleOpenJobView}
               />
             </div>
           </div>
@@ -425,6 +448,14 @@ export default function AppliedJobsPage() {
         onApply={handleApplyFilters}
         onClearAll={handleClearFilters}
         initialFilters={activeFilters}
+        variant="appliedJobs"
+      />
+
+      {/* Job Post View Modal */}
+      <JobPostViewModal
+        isOpen={isJobViewOpen}
+        onClose={() => setIsJobViewOpen(false)}
+        job={selectedJob}
       />
 
       {/* Delete Modal */}
