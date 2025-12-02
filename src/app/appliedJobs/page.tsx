@@ -355,6 +355,7 @@ export default function AppliedJobsPage() {
             onApply={handleApplyFilters}
             onClearAll={handleClearFilters}
             className="flex-1 min-h-0"
+            variant="appliedJobs"
           />
         </aside>
 
@@ -398,6 +399,7 @@ export default function AppliedJobsPage() {
         onApply={handleApplyFilters}
         onClearAll={handleClearFilters}
         initialFilters={activeFilters}
+        variant="appliedJobs"
       />
     </div>
   );
