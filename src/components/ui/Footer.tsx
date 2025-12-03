@@ -56,7 +56,6 @@ const Footer = () => {
             { name: 'Benefits', action: () => handleScrollToSection('benefits') }, // Updated ID
             { name: 'How It Works', action: () => handleScrollToSection('how-it-works') }, // Updated ID
             { name: 'Testimonials', action: () => handleScrollToSection('testimonials') }, // Updated ID
-            { name: 'Contact Us', action: () => handleScrollToSection('contact-us') }, // Added contact section
             { name: 'Privacy Policy', action: () => {} },
             { name: 'Terms of Service', action: () => {} },
           ].map((link) => (
@@ -79,7 +78,7 @@ const Footer = () => {
           >
             Support
           </div>
-          {['FAQs', 'Help Center'].map((link) => (
+          {['FAQs'].map((link) => (
             <button
               key={link}
               className={`text-body mobile-M:text-lead font-normal leading-relaxed mb-2 hover:underline ${fontClasses.body}`}
