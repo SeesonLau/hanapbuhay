@@ -78,6 +78,26 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   const [isExperienceOpen, setIsExperienceOpen] = useState(false);
   const [isGenderOpen, setIsGenderOpen] = useState(false);
 
+  // Sync internal state when initialFilters prop changes (e.g., from URL params)
+  useEffect(() => {
+    if (initialFilters?.jobTypes) {
+      setJobTypes(initialFilters.jobTypes);
+      // Auto-open the job type accordion if there are filters
+      if (Object.keys(initialFilters.jobTypes).length > 0) {
+        setIsJobTypeOpen(true);
+      }
+    }
+    if (initialFilters?.salaryRange) {
+      setSalaryRange(initialFilters.salaryRange);
+    }
+    if (initialFilters?.experienceLevel) {
+      setExperienceLevel(initialFilters.experienceLevel);
+    }
+    if (initialFilters?.preferredGender) {
+      setPreferredGender(initialFilters.preferredGender);
+    }
+  }, [initialFilters]);
+
   // Scroll indicator state
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(false);

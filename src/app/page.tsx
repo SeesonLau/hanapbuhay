@@ -6,7 +6,7 @@ import Lenis from 'lenis';
 import HeaderHome from '@/components/ui/HeaderHome';
 import BenefitsSection from '@/components/home/BenefitsSection';
 import RecommendedJobsSection from '@/components/home/RecommendedJobsSection';
-import TestimonialsSection from '@/components/home/TestimonialsSection';
+import PopularJobCategoriesSection from '@/components/home/PopularJobCategoriesSection';
 import Footer from '@/components/ui/Footer';
 import Image from 'next/image';
 import Button from '@/components/ui/Button';
@@ -276,7 +276,7 @@ export default function HomePage() {
       <div className="relative z-10">
         <BenefitsSection />
         <RecommendedJobsSection />
-        <TestimonialsSection />
+        <PopularJobCategoriesSection />
       </div>
 
       {/* Footer Section */}

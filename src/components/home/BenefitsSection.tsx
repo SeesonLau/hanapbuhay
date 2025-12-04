@@ -2,59 +2,39 @@
 'use client';
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { FaHandshake, FaBriefcase, FaCheck } from 'react-icons/fa';
+import { FaHandshake, FaBriefcase, FaStar, FaMapMarkerAlt, FaBolt, FaShieldAlt } from 'react-icons/fa';
 import { fontClasses } from '@/styles/fonts';
 
-interface Benefit {
+interface Feature {
   icon: React.ReactNode;
   title: string;
   description: string;
-  highlight: string;
 }
 
 export default function BenefitsSection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2, margin: "-20% 0px -20% 0px" });
 
-  const clientBenefits: Benefit[] = [
+  const features: Feature[] = [
     {
-      icon: <FaHandshake className="text-2xl" />,
-      title: "trusted, reliable workers",
-      description: "in your local area, without the hassle of broad platforms.",
-      highlight: "Find"
+      icon: <FaMapMarkerAlt className="text-xl" />,
+      title: "Local Connections",
+      description: "Find trusted workers and clients right in your community, no more searching far and wide."
     },
     {
-      icon: <FaCheck className="text-2xl" />,
-      title: "transparent ratings and reviews",
-      description: "from the community.",
-      highlight: "Gain confidence with"
+      icon: <FaBolt className="text-xl" />,
+      title: "Quick Hiring",
+      description: "Post a job in minutes and receive responses from nearby skilled professionals fast."
     },
     {
-      icon: <FaCheck className="text-2xl" />,
-      title: "Post a job in minutes",
-      description: "and receive responses from nearby skilled individuals.",
-      highlight: ""
-    }
-  ];
-
-  const workerBenefits: Benefit[] = [
-    {
-      icon: <FaBriefcase className="text-2xl" />,
-      title: "monetize your skills",
-      description: "and find jobs right in your locality.",
-      highlight: "Easily"
+      icon: <FaStar className="text-xl" />,
+      title: "Verified Reviews",
+      description: "Build trust with transparent ratings and authentic feedback from the community."
     },
     {
-      icon: <FaCheck className="text-2xl" />,
-      title: "Build your professional reputation",
-      description: "through client feedback and a dedicated profile.",
-      highlight: ""
-    },
-    {
-      icon: <FaCheck className="text-2xl" />,
-      title: "reach more clients",
-      description: "in your community.",
-      highlight: "Discover new opportunities and"
+      icon: <FaShieldAlt className="text-xl" />,
+      title: "Secure Platform",
+      description: "Your data and transactions are protected with our reliable and secure system."
     }
   ];
 
@@ -63,8 +43,8 @@ export default function BenefitsSection() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.1
+        staggerChildren: 0.15,
+        delayChildren: 0.2
       }
     }
   };
@@ -81,11 +61,11 @@ export default function BenefitsSection() {
     }
   };
 
-  const benefitCardVariants = {
-    hidden: { opacity: 0, x: -20 },
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
-      x: 0,
+      y: 0,
       transition: {
         duration: 0.5,
         ease: [0.22, 1, 0.36, 1] as const
@@ -99,220 +79,88 @@ export default function BenefitsSection() {
       className="min-h-screen flex items-center justify-center relative py-16 tablet:py-20 laptop:py-24 laptop:snap-start laptop:snap-always overflow-hidden"
       ref={ref}
     >
-      {/* Animated background gradient orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-1/4 -left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, 50, 0],
-            y: [0, 30, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div
-          className="absolute bottom-1/4 -right-20 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, -50, 0],
-            y: [0, -30, 0],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </div>
-
       <motion.div 
         className="container mx-auto px-4 tablet:px-6 laptop:px-8 relative z-10 max-w-7xl"
         variants={containerVariants}
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
       >
-        {/* Header Section */}
-        <motion.div 
-          className="text-center mb-12 tablet:mb-16 laptop:mb-20"
-          variants={itemVariants}
-        >
-          <motion.div
-            className="inline-block mb-4"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <div 
-              className="px-6 py-2 rounded-full border text-small font-medium"
-              style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                backdropFilter: 'blur(10px)',
-                borderColor: 'rgba(255, 255, 255, 0.1)'
-              }}
-            >
-            </div>
-          </motion.div>
+        {/* Main Layout: Left heading + Right grid */}
+        <div className="grid grid-cols-1 laptop:grid-cols-12 gap-12 laptop:gap-16 items-start">
           
-          <h2 
-            className={`text-h2 tablet:text-h1 laptop:text-hero font-bold text-gray-neutral100 mb-4 ${fontClasses.heading}`}
+          {/* Left Section - Heading */}
+          <motion.div 
+            className="laptop:col-span-4 laptop:sticky laptop:top-32"
+            variants={itemVariants}
           >
-            Our <span className="text-blue-400">Benefits</span>
-          </h2>
-          
-          <p className={`text-body tablet:text-lead text-gray-neutral300 max-w-2xl mx-auto ${fontClasses.body}`}>
-            Experience a platform designed for both clients and workers to thrive
-          </p>
-        </motion.div>
-
-        {/* Benefits Grid */}
-        <div className="grid grid-cols-1 laptop:grid-cols-2 gap-8 laptop:gap-12">
-          {/* For Clients Section */}
-          <motion.div variants={itemVariants}>
-            <div
-              className="rounded-3xl border p-8 tablet:p-10 relative overflow-hidden h-full"
-              style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                backdropFilter: 'blur(20px)',
-                borderColor: 'rgba(255, 255, 255, 0.08)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-              }}
+            <h2 
+              className={`text-h2 tablet:text-h1 laptop:text-hero font-bold text-white mb-6 leading-tight ${fontClasses.heading}`}
             >
-              {/* Header with Icon */}
-              <div className="flex items-center gap-4 mb-8">
-                <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                  style={{
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    border: '1px solid rgba(59, 130, 246, 0.2)'
-                  }}
-                >
-                  <FaHandshake className="text-3xl text-blue-400" />
-                </div>
-                <div>
-                  <h3 className={`text-h3 tablet:text-h2 font-bold text-gray-neutral100 ${fontClasses.heading}`}>
-                    For Clients
-                  </h3>
-                  <p className={`text-small text-gray-neutral400 ${fontClasses.body}`}>
-                    Find trusted professionals in your local area
-                  </p>
-                </div>
-              </div>
+              Core Features That{' '}
+              <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-blue-600 bg-clip-text text-transparent">
+                Power Your Success
+              </span>
+            </h2>
+            
+            <p className={`text-body tablet:text-lead text-gray-400 leading-relaxed ${fontClasses.body}`}>
+              A platform designed to connect local talent with opportunities, making hiring and finding work simpler than ever before.
+            </p>
 
-              {/* Benefits List */}
-              <div className="space-y-6">
-                {clientBenefits.map((benefit, idx) => (
-                  <motion.div
-                    key={idx}
-                    variants={benefitCardVariants}
-                    className="group"
-                  >
-                    <div
-                      className="p-5 rounded-2xl border transition-all duration-300 hover:scale-[1.02]"
-                      style={{
-                        background: 'rgba(255, 255, 255, 0.02)',
-                        backdropFilter: 'blur(10px)',
-                        borderColor: 'rgba(255, 255, 255, 0.06)'
-                      }}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div
-                          className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center mt-0.5"
-                          style={{
-                            background: 'rgba(239, 143, 17, 0.1)',
-                            border: '1px solid rgba(239, 143, 17, 0.2)'
-                          }}
-                        >
-                          <FaCheck className="text-blue-400 text-sm" />
-                        </div>
-                        <div className="flex-1">
-                          <p className={`text-body text-gray-neutral200 leading-relaxed ${fontClasses.body}`}>
-                            {benefit.highlight && <span className="text-gray-neutral300">{benefit.highlight} </span>}
-                            <span className="font-bold text-blue-400">{benefit.title}</span>
-                            <span className="text-gray-neutral300"> {benefit.description}</span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
+            {/* Decorative line */}
+            <motion.div 
+              className="hidden laptop:block mt-8 h-1 w-20 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400"
+              initial={{ scaleX: 0, originX: 0 }}
+              animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+            />
           </motion.div>
 
-          {/* For Workers Section */}
-          <motion.div variants={itemVariants}>
-            <div
-              className="rounded-3xl border p-8 tablet:p-10 relative overflow-hidden h-full"
-              style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                backdropFilter: 'blur(20px)',
-                borderColor: 'rgba(255, 255, 255, 0.08)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
-              }}
-            >
-              {/* Header with Icon */}
-              <div className="flex items-center gap-4 mb-8">
-                <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center"
-                  style={{
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    border: '1px solid rgba(59, 130, 246, 0.2)'
-                  }}
+          {/* Right Section - Feature Grid */}
+          <motion.div 
+            className="laptop:col-span-8"
+            variants={containerVariants}
+          >
+            <div className="grid grid-cols-1 mobile-L:grid-cols-2 gap-6 tablet:gap-8">
+              {features.map((feature, idx) => (
+                <motion.div
+                  key={idx}
+                  variants={cardVariants}
+                  className="group"
                 >
-                  <FaBriefcase className="text-3xl text-blue-400" />
-                </div>
-                <div>
-                  <h3 className={`text-h3 tablet:text-h2 font-bold text-gray-neutral100 ${fontClasses.heading}`}>
-                    For Workers
-                  </h3>
-                  <p className={`text-small text-gray-neutral400 ${fontClasses.body}`}>
-                    Monetize your skills and grow your business
-                  </p>
-                </div>
-              </div>
-
-              {/* Benefits List */}
-              <div className="space-y-6">
-                {workerBenefits.map((benefit, idx) => (
-                  <motion.div
-                    key={idx}
-                    variants={benefitCardVariants}
-                    className="group"
+                  <div
+                    className="h-full p-6 tablet:p-8 rounded-2xl border transition-all duration-500 hover:scale-[1.02] hover:border-blue-500/30"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      backdropFilter: 'blur(20px)',
+                      borderColor: 'rgba(255, 255, 255, 0.08)',
+                      boxShadow: '0 4px 24px rgba(0, 0, 0, 0.1)'
+                    }}
                   >
+                    {/* Icon */}
                     <div
-                      className="p-5 rounded-2xl border transition-all duration-300 hover:scale-[1.02]"
+                      className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-all duration-300 group-hover:scale-110"
                       style={{
-                        background: 'rgba(255, 255, 255, 0.02)',
-                        backdropFilter: 'blur(10px)',
-                        borderColor: 'rgba(255, 255, 255, 0.06)'
+                        background: 'rgba(59, 130, 246, 0.1)',
+                        border: '1px solid rgba(59, 130, 246, 0.2)'
                       }}
                     >
-                      <div className="flex items-start gap-4">
-                        <div
-                          className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center mt-0.5"
-                          style={{
-                            background: 'rgba(239, 143, 17, 0.1)',
-                            border: '1px solid rgba(239, 143, 17, 0.2)'
-                          }}
-                        >
-                          <FaCheck className="text-blue-400 text-sm" />
-                        </div>
-                        <div className="flex-1">
-                          <p className={`text-body text-gray-neutral200 leading-relaxed ${fontClasses.body}`}>
-                            {benefit.highlight && <span className="text-gray-neutral300">{benefit.highlight} </span>}
-                            <span className="font-bold text-blue-400">{benefit.title}</span>
-                            <span className="text-gray-neutral300"> {benefit.description}</span>
-                          </p>
-                        </div>
-                      </div>
+                      <span className="text-blue-400">
+                        {feature.icon}
+                      </span>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
+
+                    {/* Title */}
+                    <h3 className={`text-lead tablet:text-h3 font-semibold text-white mb-3 ${fontClasses.heading}`}>
+                      {feature.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p className={`text-small tablet:text-body text-gray-400 leading-relaxed ${fontClasses.body}`}>
+                      {feature.description}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         </div>

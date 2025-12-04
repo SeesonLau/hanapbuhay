@@ -178,15 +178,15 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
           <div ref={tagsRowRef} className="flex flex-wrap gap-1 items-center min-h-[17px]">
             {visibleTags.map((tag, index) => (
               tag.type === 'gender' ? (
-                <StaticGenderTag key={`tag-${index}`} label={tag.label} />
+                <StaticGenderTag key={`tag-${index}`} label={tag.label} variant="glassy" />
               ) : tag.type === 'experience' ? (
-                <StaticExperienceLevelTag key={`tag-${index}`} label={tag.label} />
+                <StaticExperienceLevelTag key={`tag-${index}`} label={tag.label} variant="glassy" />
               ) : (
-                <StaticJobTypeTag key={`tag-${index}`} label={tag.label} />
+                <StaticJobTypeTag key={`tag-${index}`} label={tag.label} variant="glassy" />
               )
             ))}
             {extraCount > 0 && (
-              <div className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-white/10 text-gray-300 backdrop-blur-sm">
+              <div className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-white/10 text-gray-300 backdrop-blur-sm border border-white/20">
                 {extraCount}+
               </div>
             )}
@@ -196,8 +196,8 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
         {/* Footer */}
         <div className="mt-auto space-y-4 mobile-M:space-y-5">
           <div className="flex items-center gap-2 flex-wrap">
-            <StaticLocationTag label={location} />
-            <StaticSalaryTag label={`${salary} /${salaryPeriod}`} />
+            <StaticLocationTag label={location} variant="glassy" />
+            <StaticSalaryTag label={`${salary} /${salaryPeriod}`} variant="glassy" />
           </div>
 
           <div className="flex flex-col mobile-M:flex-row items-start mobile-M:items-center justify-between gap-3 mobile-M:gap-2">

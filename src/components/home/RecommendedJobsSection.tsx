@@ -101,24 +101,6 @@ export default function RecommendedJobsSection() {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -30 }}
           transition={{ duration: 0.6 }}
         >
-          <motion.div
-            className="inline-block mb-4"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <div 
-              className="px-6 py-2 rounded-full border text-small font-medium text-blue-300"
-              style={{
-                background: 'rgba(59, 130, 246, 0.1)',
-                backdropFilter: 'blur(10px)',
-                borderColor: 'rgba(59, 130, 246, 0.3)'
-              }}
-            >
-              Most Applied
-            </div>
-          </motion.div>
-          
           <h2 
             className={`text-h2 mobile-M:text-h1 tablet:text-5xl laptop:text-hero font-bold text-white mb-4 ${fontClasses.heading}`}
           >
