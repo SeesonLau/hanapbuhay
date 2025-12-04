@@ -174,7 +174,6 @@ export function useApplications(userId?: string | null, options: UseApplications
     setIsDeleting(true);
     try {
       await ApplicationService.deleteApplication(applicationIdToDelete, userId);
-      toast.success('Application withdrawn successfully.');
       load(); // Refresh the list
     } catch (error) {
       toast.error('Failed to withdraw application.');

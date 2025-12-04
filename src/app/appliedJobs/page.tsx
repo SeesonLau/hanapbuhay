@@ -200,14 +200,10 @@ export default function AppliedJobsPage() {
   const handleConfirmDelete = async () => {
     if (!selectedApplication || !currentUserId) return;
     try {
-      await ApplicationService.deleteApplication(selectedApplication.id, currentUserId);
-      toast.success('Application withdrawn successfully');
-      confirmDeleteApplication?.(); // Closes modal and resets state in hook
-      refreshApplications?.(); // Re-fetches applications
+      await confirmDeleteApplication?.(); // This now handles the deletion, toast, and refresh
     } catch (error) {
       console.error('Failed to withdraw application:', error);
-      toast.error('Failed to withdraw application.');
-      cancelDeleteApplication?.(); // Also close modal on failure
+      // The hook will show its own toast on error.
     } finally {
       setSelectedApplication(null);
     }

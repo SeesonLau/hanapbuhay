@@ -10,6 +10,8 @@ import { ExperienceLevel } from "@/lib/constants/experience-level";
 import { JobType, SubTypes } from "@/lib/constants/job-types";
 import type { FilterOptions } from '@/components/ui/FilterSection';
 
+import { PostMessages } from "@/resources/messages/posts";
+
 const PAGE_SIZE = 10;
 
 export interface JobPostData {
@@ -20,6 +22,7 @@ export interface JobPostData {
   salary: string;
   salaryPeriod: string;
   postedDate: string;
+  isLocked: boolean;
   applicantCount?: number;
   genderTags?: string[];
   experienceTags?: string[];
@@ -89,6 +92,7 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       salary: formatPeso((post as any).price),
       salaryPeriod: "month",
       postedDate: formatPostedDate(post.createdAt),
+      isLocked: post.isLocked,
       applicantCount,
       genderTags,
       experienceTags,
@@ -533,6 +537,19 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     }
   }, [userId, load]);
 
+  const toggleLockPost = useCallback(async (postId: string, isLocked: boolean) => {
+    if (!userId) throw new Error("User not authenticated");
+    try {
+      await PostService.updatePost(postId, { isLocked });
+      toast.success(PostMessages.LOCK_SUCCESS(isLocked));
+      // Refresh the list to show the updated status
+      await load({ page: 1 });
+    } catch (err) {
+      toast.error(PostMessages.LOCK_FAILURE(isLocked));
+      throw err;
+    }
+  }, [userId, load]);
+
   const updatePost = useCallback(async (postId: string, postData: Partial<Post> | any) => {
     if (!userId) throw new Error("User not authenticated");
     try {
@@ -577,6 +594,7 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     loadMore,
     refresh,
     deletePost,
+    toggleLockPost,
     updatePost,
     createPost,
     applyFilters,

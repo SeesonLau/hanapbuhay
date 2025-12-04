@@ -31,6 +31,7 @@ export class PostService {
     let query = supabase
       .from('posts')
       .select('*', { count: 'exact' })
+      .eq('isLocked', false)
       .is('deletedAt', null); // Exclude soft-deleted posts
 
     // Apply search term filter (for title, description, etc.)
@@ -240,6 +241,7 @@ export class PostService {
     const { count, error } = await supabase
       .from('posts')
       .select('*', { count: 'exact', head: true })
+      .eq('isLocked', false)
       .is('deletedAt', null);
 
     if (error) {
@@ -277,6 +279,7 @@ export class PostService {
       const { data, error } = await supabase
         .from('posts')
         .select('title')
+        .eq('isLocked', false)
         .is('deletedAt', null)
         .limit(100); // Get a reasonable sample
 

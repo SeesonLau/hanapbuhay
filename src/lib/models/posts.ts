@@ -14,4 +14,5 @@ export interface Post {
   updatedBy: string;
   deletedAt?: string | null;
   deletedBy?: string | null;
+  isLocked: boolean;
 }

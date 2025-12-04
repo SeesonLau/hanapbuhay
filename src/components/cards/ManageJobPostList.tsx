@@ -16,6 +16,7 @@ interface JobPostData {
   salary: string;
   salaryPeriod: string;
   postedDate: string;
+  isLocked: boolean;
   applicantCount?: number;
   genderTags?: string[];
   experienceTags?: string[];
@@ -29,6 +30,7 @@ interface ManageJobPostListProps {
   onViewApplicants?: (data: JobPostData) => void;
   onEdit?: (data: JobPostData) => void;
   onDelete?: (data: JobPostData) => void;
+  onToggleLock?: (postId: string, isLocked: boolean) => void;
 }
 
 export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({ 
@@ -38,14 +40,17 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
   onViewApplicants,
   onEdit,
   onDelete,
+  onToggleLock,
 }) => {
   const {
+    id,
     title,
     description,
     location,
     salary,
     salaryPeriod,
     postedDate,
+    isLocked,
     applicantCount = 0,
     genderTags = [],
     experienceTags = [],
@@ -89,10 +94,9 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
   const firstTag = allTags[0];
   const hiddenCount = Math.max(0, allTags.length - 1);
 
-  const [isOpen, setIsOpen] = React.useState(true);
   return (
     <div 
-      className={`w-full h-[60px] ${isOpen ? 'bg-white' : 'bg-gray-neutral100'} border ${isOpen ? 'border-gray-neutral200' : 'border-gray-neutral300'} shadow-sm px-6 rounded-[10px] transition-all duration-200 ease-out ${isOpen ? 'hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300' : ''} cursor-pointer ${className}`}
+      className={`w-full h-[60px] ${!isLocked ? 'bg-white' : 'bg-gray-neutral100'} border ${!isLocked ? 'border-gray-neutral200' : 'border-gray-neutral300'} shadow-sm px-6 rounded-[10px] transition-all duration-200 ease-out ${!isLocked ? 'hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300' : ''} cursor-pointer ${className}`}
       onClick={() => onOpen?.(jobData)}
     >
       {/* Table-like aligned columns: Title | Tags | Location+Salary+Date | Actions */}
@@ -100,21 +104,21 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
         className="grid items-center h-full gap-6 grid-cols-2 tablet:grid-cols-4 laptop:grid-cols-3 laptop-L:grid-cols-5"
       >
         {/* Title */}
-        <div className={`min-w-0 flex items-center mobile-S:max-w-[150px] ${isOpen ? '' : 'filter grayscale'}`}>
-          <h3 className={`font-alexandria font-semibold text-[15px] truncate ${isOpen ? 'text-gray-neutral900' : 'text-gray-neutral700'}`}>
+        <div className={`min-w-0 flex items-center mobile-S:max-w-[150px] ${isLocked ? 'filter grayscale' : ''}`}>
+          <h3 className={`font-alexandria font-semibold text-[15px] truncate ${!isLocked ? 'text-gray-neutral900' : 'text-gray-neutral700'}`}>
             {shortTitle}
           </h3>
         </div>
 
-        <div className={`min-w-0 hidden tablet:block ${isOpen ? '' : 'filter grayscale'}`}>
+        <div className={`min-w-0 hidden tablet:block ${isLocked ? 'filter grayscale' : ''}`}>
           <div className="flex items-center gap-2 whitespace-nowrap overflow-hidden">
             {firstTag && (
               firstTag.type === 'gender' ? (
-                <StaticGenderTag label={firstTag.label} className={isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'} />
+                <StaticGenderTag label={firstTag.label} className={isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''} />
               ) : firstTag.type === 'experience' ? (
-                <StaticExperienceLevelTag label={firstTag.label} className={isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'} />
+                <StaticExperienceLevelTag label={firstTag.label} className={isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''} />
               ) : (
-                <StaticJobTypeTag label={firstTag.label} className={isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'} />
+                <StaticJobTypeTag label={firstTag.label} className={isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''} />
               )
             )}
             {hiddenCount > 0 && (
@@ -124,15 +128,15 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
         </div>
 
         {/* Salary - Laptop-L (1440px) only */}
-        <div className={`hidden laptop-L:flex items-center gap-3 flex-1 ${isOpen ? '' : 'filter grayscale'}`}>
+        <div className={`hidden laptop-L:flex items-center gap-3 flex-1 ${isLocked ? 'filter grayscale' : ''}`}>
           <div className="w-[140px] min-w-[140px] max-w-[140px] overflow-hidden">
-            <StaticSalaryTag label={`${salary} /${salaryPeriod}`} className={`whitespace-nowrap ${isOpen ? '' : 'text-gray-neutral600 bg-gray-neutral100'} w-full`} />
+            <StaticSalaryTag label={`${salary} /${salaryPeriod}`} className={`whitespace-nowrap ${isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''} w-full`} />
           </div>
         </div>
 
         {/* Date Posted - Tablet and Laptop-L; hidden at Laptop */}
-        <div className={`hidden tablet:flex laptop:hidden laptop-L:flex flex-shrink-0 ${isOpen ? '' : 'filter grayscale'}`}>
-          <span className={`font-inter text-[10px] whitespace-nowrap ${isOpen ? 'text-gray-neutral600' : 'text-gray-neutral500'}`}>Posted on: {postedDate}</span>
+        <div className={`hidden tablet:flex laptop:hidden laptop-L:flex flex-shrink-0 ${isLocked ? 'filter grayscale' : ''}`}>
+          <span className={`font-inter text-[10px] whitespace-nowrap ${!isLocked ? 'text-gray-neutral600' : 'text-gray-neutral500'}`}>Posted on: {postedDate}</span>
         </div>
 
         {/* Action Buttons (flush right, compact/hug content) */}
@@ -144,8 +148,8 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
             onDelete={() => onDelete?.(jobData)}
             variant="compact"
             showLockToggle
-            isOpenLock={isOpen}
-            onToggleLock={() => setIsOpen((v) => !v)}
+            isOpenLock={!isLocked}
+            onToggleLock={() => onToggleLock?.(id, !isLocked)}
             className="w-auto"
           />
         </div>

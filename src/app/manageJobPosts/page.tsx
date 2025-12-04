@@ -26,7 +26,7 @@ import FilterModal from '@/components/ui/FilterModal';
 export default function ManageJobPostsPage() {
   const [user, setUser] = useState<any | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort, loadMore, refresh, deletePost, updatePost, createPost, applyFilters, setSelectedPostId, parseUrlParams, setSortInUrlForManage } = useJobPosts(userId, { skip: !userId });
+  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort, loadMore, refresh, deletePost, updatePost, createPost, toggleLockPost, applyFilters, setSelectedPostId, parseUrlParams, setSortInUrlForManage } = useJobPosts(userId, { skip: !userId });
   const [initialLoading, setInitialLoading] = useState(true);
   const { stats, loading: statsLoading, error: statsError } = useStats({ variant: 'manageJobs', userId });
   
@@ -219,6 +219,7 @@ export default function ManageJobPostsPage() {
               .filter(Boolean)
               .join(' > '),
             imageUrl: '',
+            isLocked: false,
             createdBy: userId as string,
             updatedBy: userId as string,
           };
@@ -388,6 +389,7 @@ export default function ManageJobPostsPage() {
           onViewApplicants={handleOpenApplicants}
           onEdit={handleEditPost}
           onDelete={handleDeletePost}
+          onToggleLock={toggleLockPost}
         />
 
         {/* Modals */}
