@@ -138,6 +138,7 @@ export default function FindJobsPage() {
         others: false,
       },
     });
+    applyFilters?.(null);
   };
 
   const handleSearch = async (query: string, location?: string) => {

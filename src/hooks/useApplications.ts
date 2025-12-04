@@ -37,12 +37,12 @@ export function useApplications(userId?: string | null, options: UseApplications
   const [error, setError] = useState<string | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const [postIdToApply, setPostIdToApply] = useState<string | null>(null);
-  // State for delete confirmation
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
   const [applicationIdToDelete, setApplicationIdToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (params: { searchTerm?: string; location?: string; filters?: FilterOptions | null } = {}) => {
     if (!userId) {
       setApplications([]);
       return;
@@ -52,8 +52,18 @@ export function useApplications(userId?: string | null, options: UseApplications
     setError(null);
 
     try {
-      // fetch first page with a large pageSize so we get a reasonable set for UI
-      const res = await ApplicationService.getApplicationsByUserId(userId, { page: 1, pageSize: options.pageSize ?? 50 });
+      const appliedFilters = 'filters' in params ? params.filters : filters;
+      const queryParams: any = {
+        page: 1,
+        pageSize: options.pageSize ?? 50,
+        filters: {
+          ...appliedFilters,
+          searchTerm: params.searchTerm,
+          location: params.location,
+        },
+      };
+
+      const res = await ApplicationService.getApplicationsByUserId(userId, queryParams);
       const apps = res.applications || [];
 
       console.log('Raw applications data from API:', apps);
@@ -62,37 +72,22 @@ export function useApplications(userId?: string | null, options: UseApplications
         const post = a.posts ?? a.post ?? {};
         const appliedOn = a.createdAt ?? a.created_at ?? '';
         
-        console.log('Processing application:', {
-          title: post.title,
-          type: post.type,
-          subType: post.subType,
-          rawPost: post
-        });
-        
-        // Extract subType array from post (same logic as useJobPosts)
         const sub = post.subType || [];
         
-        console.log('Extracted subType array:', sub);
-        
-        // Extract gender tags
         const genderTags = Array.from(new Set(
           sub.filter((s: string) => Object.values(Gender).includes(s as Gender))
         ));
         
-        // Extract experience tags
         const experienceTags = Array.from(new Set(
           sub.filter((s: string) => Object.values(ExperienceLevel).includes(s as ExperienceLevel))
         ));
         
-        // Extract job type tags (including subtypes)
         const allJobSubTypes = Object.values(SubTypes).flat();
         const jobSubtypeTags = Array.from(new Set(
           sub.filter((s: string) => allJobSubTypes.includes(s))
              .filter((s: string) => !genderTags.includes(s) && !experienceTags.includes(s))
         ));
         const jobTypeTags = Array.from(new Set([post.type, ...jobSubtypeTags].filter(Boolean)));
-        
-        console.log('Extracted tags:', { genderTags, experienceTags, jobTypeTags });
         
         return {
           id: a.applicationId ?? a.id,
@@ -106,7 +101,7 @@ export function useApplications(userId?: string | null, options: UseApplications
           genderTags,
           experienceTags,
           jobTypeTags,
-          raw: a, // Preserve raw application data with posts info
+          raw: a,
         } as AppliedJob;
       });
 
@@ -119,19 +114,24 @@ export function useApplications(userId?: string | null, options: UseApplications
     } finally {
       setLoading(false);
     }
-  }, [userId, options.pageSize]);
+  }, [userId, options.pageSize, filters]);
 
   useEffect(() => {
     if (options.skip) return;
-    load();
-  }, [load, options.skip]);
+    const { q, location, parsedFilters } = parseUrlParams();
+    if (q || location || parsedFilters) {
+      setFilters(parsedFilters);
+      load({ searchTerm: q, location, filters: parsedFilters });
+    } else {
+      load();
+    }
+  }, [options.skip]);
 
   const createApplication = useCallback((postId: string) => {
     if (!userId) {
       toast.error('Please log in to apply for jobs');
       return;
     }
-    // Set the post ID and open the confirmation modal
     setPostIdToApply(postId);
     setIsConfirming(true);
   }, [userId]);
@@ -140,14 +140,12 @@ export function useApplications(userId?: string | null, options: UseApplications
     if (!postIdToApply || !userId) return;
     try {
       await ApplicationService.createApplication(postIdToApply, userId);
-      // If an onSuccess callback is provided, call it.
       if (options.onSuccess) {
         options.onSuccess();
       }
     } catch (error) {
       
     } finally {
-      // Close the modal and reset the state
       setIsConfirming(false);
       setPostIdToApply(null);
     }
@@ -157,8 +155,6 @@ export function useApplications(userId?: string | null, options: UseApplications
     setIsConfirming(false);
     setPostIdToApply(null);
   }, []);
-
-  // --- Delete Application Logic ---
 
   const deleteApplication = useCallback((applicationId: string) => {
     if (!userId) {
@@ -199,13 +195,11 @@ export function useApplications(userId?: string | null, options: UseApplications
     }
   }, [userId]);
 
-  // URL management helpers
   const updateQueryParams = useCallback((params: Record<string, any>, push = true) => {
     if (typeof window === 'undefined') return;
     
     const url = new URL(window.location.href);
     
-    // Update or delete parameters
     Object.entries(params).forEach(([key, value]) => {
       if (value === undefined || value === null) {
         url.searchParams.delete(key);
@@ -216,7 +210,6 @@ export function useApplications(userId?: string | null, options: UseApplications
     
     const newUrl = url.toString();
 
-    // No-op if URL would not change
     if (newUrl === window.location.href) return;
 
     const method = push ? 'pushState' : 'replaceState';
@@ -224,50 +217,29 @@ export function useApplications(userId?: string | null, options: UseApplications
   }, []);
 
   const parseUrlParams = useCallback(() => {
-    if (typeof window === 'undefined') return { sort: '', parsedFilters: null, applicationId: '' };
+    if (typeof window === 'undefined') return { sort: '', parsedFilters: null, applicationId: '', q: '', location: '' };
     
     const url = new URL(window.location.href);
     const sortVal = url.searchParams.get('sort') || '';
-    const filtersJson = url.searchParams.get('filters');
+    const filtersStr = url.searchParams.get('filters');
     const applicationId = url.searchParams.get('applicationId') || '';
+    const q = url.searchParams.get('q') || '';
+    const location = url.searchParams.get('location') || '';
     
-    let parsedFilters: FilterOptions | null = null;
-    if (filtersJson) {
-      try {
-        parsedFilters = JSON.parse(filtersJson);
-      } catch {
-        parsedFilters = null;
-      }
-    }
-    
-    return { sort: sortVal, parsedFilters, applicationId };
+    return { sort: sortVal, parsedFilters: parseFiltersFromUrl(filtersStr), applicationId, q, location };
   }, []);
 
   const setSelectedApplicationId = useCallback((id?: string | null, push = true) => {
     updateQueryParams({ applicationId: id || undefined }, push);
   }, [updateQueryParams]);
 
-  const isFiltersEmpty = (f: FilterOptions | null) => {
-    if (!f) return true;
-    // jobTypes: object with arrays
-    const { jobTypes, salaryRange, experienceLevel, preferredGender } = f as any;
-    const hasJobTypes = Object.values(jobTypes || {}).some((arr: any) => Array.isArray(arr) && arr.length > 0);
-    const hasSalary = Object.values(salaryRange || {}).some(Boolean);
-    const hasExp = Object.values(experienceLevel || {}).some(Boolean);
-    const hasGender = Object.values(preferredGender || {}).some(Boolean);
-    return !(hasJobTypes || hasSalary || hasExp || hasGender);
-  };
-
-  const setFiltersInUrl = useCallback((f: FilterOptions | null) => {
-    if (!f || isFiltersEmpty(f)) {
-      updateQueryParams({ filters: undefined });
-      return;
-    }
-    updateQueryParams({ filters: JSON.stringify(f) });
-  }, [updateQueryParams]);
+  const applyFilters = useCallback(async (f: FilterOptions | null) => {
+    setFilters(f);
+    await load({ filters: f });
+    updateQueryParams({ filters: serializeFiltersForUrl(f) });
+  }, [load, updateQueryParams]);
 
   const setSortInUrl = useCallback((sort?: string) => {
-    // Default sorts treated as absence of `sort` param
     const defaultSorts = new Set(['createdAt_desc', 'date_desc']);
     const { sort: currentSort } = parseUrlParams();
 
@@ -280,6 +252,13 @@ export function useApplications(userId?: string | null, options: UseApplications
     if (currentSort === sort) return;
     updateQueryParams({ sort });
   }, [updateQueryParams, parseUrlParams]);
+
+  const searchApplications = useCallback((query: string, location?: string) => {
+    (async () => {
+      await load({ searchTerm: query, location });
+      updateQueryParams({ q: query || undefined, location: location || undefined });
+    })();
+  }, [load, updateQueryParams]);
 
   return {
     applications,
@@ -297,11 +276,78 @@ export function useApplications(userId?: string | null, options: UseApplications
     cancelDeleteApplication,
     getAppliedPostIds,
     setSelectedApplicationId,
-    setFiltersInUrl,
+    applyFilters,
     setSortInUrl,
     parseUrlParams,
     updateQueryParams,
+    searchApplications,
   };
 }
+
+// Helper to serialize filters into a compact string
+const serializeFiltersForUrl = (filters: FilterOptions | null): string | undefined => {
+  if (!filters) return undefined;
+  const parts: string[] = [];
+  
+  const jobTypes = Object.entries(filters.jobTypes || {})
+    .filter(([_, subtypes]) => subtypes.length > 0)
+    .map(([type, subtypes]) => `${type}:${subtypes.join(',')}`)
+    .join(';');
+  if (jobTypes) parts.push(`jt=${jobTypes}`);
+
+  const salary = Object.entries(filters.salaryRange || {})
+    .filter(([_, v]) => v)
+    .map(([k]) => k)
+    .join(',');
+  if (salary) parts.push(`sr=${salary}`);
+
+  const exp = Object.entries(filters.experienceLevel || {})
+    .filter(([_, v]) => v)
+    .map(([k]) => k)
+    .join(',');
+  if (exp) parts.push(`el=${exp}`);
+  
+  const gender = Object.entries(filters.preferredGender || {})
+    .filter(([_, v]) => v)
+    .map(([k]) => k)
+    .join(',');
+  if (gender) parts.push(`pg=${gender}`);
+
+  return parts.join('|');
+};
+
+// Helper to parse the compact filter string back into an object
+const parseFiltersFromUrl = (str: string | null): FilterOptions | null => {
+  if (!str) return null;
+  
+  const filters: FilterOptions = {
+    jobTypes: {},
+    salaryRange: { lessThan5000: false, range10to20: false, moreThan20000: false, custom: false },
+    experienceLevel: { entryLevel: false, intermediate: false, professional: false },
+    preferredGender: { any: false, female: false, male: false, others: false },
+  };
+
+  str.split('|').forEach(part => {
+    const [key, value] = part.split('=');
+    if (!key || !value) return;
+
+    if (key === 'jt') {
+      value.split(';').forEach(typePart => {
+        const [type, subtypesStr] = typePart.split(':');
+        if (type && subtypesStr) {
+          filters.jobTypes[type] = subtypesStr.split(',');
+        }
+      });
+    } else if (key === 'sr') {
+      value.split(',').forEach(k => (filters.salaryRange as any)[k] = true);
+    } else if (key === 'el') {
+      value.split(',').forEach(k => (filters.experienceLevel as any)[k] = true);
+    } else if (key === 'pg') {
+      value.split(',').forEach(k => (filters.preferredGender as any)[k] = true);
+    }
+  });
+
+  return filters;
+};
 
 export default useApplications;

@@ -86,10 +86,11 @@ export default function AppliedJobsPage() {
     isDeleteConfirming,
     confirmDeleteApplication,
     cancelDeleteApplication,
-    setFiltersInUrl,
+    applyFilters,
     setSortInUrl,
     parseUrlParams,
     refresh: refreshApplications,
+    searchApplications,
   } = useApplications(currentUserId);
 
   // On mount, restore sort and filters from URL to UI state
@@ -138,9 +139,8 @@ export default function AppliedJobsPage() {
     return count;
   }, [activeFilters]);
 
-  const handleSearch = (query: string) => {
-    console.log('Searching for:', query);
-    // TODO: Implement search functionality
+  const handleSearch = (query: string, location?: string) => {
+    searchApplications?.(query, location);
   };
 
   const handleStatFilter = (type: 'total' | 'pending' | 'approved' | 'rejected') => {
@@ -160,8 +160,7 @@ export default function AppliedJobsPage() {
 
   const handleApplyFilters = (filters: FilterOptions) => {
     setActiveFilters(filters);
-    // Update URL with filters
-    setFiltersInUrl?.(filters);
+    applyFilters?.(filters);
   };
 
   const handleClearFilters = () => {
@@ -185,8 +184,7 @@ export default function AppliedJobsPage() {
         others: false,
       },
     });
-    // Clear filters from URL
-    setFiltersInUrl?.(null);
+    applyFilters?.(null);
   };
 
   const handleDeleteApplication = (applicationId: string) => {

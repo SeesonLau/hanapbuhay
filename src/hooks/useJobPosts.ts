@@ -46,6 +46,77 @@ function formatPostedDate(iso?: string) {
   }
 }
 
+// Helper to serialize filters into a compact string
+const serializeFiltersForUrl = (filters: FilterOptions | null): string | undefined => {
+  if (!filters) return undefined;
+
+  const parts: string[] = [];
+
+  // Job Types: jt=Agriculture:Farmhand,Other;IT:Developer
+  const jobTypes = Object.entries(filters.jobTypes || {})
+    .filter(([_, subtypes]) => subtypes.length > 0)
+    .map(([type, subtypes]) => `${type}:${subtypes.join(',')}`)
+    .join(';');
+  if (jobTypes) parts.push(`jt=${jobTypes}`);
+
+  // Salary Range: sr=lessThan5000,range10to20
+  const salary = Object.entries(filters.salaryRange || {})
+    .filter(([_, v]) => v)
+    .map(([k]) => k)
+    .join(',');
+  if (salary) parts.push(`sr=${salary}`);
+
+  // Experience Level: el=entryLevel,intermediate
+  const exp = Object.entries(filters.experienceLevel || {})
+    .filter(([_, v]) => v)
+    .map(([k]) => k)
+    .join(',');
+  if (exp) parts.push(`el=${exp}`);
+  
+  // Gender: pg=male,female
+  const gender = Object.entries(filters.preferredGender || {})
+    .filter(([_, v]) => v)
+    .map(([k]) => k)
+    .join(',');
+  if (gender) parts.push(`pg=${gender}`);
+
+  return parts.join('|');
+};
+
+// Helper to parse the compact filter string back into an object
+const parseFiltersFromUrl = (str: string | null): FilterOptions | null => {
+  if (!str) return null;
+  
+  const filters: FilterOptions = {
+    jobTypes: {},
+    salaryRange: { lessThan5000: false, range10to20: false, moreThan20000: false, custom: false },
+    experienceLevel: { entryLevel: false, intermediate: false, professional: false },
+    preferredGender: { any: false, female: false, male: false, others: false },
+  };
+
+  str.split('|').forEach(part => {
+    const [key, value] = part.split('=');
+    if (!key || !value) return;
+
+    if (key === 'jt') {
+      value.split(';').forEach(typePart => {
+        const [type, subtypesStr] = typePart.split(':');
+        if (type && subtypesStr) {
+          filters.jobTypes[type] = subtypesStr.split(',');
+        }
+      });
+    } else if (key === 'sr') {
+      value.split(',').forEach(k => (filters.salaryRange as any)[k] = true);
+    } else if (key === 'el') {
+      value.split(',').forEach(k => (filters.experienceLevel as any)[k] = true);
+    } else if (key === 'pg') {
+      value.split(',').forEach(k => (filters.preferredGender as any)[k] = true);
+    }
+  });
+
+  return filters;
+};
+
 export function useJobPosts(userId?: string | null, options: { skip?: boolean; excludeMine?: boolean; excludeApplied?: boolean } = {}) {
   const [jobs, setJobs] = useState<JobPostData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -102,7 +173,39 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     };
   };
 
+    // URL utility functions
+    const updateQueryParams = (params: Record<string, any>, push = true) => {
+      if (typeof window === 'undefined') return;
+      
+      const url = new URL(window.location.href);
+      
+      Object.entries(params).forEach(([key, value]) => {
+        if (value === undefined || value === null || value === '') {
+          url.searchParams.delete(key);
+        } else {
+          url.searchParams.set(key, String(value));
+        }
+      });
+      
+      const newUrl = url.toString();
+      if (newUrl === window.location.href) return;
   
+      const method = push ? 'pushState' : 'replaceState';
+      window.history[method]({}, '', newUrl);
+    };
+  
+    const parseUrlParams = () => {
+      if (typeof window === 'undefined') return { q: '', location: '', sortVal: '', parsedFilters: null, postId: '' };
+      
+      const url = new URL(window.location.href);
+      const q = url.searchParams.get('q') || '';
+      const location = url.searchParams.get('location') || '';
+      const sortVal = url.searchParams.get('sort') || '';
+      const filtersStr = url.searchParams.get('filters');
+      const postId = url.searchParams.get('postId') || '';
+      
+      return { q, location, sortVal, parsedFilters: parseFiltersFromUrl(filtersStr), postId };
+    };
 
   const load = useCallback(async (params: { page?: number; isLoadMore?: boolean; searchTerm?: string; location?: string; sortBy?: string; sortOrder?: 'asc' | 'desc'; filters?: FilterOptions | null } = {}) => {
     const page = params.page ?? 1;
@@ -122,7 +225,7 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       };
 
       // Apply filters (job types, subtypes, price range) to request params if provided
-      const appliedFilters = params.filters ?? filters;
+      const appliedFilters = 'filters' in params ? params.filters : filters;
       if (appliedFilters) {
         const { jobTypes, salaryRange } = appliedFilters;
 
@@ -251,66 +354,44 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       setLoading(false);
       setIsLoadingMore(false);
     }
-  }, [userId, sort.sortBy, sort.sortOrder]);
+  }, [userId, sort.sortBy, sort.sortOrder, filters, options.excludeMine, options.excludeApplied]);
 
   const applyFilters = useCallback(async (f: FilterOptions | null) => {
     setFilters(f);
     await load({ page: 1, filters: f });
-    
-    // Update URL with filters (JSON encoded)
-    if (f) {
-      updateQueryParams({ filters: JSON.stringify(f) });
-    } else {
-      updateQueryParams({ filters: undefined });
+    updateQueryParams({ filters: serializeFiltersForUrl(f) });
+  }, [load, updateQueryParams]);
+
+  useEffect(() => {
+    const { q, location: loc, sortVal, parsedFilters } = parseUrlParams();
+
+    let sortBy = 'createdAt';
+    let sortOrder: 'asc' | 'desc' = 'desc';
+    if (sortVal) {
+      const parts = sortVal.split('_');
+      sortBy = parts[0] || 'createdAt';
+      sortOrder = parts[1] === 'asc' ? 'asc' : 'desc';
     }
-  }, [load]);
 
-  // URL utility functions - these don't depend on state and can be called directly
-  const updateQueryParams = (params: Record<string, any>, push = true) => {
-    if (typeof window === 'undefined') return;
-    
-    const url = new URL(window.location.href);
-    
-    // Update or delete parameters
-    Object.entries(params).forEach(([key, value]) => {
-      if (value === undefined || value === null) {
-        url.searchParams.delete(key);
-      } else {
-        url.searchParams.set(key, String(value));
-      }
-    });
-    
-    const newUrl = url.toString();
-
-    // No-op if URL would not change
-    if (newUrl === window.location.href) return;
-
-    const method = push ? 'pushState' : 'replaceState';
-    window.history[method]({}, '', newUrl);
-  };
-
-  const parseUrlParams = () => {
-    if (typeof window === 'undefined') return { q: '', location: '', sortVal: '', parsedFilters: null, postId: '' };
-    
-    const url = new URL(window.location.href);
-    const q = url.searchParams.get('q') || '';
-    const location = url.searchParams.get('location') || '';
-    const sortVal = url.searchParams.get('sort') || '';
-    const filtersJson = url.searchParams.get('filters');
-    const postId = url.searchParams.get('postId') || '';
-    
-    let parsedFilters: FilterOptions | null = null;
-    if (filtersJson) {
-      try {
-        parsedFilters = JSON.parse(filtersJson);
-      } catch {
-        parsedFilters = null;
-      }
+    setSort({ sortBy, sortOrder });
+    if (parsedFilters) {
+      setFilters(parsedFilters);
     }
-    
-    return { q, location, sortVal, parsedFilters, postId };
-  };
 
+    if (q || loc || sortVal || parsedFilters) {
+      load({
+        page: 1,
+        searchTerm: q,
+        location: loc,
+        sortBy,
+        sortOrder,
+        filters: parsedFilters,
+      });
+    } else if (!options.skip) {
+      load({ page: 1 });
+    }
+  }, [options.skip]);
+  
   const setSelectedPostId = (id?: string | null, push = true) => {
     updateQueryParams({ postId: id || undefined }, push);
   };
@@ -363,42 +444,6 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       return true;
     });
   };
-
-  useEffect(() => {
-    if (options.skip) {
-      return;
-    }
-    // load first page when userId changes (or on mount)
-    load({ page: 1 });
-  }, [load, options.skip]);
-
-  // Mount effect to restore state from URL
-  useEffect(() => {
-    const { q, location: loc, sortVal, parsedFilters } = parseUrlParams();
-
-    // Determine sort state from URL; default is createdAt desc (no param)
-    let sortBy = 'createdAt';
-    let sortOrder: 'asc' | 'desc' = 'desc';
-    if (sortVal) {
-      const parts = sortVal.split('_');
-      sortBy = parts[0] || 'createdAt';
-      sortOrder = parts[1] === 'asc' ? 'asc' : 'desc';
-    }
-
-    // Reflect URL sort into hook state so UI stays in sync
-    setSort({ sortBy, sortOrder });
-
-    if (q || loc || sortVal || parsedFilters) {
-      load({
-        page: 1,
-        searchTerm: q,
-        location: loc,
-        sortBy,
-        sortOrder,
-        filters: parsedFilters,
-      });
-    }
-  }, []);
 
   const handleSearch = useCallback((query: string, location?: string) => {
     (async () => {
