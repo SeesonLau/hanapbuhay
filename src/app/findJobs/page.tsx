@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Banner from "@/components/ui/Banner";
 import ViewProfileModal from "@/components/modals/ViewProfileModal";
@@ -25,7 +25,31 @@ import FilterButton from "@/components/ui/FilterButton";
 import FilterModal from "@/components/ui/FilterModal";
 import DeleteModal from "@/components/ui/DeleteModal";
 
+// Force dynamic rendering since we use useSearchParams
+export const dynamic = 'force-dynamic';
+
+// Wrapper component to handle Suspense boundary for useSearchParams
 export default function FindJobsPage() {
+  return (
+    <Suspense fallback={<FindJobsPageFallback />}>
+      <FindJobsPageContent />
+    </Suspense>
+  );
+}
+
+// Loading fallback component
+function FindJobsPageFallback() {
+  return (
+    <div className="min-h-screen overflow-x-hidden">
+      <div className="fixed inset-0 -z-10 bg-gray-default" />
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    </div>
+  );
+}
+
+function FindJobsPageContent() {
   const searchParams = useSearchParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
