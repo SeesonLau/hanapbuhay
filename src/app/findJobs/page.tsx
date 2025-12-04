@@ -67,6 +67,7 @@ export default function FindJobsPage() {
     loadMore,
     refresh,
     applyFilters,
+    setSortInUrl,
     setSelectedPostId,
   } = useJobPosts(currentUserId ?? undefined, { excludeMine: true, excludeApplied: true });
 
@@ -105,34 +106,10 @@ export default function FindJobsPage() {
   }, [activeFilters]);
 
   const handleSortChange = useCallback((opt: any) => {
-      const val = String(opt?.value ?? 'latest');
-      // map UI sort values to service sort params
-      let sortBy: string = 'createdAt';
-      let sortOrder: 'asc' | 'desc' = 'desc';
-      switch (val) {
-        case 'latest':
-          sortBy = 'createdAt';
-          sortOrder = 'desc';
-          break;
-        case 'oldest':
-          sortBy = 'createdAt';
-          sortOrder = 'asc';
-          break;
-        case 'salary-asc':
-          sortBy = 'price';
-          sortOrder = 'asc';
-          break;
-        case 'salary-desc':
-          sortBy = 'price';
-          sortOrder = 'desc';
-          break;
-        default:
-          break;
-      }
-      if (hookHandleSort) {
-        hookHandleSort(sortBy, sortOrder);
-      }
-    }, [hookHandleSort]);
+    const val = String(opt?.value ?? 'latest');
+    const sortParam = val === 'latest' ? 'date_desc' : val === 'oldest' ? 'date_asc' : val === 'salary-asc' ? 'salary_asc' : val === 'salary-desc' ? 'salary_desc' : undefined;
+    setSortInUrl?.(sortParam);
+  }, [setSortInUrl]);
 
   const handleApplyFilters = (filters: FilterOptions) => {
     setActiveFilters(filters);

@@ -94,18 +94,27 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
         const raw = (job as any)?.raw;
         const userId = raw?.userId || raw?.createdBy;
         if (!userId) return;
-        setPosterUserId(String(userId));
-        const info = await ProfileService.getNameProfilePic(String(userId));
+
+        const uid = String(userId);
+        // Avoid refetching / setState if we already have the same poster id
+        if (posterUserId === uid) return;
+
+        setPosterUserId(uid);
+        const info = await ProfileService.getNameProfilePic(uid);
         if (info) {
           const displayName = formatDisplayName(info.name ?? "");
           setPoster({ name: displayName || "Unknown Poster", role: "Client", avatarUrl: info.profilePicUrl ?? undefined });
         }
-      } catch (_) {}
+      } catch (err) {
+        // log for visibility but don't crash the modal
+        // eslint-disable-next-line no-console
+        console.error('Error fetching profile:', err);
+      }
     };
     if (isOpen && job) {
       fetchPoster();
     }
-  }, [isOpen, job]);
+  }, [isOpen, job, posterUserId]);
 
   if (!isOpen || !job) return null;
 

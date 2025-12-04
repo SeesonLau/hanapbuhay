@@ -483,6 +483,39 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     updateQueryParams({ sort: requestedSortParam });
   }, [load]);
 
+  const setSortInUrl = useCallback((sort?: string) => {
+    // Default sorts treated as absence of `sort` param
+    const defaultSorts = new Set(['createdAt_desc', 'date_desc']);
+    const { sortVal: currentSort } = parseUrlParams();
+
+    if (!sort || defaultSorts.has(sort)) {
+      if (!currentSort) return;
+      // use replaceState to avoid adding to history
+      updateQueryParams({ sort: undefined }, false);
+      return;
+    }
+
+    if (currentSort === sort) return;
+    updateQueryParams({ sort });
+  }, [parseUrlParams, updateQueryParams]);
+
+  const setSortInUrlForManage = useCallback((sort?: string) => {
+    // This is a simplified version for manage jobs which only has date sort
+    const defaultSorts = new Set(['latest', 'date_desc']);
+    const { sortVal: currentSort } = parseUrlParams();
+
+    if (!sort || defaultSorts.has(sort)) {
+      if (!currentSort) return;
+      // use replaceState to avoid adding to history
+      updateQueryParams({ sort: undefined }, false);
+      return;
+    }
+
+    if (currentSort === sort) return;
+    updateQueryParams({ sort });
+  }, [parseUrlParams, updateQueryParams]);
+
+
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMoreData) return;
     await load({ page: currentPage + 1, isLoadMore: true });
@@ -549,6 +582,8 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     applyFilters,
     setSelectedPostId,
     parseUrlParams,
+    setSortInUrl, // findJobs uses this
+    setSortInUrlForManage,
     updateQueryParams,
   };
 }

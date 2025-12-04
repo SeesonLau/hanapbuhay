@@ -1,7 +1,7 @@
 // src/app/manage-job-posts/page.tsx
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import Banner from '@/components/ui/Banner';
 import AddButtonIcon from '@/assets/add.svg';
@@ -26,7 +26,7 @@ import FilterModal from '@/components/ui/FilterModal';
 export default function ManageJobPostsPage() {
   const [user, setUser] = useState<any | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort, loadMore, refresh, deletePost, updatePost, createPost, applyFilters } = useJobPosts(userId, { skip: !userId });
+  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort, loadMore, refresh, deletePost, updatePost, createPost, applyFilters, setSelectedPostId, parseUrlParams, setSortInUrlForManage } = useJobPosts(userId, { skip: !userId });
   const [initialLoading, setInitialLoading] = useState(true);
   const { stats, loading: statsLoading, error: statsError } = useStats({ variant: 'manageJobs', userId });
   
@@ -113,11 +113,8 @@ export default function ManageJobPostsPage() {
   // Stable sort change handler to avoid re-render loops
   const handleManageSortChange = useCallback((opt: any) => {
     const val = String(opt?.value ?? 'latest');
-    let sortBy = 'createdAt';
-    let sortOrder: 'asc' | 'desc' = 'desc';
-    if (val === 'oldest') sortOrder = 'asc';
-    handleSort?.(sortBy, sortOrder);
-  }, [handleSort]);
+    setSortInUrlForManage?.(val);
+  }, [setSortInUrlForManage]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -155,6 +152,7 @@ export default function ManageJobPostsPage() {
         others: false,
       },
     });
+    applyFilters?.(null);
   };
 
   const handlePostSaved = async (data?: any) => {
@@ -251,6 +249,61 @@ export default function ManageJobPostsPage() {
     }
   };
 
+  // On mount - if URL contains postId, honor it only for internal navigation.
+  // If the post exists in current list, open the modal with that post.
+  // Otherwise, remove the postId param (replaceState) so external/bookmarked links don't persist invalid id.
+  const _processedUrlPostRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const { postId } = parseUrlParams?.() ?? { postId: '' } as any;
+      if (!postId) return;
+
+      // Avoid re-processing the same postId repeatedly which can cause update loops
+      if (_processedUrlPostRef.current === postId) return;
+
+      const ref = document.referrer || '';
+      const isInternalRef = ref.startsWith(window.location.origin);
+
+      if (!isInternalRef) {
+        setSelectedPostId?.(null, false);
+        _processedUrlPostRef.current = null;
+        return;
+      }
+
+      const found = jobs?.find((j) => j.id === postId);
+      if (!found) {
+        // If not found in the currently loaded list, remove the param (avoid stale URL)
+        setSelectedPostId?.(null, false);
+        _processedUrlPostRef.current = null;
+        return;
+      }
+
+      const data: JobPostViewData = {
+        id: found.id,
+        title: found.title,
+        description: found.description,
+        requirements: found.requirements ?? [],
+        location: found.location ?? '',
+        salary: String(found.salary).replace(/₱|,/g, ''),
+        salaryPeriod: found.salaryPeriod ?? 'month',
+        postedDate: found.postedDate ?? '',
+        applicantCount: found.applicantCount ?? 0,
+        genderTags: found.genderTags,
+        experienceTags: found.experienceTags,
+        jobTypeTags: found.jobTypeTags,
+        raw: found.raw,
+      };
+
+      _processedUrlPostRef.current = postId;
+      setSelectedPostId?.(postId);
+      setSelectedJob(data);
+      setIsJobViewOpen(true);
+    } catch (e) {
+      // ignore
+    }
+  }, [jobs]);
+
   // Show preloader while loading user data
   if (initialLoading) {
     return (
@@ -331,7 +384,7 @@ export default function ManageJobPostsPage() {
           viewMode={viewMode}
           onViewModeChange={(v) => setViewMode(v)}
           onLoadMore={loadMore as () => void}
-          onOpen={(data) => { setSelectedJob(data); setIsJobViewOpen(true); }}
+          onOpen={(data) => { setSelectedPostId?.(data?.id); setSelectedJob(data); setIsJobViewOpen(true); }}
           onViewApplicants={handleOpenApplicants}
           onEdit={handleEditPost}
           onDelete={handleDeletePost}
@@ -368,7 +421,7 @@ export default function ManageJobPostsPage() {
 
         <JobPostViewModal 
           isOpen={isJobViewOpen} 
-          onClose={() => setIsJobViewOpen(false)} 
+          onClose={() => { setSelectedPostId?.(null, false); setIsJobViewOpen(false); }} 
           job={selectedJob}
         />
       </main>
@@ -383,6 +436,13 @@ export default function ManageJobPostsPage() {
         onClearAll={handleClearFilters}
         initialFilters={activeFilters}
       />
+      {/* If the URL contains postId, restore or clean it on mount depending on referrer */}
+      { /* Minimal effect: honor postId only for internal navigation and open job view if post is present in list */ }
+      {/* Keep logic minimal and inside the page: read url -> if internal navigation open modal, otherwise remove param */}
+      {/* parse postId in URL on mount: honor only internal navigation, otherwise remove param */}
+      <>
+        { /* React effect implemented as actual useEffect below (keeps modifications minimal) */ }
+      </>
 
       {/* Floating Add Post Button - Mobile only */}
       <button
