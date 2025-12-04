@@ -10,15 +10,15 @@ import Button from '@/components/ui/Button';
 import TextBox from '@/components/ui/TextBox';
 import Image from 'next/image';
 import { IoArrowBack } from "react-icons/io5";
-import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 
 interface LoginFormProps {
   onForgotPassword: () => void;
   onBackClick?: () => void;
   onSignUpClick?: () => void;
+  onLoadingChange?: (loading: boolean) => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackClick, onSignUpClick }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackClick, onSignUpClick, onLoadingChange }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,6 +32,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
     
     // Clear previous states
     setLoading(true);
+    onLoadingChange?.(true);
     setNeedsConfirmation(false);
     setError('');
 
@@ -66,6 +67,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
       setError(err.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
+      onLoadingChange?.(false);
       console.log('===================');
     }
   };
@@ -125,11 +127,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
         Sign In
       </h2>
 
-      <Preloader
-        isVisible={loading}
-        message={PreloaderMessages.PROCESSING}
-        variant="default"
-      />
+      
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (

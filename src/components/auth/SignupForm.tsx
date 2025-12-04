@@ -19,14 +19,14 @@ import {
   getGreenColor,
   getBlueDarkColor
 } from '@/styles';
-import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 
 interface SignupFormProps {
   onBackClick?: () => void;
   onSignInClick?: () => void;
+  onLoadingChange?: (loading: boolean) => void;
 }
 
-export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInClick }) => {
+export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInClick, onLoadingChange }) => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,6 +39,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    onLoadingChange?.(true);
     setError('');
 
     // Validate passwords match
@@ -68,6 +69,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
+      onLoadingChange?.(false);
     }
   };
 
@@ -123,11 +125,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
           Sign Up
         </h2>
 
-        <Preloader
-      isVisible={loading}
-      message={PreloaderMessages.PROCESSING}
-      variant="default"
-    />
+        
 
         <form onSubmit={handleSubmit} className="space-y-4 px-2 sm:px-6 pb-4">
           {error && (
