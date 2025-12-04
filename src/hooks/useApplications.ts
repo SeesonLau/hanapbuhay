@@ -37,6 +37,10 @@ export function useApplications(userId?: string | null, options: UseApplications
   const [error, setError] = useState<string | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const [postIdToApply, setPostIdToApply] = useState<string | null>(null);
+  // State for delete confirmation
+  const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
+  const [applicationIdToDelete, setApplicationIdToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const load = useCallback(async () => {
     if (!userId) {
@@ -154,6 +158,38 @@ export function useApplications(userId?: string | null, options: UseApplications
     setPostIdToApply(null);
   }, []);
 
+  // --- Delete Application Logic ---
+
+  const deleteApplication = useCallback((applicationId: string) => {
+    if (!userId) {
+      toast.error('Please log in to manage applications');
+      return;
+    }
+    setApplicationIdToDelete(applicationId);
+    setIsDeleteConfirming(true);
+  }, [userId]);
+
+  const confirmDeleteApplication = useCallback(async () => {
+    if (!applicationIdToDelete || !userId) return;
+    setIsDeleting(true);
+    try {
+      await ApplicationService.deleteApplication(applicationIdToDelete, userId);
+      toast.success('Application withdrawn successfully.');
+      load(); // Refresh the list
+    } catch (error) {
+      toast.error('Failed to withdraw application.');
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteConfirming(false);
+      setApplicationIdToDelete(null);
+    }
+  }, [applicationIdToDelete, userId, load]);
+
+  const cancelDeleteApplication = useCallback(() => {
+    setIsDeleteConfirming(false);
+    setApplicationIdToDelete(null);
+  }, []);
+
   const getAppliedPostIds = useCallback(async (): Promise<string[]> => {
     if (!userId) return [];
     try {
@@ -255,6 +291,11 @@ export function useApplications(userId?: string | null, options: UseApplications
     isConfirming,
     confirmApplication,
     cancelApplication,
+    deleteApplication,
+    isDeleting,
+    isDeleteConfirming,
+    confirmDeleteApplication,
+    cancelDeleteApplication,
     getAppliedPostIds,
     setSelectedApplicationId,
     setFiltersInUrl,

@@ -1,5 +1,6 @@
 'use client';
 
+import { toast } from 'react-hot-toast';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import Banner from '@/components/ui/Banner';
 import StatsSection from '@/components/posts/StatsSection';
@@ -10,14 +11,14 @@ import { ViewToggle } from '@/components/ui/ViewToggle';
 import Sort from '@/components/ui/Sort';
 import FilterSection, { FilterOptions } from '@/components/ui/FilterSection';
 import { ApplicationService } from '@/lib/services/applications-services';
+import DeleteModal from '@/components/ui/DeleteModal';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterModal from '@/components/ui/FilterModal';
-import { ApplicationStatus } from '@/components/cards/AppliedJobCardList';
+import { ApplicationStatus, AppliedJob } from '@/components/cards/AppliedJobCardList';
 import useApplications from '@/hooks/useApplications';
 import ApplicationsSection from '@/components/applications/ApplicationsSection';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
-import { JobType, SubTypes } from '@/lib/constants/job-types';
 import JobPostViewModal, { JobPostViewData } from '@/components/modals/JobPostViewModal';
 
 export default function AppliedJobsPage() {
@@ -28,6 +29,8 @@ export default function AppliedJobsPage() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
+  const [selectedApplication, setSelectedApplication] = useState<AppliedJob | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'total' | null>(null);
   const [sortOption, setSortOption] = useState<string>('latest');
   const [activeFilters, setActiveFilters] = useState<FilterOptions>({
@@ -78,9 +81,15 @@ export default function AppliedJobsPage() {
     loading: appsLoading, 
     error: appsError,
     setSelectedApplicationId,
+    deleteApplication,
+    isDeleting,
+    isDeleteConfirming,
+    confirmDeleteApplication,
+    cancelDeleteApplication,
     setFiltersInUrl,
     setSortInUrl,
     parseUrlParams,
+    refresh: refreshApplications,
   } = useApplications(currentUserId);
 
   // On mount, restore sort and filters from URL to UI state
@@ -180,9 +189,28 @@ export default function AppliedJobsPage() {
     setFiltersInUrl?.(null);
   };
 
-  const handleDeleteApplication = (jobId: string) => {
-    console.log('Delete application:', jobId);
-    // TODO: Implement delete functionality
+  const handleDeleteApplication = (applicationId: string) => {
+    const appToDelete = filteredAndSortedApplications.find(app => app.id === applicationId);
+    if (appToDelete) {
+      setSelectedApplication(appToDelete);
+      deleteApplication?.(applicationId);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedApplication || !currentUserId) return;
+    try {
+      await ApplicationService.deleteApplication(selectedApplication.id, currentUserId);
+      toast.success('Application withdrawn successfully');
+      confirmDeleteApplication?.(); // Closes modal and resets state in hook
+      refreshApplications?.(); // Re-fetches applications
+    } catch (error) {
+      console.error('Failed to withdraw application:', error);
+      toast.error('Failed to withdraw application.');
+      cancelDeleteApplication?.(); // Also close modal on failure
+    } finally {
+      setSelectedApplication(null);
+    }
   };
 
   const handleOpenJobView = async (job: any) => {
@@ -499,6 +527,15 @@ export default function AppliedJobsPage() {
         isOpen={isJobViewOpen}
         onClose={() => { setSelectedApplicationId?.(null, false); setIsJobViewOpen(false); }}
         job={selectedJob}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={isDeleteConfirming}
+        onClose={cancelDeleteApplication}
+        onConfirm={handleConfirmDelete}
+        modalType="withdrawApplication"
+        isProcessing={isDeleting}
       />
     </div>
   );

@@ -81,8 +81,8 @@ export const MODAL_CONTENT: Record<ModalType, ModalContent> = {
   },
   withdrawApplication: {
     variant: 'delete',
-    title: 'Job Application Withdrawal',
-    description: 'Are you sure you want to withdraw from this job?',
+    title: 'Withdraw Application?',
+    description: 'This action cannot be undone.',
     confirmText: 'Withdraw',
   },
   deleteWorkExperience: {
