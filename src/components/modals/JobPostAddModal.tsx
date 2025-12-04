@@ -521,7 +521,15 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
               <Button variant="ghost" fullRounded={true} className="w-[140px] border-2 border-primary-primary500 text-primary-primary500 hover:bg-primary-primary100" onClick={() => setPage(1)}>Back</Button>
             )}
             {page === 1 && (
-              <Button variant="primary" fullRounded={true} className="ml-auto w-[140px]" onClick={() => setPage(2)}>Next</Button>
+              <Button 
+                variant="primary" 
+                fullRounded={true} 
+                className="ml-auto w-[140px] disabled:opacity-50" 
+                disabled={selectedSubTypes.length === 0 || selectedExperience.length === 0 || selectedGenders.length === 0}
+                onClick={() => setPage(2)}
+              >
+                Next
+              </Button>
             )}
             {page === 2 && (
               <Button variant="primary" fullRounded={true} className="ml-auto w-[140px] disabled:opacity-50" disabled={!isFormValid} onClick={handleSubmit}>Post</Button>
