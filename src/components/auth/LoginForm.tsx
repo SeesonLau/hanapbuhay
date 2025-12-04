@@ -50,8 +50,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
 
       // CRITICAL: Only navigate if BOTH success is true AND we have user data
       if (result.success === true && result.data) {
-        console.log('✅ Login successful, redirecting to findJobs');
-        router.push(ROUTES.FINDJOBS);
+        console.log('✅ Login successful');
+        
+        // Check if there's a pending job application from landing page
+        const pendingJobId = sessionStorage.getItem('pendingJobApplication');
+        if (pendingJobId) {
+          console.log('📋 Pending job application found:', pendingJobId);
+          sessionStorage.removeItem('pendingJobApplication');
+          // Redirect to findJobs with the job ID to trigger application modal
+          router.push(`${ROUTES.FINDJOBS}?applyJobId=${pendingJobId}`);
+        } else {
+          console.log('➡️ Redirecting to findJobs');
+          router.push(ROUTES.FINDJOBS);
+        }
       } else if (result.needsConfirmation) {
         console.log('⚠️ Email confirmation needed');
         setNeedsConfirmation(true);
@@ -180,7 +191,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
             type="button"
             onClick={onForgotPassword}
             disabled={loading}
-            className="font-alexandria font-light text-mini sm:text-small text-primary-primary400 hover:text-primary-primary500 font-light hover:underline disabled:opacity-50"
+            className="font-alexandria font-light text-mini sm:text-small text-primary-primary400 hover:text-primary-primary500 hover:underline disabled:opacity-50"
           >
             Forgot Password?
           </button>
@@ -244,7 +255,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
             type="button"
             onClick={onSignUpClick}
             disabled={loading}
-            className="font-alexandria font-light text-mini sm:text-small text-primary-primary400 hover:text-primary-primary500 font-light hover:underline disabled:opacity-50"
+            className="font-alexandria font-light text-mini sm:text-small text-primary-primary400 hover:text-primary-primary500 hover:underline disabled:opacity-50"
           >
             here
           </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import Banner from "@/components/ui/Banner";
 import ViewProfileModal from "@/components/modals/ViewProfileModal";
 import JobPostViewModal, { JobPostViewData } from "@/components/modals/JobPostViewModal";
@@ -25,6 +26,7 @@ import FilterModal from "@/components/ui/FilterModal";
 import DeleteModal from "@/components/ui/DeleteModal";
 
 export default function FindJobsPage() {
+  const searchParams = useSearchParams();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
@@ -178,6 +180,22 @@ export default function FindJobsPage() {
     };
     initCurrentUser();
   }, []);
+
+  // Check for pending job application from landing page
+  useEffect(() => {
+    const applyJobId = searchParams.get('applyJobId');
+    if (applyJobId && jobs.length > 0 && currentUserId) {
+      // Find the job from the loaded jobs
+      const jobToApply = jobs.find(j => j.id === applyJobId);
+      if (jobToApply) {
+        // Trigger the application modal
+        createApplication(applyJobId);
+        
+        // Clear the URL parameter
+        window.history.replaceState({}, '', '/findJobs');
+      }
+    }
+  }, [searchParams, jobs, currentUserId, createApplication]);
 
   // remove manual counts -- hook already fetches applicant counts for each post
 
