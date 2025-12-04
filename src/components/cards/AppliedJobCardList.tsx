@@ -26,6 +26,7 @@ export interface AppliedJob {
   genderTags?: string[];
   experienceTags?: string[];
   jobTypeTags?: string[];
+  raw?: any; // Store complete application object with posts data for modal
 }
 
 // Component props interface
