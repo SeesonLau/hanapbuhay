@@ -9,6 +9,8 @@ import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
 import { JobType, SubTypes } from '@/lib/constants/job-types';
 
+const PAGE_SIZE = 10;
+
 interface UseApplicationsOptions {
   skip?: boolean;
   pageSize?: number;
@@ -34,28 +36,45 @@ function formatAppliedDate(iso?: string) {
 export function useApplications(userId?: string | null, options: UseApplicationsOptions = {}) {
   const [applications, setApplications] = useState<AppliedJob[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [hasMoreData, setHasMoreData] = useState<boolean>(true);
+  const [sort, setSort] = useState<{ sortBy: string; sortOrder: 'asc' | 'desc' }>({
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+  });
+  const [filters, setFilters] = useState<FilterOptions | null>(null);
+
   const [isConfirming, setIsConfirming] = useState(false);
   const [postIdToApply, setPostIdToApply] = useState<string | null>(null);
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
   const [applicationIdToDelete, setApplicationIdToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [filters, setFilters] = useState<FilterOptions | null>(null);
 
-  const load = useCallback(async (params: { searchTerm?: string; location?: string; filters?: FilterOptions | null } = {}) => {
+  const load = useCallback(async (params: { page?: number; isLoadMore?: boolean; searchTerm?: string; location?: string; sortBy?: string; sortOrder?: 'asc' | 'desc'; filters?: FilterOptions | null } = {}) => {
     if (!userId) {
       setApplications([]);
       return;
     }
 
-    setLoading(true);
+    const page = params.page ?? 1;
+    const isLoadMore = params.isLoadMore ?? false;
+
+    if (isLoadMore) {
+      setIsLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
     setError(null);
 
     try {
       const appliedFilters = 'filters' in params ? params.filters : filters;
       const queryParams: any = {
-        page: 1,
-        pageSize: options.pageSize ?? 50,
+        page,
+        pageSize: options.pageSize ?? PAGE_SIZE,
+        sortBy: params.sortBy ?? sort.sortBy,
+        sortOrder: params.sortOrder ?? sort.sortOrder,
         filters: {
           ...appliedFilters,
           searchTerm: params.searchTerm,
@@ -65,8 +84,6 @@ export function useApplications(userId?: string | null, options: UseApplications
 
       const res = await ApplicationService.getApplicationsByUserId(userId, queryParams);
       const apps = res.applications || [];
-
-      console.log('Raw applications data from API:', apps);
 
       const mapped = apps.map((a: any) => {
         const post = a.posts ?? a.post ?? {};
@@ -105,27 +122,44 @@ export function useApplications(userId?: string | null, options: UseApplications
         } as AppliedJob;
       });
 
-      console.log('Final mapped applications:', mapped);
-      setApplications(mapped);
+      if (isLoadMore) {
+        setApplications(prev => [...prev, ...mapped]);
+      } else {
+        setApplications(mapped);
+      }
+      setCurrentPage(page);
+      setHasMoreData(res.hasMore);
+
     } catch (err) {
       console.error('Failed to load applications', err);
       setError('Failed to load applications');
       toast.error('Failed to load applications');
     } finally {
       setLoading(false);
+      setIsLoadingMore(false);
     }
-  }, [userId, options.pageSize, filters]);
+  }, [userId, options.pageSize, filters, sort.sortBy, sort.sortOrder]);
 
   useEffect(() => {
     if (options.skip) return;
-    const { q, location, parsedFilters } = parseUrlParams();
-    if (q || location || parsedFilters) {
-      setFilters(parsedFilters);
-      load({ searchTerm: q, location, filters: parsedFilters });
-    } else {
-      load();
+    const { q, location, sort: sortVal, parsedFilters } = parseUrlParams();
+
+    let sortBy = 'createdAt';
+    let sortOrder: 'asc' | 'desc' = 'desc';
+    if (sortVal) {
+      const parts = sortVal.split('_');
+      sortBy = parts[0] || 'createdAt';
+      sortOrder = parts[1] === 'asc' ? 'asc' : 'desc';
     }
+
+    setSort({ sortBy, sortOrder });
+    if (parsedFilters) {
+      setFilters(parsedFilters);
+    }
+
+    load({ searchTerm: q, location, sortBy, sortOrder, filters: parsedFilters });
   }, [options.skip]);
+
 
   const createApplication = useCallback((postId: string) => {
     if (!userId) {
@@ -170,7 +204,7 @@ export function useApplications(userId?: string | null, options: UseApplications
     setIsDeleting(true);
     try {
       await ApplicationService.deleteApplication(applicationIdToDelete, userId);
-      load(); // Refresh the list
+      load({ page: 1 }); // Refresh the list
     } catch (error) {
       toast.error('Failed to withdraw application.');
     } finally {
@@ -201,7 +235,7 @@ export function useApplications(userId?: string | null, options: UseApplications
     const url = new URL(window.location.href);
     
     Object.entries(params).forEach(([key, value]) => {
-      if (value === undefined || value === null) {
+      if (value === undefined || value === null || value === '') {
         url.searchParams.delete(key);
       } else {
         url.searchParams.set(key, String(value));
@@ -235,36 +269,71 @@ export function useApplications(userId?: string | null, options: UseApplications
 
   const applyFilters = useCallback(async (f: FilterOptions | null) => {
     setFilters(f);
-    await load({ filters: f });
+    await load({ page: 1, filters: f });
     updateQueryParams({ filters: serializeFiltersForUrl(f) });
   }, [load, updateQueryParams]);
 
-  const setSortInUrl = useCallback((sort?: string) => {
-    const defaultSorts = new Set(['createdAt_desc', 'date_desc']);
+  const handleSort = useCallback(async (sortBy: string, sortOrder: 'asc' | 'desc') => {
+    setSort({ sortBy, sortOrder });
+    await load({ page: 1, sortBy, sortOrder });
+  }, [load]);
+
+  const setSortInUrl = useCallback((sortParam?: string) => {
+    const defaultSorts = new Set(['createdAt_desc', 'date_desc', 'latest']);
     const { sort: currentSort } = parseUrlParams();
 
-    if (!sort || defaultSorts.has(sort)) {
+    if (!sortParam || defaultSorts.has(sortParam)) {
       if (!currentSort) return;
       updateQueryParams({ sort: undefined }, false);
       return;
     }
 
-    if (currentSort === sort) return;
-    updateQueryParams({ sort });
+    if (currentSort === sortParam) return;
+    updateQueryParams({ sort: sortParam });
   }, [updateQueryParams, parseUrlParams]);
 
   const searchApplications = useCallback((query: string, location?: string) => {
     (async () => {
-      await load({ searchTerm: query, location });
+      await load({ page: 1, searchTerm: query, location });
       updateQueryParams({ q: query || undefined, location: location || undefined });
     })();
   }, [load, updateQueryParams]);
+  
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMoreData) return;
+    const { q, location } = parseUrlParams();
+    await load({ 
+      page: currentPage + 1, 
+      isLoadMore: true,
+      searchTerm: q,
+      location,
+      filters,
+      sortBy: sort.sortBy,
+      sortOrder: sort.sortOrder
+    });
+  }, [isLoadingMore, hasMoreData, currentPage, load, parseUrlParams, filters, sort]);
+
+  const refresh = useCallback(async () => {
+    const { q, location, sort: sortVal, parsedFilters } = parseUrlParams();
+    let sortBy = 'createdAt';
+    let sortOrder: 'asc' | 'desc' = 'desc';
+    if (sortVal) {
+      const parts = sortVal.split('_');
+      sortBy = parts[0] || 'createdAt';
+      sortOrder = parts[1] === 'asc' ? 'asc' : 'desc';
+    }
+    await load({ page: 1, searchTerm: q, location, sortBy, sortOrder, filters: parsedFilters });
+  }, [load, parseUrlParams]);
 
   return {
     applications,
     loading,
+    isLoadingMore,
+    hasMore: hasMoreData,
     error,
-    refresh: load,
+    refresh,
+    loadMore,
+    handleSort,
     createApplication,
     isConfirming,
     confirmApplication,

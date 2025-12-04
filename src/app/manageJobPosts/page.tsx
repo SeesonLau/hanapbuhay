@@ -359,73 +359,41 @@ export default function ManageJobPostsPage() {
           />
         </aside>
 
-      <main className="pt-2 px-4 md:px-6 laptop:px-6 pb-8 w-full laptop:w-[calc(100%-460px)] laptop:ml-[180px] laptop-L:w-[calc(100%-480px)] laptop-L:ml-[200px]">
-
-        {/* Controls Row with Filter Button - Mobile/Tablet Only */}
-        <div className="laptop:hidden flex items-center justify-between gap-1.5 bg-white rounded-lg px-2 py-2 shadow-sm mb-4">
-          {/* Filter Button */}
-          <FilterButton
-            onClick={() => setIsFilterModalOpen(true)}
-            filterCount={activeFilterCount}
-          />
-          {/* Sort By and View Toggle */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-tiny text-gray-neutral600 whitespace-nowrap hidden mobile-S:inline">Sort by</span>
-            <Sort variant="manageJobs" onChange={handleManageSortChange} />
-            <ViewToggle value={viewMode} onChange={setViewMode} />
-          </div>
+      <main className="w-full laptop:w-[calc(100%-460px)] laptop:ml-[180px] laptop-L:w-[calc(100%-480px)] laptop-L:ml-[200px]">
+        <div className="px-4 md:px-6 laptop:px-6 pt-2 pb-6 max-w-full">
+            <div className="space-y-4">
+                {/* Controls Row with Filter Button - Mobile/Tablet Only */}
+                <div className="laptop:hidden flex items-center justify-between gap-1.5 bg-white rounded-lg px-2 py-2 shadow-sm">
+                    {/* Filter Button */}
+                    <FilterButton
+                        onClick={() => setIsFilterModalOpen(true)}
+                        filterCount={activeFilterCount}
+                    />
+                    {/* Sort By and View Toggle */}
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-tiny text-gray-neutral600 whitespace-nowrap hidden mobile-S:inline">Sort by</span>
+                        <Sort variant="manageJobs" onChange={handleManageSortChange} />
+                        <ViewToggle value={viewMode} onChange={setViewMode} />
+                    </div>
+                </div>
+                <PostsSection
+                    jobs={jobs}
+                    variant="manage"
+                    loading={loading}
+                    isLoadingMore={isLoadingMore}
+                    error={error}
+                    hasMore={hasMore}
+                    viewMode={viewMode}
+                    onViewModeChange={(v) => setViewMode(v)}
+                    onLoadMore={loadMore as () => void}
+                    onOpen={(data) => { setSelectedPostId?.(data?.id); setSelectedJob(data); setIsJobViewOpen(true); }}
+                    onViewApplicants={handleOpenApplicants}
+                    onEdit={handleEditPost}
+                    onDelete={handleDeletePost}
+                    onToggleLock={toggleLockPost}
+                />
+            </div>
         </div>
-        <PostsSection
-          jobs={jobs}
-          variant="manage"
-          loading={loading}
-          isLoadingMore={isLoadingMore}
-          error={error}
-          hasMore={hasMore}
-          viewMode={viewMode}
-          onViewModeChange={(v) => setViewMode(v)}
-          onLoadMore={loadMore as () => void}
-          onOpen={(data) => { setSelectedPostId?.(data?.id); setSelectedJob(data); setIsJobViewOpen(true); }}
-          onViewApplicants={handleOpenApplicants}
-          onEdit={handleEditPost}
-          onDelete={handleDeletePost}
-          onToggleLock={toggleLockPost}
-        />
-
-        {/* Modals */}
-        <JobPostAddModal 
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onSubmit={handlePostSaved}
-        />
-
-        <JobPostEditModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onSubmit={handlePostSaved}
-          post={selectedPost}
-        />
-
-        <DeleteModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handlePostDeleted}
-          modalType="deleteJobPost"
-        />
-
-        <ApplicantsModal 
-          isOpen={isApplicantsModalOpen}
-          onClose={() => setIsApplicantsModalOpen(false)}
-          title={selectedApplicants?.title ?? 'Applicants'}
-          applicantCount={selectedApplicants?.applicantCount ?? 0}
-          postId={selectedApplicants?.postId}
-        />
-
-        <JobPostViewModal 
-          isOpen={isJobViewOpen} 
-          onClose={() => { setSelectedPostId?.(null, false); setIsJobViewOpen(false); }} 
-          job={selectedJob}
-        />
       </main>
 
       </div>
