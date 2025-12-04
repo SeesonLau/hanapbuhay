@@ -102,6 +102,7 @@ export function useApplications(userId?: string | null, options: UseApplications
           genderTags,
           experienceTags,
           jobTypeTags,
+          raw: a, // Preserve raw application data with posts info
         } as AppliedJob;
       });
 

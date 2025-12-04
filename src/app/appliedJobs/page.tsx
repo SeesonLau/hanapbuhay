@@ -9,6 +9,7 @@ import { AuthService } from '@/lib/services/auth-services';
 import { ViewToggle } from '@/components/ui/ViewToggle';
 import Sort from '@/components/ui/Sort';
 import FilterSection, { FilterOptions } from '@/components/ui/FilterSection';
+import { ApplicationService } from '@/lib/services/applications-services';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterModal from '@/components/ui/FilterModal';
 import { ApplicationStatus } from '@/components/cards/AppliedJobCardList';
@@ -184,21 +185,46 @@ export default function AppliedJobsPage() {
     // TODO: Implement delete functionality
   };
 
-  const handleOpenJobView = (job: any) => {
+  const handleOpenJobView = async (job: any) => {
     // Update URL with application ID
     setSelectedApplicationId?.(job.id);
-    // Transform AppliedJob to JobPostViewData format
+
+    // Extract raw application data
+    const rawApp = job.raw || {};
+    const post = rawApp.posts || rawApp.post || {};
+    
+    // Parse requirements from description if available
+    const desc = job.description || '';
+    const requirementsMatch = desc.match(/\[requirements\]\s*([\s\S]*)/i);
+    const aboutText = requirementsMatch ? desc.substring(0, requirementsMatch.index).trim() : desc;
+    const requirementsText = requirementsMatch ? requirementsMatch[1].trim() : '';
+    const requirementsArray = requirementsText ? requirementsText.split('\n').map((r: string) => r.trim()).filter(Boolean) : [];
+    
+    // Fetch applicant count for this post
+    let applicantCount = 0;
+    if (post.postId) {
+      try {
+        applicantCount = await ApplicationService.getTotalApplicationsByPostIdCount(post.postId);
+      } catch (error) {
+        console.error('Error fetching applicant count:', error);
+      }
+    }
+    
+    // Transform AppliedJob to JobPostViewData format with complete data
     const jobData: JobPostViewData = {
-      id: job.id,
+      id: post.postId || job.id,
       title: job.title,
-      description: job.description,
+      description: aboutText,
+      requirements: requirementsArray,
       location: job.location,
-      salary: job.salary,
+      salary: job.salary.replace('₱', '').replace(/,/g, ''),
       salaryPeriod: job.salaryPeriod,
-      postedDate: job.appliedOn, // Using appliedOn as postedDate
+      postedDate: rawApp.createdAt ? new Date(rawApp.createdAt).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' }) : job.appliedOn,
+      applicantCount,
       genderTags: job.genderTags,
       experienceTags: job.experienceTags,
       jobTypeTags: job.jobTypeTags,
+      raw: post, // Pass raw post data for profile fetching
     };
     setSelectedJob(jobData);
     setIsJobViewOpen(true);
