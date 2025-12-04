@@ -249,42 +249,16 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     }
   }, [userId, sort.sortBy, sort.sortOrder]);
 
-  // Helper to flatten filter object into URL params
-  const flattenFiltersToParams = (filters: FilterOptions | null): Record<string, any> => {
-    if (!filters) {
-      return { jobTypes: undefined, experience: undefined, gender: undefined, salary: undefined };
-    }
-
-    const { jobTypes, experienceLevel, preferredGender, salaryRange } = filters;
-
-    const selectedJobTypes = Object.values(jobTypes || {}).flat();
-    const selectedExperience = Object.keys(experienceLevel || {}).filter(k => experienceLevel[k as keyof typeof experienceLevel]);
-    const selectedGender = Object.keys(preferredGender || {}).filter(k => preferredGender[k as keyof typeof preferredGender]);
-    const selectedSalary = Object.keys(salaryRange || {}).filter(k => salaryRange[k as keyof typeof salaryRange]);
-
-    return {
-      jobTypes: selectedJobTypes.length > 0 ? selectedJobTypes.join(',') : undefined,
-      experience: selectedExperience.length > 0 ? selectedExperience.join(',') : undefined,
-      gender: selectedGender.length > 0 ? selectedGender.join(',') : undefined,
-      salary: selectedSalary.length > 0 ? selectedSalary.join(',') : undefined,
-    };
-  };
-
   const applyFilters = useCallback(async (f: FilterOptions | null) => {
     setFilters(f);
     await load({ page: 1, filters: f });
     
-    // Update URL with flattened filter params
-    const paramsToUpdate = flattenFiltersToParams(f);
-
-    // We also need to clear the old 'filters' param if it exists
-    paramsToUpdate.filters = undefined; 
-
-    // Use replaceState to avoid polluting browser history when only clearing old param
-    const hasOldFilterParam = new URL(window.location.href).searchParams.has('filters');
-    const onlyClearingOldParam = hasOldFilterParam && Object.values(paramsToUpdate).every(v => v === undefined);
-
-    updateQueryParams(paramsToUpdate, !onlyClearingOldParam);
+    // Update URL with filters (JSON encoded)
+    if (f) {
+      updateQueryParams({ filters: JSON.stringify(f) });
+    } else {
+      updateQueryParams({ filters: undefined });
+    }
   }, [load]);
 
   // URL utility functions - these don't depend on state and can be called directly
@@ -318,39 +292,16 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     const q = url.searchParams.get('q') || '';
     const location = url.searchParams.get('location') || '';
     const sortVal = url.searchParams.get('sort') || '';
+    const filtersJson = url.searchParams.get('filters');
     const postId = url.searchParams.get('postId') || '';
     
-    // Parse flattened filter params
-    const jobTypesParam = url.searchParams.get('jobTypes')?.split(',') || [];
-    const experienceParam = url.searchParams.get('experience')?.split(',') || [];
-    const genderParam = url.searchParams.get('gender')?.split(',') || [];
-    const salaryParam = url.searchParams.get('salary')?.split(',') || [];
-
-    const parsedFilters: FilterOptions = {
-      jobTypes: {}, // Note: This simplified parsing doesn't restore the original job type category structure
-      experienceLevel: {
-        entryLevel: experienceParam.includes('entryLevel'),
-        intermediate: experienceParam.includes('intermediate'),
-        professional: experienceParam.includes('professional'),
-      },
-      preferredGender: {
-        any: genderParam.includes('any'),
-        male: genderParam.includes('male'),
-        female: genderParam.includes('female'),
-        others: genderParam.includes('others'),
-      },
-      salaryRange: {
-        lessThan5000: salaryParam.includes('lessThan5000'),
-        range10to20: salaryParam.includes('range10to20'),
-        moreThan20000: salaryParam.includes('moreThan20000'),
-        custom: salaryParam.includes('custom'),
-      },
-    };
-
-    // A simple way to reconstruct jobTypes. This loses the parent category but works for filtering.
-    // A more complex mapping would be needed to fully restore the UI state.
-    if (jobTypesParam.length > 0) {
-      parsedFilters.jobTypes['all'] = jobTypesParam;
+    let parsedFilters: FilterOptions | null = null;
+    if (filtersJson) {
+      try {
+        parsedFilters = JSON.parse(filtersJson);
+      } catch {
+        parsedFilters = null;
+      }
     }
     
     return { q, location, sortVal, parsedFilters, postId };

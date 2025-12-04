@@ -11,7 +11,7 @@ interface Props {
   error?: string | null;
   viewMode: "card" | "list";
   onDelete?: (jobId: string) => void;
-  onOpen?: (job: AppliedJob) => void;
+  onOpen?: (job: any) => void;
 }
 
 const ApplicationsSection: React.FC<Props> = ({
@@ -19,8 +19,8 @@ const ApplicationsSection: React.FC<Props> = ({
   loading,
   error,
   viewMode,
-  onDelete,
-  onOpen,
+  onDelete,onOpen,
+
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [isScrollable, setIsScrollable] = React.useState(false);

@@ -11,6 +11,8 @@ interface RequestParams {
   jobType?: string | string[];
   subType?: string[];
   priceRange?: { min: number; max: number };
+  experienceLevel?: string | string[];
+  preferredGender?: string | string[];
   matchMode?: 'mixed'; // For when both subType and type filtering is needed
   // ... other filter params
 }
@@ -78,6 +80,26 @@ export class PostService {
         // Single job type: use .eq() operator
         console.log('Using .eq() for single job type:', jobType);
         query = query.eq('type', jobType);
+      }
+    }
+
+    // Apply experience level filter (stored in subType array)
+    if (params.experienceLevel) {
+      const expArr = Array.isArray(params.experienceLevel) ? params.experienceLevel : [params.experienceLevel];
+      if (expArr.length > 0) {
+        const expFilter = `subType.cs.{${expArr.join(',')}}`;
+        console.log('Filtering by experienceLevel (subType contains):', expArr);
+        query = query.or(expFilter);
+      }
+    }
+
+    // Apply preferred gender filter (also stored in subType array as tags)
+    if (params.preferredGender) {
+      const gArr = Array.isArray(params.preferredGender) ? params.preferredGender : [params.preferredGender];
+      if (gArr.length > 0) {
+        const genderFilter = `subType.cs.{${gArr.join(',')}}`;
+        console.log('Filtering by preferredGender (subType contains):', gArr);
+        query = query.or(genderFilter);
       }
     }
 

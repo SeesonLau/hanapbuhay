@@ -11,6 +11,21 @@ interface ApplicationQueryParams {
   status?: ApplicationStatus[];
   sortBy?: 'createdAt' | 'updatedAt';
   sortOrder?: 'asc' | 'desc';
+  // Optional server-side filters to restrict applications by their related post fields
+  filters?: {
+    searchTerm?: string;
+    location?: string;
+    jobType?: string | string[];
+    subType?: string[];
+    priceRange?: { min: number; max: number };
+    /**
+     * matchMode can be used to indicate mixed filtering when both subType and jobType
+     * selections should be applied (server will interpret accordingly). Example: 'mixed'
+     */
+    matchMode?: 'mixed' | string;
+    experienceLevel?: string | string[];
+    preferredGender?: string | string[];
+  };
 }
 
 interface PaginatedApplications {
@@ -122,6 +137,82 @@ export class ApplicationService {
       sortOrder = 'desc'
     } = params;
 
+    // If filters are provided, perform a posts lookup to find matching postIds,
+    // then restrict applications to those postIds. This avoids trying to filter
+    // on joined fields directly and keeps filtering server-side.
+    let postIdFilter: string[] | undefined = undefined;
+    const f = params.filters;
+    if (f) {
+      try {
+        let postsQuery = supabase
+          .from('posts')
+          .select('postId', { count: 'exact' })
+          .is('deletedAt', null);
+
+        if (f.searchTerm) {
+          const clean = String(f.searchTerm).replace(/\*/g, '').trim();
+          if (clean) postsQuery = postsQuery.or(`title.ilike.%${clean}%,description.ilike.%${clean}%`);
+        }
+
+        if (f.location) {
+          postsQuery = postsQuery.ilike('location', `%${f.location}%`);
+        }
+
+        // jobType / subType filtering (reuse same logic as PostService)
+        if (f.subType && f.subType.length > 0) {
+          if (f.jobType && f.matchMode === 'mixed') {
+            const otherJobTypes = Array.isArray(f.jobType) ? f.jobType : [f.jobType];
+            const subTypeFilter = `subType.cs.{${f.subType.join(',')}}`;
+            const jobTypeFilter = `type.in.(${otherJobTypes.join(',')})`;
+            postsQuery = postsQuery.or(`${subTypeFilter},${jobTypeFilter}`);
+          } else {
+            const subTypeFilter = `subType.cs.{${f.subType.join(',')}}`;
+            postsQuery = postsQuery.or(subTypeFilter);
+          }
+        } else if (f.jobType) {
+          if (Array.isArray(f.jobType)) {
+            postsQuery = postsQuery.in('type', f.jobType);
+          } else {
+            postsQuery = postsQuery.eq('type', f.jobType as string);
+          }
+        }
+
+        if (f.priceRange) {
+          postsQuery = postsQuery.gte('price', f.priceRange.min).lte('price', f.priceRange.max);
+        }
+
+        // experienceLevel and preferredGender are stored as tags inside subType array
+        if (f.experienceLevel) {
+          const exp = Array.isArray(f.experienceLevel) ? f.experienceLevel : [f.experienceLevel];
+          if (exp.length > 0) {
+            const expFilter = `subType.cs.{${exp.join(',')}}`;
+            postsQuery = postsQuery.or(expFilter);
+          }
+        }
+
+        if (f.preferredGender) {
+          const gen = Array.isArray(f.preferredGender) ? f.preferredGender : [f.preferredGender];
+          if (gen.length > 0) {
+            const genderFilter = `subType.cs.{${gen.join(',')}}`;
+            postsQuery = postsQuery.or(genderFilter);
+          }
+        }
+
+        // Get a large enough range for matching posts (no pagination here)
+        const { data: postsData, error: postsError } = await postsQuery.range(0, 9999);
+        if (postsError) throw postsError;
+        const postIds = (postsData || []).map((p: any) => p.postId).filter(Boolean);
+        if (postIds.length === 0) {
+          // No matching posts -> return empty applications
+          return { applications: [], count: 0, hasMore: false };
+        }
+        postIdFilter = postIds;
+      } catch (err) {
+        console.error('Failed to resolve post filters for applications:', err);
+        // continue without post-based filtering (fail-open)
+      }
+    }
+
     let query = supabase
       .from('applications')
       .select(`
@@ -138,6 +229,10 @@ export class ApplicationService {
       `, { count: 'exact' })
       .eq('userId', userId)
       .is('deletedAt', null);
+
+    if (postIdFilter && postIdFilter.length > 0) {
+      query = query.in('postId', postIdFilter);
+    }
 
     if (status?.length) {
       query = query.in('status', status);
