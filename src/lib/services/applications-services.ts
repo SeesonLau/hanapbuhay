@@ -133,7 +133,9 @@ export class ApplicationService {
           price,
           location,
           type,
-          subType
+          subType,
+          userId,
+          createdBy
         )
       `, { count: 'exact' })
       .eq('userId', userId)
