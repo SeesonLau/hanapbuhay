@@ -273,17 +273,17 @@ export default function AppliedJobCard({
               <span className="font-inter text-[10px] font-medium">{status.text}</span>
             </div>
 
-            {/* Delete Button */}
+            {/* Delete Button - Circle with minus sign */}
             {onDelete && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDelete();
                 }}
-                className="p-1.5 text-error-error500 hover:text-error-error600 hover:bg-error-error50 rounded-md transition-colors"
+                className="flex-shrink-0 bg-white border-2 border-error-error500 text-error-error500 rounded-full w-5 h-5 flex items-center justify-center hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-sm transition-colors"
                 title="Delete application"
               >
-                <RiDeleteBin6Line className="w-4 h-4" />
+                <span className="text-sm font-bold leading-none">−</span>
               </button>
             )}
           </div>
@@ -315,10 +315,10 @@ export default function AppliedJobCard({
                 handleDelete();
               }}
               style={{ display: 'flex' }}
-              className="laptop:!hidden z-10 flex-shrink-0 bg-white border-2 border-error-error500 text-error-error500 rounded-full w-6 h-6 items-center justify-center hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-md leading-none text-xl font-medium"
+              className="laptop:!hidden z-10 flex-shrink-0 bg-white border-2 border-error-error500 text-error-error500 rounded-full w-6 h-6 items-center justify-center hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-md transition-colors"
               title="Delete application"
             >
-              −
+              <span className="text-base font-bold leading-none">−</span>
             </button>
             {/* Laptop+ version - shows on hover (1024px and above) */}
             <button
@@ -326,10 +326,10 @@ export default function AppliedJobCard({
                 e.stopPropagation();
                 handleDelete();
               }}
-              className="hidden laptop:!flex z-10 flex-shrink-0 bg-white border-2 border-error-error500 text-error-error500 rounded-full w-6 h-6 items-center justify-center hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-md leading-none text-xl font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+              className="hidden laptop:!flex z-10 flex-shrink-0 bg-white border-2 border-error-error500 text-error-error500 rounded-full w-6 h-6 items-center justify-center hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
               title="Delete application"
             >
-              −
+              <span className="text-base font-bold leading-none">−</span>
             </button>
           </>
         )}

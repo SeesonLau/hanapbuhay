@@ -155,6 +155,26 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
 
   const handleApply = () => {
+    // Check if any filters are selected
+    const hasJobTypeFilters = Object.values(jobTypes).some(
+      (subtypes) => Array.isArray(subtypes) && subtypes.length > 0
+    );
+    const hasSalaryFilters = Object.values(salaryRange).some(Boolean);
+    const hasExperienceFilters = Object.values(experienceLevel).some(Boolean);
+    const hasGenderFilters = Object.values(preferredGender).some(Boolean);
+
+    // For appliedJobs variant, only check jobTypes and salaryRange
+    const hasAnyFilters = variant === 'appliedJobs'
+      ? hasJobTypeFilters || hasSalaryFilters
+      : hasJobTypeFilters || hasSalaryFilters || hasExperienceFilters || hasGenderFilters;
+
+    // If no filters selected, clear filters to show default list
+    if (!hasAnyFilters) {
+      onClearAll?.();
+      return;
+    }
+
+    // Apply the selected filters
     onApply?.({
       jobTypes,
       salaryRange,

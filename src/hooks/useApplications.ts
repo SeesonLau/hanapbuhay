@@ -75,8 +75,11 @@ export function useApplications(userId?: string | null, options: UseApplications
         pageSize: options.pageSize ?? PAGE_SIZE,
         sortBy: params.sortBy ?? sort.sortBy,
         sortOrder: params.sortOrder ?? sort.sortOrder,
-        filters: {
+        filters: appliedFilters ? {
           ...appliedFilters,
+          searchTerm: params.searchTerm,
+          location: params.location,
+        } : {
           searchTerm: params.searchTerm,
           location: params.location,
         },
