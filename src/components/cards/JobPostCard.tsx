@@ -7,6 +7,7 @@ import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
 import { fontClasses } from '@/styles/fonts';
+import Button from '@/components/ui/Button';
 
 interface JobPostData {
   id: string;
@@ -210,14 +211,14 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
                 {applicantCount} Applicants
               </span>
             </div>
-            <motion.button
+            <Button
+              variant="glassy"
+              size="sm"
+              fullRounded
               onClick={(e) => { e.stopPropagation(); onApply?.(id); }}
-              className="px-4 mobile-M:px-5 py-2 mobile-M:py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors text-small mobile-M:text-body font-semibold shadow-lg shadow-blue-600/30 whitespace-nowrap"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
             >
               Apply Now
-            </motion.button>
+            </Button>
           </div>
         </div>
       </motion.div>
@@ -290,12 +291,13 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
             <span className="text-gray-400 hidden mobile-M:inline">•</span>
             <span className={`font-inter text-[9px] mobile-M:text-[10px] text-gray-neutral600`}>{applicantCount} Applicants</span>
           </div>
-          <button
+          <Button
+            variant="primary"
+            size="sm"
             onClick={(e) => { e.stopPropagation(); onApply?.(id); }}
-            className="px-3 mobile-M:px-4 py-1.5 mobile-M:py-2 bg-primary-primary500 text-white rounded-lg hover:bg-primary-primary600 transition-colors text-tiny mobile-M:text-small whitespace-nowrap"
           >
             Apply Now
-          </button>
+          </Button>
         </div>
       </div>
     </div>
