@@ -253,14 +253,21 @@ export class PostService {
   /**
    * Gets the total count of posts for a specific user.
    */
-  static async getPostCountByUserId(userId: string): Promise<number> {
-    const { count, error } = await supabase
+  static async getPostCountByUserId(userId: string, options?: { isLocked?: boolean }): Promise<number> {
+    let query = supabase
       .from('posts')
       .select('*', { count: 'exact', head: true })
       .eq('userId', userId)
       .is('deletedAt', null);
 
+    if (options && options.isLocked !== undefined) {
+      query = query.eq('isLocked', options.isLocked);
+    }
+
+    const { count, error } = await query;
+
     if (error) {
+      console.error('Error in getPostCountByUserId:', error.message);
       return 0;
     }
     return count ?? 0;
