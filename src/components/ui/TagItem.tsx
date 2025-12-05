@@ -11,32 +11,48 @@ import { parseLocationDetailed } from '@/lib/constants/philippines-locations';
 interface StaticTagProps {
   label: string;
   className?: string;
+  variant?: 'default' | 'glassy';
 }
 
-export const StaticGenderTag: React.FC<StaticTagProps> = ({ label, className = '' }) => {
+export const StaticGenderTag: React.FC<StaticTagProps> = ({ label, className = '', variant = 'default' }) => {
+  const isGlassy = variant === 'glassy';
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] text-tag-genderText bg-tag-genderBg ${className}`}
+      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] ${
+        isGlassy 
+          ? 'text-pink-300 bg-pink-500/20 backdrop-blur-sm border border-pink-500/30' 
+          : 'text-tag-genderText bg-tag-genderBg'
+      } ${className}`}
     >
       {label}
     </div>
   );
 };
 
-export const StaticExperienceLevelTag: React.FC<StaticTagProps> = ({ label, className = '' }) => {
+export const StaticExperienceLevelTag: React.FC<StaticTagProps> = ({ label, className = '', variant = 'default' }) => {
+  const isGlassy = variant === 'glassy';
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] text-tag-experienceText bg-tag-experienceBg ${className}`}
+      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] ${
+        isGlassy 
+          ? 'text-emerald-300 bg-emerald-500/20 backdrop-blur-sm border border-emerald-500/30' 
+          : 'text-tag-experienceText bg-tag-experienceBg'
+      } ${className}`}
     >
       {label}
     </div>
   );
 };
 
-export const StaticJobTypeTag: React.FC<StaticTagProps> = ({ label, className = '' }) => {
+export const StaticJobTypeTag: React.FC<StaticTagProps> = ({ label, className = '', variant = 'default' }) => {
+  const isGlassy = variant === 'glassy';
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] text-tag-jobText bg-tag-jobBg ${className}`}
+      className={`inline-flex items-center justify-center px-3 h-[17px] rounded-[5px] text-[10px] ${
+        isGlassy 
+          ? 'text-blue-300 bg-blue-500/20 backdrop-blur-sm border border-blue-500/30' 
+          : 'text-tag-jobText bg-tag-jobBg'
+      } ${className}`}
     >
       {label}
     </div>
@@ -46,16 +62,27 @@ export const StaticJobTypeTag: React.FC<StaticTagProps> = ({ label, className = 
 interface StaticLocationTagProps {
   label: string;
   className?: string;
+  variant?: 'default' | 'glassy';
 }
 
-export const StaticLocationTag: React.FC<StaticLocationTagProps> = ({ label, className = '' }) => {
+export const StaticLocationTag: React.FC<StaticLocationTagProps> = ({ label, className = '', variant = 'default' }) => {
   const { province, city, address } = parseLocationDetailed(label || '');
   const hasAddress = !!address;
+  const isGlassy = variant === 'glassy';
   return (
     <div 
-      className={`inline-flex items-center px-3 h-[25px] rounded-[5px] font-alexandria font-normal text-[10px] text-black bg-gray-default min-w-0 max-w-full ${className}`}
+      className={`inline-flex items-center px-3 h-[25px] rounded-[5px] font-alexandria font-normal text-[10px] min-w-0 max-w-full ${
+        isGlassy 
+          ? 'text-gray-200 bg-white/10 backdrop-blur-sm border border-white/20' 
+          : 'text-black bg-gray-default'
+      } ${className}`}
     >
-      <img src="/icons/Location.svg" alt="Location" className="w-[15px] h-[15px] mr-2" />
+      <img 
+        src="/icons/Location.svg" 
+        alt="Location" 
+        className="w-[15px] h-[15px] mr-2" 
+        style={isGlassy ? { filter: 'brightness(0) invert(1)' } : undefined}
+      />
       <div className="flex items-center min-w-0">
         {province && <span className="flex-shrink-0">{province}</span>}
         {city && <span className="flex-shrink-0">{province ? ', ' : ''}{city}</span>}
@@ -73,17 +100,24 @@ export const StaticLocationTag: React.FC<StaticLocationTagProps> = ({ label, cla
 interface StaticSalaryTagProps {
   label: string;
   className?: string;
+  variant?: 'default' | 'glassy';
 }
 
-export const StaticSalaryTag: React.FC<StaticSalaryTagProps> = ({ label, className = '' }) => {
+export const StaticSalaryTag: React.FC<StaticSalaryTagProps> = ({ label, className = '', variant = 'default' }) => {
+  const isGlassy = variant === 'glassy';
   return (
     <div 
-      className={`inline-flex items-center justify-center px-3 h-[25px] rounded-[5px] font-alexandria font-normal text-[10px] text-black bg-gray-default ${className}`}
+      className={`inline-flex items-center justify-center px-3 h-[25px] rounded-[5px] font-alexandria font-normal text-[10px] ${
+        isGlassy 
+          ? 'text-gray-200 bg-white/10 backdrop-blur-sm border border-white/20' 
+          : 'text-black bg-gray-default'
+      } ${className}`}
     >
       <img 
         src="/icons/PHP.svg" 
         alt="Salary icon" 
         className="w-[15px] h-[15px] mr-2" 
+        style={isGlassy ? { filter: 'brightness(0) invert(1)' } : undefined}
       />
       {label.replace(/₱/g, '')}
     </div>

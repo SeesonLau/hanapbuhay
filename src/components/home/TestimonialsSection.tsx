@@ -87,14 +87,15 @@ export default function TestimonialsSection() {
               key={index}
               className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-5 mobile-M:p-6 tablet:p-7 laptop:p-8 border border-white border-opacity-20 flex flex-col items-center text-center"
               style={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                backgroundColor: 'rgba(30, 58, 138, 0.15)',
+                boxShadow: '0 8px 32px rgba(30, 58, 138, 0.2)',
+                borderColor: 'rgba(59, 130, 246, 0.2)'
               }}
               variants={cardVariants}
               whileHover={{ 
                 scale: 1.05,
                 y: -10,
-                boxShadow: '0 16px 48px rgba(0, 0, 0, 0.15)'
+                boxShadow: '0 16px 48px rgba(30, 58, 138, 0.3)'
               }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >

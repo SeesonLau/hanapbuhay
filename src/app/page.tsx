@@ -1,13 +1,16 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import Lenis from 'lenis';
 import HeaderHome from '@/components/ui/HeaderHome';
 import BenefitsSection from '@/components/home/BenefitsSection';
-import HowItWorksSection from '@/components/home/HowItWorksSection';
-import TestimonialsSection from '@/components/home/TestimonialsSection';
+import RecommendedJobsSection from '@/components/home/RecommendedJobsSection';
+import PopularJobCategoriesSection from '@/components/home/PopularJobCategoriesSection';
 import Footer from '@/components/ui/Footer';
 import Image from 'next/image';
 import Button from '@/components/ui/Button';
+import Particles from '@/components/animations/Particles';
 import {
   getBlueDarkColor,
   TYPOGRAPHY,
@@ -18,10 +21,43 @@ import Link from 'next/link';
 export default function HomePage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const heroRef = useRef(null);
+  const router = useRouter();
   const { scrollYProgress } = useScroll();
   
   const heroY = useTransform(scrollYProgress, [0, 1], [0, -100]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+
+  // Prefetch login and signup pages for instant navigation
+  useEffect(() => {
+    router.prefetch('/login');
+    router.prefetch('/signup');
+  }, [router]);
+
+  // Initialize Lenis smooth scrolling
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.0,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+      infinite: false,
+    });
+
+    let rafId: number;
+    function raf(time: number) {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    }
+
+    rafId = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -61,184 +97,186 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-y-auto laptop:snap-y laptop:snap-proximity bg-white">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-black via-slate-900 to-blue-950">
+      {/* 3D Particle Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <Particles
+          particleColors={['#ffffff', '#60a5fa', '#3b82f6']}
+          particleCount={150}
+          particleSpread={12}
+          speed={0.1}
+          particleBaseSize={100}
+          moveParticlesOnHover={false}
+          particleHoverFactor={0}
+          alphaParticles={true}
+          disableRotation={false}
+          sizeRandomness={1.2}
+          cameraDistance={25}
+          pixelRatio={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 2) : 1}
+        />
+      </div>
+
       {/* Header Section */}
-      <HeaderHome 
-        onNavigateToSection={scrollToSection}
-        onNavigateToFooter={scrollToFooter}
-        isScrolled={isScrolled}
-      />
+      <div className="relative z-20">
+        <HeaderHome 
+          onNavigateToSection={scrollToSection}
+          onNavigateToFooter={scrollToFooter}
+          isScrolled={isScrolled}
+        />
+      </div>
 
       {/* Hero Section */}
-      <motion.section 
+      <section 
+        id="hero"
         ref={heroRef}
-        className="min-h-screen laptop:h-screen flex items-center justify-center px-4 mobile-M:px-6 tablet:px-8 laptop:px-24 py-12 pt-20 mobile-M:pt-24 tablet:pt-28 laptop:pt-30 relative z-10 laptop:snap-start laptop:snap-always"
-        style={{ 
-          y: heroY,
-          opacity: heroOpacity
-        }}
+        className="min-h-screen flex items-center justify-center px-4 mobile-M:px-6 tablet:px-8 laptop:px-12 pt-16 mobile-M:pt-20 tablet:pt-24 pb-8 mobile-M:pb-10 tablet:pb-12 relative z-10"
       >
-        <div className="container mx-auto flex flex-col tablet:flex-row items-center justify-center gap-8 mobile-M:gap-10 tablet:gap-12 laptop:gap-14">
-          {/* Left side - Hero Text */}
-          <motion.div
-            className="flex-1 text-gray-neutral900 space-y-4 mobile-M:space-y-5 tablet:space-y-6 max-w-full tablet:max-w-lg laptop:max-w-xl text-center tablet:text-left"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.8,
-              delay: 0.2,
-              ease: [0.16, 1, 0.3, 1]
-            }}
-          >
-            <motion.h1 
-              className={`${fontClasses.heading} font-alexandria font-bold text-h2  mobile-M:text-4xl mobile-L:text-[2.75rem] tablet:text-5xl laptop:text-[3.125rem] leading-tight`}
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ 
-                duration: 0.6, 
-                delay: 0.3,
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 laptop:grid-cols-2 gap-8 mobile-M:gap-10 tablet:gap-12 laptop:gap-16 items-center">
+            {/* Left side - Hero Text */}
+            <motion.div
+              className="space-y-4 mobile-M:space-y-5 tablet:space-y-6 laptop:space-y-8 text-center laptop:text-left"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.8,
+                delay: 0.2,
                 ease: [0.16, 1, 0.3, 1]
               }}
             >
-              <motion.span 
-                className="block"
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
+              <motion.h1 
+                className={`${fontClasses.heading} font-bold text-h2 mobile-M:text-h1 tablet:text-5xl laptop:text-6xl leading-tight text-white`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ 
                   duration: 0.6, 
                   delay: 0.3,
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >
-                Connecting People,
-              </motion.span>
-              <motion.span 
-                className="block"
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ 
-                  duration: 0.6, 
+                Find Your Next{' '}
+                <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-blue-600 bg-clip-text text-transparent">
+                  Opportunity
+                </span>
+              </motion.h1>
+
+              <motion.p
+                className={`${fontClasses.body} text-gray-300 text-body mobile-M:text-lead tablet:text-xl leading-relaxed`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.6,
                   delay: 0.5,
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >
-                Creating Opportunities
-              </motion.span>
-            </motion.h1>
-            <motion.p
-              className={`${fontClasses.body} font-alexandria font-normal text-gray-neutral600 text-sm mobile-M:text-base mobile-L:text-lg tablet:text-xl laptop:text-[1.25rem] leading-relaxed`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.6,
-                delay: 0.7,
-                ease: [0.16, 1, 0.3, 1]
-              }}
-            >
-              HanapBuhay bridges people who need help with those who can offer it. Together, we make everyday life easier.
-            </motion.p>
-            <motion.div 
-              className="flex flex-col mobile-L:flex-row gap-3 mobile-M:gap-4 mt-6 mobile-M:mt-8 justify-center tablet:justify-start"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ 
-                duration: 0.6, 
-                delay: 0.9,
-                ease: [0.16, 1, 0.3, 1]
-              }}
-            >
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                className="w-full mobile-L:w-auto"
+                Connect with opportunities that matter. Whether you're seeking work or offering it, HanapBuhay makes finding the perfect match effortless and rewarding.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div 
+                className="flex flex-col mobile-L:flex-row gap-3 mobile-M:gap-4 pt-2 mobile-M:pt-4 justify-center laptop:justify-start"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: 0.7,
+                  ease: [0.16, 1, 0.3, 1]
+                }}
               >
-                <Link href="/signup" className="block">
-                  <Button 
-                    variant="primary"
-                    size="lg"
-                    useCustomHover={true}
-                    fullRounded={true}
-                    className="w-full mobile-L:w-auto justify-center px-6 mobile-M:px-8 py-2.5 mobile-M:py-3 min-w-full mobile-L:min-w-40 tablet:min-w-44 text-sm mobile-M:text-base shadow-lg hover:shadow-xl transition-shadow"
-                  >
-                    Sign Up
-                  </Button>
-                </Link>
-              </motion.div>
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                className="w-full mobile-L:w-auto"
-              >
-                <Link href="/login" className="block">
-                  <Button 
-                    variant="ghost"
-                    size="lg"
-                    fullRounded={true}
-                    className="w-full mobile-L:w-auto justify-center px-6 mobile-M:px-8 py-2.5 mobile-M:py-3 min-w-full mobile-L:min-w-40 tablet:min-w-44 text-sm mobile-M:text-base transition-all duration-300"
-                    style={{
-                      outlineColor: getBlueDarkColor('default'),
-                      color: getBlueDarkColor('default'),
-                      backgroundColor: 'transparent',
-                      outline: '2px solid',
-                      outlineOffset: '-2px',
-                      boxShadow: 'none'
-                    }}
-                    onMouseOver={(e) => {
-                      if (!e.currentTarget.disabled) {
-                        e.currentTarget.style.boxShadow = `0 0 20px ${getBlueDarkColor('default')}, 0 0 40px ${getBlueDarkColor('default')}40`;
-                        e.currentTarget.style.outlineColor = getBlueDarkColor('hover');
-                      }
-                    }}
-                    onMouseOut={(e) => {
-                      if (!e.currentTarget.disabled) {
-                        e.currentTarget.style.boxShadow = 'none';
-                        e.currentTarget.style.outlineColor = getBlueDarkColor('default');
-                      }
-                    }}
-                  >
-                    Login
-                  </Button>
-                </Link>
+                <motion.button
+                  onClick={() => router.push('/signup')}
+                  className="px-6 mobile-M:px-8 py-2.5 mobile-M:py-3 tablet:py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-small mobile-M:text-body font-semibold rounded-full transition-all duration-300 shadow-lg shadow-blue-600/50 hover:shadow-blue-600/80 cursor-pointer"
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Get Started
+                </motion.button>
+                <motion.button
+                  onClick={() => router.push('/login')}
+                  className="px-6 mobile-M:px-8 py-2.5 mobile-M:py-3 tablet:py-3.5 border-2 border-white/20 hover:border-white/40 text-white text-small mobile-M:text-body font-semibold rounded-full transition-all duration-300 backdrop-blur-sm hover:bg-white/5 cursor-pointer"
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Sign In
+                </motion.button>
               </motion.div>
             </motion.div>
-          </motion.div>
-          
-          {/* Right side - Image */}
-          <motion.div 
-            className="hidden laptop:flex flex-1 justify-center w-full tablet:w-auto"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ 
-              duration: 0.8, 
-              delay: 0.4,
-              ease: [0.16, 1, 0.3, 1]
-            }}
-          >
+            
+            {/* Right side - Illustration */}
             <motion.div 
-              className="relative w-full max-w-sm mobile-M:max-w-md mobile-L:max-w-lg tablet:max-w-xl laptop:max-w-2xl h-64 mobile-M:h-72 mobile-L:h-80 tablet:h-96 laptop:h-[28rem] rounded-lg overflow-hidden"
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="relative hidden laptop:block"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ 
+                duration: 0.8, 
+                delay: 0.4,
+                ease: [0.16, 1, 0.3, 1]
+              }}
             >
-              <Image
-                src="/image/home-image1.png"
-                alt="People connecting through HanapBuhay"
-                fill
-                style={{ objectFit: 'contain' }}
-                priority
-                className="scale-110 mobile-M:scale-115 tablet:scale-125"
+              <div 
+                className="rounded-2xl tablet:rounded-3xl p-6 tablet:p-8 relative overflow-hidden"
+                style={{
+                  background: 'rgba(30, 58, 138, 0.15)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  boxShadow: '0 8px 32px rgba(30, 58, 138, 0.3)'
+                }}
+              >
+                {/* Decorative gradient */}
+                <div 
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.3) 0%, rgba(12, 74, 110, 0.2) 100%)'
+                  }}
+                />
+                
+                <div className="relative h-72 tablet:h-80 laptop:h-96 rounded-xl tablet:rounded-2xl overflow-hidden">
+                  <Image
+                    src="/image/home-image1.png"
+                    alt="People connecting through HanapBuhay"
+                    fill
+                    style={{ objectFit: 'contain' }}
+                    priority
+                  />
+                </div>
+              </div>
+
+              {/* Floating elements */}
+              <motion.div
+                className="absolute -top-4 -right-4 w-20 h-20 bg-blue-500/20 rounded-full blur-xl"
+                animate={{
+                  y: [0, -20, 0],
+                  scale: [1, 1.2, 1],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+              <motion.div
+                className="absolute -bottom-4 -left-4 w-32 h-32 bg-cyan-500/20 rounded-full blur-xl"
+                animate={{
+                  y: [0, 20, 0],
+                  scale: [1, 1.3, 1],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
               />
             </motion.div>
-          </motion.div>
+          </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Other Sections */}
       <div className="relative z-10">
         <BenefitsSection />
-        <HowItWorksSection />
-        <TestimonialsSection />
+        <RecommendedJobsSection />
+        <PopularJobCategoriesSection />
       </div>
 
       {/* Footer Section */}

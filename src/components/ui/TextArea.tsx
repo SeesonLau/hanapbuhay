@@ -18,6 +18,8 @@ export interface TextAreaProps extends Omit<React.TextareaHTMLAttributes<HTMLTex
   onValidationChange?: (isValid: boolean, error?: string) => void;
   showCharCount?: boolean;
   height?: string;
+  /** Visual variant: 'default' or 'glassmorphism' */
+  variant?: 'default' | 'glassmorphism';
 }
 
 const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
@@ -37,6 +39,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
   onValidationChange,
   showCharCount = false,
   height = '128px',
+  variant = 'default',
   placeholder,
   value,
   defaultValue,
@@ -48,6 +51,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
   const [validationError, setValidationError] = useState<string | undefined>();
   const [touched, setTouched] = useState(false);
   const [isValid, setIsValid] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const validateInput = (inputValue: string): { isValid: boolean; error?: string } => {
     if (customValidator) {
@@ -108,34 +112,59 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
     ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
   `.trim();
 
-  const textareaClasses = `
-    w-full 
-    ${responsive ? 'px-4 py-3 sm:px-5 sm:py-3' : 'px-5 py-3'}
-    border rounded-[10px] 
-    ${responsive ? 'text-[12px] leading-[15px] sm:text-[12px] sm:leading-[15px]' : 'text-[12px] leading-[15px]'}
-    font-light 
-    bg-white 
-    transition-all duration-200
-    focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent
-    disabled:bg-gray-50 disabled:cursor-not-allowed
-    resize-none
-    ${isInErrorState ? 
-      'border-red-500 focus:ring-red-400' : 
-      'border-[#AEB2B1] hover:border-gray-400 focus:border-blue-500'
-    }
-    placeholder:text-[#AEB2B1] placeholder:font-light placeholder:text-[12px] placeholder:leading-[15px]
-  `.trim();
+  const textareaClasses = variant === 'glassmorphism'
+    ? `
+      w-full 
+      ${responsive ? 'px-4 py-3 sm:px-5 sm:py-3' : 'px-5 py-3'}
+      border rounded-[10px] 
+      ${responsive ? 'text-small sm:text-small' : 'text-small'}
+      font-inter font-normal 
+      text-white
+      transition-all duration-200
+      focus:outline-none focus:ring-2 focus:border-transparent
+      disabled:cursor-not-allowed
+      resize-none
+      ${isInErrorState ? 
+        'border-red-400/50 focus:ring-red-400/20 bg-red-500/10 backdrop-blur-[10px]' : 
+        'border-white/20 hover:border-white/30 focus:border-blue-300/50 focus:ring-blue-300/20 bg-white/10 backdrop-blur-[10px] hover:bg-white/15'
+      }
+      placeholder:text-white/50 placeholder:font-inter placeholder:font-normal placeholder:text-small
+      disabled:bg-white/5 disabled:opacity-50
+    `.trim()
+    : `
+      w-full 
+      ${responsive ? 'px-4 py-3 sm:px-5 sm:py-3' : 'px-5 py-3'}
+      border rounded-[10px] 
+      ${responsive ? 'text-small sm:text-small' : 'text-small'}
+      font-inter font-normal 
+      bg-white 
+      transition-all duration-200
+      focus:outline-none focus:ring-2 focus:ring-primary-primary400 focus:border-transparent
+      disabled:bg-gray-neutral50 disabled:cursor-not-allowed
+      resize-none
+      ${isInErrorState ? 
+        'border-error-error500 focus:ring-error-error200' : 
+        'border-gray-neutral300 hover:border-gray-neutral400 focus:border-primary-primary500'
+      }
+      placeholder:text-gray-neutral400 placeholder:font-inter placeholder:font-normal placeholder:text-small
+    `.trim();
 
-  const labelClasses = `
-    ${responsive ? 'text-[15px] leading-[18px] sm:text-[15px] sm:leading-[18px]' : 'text-[15px] leading-[18px]'}
-    font-semibold text-[#4D5151]
-    ${isInErrorState ? 'text-red-600' : ''}
-    ${required ? 'after:content-["*"] after:text-red-500 after:ml-1' : ''}
-  `.trim();
+  const labelClasses = variant === 'glassmorphism'
+    ? `
+      ${responsive ? 'text-body sm:text-body' : 'text-body'}
+      font-semibold font-inter text-white
+      ${isInErrorState ? 'text-red-300' : ''}
+      ${required ? 'after:content-["*"] after:text-red-300 after:ml-1' : ''}
+    `.trim()
+    : `
+      ${responsive ? 'text-body sm:text-body' : 'text-body'}
+      font-semibold font-inter text-gray-neutral900
+      ${isInErrorState ? 'text-error-error600' : ''}
+      ${required ? 'after:content-["*"] after:text-error-error500 after:ml-1' : ''}
+    `.trim();
 
-  const errorTextClasses = `${responsive ? 'text-xs sm:text-sm' : 'text-xs'} text-red-600 mt-1`;
-  const helperTextClasses = `${responsive ? 'text-xs sm:text-sm' : 'text-xs'} text-gray-500 mt-1`;
-  const charCountClasses = `${responsive ? 'text-xs sm:text-sm' : 'text-xs'} text-gray-500 text-right`;
+  const helperTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter text-gray-neutral500 mt-1`;
+  const charCountClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter text-gray-neutral500 text-right`;
 
   const containerWidth = width || (responsive ? '100%' : '400px');
   
@@ -153,7 +182,11 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
         </label>
       )}
 
-      <div className={textareaWrapperClasses}>
+      <div 
+        className={textareaWrapperClasses}
+        onMouseEnter={() => currentError && setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
         <textarea
           ref={ref}
           placeholder={placeholder}
@@ -168,6 +201,17 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
           style={{ height }}
           {...props}
         />
+
+        {/* Validation Error Tooltip */}
+        {currentError && showTooltip && (
+          <div className="absolute right-0 bottom-full mb-2 z-50 pointer-events-none">
+            <div className="relative bg-error-error600 text-white px-2 py-1 rounded shadow-lg text-mini font-inter whitespace-nowrap max-w-xs">
+              {currentError}
+              {/* Arrow pointing down */}
+              <div className="absolute right-4 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-error-error600"></div>
+            </div>
+          </div>
+        )}
       </div>
 
       {showCharCount && !currentError && (
@@ -176,12 +220,8 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
         </span>
       )}
 
-      {currentError && (
-        <span className={errorTextClasses}>
-          {currentError}
-        </span>
-      )}
-      {!currentError && helperText && (
+      {/* Helper Text (errors now shown in tooltip on hover) */}
+      {helperText && (
         <span className={helperTextClasses}>
           {helperText}
         </span>
