@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import NotificationCard from "./NotificationCard";
 import { Notification } from "@/lib/models/notification";
@@ -13,9 +14,10 @@ import Button from "@/components/ui/Button";
 
 interface NotificationPopUpProps {
   isScrolled?: boolean;
+  onClose?: () => void;
 }
 
-const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = false }) => {
+const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = false, onClose }) => {
   const router = useRouter();
   const [displayCount, setDisplayCount] = useState(5);
   const [maxHeight, setMaxHeight] = useState(380); // 5 cards * 76px = 380px
@@ -24,8 +26,14 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
   const [userId, setUserId] = useState<string | null>(null);
   const [userLoading, setUserLoading] = useState(true);
   const [hoveredNotifId, setHoveredNotifId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isLoadingRef = useRef(false);
+
+  // Ensure we're on the client side for portal
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -126,9 +134,12 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
   const remainingCount = notifications.length - displayCount;
   const showSeePreviousButton = !enableScrollLoad && notifications.length > 5;
 
-  return (
+  // Don't render until mounted (client-side only for portal)
+  if (!mounted) return null;
+
+  const notificationContent = (
     <div 
-      className={`fixed right-4 w-[500px] max-w-[calc(100vw-2rem)] bg-white shadow-lg rounded-2xl border border-gray-200 z-50 overflow-hidden transition-all duration-300 ${
+      className={`fixed right-4 w-[500px] max-w-[calc(100vw-2rem)] bg-white shadow-lg rounded-2xl border border-gray-200 z-[60] overflow-hidden transition-all duration-300 ${
         isScrolled ? 'top-14' : 'top-16'
       }`}
       style={{
@@ -255,6 +266,9 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
       )}
     </div>
   );
+
+  // Use portal to render outside of parent stacking context (Banner)
+  return createPortal(notificationContent, document.body);
 };
 
 export default NotificationPopUp;
