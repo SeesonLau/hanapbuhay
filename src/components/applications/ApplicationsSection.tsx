@@ -29,9 +29,6 @@ const ApplicationsSection: React.FC<Props> = ({
   onLoadMore,
 }) => {
   const observerTarget = React.useRef<HTMLDivElement>(null);
-  const scrollRef = React.useRef<HTMLDivElement>(null);
-  const [isScrollable, setIsScrollable] = React.useState(false);
-  const [isAtBottom, setIsAtBottom] = React.useState(false);
 
   React.useEffect(() => {
     if (!onLoadMore || !hasMore || loading || isLoadingMore) return;
@@ -52,21 +49,6 @@ const ApplicationsSection: React.FC<Props> = ({
     return () => observer.disconnect();
   }, [onLoadMore, hasMore, loading, isLoadingMore]);
 
-  React.useEffect(() => {
-    const el = scrollRef.current;
-    if (!el || viewMode !== "card") return;
-
-    setIsScrollable(el.scrollHeight > el.clientHeight);
-
-    const handleScroll = () => {
-      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
-      setIsAtBottom(atBottom);
-    };
-
-    el.addEventListener("scroll", handleScroll);
-    return () => el.removeEventListener("scroll", handleScroll);
-  }, [applications, viewMode]);
-
   if (loading && (!applications || applications.length === 0)) {
     return <div className="text-center py-8">Loading applications...</div>;
   }
@@ -82,7 +64,7 @@ const ApplicationsSection: React.FC<Props> = ({
   const renderLoadMore = () => (
     <>
       {hasMore && !isLoadingMore && (
-        <div ref={observerTarget} className="w-full flex justify-center items-center py-6 snap-start">
+        <div ref={observerTarget} className="w-full flex justify-center items-center py-6">
           <button
             onClick={onLoadMore}
             className="flex flex-col items-center gap-2 px-6 py-4 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border-none bg-transparent"
@@ -93,12 +75,12 @@ const ApplicationsSection: React.FC<Props> = ({
         </div>
       )}
       {isLoadingMore && (
-        <div className="w-full text-center py-4 snap-start">
+        <div className="w-full text-center py-4">
           <div className="text-gray-600">Loading more applications...</div>
         </div>
       )}
       {!hasMore && applications.length > 0 && (
-        <div className="w-full text-center py-4 text-gray-500 snap-start">
+        <div className="w-full text-center py-4 text-gray-500">
           You've reached the end
         </div>
       )}
@@ -109,15 +91,15 @@ const ApplicationsSection: React.FC<Props> = ({
     <div className="mt-8 space-y-6 relative">
       {viewMode === "card" ? (
         <div className="relative">
-          <div
-            ref={scrollRef}
-            className="py-2 px-2"
-          >
+          <div className="py-2 px-2">
             <div 
-              className="w-full grid grid-cols-1 tablet:grid-cols-2 laptop-L:grid-cols-3 gap-4 auto-rows-fr"
+              className="w-full grid grid-cols-1 tablet:grid-cols-2 laptop-L:grid-cols-3 gap-4 items-stretch"
+              style={{
+                gridAutoRows: 'min-content'
+              }}
             >
               {applications.map((app) => (
-                <div key={app.id} className="snap-start w-full h-full">
+                <div key={app.id} className="h-full">
                   <AppliedJobCard
                     job={app}
                     variant="card"

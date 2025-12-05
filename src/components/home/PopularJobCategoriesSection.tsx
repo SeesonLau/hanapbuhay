@@ -75,7 +75,8 @@ interface CategoryData {
 
 export default function PopularJobCategoriesSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2, margin: "-20% 0px -20% 0px" });
+  // Bidirectional scroll animation - replays when scrolling back into view
+  const isInView = useInView(ref, { once: false, amount: 0.15 });
 
   // State for posts and loading
   const [posts, setPosts] = useState<{ post: Post; applicantCount: number }[]>([]);

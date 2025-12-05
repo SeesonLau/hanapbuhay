@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Lenis from 'lenis';
@@ -10,13 +11,18 @@ import PopularJobCategoriesSection from '@/components/home/PopularJobCategoriesS
 import Footer from '@/components/ui/Footer';
 import Image from 'next/image';
 import Button from '@/components/ui/Button';
-import Particles from '@/components/animations/Particles';
 import {
   getBlueDarkColor,
   TYPOGRAPHY,
   fontClasses
 } from '@/styles';
 import Link from 'next/link';
+
+// Dynamically import heavy WebGL component to speed up initial page load
+const Particles = dynamic(() => import('@/components/animations/Particles'), {
+  ssr: false,
+  loading: () => null,
+});
 
 export default function HomePage() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -31,6 +37,7 @@ export default function HomePage() {
   useEffect(() => {
     router.prefetch('/login');
     router.prefetch('/signup');
+    router.prefetch('/findJobs');
   }, [router]);
 
   // Initialize Lenis smooth scrolling

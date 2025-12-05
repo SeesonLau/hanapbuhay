@@ -1,6 +1,6 @@
 // src/components/home/RecommendedJobsSection.tsx
 'use client';
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, useInView } from 'framer-motion';
 import { JobPostCard } from '@/components/cards/JobPostCard';
@@ -15,9 +15,15 @@ import JobPostViewModal, { JobPostViewData } from '@/components/modals/JobPostVi
 export default function RecommendedJobsSection() {
   const ref = useRef(null);
   const router = useRouter();
-  const isInView = useInView(ref, { once: true, amount: 0.2, margin: "-20% 0px -20% 0px" });
+  // Bidirectional scroll animation - replays when scrolling back into view
+  const isInView = useInView(ref, { once: false, amount: 0.15 });
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
+
+  // Prefetch login page for instant navigation
+  useEffect(() => {
+    router.prefetch('/login');
+  }, [router]);
 
   // Fetch jobs without authentication - no user filtering needed for landing page
   const {
@@ -38,8 +44,8 @@ export default function RecommendedJobsSection() {
   const handleApplyNow = useCallback((postId: string) => {
     // Store the job ID in sessionStorage so we can apply after login
     sessionStorage.setItem('pendingJobApplication', postId);
-    window.location.href = '/login';
-  }, []);
+    router.push('/login');
+  }, [router]);
 
   const handleOpenJob = useCallback((jobData: any) => {
     const job = jobs.find((j) => j.id === jobData.id);
@@ -174,7 +180,7 @@ export default function RecommendedJobsSection() {
           transition={{ duration: 0.6, delay: 0.8 }}
         >
           <motion.button
-            onClick={() => window.location.href = '/login'}
+            onClick={() => router.push('/login')}
             className="inline-block px-8 py-3.5 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-400/30 hover:border-blue-400/50 text-white font-semibold rounded-full transition-all duration-300 backdrop-blur-sm text-body"
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.98 }}

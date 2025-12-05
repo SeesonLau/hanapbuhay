@@ -429,7 +429,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
           </div>
 
           {/* About this role */}
-          <div>
+          <div className="mt-2">
             <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">About this role</div>
             <TextArea 
               placeholder="Description"
@@ -443,7 +443,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
           </div>
 
         {/* Requirements */}
-          <div>
+          <div className="mt-2">
             <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Requirements</div>
             <div className="space-y-3">
               {requirementsList.map((req, idx) => {
