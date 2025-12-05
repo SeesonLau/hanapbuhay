@@ -61,7 +61,7 @@ const Footer = () => {
             </div>
             {[
               { name: 'Benefits', action: () => handleScrollToSection('benefits') },
-              { name: 'How It Works', action: () => handleScrollToSection('how-it-works') },
+              { name: 'Recommended Jobs', action: () => handleScrollToSection('recommended-jobs') },
               { name: 'Popular Categories', action: () => handleScrollToSection('popular-categories') },
               { name: 'Privacy Policy', action: () => setIsPrivacyModalOpen(true) },
               { name: 'Terms of Service', action: () => setIsTermsModalOpen(true) },

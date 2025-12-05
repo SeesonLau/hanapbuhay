@@ -43,7 +43,7 @@ export interface JobPostViewData {
     role?: string;
     avatarUrl?: string;
   };
-  raw?: any; // Store complete post data for profile fetching
+  raw?: any; // Raw post data for additional context
 }
 
 interface JobPostViewModalProps {

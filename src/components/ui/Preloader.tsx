@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Lottie from "lottie-react";
 import loaderCat from "@/assets/Loadercat.json";
-import rocketBye from "@/assets/Rocketbye.json";
 
 // Preloader message variants
 export const PreloaderMessages = {
@@ -15,8 +14,7 @@ export const PreloaderMessages = {
   UPLOADING_IMAGE: "Uploading image",
   DELETING_PROJECT: "Deleting project",
   PROCESSING: "Processing",
-  LOADING: "Loading",
-  GOODBYE: "Goodbye! See you soon 🚀"
+  GOODBYE: "Logging out..."
 };
 
 interface PreloaderProps {
@@ -69,18 +67,23 @@ export const Preloader: React.FC<PreloaderProps> = ({
       className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center 
         bg-white transition-opacity duration-300
         ${isVisible ? "opacity-100" : "opacity-0"}`}
+      style={{
+        background: 'rgba(255, 255, 255, 0.05)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)'
+      }}
     >
       {/* Lottie Loader */}
       <div className="w-64 h-64 md:w-96 md:h-96 -mb-8 md:-mb-12">
         <Lottie
-          animationData={variant === "goodbye" ? rocketBye : loaderCat}
-          loop={variant !== "goodbye"} 
+          animationData={loaderCat}
+          loop={variant !== "goodbye"}
           autoplay
         />
       </div>
 
       {/* Message */}
-      <p className="font-inter text-xl md:text-2xl font-semibold text-gray-neutral700 text-center">
+      <p className={`font-inter text-xl md:text-2xl font-semibold text-primary-primary500 text-center`}>
         {message}
         {variant !== "goodbye" && <span className="inline-block w-8 text-left">{dots}</span>}
       </p>

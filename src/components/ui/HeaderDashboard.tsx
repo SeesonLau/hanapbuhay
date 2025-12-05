@@ -75,8 +75,14 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  // State for unread notification count
-  const [unreadCount, setUnreadCount] = useState(0);
+  // State for unread notification count - initialize from cache
+  const [unreadCount, setUnreadCount] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem('unreadNotificationCount');
+      return cached ? parseInt(cached, 10) : 0;
+    }
+    return 0;
+  });
 
   //Logout animation state
   const [showGoodbye, setShowGoodbye] = useState(false);
@@ -151,6 +157,10 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
         if (currentUser) {
           const count = await NotificationService.getUnreadCount(currentUser.id);
           setUnreadCount(count);
+          // Cache the count
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('unreadNotificationCount', count.toString());
+          }
         }
       } catch (error) {
         console.error('Error fetching unread count:', error);
@@ -158,7 +168,14 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
       }
     };
 
-    fetchUnreadCount();
+    // Only fetch if we don't have cached data, otherwise fetch in background
+    const cachedCount = typeof window !== 'undefined' ? sessionStorage.getItem('unreadNotificationCount') : null;
+    if (!cachedCount) {
+      fetchUnreadCount();
+    } else {
+      // Still fetch in background to ensure data is fresh, but don't block UI
+      fetchUnreadCount();
+    }
 
     // Set up real-time subscription for notification updates
     let unsubscribe: (() => void) | null = null;
@@ -230,6 +247,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     // Clear cached user data on sign out
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('headerUserData');
+      sessionStorage.removeItem('unreadNotificationCount');
     }
     
     setTimeout(async () => {

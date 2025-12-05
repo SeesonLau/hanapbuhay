@@ -78,26 +78,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   const [isExperienceOpen, setIsExperienceOpen] = useState(false);
   const [isGenderOpen, setIsGenderOpen] = useState(false);
 
-  // Sync internal state when initialFilters prop changes (e.g., from URL params)
-  useEffect(() => {
-    if (initialFilters?.jobTypes) {
-      setJobTypes(initialFilters.jobTypes);
-      // Auto-open the job type accordion if there are filters
-      if (Object.keys(initialFilters.jobTypes).length > 0) {
-        setIsJobTypeOpen(true);
-      }
-    }
-    if (initialFilters?.salaryRange) {
-      setSalaryRange(initialFilters.salaryRange);
-    }
-    if (initialFilters?.experienceLevel) {
-      setExperienceLevel(initialFilters.experienceLevel);
-    }
-    if (initialFilters?.preferredGender) {
-      setPreferredGender(initialFilters.preferredGender);
-    }
-  }, [initialFilters]);
-
   // Scroll indicator state
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(false);
@@ -179,10 +159,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     <div className={`flex flex-col h-[calc(100%-64px)] ${className}`}>
       {/* Header (static) */}
       <div className="flex-shrink-0 flex flex-row items-center justify-between px-4 py-4 bg-white">
-        <h2 className="text-body font-alexandria font-bold text-gray-neutral900">Filter</h2>
+        <h2 className="text-lead font-alexandria font-bold text-gray-neutral900">Filter</h2>
         <button
           onClick={handleClearAll}
-          className="text-small font-inter font-semibold text-primary-primary500 hover:text-primary-primary600 transition-colors duration-150"
+          className="text-small font-inter font-normal text-primary-primary500 hover:text-primary-primary600 transition-colors duration-150"
         >
           Clear All
         </button>
@@ -199,7 +179,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             onClick={() => setIsJobTypeOpen(!isJobTypeOpen)}
             className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
           >
-            <h3 className="text-small font-inter font-semibold text-gray-neutral900">
+            <h3 className="text-body font-inter font-normal text-gray-neutral900">
               Job Type
             </h3>
             <IoChevronForward
@@ -225,7 +205,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             onClick={() => setIsSalaryOpen(!isSalaryOpen)}
             className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
           >
-            <h3 className="text-small font-inter font-semibold text-gray-neutral900">
+            <h3 className="text-body font-inter font-normal text-gray-neutral900">
               Salary Range
             </h3>
             <IoChevronForward
@@ -254,6 +234,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 onChange={(checked) => handleSalaryChange('moreThan20000', checked)}
                 size="sm"
               />
+              <Checkbox
+                label="Custom"
+                checked={salaryRange.custom}
+                onChange={(checked) => handleSalaryChange('custom', checked)}
+                size="sm"
+              />
             </div>
           )}
         </div>
@@ -265,7 +251,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               onClick={() => setIsExperienceOpen(!isExperienceOpen)}
               className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
             >
-              <h3 className="text-small font-inter font-semibold text-gray-neutral900">
+              <h3 className="text-body font-inter font-normal text-gray-neutral900">
                 Experience level
               </h3>
               <IoChevronForward
@@ -306,7 +292,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               onClick={() => setIsGenderOpen(!isGenderOpen)}
               className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
             >
-              <h3 className="text-small font-inter font-semibold text-gray-neutral900">
+              <h3 className="text-body font-inter font-normal text-gray-neutral900">
                 Preferred Gender
               </h3>
               <IoChevronForward
@@ -355,7 +341,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       </div>
 
       {/* Fixed bottom Apply button (blue section) */}
-      <div className="flex-shrink-0 border-t border-gray-neutral200 p-2 bg-white">
+      <div className="flex-shrink-0 border-t border-gray-neutral200 p-3 bg-white">
         <Button
           variant="primary"
           size="md"

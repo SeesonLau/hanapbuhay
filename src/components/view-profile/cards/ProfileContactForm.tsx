@@ -2,6 +2,7 @@
 import { HiOutlineMail, HiOutlinePhone, HiOutlineLocationMarker } from "react-icons/hi";
 import Image from "next/image";
 import ChatIcon from "@/assets/chat.svg"
+import { useRouter } from "next/navigation";
 
 interface ProfileContactFormProps {
   userId: string;
@@ -24,6 +25,11 @@ export default function ProfileContactForm({
   phoneNumber,
   address,
 }: ProfileContactFormProps) {
+  const router = useRouter();
+
+  const handleChatClick = () => {
+    router.push('/chat');
+  };
   return (
     <div className="p-4 pr-0 sm:pr-4 flex flex-col gap-4 -mb-6">
       {/* Mobile Layout */}
@@ -53,6 +59,7 @@ export default function ProfileContactForm({
             width={32}
             height={32}
             className="cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
+            onClick={handleChatClick}
           />
         </div>
       </div>
@@ -82,6 +89,7 @@ export default function ProfileContactForm({
           width={24}
           height={24}
           className="cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={handleChatClick}
         />
       </div>
       

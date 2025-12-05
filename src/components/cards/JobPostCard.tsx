@@ -27,11 +27,12 @@ interface JobPostCardProps {
   jobData: JobPostData;
   className?: string;
   variant?: 'default' | 'glassy';
+  disableCardClick?: boolean;
   onApply?: (id: string) => void;
   onOpen?: (data: JobPostData) => void;
 }
 
-export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '', variant = 'default', onApply, onOpen }) => {
+export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '', variant = 'default', disableCardClick = false, onApply, onOpen }) => {
   const {
     id,
     title,
@@ -134,15 +135,15 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
   if (variant === 'glassy') {
     return (
       <motion.div 
-        className={`w-full h-full min-h-[280px] mobile-M:min-h-[300px] rounded-2xl tablet:rounded-3xl p-5 mobile-M:p-6 tablet:p-7 laptop:p-8 flex flex-col overflow-hidden cursor-pointer ${className}`}
+        className={`w-full h-full min-h-[280px] mobile-M:min-h-[300px] rounded-2xl tablet:rounded-3xl p-5 mobile-M:p-6 tablet:p-7 laptop:p-8 flex flex-col overflow-hidden ${disableCardClick ? '' : 'cursor-pointer'} ${className}`}
         style={{
           background: 'rgba(30, 58, 138, 0.15)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(59, 130, 246, 0.2)',
           boxShadow: '0 8px 32px rgba(30, 58, 138, 0.2)'
         }}
-        onClick={() => onOpen?.(jobData)}
-        whileHover={{ 
+        onClick={disableCardClick ? undefined : () => onOpen?.(jobData)}
+        whileHover={disableCardClick ? undefined : { 
           scale: 1.02, 
           y: -4,
           boxShadow: '0 12px 48px rgba(30, 58, 138, 0.3)'
@@ -280,7 +281,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
       <div className="mt-auto space-y-3 mobile-M:space-y-4 tablet:space-y-[16px]">
         {/* Location and Salary */}
         <div className="flex items-center gap-2 flex-wrap">
-          <StaticLocationTag label={location} />
+          <StaticLocationTag label={location} showFullAddress={false} />
           <StaticSalaryTag label={`${salary} /${salaryPeriod}`} />
         </div>
 

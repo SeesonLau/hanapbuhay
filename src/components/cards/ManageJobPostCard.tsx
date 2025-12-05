@@ -223,7 +223,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
       <div className="mt-auto space-y-[16px]">
         {/* Location and Salary */}
         <div className={`flex flex-wrap items-center gap-2 ${isLocked ? 'filter grayscale' : ''}`}>
-          <StaticLocationTag label={location} className={`${isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} />
+          <StaticLocationTag label={location} showFullAddress={false} className={`${isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} />
           <StaticSalaryTag label={`${salary} /${salaryPeriod}`} className={`whitespace-nowrap ${isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} />
         </div>
 

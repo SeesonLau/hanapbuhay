@@ -1,10 +1,11 @@
 // app/login/page.tsx
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { LoginForm } from '@/components/auth/LoginForm';
+import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
 
@@ -17,6 +18,7 @@ const FloatingLines = dynamic(() => import('./FloatingLines'), {
 });
 
 function LoginContent() {
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const message = searchParams.get('message');
@@ -32,6 +34,7 @@ function LoginContent() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: '#0a0a0a' }}>
+      <Preloader isVisible={loading} message={PreloaderMessages.PROCESSING} variant="default" />
       {/* Floating Lines Background */}
       <div className="absolute inset-0 z-0">
         <FloatingLines 
@@ -98,6 +101,7 @@ function LoginContent() {
           <LoginForm 
             onForgotPassword={handleForgotPassword}
             onSignUpClick={handleSignUp}
+            onLoadingChange={(v) => setLoading(v)}
           />
         </div>
       </div>

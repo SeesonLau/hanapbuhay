@@ -63,11 +63,12 @@ interface StaticLocationTagProps {
   label: string;
   className?: string;
   variant?: 'default' | 'glassy';
+  showFullAddress?: boolean;
 }
 
-export const StaticLocationTag: React.FC<StaticLocationTagProps> = ({ label, className = '', variant = 'default' }) => {
+export const StaticLocationTag: React.FC<StaticLocationTagProps> = ({ label, className = '', showFullAddress = true, variant = 'default'}) => {
   const { province, city, address } = parseLocationDetailed(label || '');
-  const hasAddress = !!address;
+  const hasAddress = showFullAddress && !!address;
   const isGlassy = variant === 'glassy';
   return (
     <div 
