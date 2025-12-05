@@ -87,6 +87,14 @@ export default function AppliedJobCard({
     }
   };
 
+  // Extract only the "about this role" part, excluding requirements
+  const getAboutText = (description: string): string => {
+    const requirementsMatch = description.match(/\[requirements\]\s*([\s\S]*)/i);
+    return requirementsMatch ? description.substring(0, requirementsMatch.index).trim() : description;
+  };
+
+  const aboutText = getAboutText(job.description);
+
   // Removed formatSalary function - we'll use StaticSalaryTag instead
 
   // Extract and provide defaults for tag arrays
@@ -290,26 +298,26 @@ export default function AppliedJobCard({
       onClick={handleClick}
       className={`relative group w-full h-full min-h-[220px] bg-white rounded-lg shadow-[0px_0px_10px_rgba(0,0,0,0.25)] p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-[2px] cursor-pointer ${className}`}
     >
-      {/* Delete X Button - Shows on hover at top right */}
-      {onDelete && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDelete();
-          }}
-          className="absolute top-2 right-2 bg-error-error500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-error-error600 shadow-lg z-10 leading-none text-lg font-light"
-          title="Delete application"
-        >
-          <span className="mt-[-1px]">×</span>
-        </button>
-      )}
-
-      {/* Header with Title */}
-      <div className="flex-shrink-0 mb-[16px] flex items-start justify-between">
-        <div className="min-w-0 pr-6">
+      {/* Header with Title and Delete Button */}
+      <div className="flex-shrink-0 mb-[16px] flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
           <h3 className="font-alexandria font-semibold text-[20px] truncate text-gray-neutral900">{job.title}</h3>
-          <p className="font-inter font-light text-[12px] line-clamp-1 text-gray-neutral600">{job.description}</p>
+          <p className="font-inter font-light text-[12px] line-clamp-1 text-gray-neutral600">{aboutText}</p>
         </div>
+        
+        {/* Delete "-" Button - Aligned with title, shows on hover */}
+        {onDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete();
+            }}
+            className="flex-shrink-0 bg-white/80 border-2 border-error-error500 text-error-error500 rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-sm leading-none text-xl font-normal"
+            title="Delete application"
+          >
+            <span className="mt-[-2px]">−</span>
+          </button>
+        )}
       </div>
 
       {/* Tags Section - Single row that adapts to fit */}
