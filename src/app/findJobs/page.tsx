@@ -67,6 +67,8 @@ export default function FindJobsPage() {
     loadMore,
     refresh,
     applyFilters,
+    setSortInUrl,
+    setSelectedPostId,
   } = useJobPosts(currentUserId ?? undefined, { excludeMine: true, excludeApplied: true });
 
   // Applications hook for apply functionality
@@ -104,34 +106,10 @@ export default function FindJobsPage() {
   }, [activeFilters]);
 
   const handleSortChange = useCallback((opt: any) => {
-      const val = String(opt?.value ?? 'latest');
-      // map UI sort values to service sort params
-      let sortBy: string = 'createdAt';
-      let sortOrder: 'asc' | 'desc' = 'desc';
-      switch (val) {
-        case 'latest':
-          sortBy = 'createdAt';
-          sortOrder = 'desc';
-          break;
-        case 'oldest':
-          sortBy = 'createdAt';
-          sortOrder = 'asc';
-          break;
-        case 'salary-asc':
-          sortBy = 'price';
-          sortOrder = 'asc';
-          break;
-        case 'salary-desc':
-          sortBy = 'price';
-          sortOrder = 'desc';
-          break;
-        default:
-          break;
-      }
-      if (hookHandleSort) {
-        hookHandleSort(sortBy, sortOrder);
-      }
-    }, [hookHandleSort]);
+    const val = String(opt?.value ?? 'latest');
+    const sortParam = val === 'latest' ? 'date_desc' : val === 'oldest' ? 'date_asc' : val === 'salary-asc' ? 'salary_asc' : val === 'salary-desc' ? 'salary_desc' : undefined;
+    setSortInUrl?.(sortParam);
+  }, [setSortInUrl]);
 
   const handleApplyFilters = (filters: FilterOptions) => {
     setActiveFilters(filters);
@@ -160,6 +138,7 @@ export default function FindJobsPage() {
         others: false,
       },
     });
+    applyFilters?.(null);
   };
 
   const handleSearch = async (query: string, location?: string) => {
@@ -256,7 +235,7 @@ export default function FindJobsPage() {
                   viewMode={viewMode}
                   onViewModeChange={(v: 'card' | 'list') => setViewMode(v)}
                   onLoadMore={loadMore as () => void}
-                  onOpen={(data: any) => { setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
+                  onOpen={(data: any) => { setSelectedPostId?.(data.id); setSelectedJob(data as JobPostViewData); setIsJobViewOpen(true); }}
                   onApply={handleApplyNow}
                 />
             </div>
@@ -267,7 +246,7 @@ export default function FindJobsPage() {
       {/* Modal */}
       <JobPostViewModal
         isOpen={isJobViewOpen}
-        onClose={() => setIsJobViewOpen(false)}
+        onClose={() => { setSelectedPostId?.(null, false); setIsJobViewOpen(false); }}
         job={selectedJob}
         onApply={handleApplyNow}
       />

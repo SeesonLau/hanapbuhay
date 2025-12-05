@@ -10,6 +10,8 @@ import { ExperienceLevel } from "@/lib/constants/experience-level";
 import { JobType, SubTypes } from "@/lib/constants/job-types";
 import type { FilterOptions } from '@/components/ui/FilterSection';
 
+import { PostMessages } from "@/resources/messages/posts";
+
 const PAGE_SIZE = 10;
 
 export interface JobPostData {
@@ -20,6 +22,7 @@ export interface JobPostData {
   salary: string;
   salaryPeriod: string;
   postedDate: string;
+  isLocked: boolean;
   applicantCount?: number;
   genderTags?: string[];
   experienceTags?: string[];
@@ -42,6 +45,77 @@ function formatPostedDate(iso?: string) {
     return iso;
   }
 }
+
+// Helper to serialize filters into a compact string
+const serializeFiltersForUrl = (filters: FilterOptions | null): string | undefined => {
+  if (!filters) return undefined;
+
+  const parts: string[] = [];
+
+  // Job Types: jt=Agriculture:Farmhand,Other;IT:Developer
+  const jobTypes = Object.entries(filters.jobTypes || {})
+    .filter(([_, subtypes]) => subtypes.length > 0)
+    .map(([type, subtypes]) => `${type}:${subtypes.join(',')}`)
+    .join(';');
+  if (jobTypes) parts.push(`jt=${jobTypes}`);
+
+  // Salary Range: sr=lessThan5000,range10to20
+  const salary = Object.entries(filters.salaryRange || {})
+    .filter(([_, v]) => v)
+    .map(([k]) => k)
+    .join(',');
+  if (salary) parts.push(`sr=${salary}`);
+
+  // Experience Level: el=entryLevel,intermediate
+  const exp = Object.entries(filters.experienceLevel || {})
+    .filter(([_, v]) => v)
+    .map(([k]) => k)
+    .join(',');
+  if (exp) parts.push(`el=${exp}`);
+  
+  // Gender: pg=male,female
+  const gender = Object.entries(filters.preferredGender || {})
+    .filter(([_, v]) => v)
+    .map(([k]) => k)
+    .join(',');
+  if (gender) parts.push(`pg=${gender}`);
+
+  return parts.join('|');
+};
+
+// Helper to parse the compact filter string back into an object
+const parseFiltersFromUrl = (str: string | null): FilterOptions | null => {
+  if (!str) return null;
+  
+  const filters: FilterOptions = {
+    jobTypes: {},
+    salaryRange: { lessThan5000: false, range10to20: false, moreThan20000: false, custom: false },
+    experienceLevel: { entryLevel: false, intermediate: false, professional: false },
+    preferredGender: { any: false, female: false, male: false, others: false },
+  };
+
+  str.split('|').forEach(part => {
+    const [key, value] = part.split('=');
+    if (!key || !value) return;
+
+    if (key === 'jt') {
+      value.split(';').forEach(typePart => {
+        const [type, subtypesStr] = typePart.split(':');
+        if (type && subtypesStr) {
+          filters.jobTypes[type] = subtypesStr.split(',');
+        }
+      });
+    } else if (key === 'sr') {
+      value.split(',').forEach(k => (filters.salaryRange as any)[k] = true);
+    } else if (key === 'el') {
+      value.split(',').forEach(k => (filters.experienceLevel as any)[k] = true);
+    } else if (key === 'pg') {
+      value.split(',').forEach(k => (filters.preferredGender as any)[k] = true);
+    }
+  });
+
+  return filters;
+};
 
 export function useJobPosts(userId?: string | null, options: { skip?: boolean; excludeMine?: boolean; excludeApplied?: boolean } = {}) {
   const [jobs, setJobs] = useState<JobPostData[]>([]);
@@ -89,6 +163,7 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       salary: formatPeso((post as any).price),
       salaryPeriod: "month",
       postedDate: formatPostedDate(post.createdAt),
+      isLocked: post.isLocked,
       applicantCount,
       genderTags,
       experienceTags,
@@ -97,6 +172,40 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       raw: post,
     };
   };
+
+    // URL utility functions
+    const updateQueryParams = (params: Record<string, any>, push = true) => {
+      if (typeof window === 'undefined') return;
+      
+      const url = new URL(window.location.href);
+      
+      Object.entries(params).forEach(([key, value]) => {
+        if (value === undefined || value === null || value === '') {
+          url.searchParams.delete(key);
+        } else {
+          url.searchParams.set(key, String(value));
+        }
+      });
+      
+      const newUrl = url.toString();
+      if (newUrl === window.location.href) return;
+  
+      const method = push ? 'pushState' : 'replaceState';
+      window.history[method]({}, '', newUrl);
+    };
+  
+    const parseUrlParams = () => {
+      if (typeof window === 'undefined') return { q: '', location: '', sortVal: '', parsedFilters: null, postId: '' };
+      
+      const url = new URL(window.location.href);
+      const q = url.searchParams.get('q') || '';
+      const location = url.searchParams.get('location') || '';
+      const sortVal = url.searchParams.get('sort') || '';
+      const filtersStr = url.searchParams.get('filters');
+      const postId = url.searchParams.get('postId') || '';
+      
+      return { q, location, sortVal, parsedFilters: parseFiltersFromUrl(filtersStr), postId };
+    };
 
   const load = useCallback(async (params: { page?: number; isLoadMore?: boolean; searchTerm?: string; location?: string; sortBy?: string; sortOrder?: 'asc' | 'desc'; filters?: FilterOptions | null } = {}) => {
     const page = params.page ?? 1;
@@ -116,7 +225,7 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       };
 
       // Apply filters (job types, subtypes, price range) to request params if provided
-      const appliedFilters = params.filters ?? filters;
+      const appliedFilters = 'filters' in params ? params.filters : filters;
       if (appliedFilters) {
         const { jobTypes, salaryRange } = appliedFilters;
 
@@ -245,12 +354,48 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       setLoading(false);
       setIsLoadingMore(false);
     }
-  }, [userId, sort.sortBy, sort.sortOrder]);
+  }, [userId, sort.sortBy, sort.sortOrder, filters, options.excludeMine, options.excludeApplied]);
 
   const applyFilters = useCallback(async (f: FilterOptions | null) => {
     setFilters(f);
     await load({ page: 1, filters: f });
-  }, [load]);
+    updateQueryParams({ filters: serializeFiltersForUrl(f) });
+  }, [load, updateQueryParams]);
+
+  useEffect(() => {
+    const { q, location: loc, sortVal, parsedFilters } = parseUrlParams();
+
+    let sortBy = 'createdAt';
+    let sortOrder: 'asc' | 'desc' = 'desc';
+    if (sortVal) {
+      const parts = sortVal.split('_');
+      sortBy = parts[0] || 'createdAt';
+      sortOrder = parts[1] === 'asc' ? 'asc' : 'desc';
+    }
+
+    setSort({ sortBy, sortOrder });
+    if (parsedFilters) {
+      setFilters(parsedFilters);
+    }
+
+    if (q || loc || sortVal || parsedFilters) {
+      load({
+        page: 1,
+        searchTerm: q,
+        location: loc,
+        sortBy,
+        sortOrder,
+        filters: parsedFilters,
+      });
+    } else if (!options.skip) {
+      load({ page: 1 });
+    }
+  }, [options.skip]);
+  
+  const setSelectedPostId = (id?: string | null, push = true) => {
+    updateQueryParams({ postId: id || undefined }, push);
+  };
+
 
   // Client-side filtering for experience level and preferred gender
   const getFilteredJobsByTags = (jobsToFilter: JobPostData[], filterOptions: FilterOptions | null): JobPostData[] => {
@@ -300,42 +445,29 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     });
   };
 
-  useEffect(() => {
-    if (options.skip) {
-      return;
-    }
-    // load first page when userId changes (or on mount)
-    load({ page: 1 });
-  }, [load, options.skip]);
-
   const handleSearch = useCallback((query: string, location?: string) => {
-    // First fetch from server with search term
     (async () => {
       await load({ page: 1, searchTerm: query, location });
+
+      // Update URL with search params
+      updateQueryParams({ q: query || undefined, location: location || undefined });
 
       // Then apply fuzzy search ranking on client-side for better relevance
       setJobs((prevJobs) => {
         if (!query.trim()) return prevJobs;
 
         const queryLower = query.toLowerCase();
-        const queryWords = queryLower.split(/\s+/).filter(Boolean);
 
-        // Calculate fuzzy match score using Levenshtein-like algorithm
         const calculateFuzzyScore = (text: string, searchTerm: string): number => {
           const textLower = text.toLowerCase();
-          
-          // Exact match gets highest score
+
           if (textLower.includes(searchTerm)) return 1000;
-          
-          // Check if all words are present
+
           const words = searchTerm.split(/\s+/).filter(Boolean);
           if (words.every(w => textLower.includes(w))) return 500;
-          
-          // Fuzzy matching: count character matches and position similarity
-          let score = 0;
-          let textIdx = 0;
+
           let matchedChars = 0;
-          
+          let textIdx = 0;
           for (let i = 0; i < searchTerm.length && textIdx < textLower.length; i++) {
             const searchChar = searchTerm[i];
             while (textIdx < textLower.length && textLower[textIdx] !== searchChar) {
@@ -346,17 +478,11 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
               textIdx++;
             }
           }
-          
-          // Score based on character match ratio
-          score = (matchedChars / searchTerm.length) * 300;
-          
-          // Bonus if word starts match (e.g., "desc" matches "description")
+
+          let score = (matchedChars / Math.max(1, searchTerm.length)) * 300;
           words.forEach(word => {
-            if (textLower.includes(word.substring(0, 3))) {
-              score += 50;
-            }
+            if (textLower.includes(word.substring(0, 3))) score += 50;
           });
-          
           return score;
         };
 
@@ -366,10 +492,7 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
             const titleLower = job.title.toLowerCase();
             const descLower = job.description.toLowerCase();
 
-            // Title match (higher weight)
             score += calculateFuzzyScore(titleLower, queryLower) * 1.5;
-            
-            // Description match (lower weight)
             score += calculateFuzzyScore(descLower, queryLower) * 0.5;
 
             return { job, score };
@@ -382,9 +505,65 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
   }, [load]);
 
   const handleSort = useCallback(async (sortBy: string, sortOrder: 'asc' | 'desc') => {
-    setSort({ sortBy, sortOrder });
+    const requested = { sortBy, sortOrder };
+
+    // Update state and reload
+    setSort(requested);
     await load({ page: 1, sortBy, sortOrder });
+
+    // Determine current sort value in URL
+    const { sortVal: currentSortVal } = parseUrlParams();
+    const requestedSortParam = sortOrder === 'asc' ? `${sortBy}_asc` : `${sortBy}_desc`;
+
+    // Default sort is createdAt desc -> treated as absence of `sort` param
+    const isDefault = sortBy === 'createdAt' && sortOrder === 'desc';
+
+    if (isDefault) {
+      // If URL already doesn't have sort, avoid updating
+      if (!currentSortVal) return;
+
+      // Remove sort param using replaceState so we don't add history entries
+      updateQueryParams({ sort: undefined }, false);
+      return;
+    }
+
+    // For non-default: only update URL if it differs
+    if (currentSortVal === requestedSortParam) return;
+    updateQueryParams({ sort: requestedSortParam });
   }, [load]);
+
+  const setSortInUrl = useCallback((sort?: string) => {
+    // Default sorts treated as absence of `sort` param
+    const defaultSorts = new Set(['createdAt_desc', 'date_desc']);
+    const { sortVal: currentSort } = parseUrlParams();
+
+    if (!sort || defaultSorts.has(sort)) {
+      if (!currentSort) return;
+      // use replaceState to avoid adding to history
+      updateQueryParams({ sort: undefined }, false);
+      return;
+    }
+
+    if (currentSort === sort) return;
+    updateQueryParams({ sort });
+  }, [parseUrlParams, updateQueryParams]);
+
+  const setSortInUrlForManage = useCallback((sort?: string) => {
+    // This is a simplified version for manage jobs which only has date sort
+    const defaultSorts = new Set(['latest', 'date_desc']);
+    const { sortVal: currentSort } = parseUrlParams();
+
+    if (!sort || defaultSorts.has(sort)) {
+      if (!currentSort) return;
+      // use replaceState to avoid adding to history
+      updateQueryParams({ sort: undefined }, false);
+      return;
+    }
+
+    if (currentSort === sort) return;
+    updateQueryParams({ sort });
+  }, [parseUrlParams, updateQueryParams]);
+
 
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMoreData) return;
@@ -399,6 +578,19 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       await load({ page: 1 });
     } catch (err) {
       toast.error("Failed to delete post");
+      throw err;
+    }
+  }, [userId, load]);
+
+  const toggleLockPost = useCallback(async (postId: string, isLocked: boolean) => {
+    if (!userId) throw new Error("User not authenticated");
+    try {
+      await PostService.updatePost(postId, { isLocked });
+      toast.success(PostMessages.LOCK_SUCCESS(isLocked));
+      // Refresh the list to show the updated status
+      await load({ page: 1 });
+    } catch (err) {
+      toast.error(PostMessages.LOCK_FAILURE(isLocked));
       throw err;
     }
   }, [userId, load]);
@@ -447,8 +639,14 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     loadMore,
     refresh,
     deletePost,
+    toggleLockPost,
     updatePost,
     createPost,
     applyFilters,
+    setSelectedPostId,
+    parseUrlParams,
+    setSortInUrl, // findJobs uses this
+    setSortInUrlForManage,
+    updateQueryParams,
   };
 }

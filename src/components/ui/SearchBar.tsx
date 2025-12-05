@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { IoSearchOutline } from "react-icons/io5";
 import { CiLocationOn } from "react-icons/ci";
+import ClearIcon from '@/assets/x.svg';
 import Button from './Button';
 import { PHILIPPINES_LOCATIONS } from '@/resources/locations/philippines';
 import { PostService } from '@/lib/services/posts-services';
@@ -141,6 +142,16 @@ const SearchBar: React.FC<SearchBarProps> = ({
     <CiLocationOn className="w-[18px] h-[18px] text-gray-neutral400 flex-shrink-0" />
   );
 
+  const handleClearQuery = () => {
+    setSearchQuery('');
+    onSearch?.('', variant === 'advanced' ? location : undefined);
+  };
+
+  const handleClearLocation = () => {
+    setLocation('');
+    onSearch?.(searchQuery, '');
+  };
+
   if (variant === 'simple') {
     return (
       <div className={`w-full ${className}`}>
@@ -156,6 +167,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
               placeholder={placeholder}
               className="text-gray-neutral800 placeholder:text-gray-neutral400 text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-150"
             />
+            {searchQuery && (
+              <button onClick={handleClearQuery} className="focus:outline-none">
+                <img src={(ClearIcon as any).src} alt="Clear" className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
           {/* Search Button */}
@@ -204,6 +220,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
               placeholder={placeholder}
               className="text-gray-neutral800 placeholder:text-gray-neutral400 text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-150"
             />
+            {searchQuery && (
+              <button onClick={handleClearQuery} className="focus:outline-none">
+                <img src={(ClearIcon as any).src} alt="Clear" className="w-4 h-4" />
+              </button>
+            )}
             
             {/* Job Title Suggestions Dropdown */}
             {showQuerySuggestions && querySuggestions.length > 0 && (
@@ -249,6 +270,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
               placeholder={locationPlaceholder}
               className="text-gray-neutral800 placeholder:text-gray-neutral400 text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-150"
             />
+            {location && (
+              <button onClick={handleClearLocation} className="focus:outline-none">
+                <img src={(ClearIcon as any).src} alt="Clear" className="w-4 h-4" />
+              </button>
+            )}
             
             {/* Location Suggestions Dropdown */}
             {showLocationSuggestions && locationSuggestions.length > 0 && (

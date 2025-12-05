@@ -1,7 +1,7 @@
 // src/app/manage-job-posts/page.tsx
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import Banner from '@/components/ui/Banner';
 import AddButtonIcon from '@/assets/add.svg';
@@ -26,7 +26,7 @@ import FilterModal from '@/components/ui/FilterModal';
 export default function ManageJobPostsPage() {
   const [user, setUser] = useState<any | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort, loadMore, refresh, deletePost, updatePost, createPost, applyFilters } = useJobPosts(userId, { skip: !userId });
+  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort, loadMore, refresh, deletePost, updatePost, createPost, toggleLockPost, applyFilters, setSelectedPostId, parseUrlParams, setSortInUrlForManage } = useJobPosts(userId, { skip: !userId });
   const [initialLoading, setInitialLoading] = useState(true);
   const { stats, loading: statsLoading, error: statsError } = useStats({ variant: 'manageJobs', userId });
   
@@ -113,11 +113,8 @@ export default function ManageJobPostsPage() {
   // Stable sort change handler to avoid re-render loops
   const handleManageSortChange = useCallback((opt: any) => {
     const val = String(opt?.value ?? 'latest');
-    let sortBy = 'createdAt';
-    let sortOrder: 'asc' | 'desc' = 'desc';
-    if (val === 'oldest') sortOrder = 'asc';
-    handleSort?.(sortBy, sortOrder);
-  }, [handleSort]);
+    setSortInUrlForManage?.(val);
+  }, [setSortInUrlForManage]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -155,6 +152,7 @@ export default function ManageJobPostsPage() {
         others: false,
       },
     });
+    applyFilters?.(null);
   };
 
   const handlePostSaved = async (data?: any) => {
@@ -221,6 +219,7 @@ export default function ManageJobPostsPage() {
               .filter(Boolean)
               .join(' > '),
             imageUrl: '',
+            isLocked: false,
             createdBy: userId as string,
             updatedBy: userId as string,
           };
@@ -250,6 +249,61 @@ export default function ManageJobPostsPage() {
       console.error('Error deleting post:', error);
     }
   };
+
+  // On mount - if URL contains postId, honor it only for internal navigation.
+  // If the post exists in current list, open the modal with that post.
+  // Otherwise, remove the postId param (replaceState) so external/bookmarked links don't persist invalid id.
+  const _processedUrlPostRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const { postId } = parseUrlParams?.() ?? { postId: '' } as any;
+      if (!postId) return;
+
+      // Avoid re-processing the same postId repeatedly which can cause update loops
+      if (_processedUrlPostRef.current === postId) return;
+
+      const ref = document.referrer || '';
+      const isInternalRef = ref.startsWith(window.location.origin);
+
+      if (!isInternalRef) {
+        setSelectedPostId?.(null, false);
+        _processedUrlPostRef.current = null;
+        return;
+      }
+
+      const found = jobs?.find((j) => j.id === postId);
+      if (!found) {
+        // If not found in the currently loaded list, remove the param (avoid stale URL)
+        setSelectedPostId?.(null, false);
+        _processedUrlPostRef.current = null;
+        return;
+      }
+
+      const data: JobPostViewData = {
+        id: found.id,
+        title: found.title,
+        description: found.description,
+        requirements: found.requirements ?? [],
+        location: found.location ?? '',
+        salary: String(found.salary).replace(/₱|,/g, ''),
+        salaryPeriod: found.salaryPeriod ?? 'month',
+        postedDate: found.postedDate ?? '',
+        applicantCount: found.applicantCount ?? 0,
+        genderTags: found.genderTags,
+        experienceTags: found.experienceTags,
+        jobTypeTags: found.jobTypeTags,
+        raw: found.raw,
+      };
+
+      _processedUrlPostRef.current = postId;
+      setSelectedPostId?.(postId);
+      setSelectedJob(data);
+      setIsJobViewOpen(true);
+    } catch (e) {
+      // ignore
+    }
+  }, [jobs]);
 
   // Show preloader while loading user data
   if (initialLoading) {
@@ -305,72 +359,41 @@ export default function ManageJobPostsPage() {
           />
         </aside>
 
-      <main className="pt-2 px-4 md:px-6 laptop:px-6 pb-8 w-full laptop:w-[calc(100%-460px)] laptop:ml-[180px] laptop-L:w-[calc(100%-480px)] laptop-L:ml-[200px]">
-
-        {/* Controls Row with Filter Button - Mobile/Tablet Only */}
-        <div className="laptop:hidden flex items-center justify-between gap-1.5 bg-white rounded-lg px-2 py-2 shadow-sm mb-4">
-          {/* Filter Button */}
-          <FilterButton
-            onClick={() => setIsFilterModalOpen(true)}
-            filterCount={activeFilterCount}
-          />
-          {/* Sort By and View Toggle */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-tiny text-gray-neutral600 whitespace-nowrap hidden mobile-S:inline">Sort by</span>
-            <Sort variant="manageJobs" onChange={handleManageSortChange} />
-            <ViewToggle value={viewMode} onChange={setViewMode} />
-          </div>
+      <main className="w-full laptop:w-[calc(100%-460px)] laptop:ml-[180px] laptop-L:w-[calc(100%-480px)] laptop-L:ml-[200px]">
+        <div className="px-4 md:px-6 laptop:px-6 pt-2 pb-6 max-w-full">
+            <div className="space-y-4">
+                {/* Controls Row with Filter Button - Mobile/Tablet Only */}
+                <div className="laptop:hidden flex items-center justify-between gap-1.5 bg-white rounded-lg px-2 py-2 shadow-sm">
+                    {/* Filter Button */}
+                    <FilterButton
+                        onClick={() => setIsFilterModalOpen(true)}
+                        filterCount={activeFilterCount}
+                    />
+                    {/* Sort By and View Toggle */}
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-tiny text-gray-neutral600 whitespace-nowrap hidden mobile-S:inline">Sort by</span>
+                        <Sort variant="manageJobs" onChange={handleManageSortChange} />
+                        <ViewToggle value={viewMode} onChange={setViewMode} />
+                    </div>
+                </div>
+                <PostsSection
+                    jobs={jobs}
+                    variant="manage"
+                    loading={loading}
+                    isLoadingMore={isLoadingMore}
+                    error={error}
+                    hasMore={hasMore}
+                    viewMode={viewMode}
+                    onViewModeChange={(v) => setViewMode(v)}
+                    onLoadMore={loadMore as () => void}
+                    onOpen={(data) => { setSelectedPostId?.(data?.id); setSelectedJob(data); setIsJobViewOpen(true); }}
+                    onViewApplicants={handleOpenApplicants}
+                    onEdit={handleEditPost}
+                    onDelete={handleDeletePost}
+                    onToggleLock={toggleLockPost}
+                />
+            </div>
         </div>
-        <PostsSection
-          jobs={jobs}
-          variant="manage"
-          loading={loading}
-          isLoadingMore={isLoadingMore}
-          error={error}
-          hasMore={hasMore}
-          viewMode={viewMode}
-          onViewModeChange={(v) => setViewMode(v)}
-          onLoadMore={loadMore as () => void}
-          onOpen={(data) => { setSelectedJob(data); setIsJobViewOpen(true); }}
-          onViewApplicants={handleOpenApplicants}
-          onEdit={handleEditPost}
-          onDelete={handleDeletePost}
-        />
-
-        {/* Modals */}
-        <JobPostAddModal 
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onSubmit={handlePostSaved}
-        />
-
-        <JobPostEditModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onSubmit={handlePostSaved}
-          post={selectedPost}
-        />
-
-        <DeleteModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handlePostDeleted}
-          modalType="deleteJobPost"
-        />
-
-        <ApplicantsModal 
-          isOpen={isApplicantsModalOpen}
-          onClose={() => setIsApplicantsModalOpen(false)}
-          title={selectedApplicants?.title ?? 'Applicants'}
-          applicantCount={selectedApplicants?.applicantCount ?? 0}
-          postId={selectedApplicants?.postId}
-        />
-
-        <JobPostViewModal 
-          isOpen={isJobViewOpen} 
-          onClose={() => setIsJobViewOpen(false)} 
-          job={selectedJob}
-        />
       </main>
 
       </div>
@@ -383,6 +406,13 @@ export default function ManageJobPostsPage() {
         onClearAll={handleClearFilters}
         initialFilters={activeFilters}
       />
+      {/* If the URL contains postId, restore or clean it on mount depending on referrer */}
+      { /* Minimal effect: honor postId only for internal navigation and open job view if post is present in list */ }
+      {/* Keep logic minimal and inside the page: read url -> if internal navigation open modal, otherwise remove param */}
+      {/* parse postId in URL on mount: honor only internal navigation, otherwise remove param */}
+      <>
+        { /* React effect implemented as actual useEffect below (keeps modifications minimal) */ }
+      </>
 
       {/* Floating Add Post Button - Mobile only */}
       <button

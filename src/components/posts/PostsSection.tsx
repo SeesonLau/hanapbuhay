@@ -26,6 +26,7 @@ interface Props {
   onViewApplicants?: (data: any) => void;
   onEdit?: (post: any) => void;
   onDelete?: (post: any) => void;
+  onToggleLock?: (postId: string, isLocked: boolean) => void;
 }
 
 const PostsSection: React.FC<Props> = ({
@@ -43,6 +44,7 @@ const PostsSection: React.FC<Props> = ({
   onViewApplicants,
   onEdit,
   onDelete,
+  onToggleLock,
 }) => {
   const observerTarget = React.useRef<HTMLDivElement>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
@@ -116,6 +118,7 @@ const PostsSection: React.FC<Props> = ({
                       onViewApplicants={onViewApplicants}
                       onEdit={(data) => onEdit?.(((data as any).raw) ?? data)}
                       onDelete={(data) => onDelete?.(((data as any).raw) ?? data)}
+                      onToggleLock={onToggleLock}
                     />
                   ) : (
                     <JobPostCard jobData={job as any} onOpen={onOpen} onApply={onApply} />
@@ -157,6 +160,7 @@ const PostsSection: React.FC<Props> = ({
                   onViewApplicants={onViewApplicants}
                   onEdit={(data) => onEdit?.(((data as any).raw) ?? data)}
                   onDelete={(data) => onDelete?.(((data as any).raw) ?? data)}
+                  onToggleLock={onToggleLock}
                 />
               ) : (
                 <JobPostList key={`${job.id}-${idx}`} jobData={job as any} onOpen={onOpen} onApply={onApply} />
