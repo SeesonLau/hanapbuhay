@@ -2,7 +2,7 @@
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'primary400' | 'secondary' | 'danger' | 'ghost' | 'neutral300' | 'approve' | 'deny';
+  variant?: 'primary' | 'primary400' | 'secondary' | 'danger' | 'ghost' | 'neutral300' | 'approve' | 'deny' | 'glassy';
   size?: 'tiny' | 'sm' | 'md' | 'lg' | 'xl' | 'approveDeny';
   isLoading?: boolean;
   children: React.ReactNode;
@@ -32,7 +32,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       ghost: "bg-transparent text-gray-neutral700 hover:bg-gray-neutral50 active:bg-gray-neutral100 border border-gray-neutral300",
       neutral300: "bg-gray-neutral200 text-gray-neutral900 hover:bg-gray-neutral300 active:bg-gray-neutral400",
       approve: "bg-success-success400 text-white hover:bg-success-success500 active:bg-success-success600",
-      deny: "bg-error-error400 text-white hover:bg-error-error500 active:bg-error-error600"
+      deny: "bg-error-error400 text-white hover:bg-error-error500 active:bg-error-error600",
+      glassy: "bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-lg shadow-blue-600/30"
     };
 
     const sizes = {

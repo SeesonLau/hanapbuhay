@@ -86,19 +86,20 @@ export default function HowItWorksSection() {
                 key={index}
                 className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl tablet:rounded-3xl p-6 mobile-M:p-8 tablet:p-10 border border-white border-opacity-20 flex flex-col items-center text-center"
                 style={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                  backgroundColor: 'rgba(30, 58, 138, 0.15)',
+                  boxShadow: '0 8px 32px rgba(30, 58, 138, 0.2)',
+                  borderColor: 'rgba(59, 130, 246, 0.2)'
                 }}
                 variants={cardVariants}
                 whileHover={{ 
                   scale: 1.05, 
                   y: -10,
-                  boxShadow: '0 12px 48px rgba(0, 0, 0, 0.2)'
+                  boxShadow: '0 12px 48px rgba(30, 58, 138, 0.3)'
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
                 <motion.div 
-                  className="w-20 h-20 mobile-M:w-22 mobile-M:h-22 tablet:w-24 tablet:h-24 rounded-full bg-primary-primary500 bg-opacity-20 flex items-center justify-center mb-5 mobile-M:mb-6 tablet:mb-8"
+                  className="w-20 h-20 mobile-M:w-22 mobile-M:h-22 tablet:w-24 tablet:h-24 rounded-full bg-blue-500 bg-opacity-20 flex items-center justify-center mb-5 mobile-M:mb-6 tablet:mb-8"
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.6 }}
                 >

@@ -23,6 +23,21 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchUser = async () => {
+      // If someone navigated here directly with ?userId=..., treat manual/typed navigations as default and remove param
+      if (typeof window !== 'undefined') {
+        try {
+          const url = new URL(window.location.href);
+          const userIdParam = url.searchParams.get('userId');
+          const ref = document.referrer || '';
+          const isInternalRef = ref.startsWith(window.location.origin);
+          if (userIdParam && !isInternalRef) {
+            url.searchParams.delete('userId');
+            window.history.replaceState({}, '', url.toString());
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
       setLoading(true);
 
       try {
@@ -36,6 +51,19 @@ export default function ProfilePage() {
 
         const userData = await UserService.getUserById(currentUser.id);
         setUser(userData);
+        // Reflect current user's id in the URL as a query param without adding history
+        if (typeof window !== 'undefined' && userData?.userId) {
+          try {
+            const url = new URL(window.location.href);
+            const existing = url.searchParams.get('userId');
+            if (existing !== userData.userId) {
+              url.searchParams.set('userId', String(userData.userId));
+              window.history.replaceState({}, '', url.toString());
+            }
+          } catch (e) {
+            // ignore URL errors
+          }
+        }
       } finally {
         setLoading(false);
       }

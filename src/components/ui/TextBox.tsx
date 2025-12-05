@@ -257,13 +257,11 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
       ${responsive ? 'text-body sm:text-body' : 'text-body'}
       font-semibold font-inter text-white
       ${isInErrorState ? 'text-red-300' : ''}
-      ${required ? 'after:content-["*"] after:text-red-300 after:ml-1' : ''}
     `.trim()
     : `
       ${responsive ? 'text-body sm:text-body' : 'text-body'}
       font-semibold font-inter text-black
       ${isInErrorState ? 'text-error-error600' : ''}
-      ${required ? 'after:content-["*"] after:text-error-error500 after:ml-1' : ''}
     `.trim();
 
   const iconClasses = variant === 'glassmorphism'

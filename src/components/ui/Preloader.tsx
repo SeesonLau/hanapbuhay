@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Lottie from "lottie-react";
 import loaderCat from "@/assets/Loadercat.json";
 
@@ -29,6 +30,12 @@ export const Preloader: React.FC<PreloaderProps> = ({
 }) => {
   const [show, setShow] = useState(false);
   const [dots, setDots] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure we're on the client side for portal
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isVisible) {
@@ -53,12 +60,12 @@ export const Preloader: React.FC<PreloaderProps> = ({
     return () => clearInterval(interval);
   }, [variant, isVisible]);
 
-  if (!show) return null;
+  if (!show || !mounted) return null;
 
-  return (
+  const preloaderContent = (
     <div
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center 
-        transition-opacity duration-300
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center 
+        bg-white transition-opacity duration-300
         ${isVisible ? "opacity-100" : "opacity-0"}`}
       style={{
         background: 'rgba(255, 255, 255, 0.05)',
@@ -82,4 +89,7 @@ export const Preloader: React.FC<PreloaderProps> = ({
       </p>
     </div>
   );
+
+  // Use portal to render outside of parent stacking context
+  return createPortal(preloaderContent, document.body);
 };

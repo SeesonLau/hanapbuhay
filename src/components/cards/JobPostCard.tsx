@@ -1,10 +1,13 @@
 "use client";
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticLocationTag, StaticSalaryTag } from '@/components/ui/TagItem';
 import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
+import { fontClasses } from '@/styles/fonts';
+import Button from '@/components/ui/Button';
 
 interface JobPostData {
   id: string;
@@ -23,11 +26,12 @@ interface JobPostData {
 interface JobPostCardProps {
   jobData: JobPostData;
   className?: string;
+  variant?: 'default' | 'glassy';
   onApply?: (id: string) => void;
   onOpen?: (data: JobPostData) => void;
 }
 
-export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '', onApply, onOpen }) => {
+export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '', variant = 'default', onApply, onOpen }) => {
   const {
     id,
     title,
@@ -126,6 +130,102 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
   const visibleTags = allTags.slice(0, Math.max(0, visibleCount));
   const extraCount = Math.max(0, allTags.length - visibleTags.length);
 
+  // Glassy variant styles
+  if (variant === 'glassy') {
+    return (
+      <motion.div 
+        className={`w-full h-full min-h-[280px] mobile-M:min-h-[300px] rounded-2xl tablet:rounded-3xl p-5 mobile-M:p-6 tablet:p-7 laptop:p-8 flex flex-col overflow-hidden cursor-pointer ${className}`}
+        style={{
+          background: 'rgba(30, 58, 138, 0.15)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(59, 130, 246, 0.2)',
+          boxShadow: '0 8px 32px rgba(30, 58, 138, 0.2)'
+        }}
+        onClick={() => onOpen?.(jobData)}
+        whileHover={{ 
+          scale: 1.02, 
+          y: -4,
+          boxShadow: '0 12px 48px rgba(30, 58, 138, 0.3)'
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      >
+        {/* Header */}
+        <div className="flex-shrink-0 mb-4 mobile-M:mb-5 tablet:mb-6">
+          <h3 className={`${fontClasses.heading} font-bold text-lead mobile-M:text-h3 tablet:text-h2 mb-2 mobile-M:mb-3 line-clamp-1 text-white`}>
+            {title}
+          </h3>
+          <p className={`${fontClasses.body} font-light text-small mobile-M:text-body line-clamp-2 text-gray-300`}>
+            {description}
+          </p>
+        </div>
+
+        {/* Tags Section */}
+        <div className="mb-4 mobile-M:mb-5 tablet:mb-6">
+          <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
+            {allTags.map((tag, index) => (
+              tag.type === 'gender' ? (
+                <StaticGenderTag key={`measure-${index}`} label={tag.label} />
+              ) : tag.type === 'experience' ? (
+                <StaticExperienceLevelTag key={`measure-${index}`} label={tag.label} />
+              ) : (
+                <StaticJobTypeTag key={`measure-${index}`} label={tag.label} />
+              )
+            ))}
+          </div>
+          <div ref={overflowMeasureRef} className="fixed -top-[9999px] -left-[9999px] inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-white/10 text-gray-300">
+            99+
+          </div>
+
+          <div ref={tagsRowRef} className="flex flex-wrap gap-1 items-center min-h-[17px]">
+            {visibleTags.map((tag, index) => (
+              tag.type === 'gender' ? (
+                <StaticGenderTag key={`tag-${index}`} label={tag.label} variant="glassy" />
+              ) : tag.type === 'experience' ? (
+                <StaticExperienceLevelTag key={`tag-${index}`} label={tag.label} variant="glassy" />
+              ) : (
+                <StaticJobTypeTag key={`tag-${index}`} label={tag.label} variant="glassy" />
+              )
+            ))}
+            {extraCount > 0 && (
+              <div className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-white/10 text-gray-300 backdrop-blur-sm border border-white/20">
+                {extraCount}+
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-auto space-y-4 mobile-M:space-y-5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <StaticLocationTag label={location} variant="glassy" />
+            <StaticSalaryTag label={`${salary} /${salaryPeriod}`} variant="glassy" />
+          </div>
+
+          <div className="flex flex-col mobile-M:flex-row items-start mobile-M:items-center justify-between gap-3 mobile-M:gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`${fontClasses.body} font-medium text-small text-gray-300`}>
+                Posted: {postedDate}
+              </span>
+              <span className="text-gray-400 hidden mobile-M:inline">•</span>
+              <span className={`${fontClasses.body} text-small text-blue-300 font-semibold`}>
+                {applicantCount} Applicants
+              </span>
+            </div>
+            <Button
+              variant="glassy"
+              size="sm"
+              fullRounded
+              onClick={(e) => { e.stopPropagation(); onApply?.(id); }}
+            >
+              Apply Now
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Default variant
   return (
     <div 
       className={`w-full h-full min-h-[250px] bg-white rounded-lg shadow-[0px_0px_10px_rgba(0,0,0,0.25)] p-4 mobile-M:p-5 mobile-L:p-6 tablet:p-[30px] flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-[2px] cursor-pointer ${className}`}
@@ -191,12 +291,13 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
             <span className="text-gray-400 hidden mobile-M:inline">•</span>
             <span className={`font-inter text-[9px] mobile-M:text-[10px] text-gray-neutral600`}>{applicantCount} Applicants</span>
           </div>
-          <button
+          <Button
+            variant="primary"
+            size="sm"
             onClick={(e) => { e.stopPropagation(); onApply?.(id); }}
-            className="px-3 mobile-M:px-4 py-1.5 mobile-M:py-2 bg-primary-primary500 text-white rounded-lg hover:bg-primary-primary600 transition-colors text-tiny mobile-M:text-small whitespace-nowrap"
           >
             Apply Now
-          </button>
+          </Button>
         </div>
       </div>
     </div>

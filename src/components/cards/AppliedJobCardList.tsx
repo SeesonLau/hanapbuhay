@@ -87,6 +87,14 @@ export default function AppliedJobCard({
     }
   };
 
+  // Extract only the "about this role" part, excluding requirements
+  const getAboutText = (description: string): string => {
+    const requirementsMatch = description.match(/\[requirements\]\s*([\s\S]*)/i);
+    return requirementsMatch ? description.substring(0, requirementsMatch.index).trim() : description;
+  };
+
+  const aboutText = getAboutText(job.description);
+
   // Removed formatSalary function - we'll use StaticSalaryTag instead
 
   // Extract and provide defaults for tag arrays
@@ -288,14 +296,28 @@ export default function AppliedJobCard({
   return (
     <div
       onClick={handleClick}
-      className={`w-full h-full min-h-[250px] bg-white rounded-lg shadow-[0px_0px_10px_rgba(0,0,0,0.25)] p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-[2px] cursor-pointer ${className}`}
+      className={`relative group w-full h-full min-h-[220px] bg-white rounded-lg shadow-[0px_0px_10px_rgba(0,0,0,0.25)] p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-[2px] cursor-pointer ${className}`}
     >
-      {/* Header with Title */}
-      <div className="flex-shrink-0 mb-[16px] flex items-start justify-between">
-        <div className="min-w-0">
-          <h3 className="font-alexandria font-semibold text-[20px] mb-2 truncate text-gray-neutral900">{job.title}</h3>
-          <p className="font-inter font-light text-[12px] line-clamp-1 text-gray-neutral600">{job.description}</p>
+      {/* Header with Title and Delete Button */}
+      <div className="flex-shrink-0 mb-[16px] flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="font-alexandria font-semibold text-[20px] truncate text-gray-neutral900">{job.title}</h3>
+          <p className="font-inter font-light text-[12px] line-clamp-1 text-gray-neutral600">{aboutText}</p>
         </div>
+        
+        {/* Delete "-" Button - Aligned with title, shows on hover */}
+        {onDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete();
+            }}
+            className="flex-shrink-0 bg-white/80 border-2 border-error-error500 text-error-error500 rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-sm leading-none text-xl font-normal"
+            title="Delete application"
+          >
+            <span className="mt-[-2px]">−</span>
+          </button>
+        )}
       </div>
 
       {/* Tags Section - Single row that adapts to fit */}
@@ -343,32 +365,13 @@ export default function AppliedJobCard({
           <StaticSalaryTag label={`${job.salary} /${job.salaryPeriod}`} className="whitespace-nowrap" />
         </div>
 
-        {/* Applied Date */}
-        <div className="flex justify-start">
-          <span className="font-inter font-medium text-[10px] text-gray-neutral600">Applied on: {job.appliedOn}</span>
-        </div>
-
-        {/* Status and Delete Button */}
+        {/* Applied Date and Status Badge - Same line */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-inter text-tiny text-primary-primary500 font-medium">Status:</span>
-            <div className={`flex items-center gap-1 px-3 py-1 rounded-md ${status.bgColor} ${status.textColor}`}>
-              <status.icon className="w-4 h-4" />
-              <span className="font-inter text-tiny font-medium">{status.text}</span>
-            </div>
+          <span className="font-inter font-medium text-[10px] text-gray-neutral600">Applied on: {job.appliedOn}</span>
+          <div className={`flex items-center gap-1 px-3 py-1 rounded-md ${status.bgColor} ${status.textColor}`}>
+            <status.icon className="w-4 h-4" />
+            <span className="font-inter text-tiny font-medium">{status.text}</span>
           </div>
-          {onDelete && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete();
-              }}
-              className="p-1 text-error-error500 hover:text-error-error600 hover:bg-error-error50 rounded transition-colors flex-shrink-0"
-              title="Delete application"
-            >
-              <RiDeleteBin6Line className="w-5 h-5" />
-            </button>
-          )}
         </div>
       </div>
     </div>

@@ -146,9 +146,9 @@ export default function HeaderHome({
           </div>
         </button>
 
-        {/* How it Works */}
+        {/* Recommendations */}
         <button
-          onClick={() => onNavigateToSection('how-it-works')}
+          onClick={() => onNavigateToSection('recommended-jobs')}
           className="flex justify-center items-center cursor-pointer transition-all duration-300 hover:scale-105"
         >
           <div 
@@ -160,13 +160,13 @@ export default function HeaderHome({
               fontFamily: TYPOGRAPHY.body.fontFamily
             }}
           >
-            How it Works
+            Recommendations
           </div>
         </button>
 
-        {/* Testimonials */}
+        {/* Popular */}
         <button
-          onClick={() => onNavigateToSection('testimonials')}
+          onClick={() => onNavigateToSection('popular-categories')}
           className="flex justify-center items-center cursor-pointer transition-all duration-300 hover:scale-105"
         >
           <div 
@@ -178,7 +178,7 @@ export default function HeaderHome({
               fontFamily: TYPOGRAPHY.body.fontFamily
             }}
           >
-            Testimonials
+            Popular
           </div>
         </button>
 
@@ -248,7 +248,7 @@ export default function HeaderHome({
             </button>
             <button
               onClick={() => {
-                onNavigateToSection('how-it-works');
+                onNavigateToSection('recommended-jobs');
                 setIsMobileMenuOpen(false);
               }}
               className="text-left text-neutral-200 py-3 px-2 hover:bg-blue-default hover:text-white rounded-lg transition-all duration-300"
@@ -259,11 +259,11 @@ export default function HeaderHome({
                 fontFamily: TYPOGRAPHY.body.fontFamily
               }}
             >
-              How it Works
+              Recommendations
             </button>
             <button
               onClick={() => {
-                onNavigateToSection('testimonials');
+                onNavigateToSection('popular-categories');
                 setIsMobileMenuOpen(false);
               }}
               className="text-left text-neutral-200 py-3 px-2 hover:bg-blue-default hover:text-white rounded-lg transition-all duration-300"
@@ -274,7 +274,7 @@ export default function HeaderHome({
                 fontFamily: TYPOGRAPHY.body.fontFamily
               }}
             >
-              Testimonials
+              Popular
             </button>
             <button
               onClick={() => {
