@@ -1,10 +1,11 @@
 // app/signup/page.tsx
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { SignupForm } from '@/components/auth/SignupForm';
+import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
 
@@ -17,6 +18,7 @@ const FloatingLines = dynamic(() => import('../login/FloatingLines'), {
 });
 
 function SignupContent() {
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSignIn = () => {
@@ -25,6 +27,7 @@ function SignupContent() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: '#0a0a0a' }}>
+      <Preloader isVisible={loading} message={PreloaderMessages.PROCESSING} variant="default" />
       {/* Floating Lines Background */}
       <div className="absolute inset-0 z-0">
         <FloatingLines 
@@ -61,7 +64,7 @@ function SignupContent() {
             Back to Home
           </Link>
 
-          <SignupForm onSignInClick={handleSignIn} />
+          <SignupForm onSignInClick={handleSignIn} onLoadingChange={setLoading} />
         </div>
       </div>
     </div>

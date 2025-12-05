@@ -10,9 +10,10 @@ import { IoArrowBack } from "react-icons/io5";
 
 interface ForgotPasswordFormProps {
   onBackToLogin?: () => void;
+  onLoadingChange?: (loading: boolean) => void;
 }
 
-const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }) => {
+const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin, onLoadingChange }) => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -20,6 +21,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    onLoadingChange?.(true);
     setMessage('');
 
     try {
@@ -33,6 +35,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }
       setMessage('An error occurred. Please try again.');
     } finally {
       setLoading(false);
+      onLoadingChange?.(false);
     }
   };
 

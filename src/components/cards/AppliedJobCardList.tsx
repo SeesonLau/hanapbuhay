@@ -376,7 +376,7 @@ export default function AppliedJobCard({
       <div className="mt-auto space-y-[16px]">
         {/* Location and Salary */}
         <div className="flex flex-wrap items-center gap-2">
-          <StaticLocationTag label={job.location} />
+          <StaticLocationTag label={job.location} showFullAddress={false} />
           <StaticSalaryTag label={`${job.salary} /${job.salaryPeriod}`} className="whitespace-nowrap" />
         </div>
 
