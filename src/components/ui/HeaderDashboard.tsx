@@ -197,6 +197,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
     else if (pathname === ROUTES.MANAGEJOBPOSTS) setActiveLink('manage-posts');
     else if (pathname === ROUTES.APPLIEDJOBS) setActiveLink('applied-jobs');
     else if (pathname === ROUTES.CHAT) setActiveLink('chat');
+    else if (pathname === ROUTES.PROFILE) setActiveLink('');
     else setActiveLink('find-jobs');
   }, [pathname]);  
 
