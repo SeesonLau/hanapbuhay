@@ -110,10 +110,12 @@ const Banner: React.FC<BannerProps> = ({
 
   return (
     <div 
-      className={`w-full h-[200px] font-inter fixed top-0 left-0 right-0 z-50 overflow-hidden pointer-events-none bg-gradient-to-br from-black via-slate-900 to-blue-950 ${className}`}
+      className={`w-full h-[200px] font-inter fixed top-0 left-0 right-0 z-50 pointer-events-none bg-gradient-to-br from-black via-slate-900 to-blue-950 ${className}`}
     >
       {/* Particles Background - CSS-based particles spread across entire banner */}
-      <BannerParticles particleCount={25} />
+      <div className="absolute inset-0 overflow-hidden">
+        <BannerParticles particleCount={25} />
+      </div>
 
       {/* Header Dashboard */}
       <div className="pointer-events-auto relative z-10">

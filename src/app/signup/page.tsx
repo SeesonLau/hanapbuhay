@@ -1,7 +1,7 @@
 // app/signup/page.tsx
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { SignupForm } from '@/components/auth/SignupForm';

@@ -293,6 +293,7 @@ export default function ManageJobPostsPage() {
         genderTags: found.genderTags,
         experienceTags: found.experienceTags,
         jobTypeTags: found.jobTypeTags,
+        raw: found.raw,
       };
 
       _processedUrlPostRef.current = postId;
