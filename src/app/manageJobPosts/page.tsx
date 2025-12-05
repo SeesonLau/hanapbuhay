@@ -406,13 +406,40 @@ export default function ManageJobPostsPage() {
         onClearAll={handleClearFilters}
         initialFilters={activeFilters}
       />
-      {/* If the URL contains postId, restore or clean it on mount depending on referrer */}
-      { /* Minimal effect: honor postId only for internal navigation and open job view if post is present in list */ }
-      {/* Keep logic minimal and inside the page: read url -> if internal navigation open modal, otherwise remove param */}
-      {/* parse postId in URL on mount: honor only internal navigation, otherwise remove param */}
-      <>
-        { /* React effect implemented as actual useEffect below (keeps modifications minimal) */ }
-      </>
+      {/* Modals */}
+      <JobPostAddModal 
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmit={handlePostSaved}
+      />
+
+      <JobPostEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSubmit={handlePostSaved}
+        post={selectedPost}
+      />
+
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handlePostDeleted}
+        modalType="deleteJobPost"
+      />
+
+      <ApplicantsModal 
+        isOpen={isApplicantsModalOpen}
+        onClose={() => setIsApplicantsModalOpen(false)}
+        title={selectedApplicants?.title ?? 'Applicants'}
+        applicantCount={selectedApplicants?.applicantCount ?? 0}
+        postId={selectedApplicants?.postId}
+      />
+
+      <JobPostViewModal 
+        isOpen={isJobViewOpen} 
+        onClose={() => setIsJobViewOpen(false)} 
+        job={selectedJob}
+      />
 
       {/* Floating Add Post Button - Mobile only */}
       <button
