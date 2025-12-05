@@ -4,6 +4,7 @@ import React from 'react';
 import HeaderDashboard from './HeaderDashboard';
 import SearchBar from './SearchBar';
 import Button from './Button';
+import BannerParticles from '@/components/animations/BannerParticles';
 
 interface BannerProps {
   variant: 'findJobs' | 'manageJobPosts' | 'appliedJobs' | 'chat' | 'profile' | 'settings';
@@ -109,13 +110,13 @@ const Banner: React.FC<BannerProps> = ({
 
   return (
     <div 
-      className={`w-full h-[200px] font-inter fixed top-0 left-0 right-0 z-50 overflow-visible pointer-events-none ${className}`}
-      style={{ 
-        background: 'radial-gradient(55% 45% at 50% 70%, #666666 0%,  #000000 80.77%)'
-      }}
+      className={`w-full h-[200px] font-inter fixed top-0 left-0 right-0 z-50 overflow-hidden pointer-events-none bg-gradient-to-br from-black via-slate-900 to-blue-950 ${className}`}
     >
+      {/* Particles Background - CSS-based particles spread across entire banner */}
+      <BannerParticles particleCount={25} />
+
       {/* Header Dashboard */}
-      <div className="pointer-events-auto">
+      <div className="pointer-events-auto relative z-10">
       <HeaderDashboard
         userName={userName}
         userAvatar={userAvatar}
@@ -127,7 +128,7 @@ const Banner: React.FC<BannerProps> = ({
       </div>
 
       {/* Banner Content Container - Left-aligned structure */}
-      <div className="flex flex-col py-3 px-4 md:px-6 laptop:px-32 w-full h-full">
+      <div className="flex flex-col py-3 px-4 md:px-6 laptop:px-32 w-full h-full relative z-10">
         {/* Banner Text Section - Left-aligned typography and spacing */}
         <div className={`text-start mb-1 w-full ${variant === 'profile' || variant === 'chat' ? 'mt-3 sm:mt-4' : 'mt-0'} pointer-events-none`}>
           <h1 className="text-body sm:text-body md:text-description lg:text-lead font-bold font-alexandria text-white leading-tight mb-1.5 sm:mb-2">

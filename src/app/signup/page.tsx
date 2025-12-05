@@ -2,11 +2,19 @@
 'use client';
 
 import { Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { SignupForm } from '@/components/auth/SignupForm';
 import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
-import FloatingLines from '../login/FloatingLines';
+
+// Dynamically import FloatingLines to speed up initial page load
+const FloatingLines = dynamic(() => import('../login/FloatingLines'), {
+  ssr: false,
+  loading: () => (
+    <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20" />
+  ),
+});
 
 function SignupContent() {
   const router = useRouter();

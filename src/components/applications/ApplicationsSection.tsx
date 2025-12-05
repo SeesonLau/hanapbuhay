@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { HiArrowDown } from "react-icons/hi";
 import AppliedJobCard from "@/components/cards/AppliedJobCardList";
 import type { AppliedJob } from "@/components/cards/AppliedJobCardList";
 
@@ -22,25 +21,6 @@ const ApplicationsSection: React.FC<Props> = ({
   onDelete,
   onOpen,
 }) => {
-  const scrollRef = React.useRef<HTMLDivElement>(null);
-  const [isScrollable, setIsScrollable] = React.useState(false);
-  const [isAtBottom, setIsAtBottom] = React.useState(false);
-
-  React.useEffect(() => {
-    const el = scrollRef.current;
-    if (!el || viewMode !== "card") return;
-
-    setIsScrollable(el.scrollHeight > el.clientHeight);
-
-    const handleScroll = () => {
-      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
-      setIsAtBottom(atBottom);
-    };
-
-    el.addEventListener("scroll", handleScroll);
-    return () => el.removeEventListener("scroll", handleScroll);
-  }, [applications, viewMode]);
-
   if (loading && (!applications || applications.length === 0)) {
     return <div className="text-center py-8">Loading applications...</div>;
   }
@@ -57,16 +37,15 @@ const ApplicationsSection: React.FC<Props> = ({
     <div className="mt-8 space-y-6 relative">
       {viewMode === "card" ? (
         <div className="relative">
-          <div
-            ref={scrollRef}
-            className="max-h-[600px] overflow-y-auto scrollbar-hide py-2 px-2 snap-y snap-mandatory scroll-smooth"
-            style={{ scrollPaddingTop: "0.5rem", scrollPaddingBottom: "0.5rem" }}
-          >
+          <div className="py-2 px-2">
             <div 
-              className="w-full grid grid-cols-1 tablet:grid-cols-2 laptop-L:grid-cols-3 gap-4 auto-rows-fr"
+              className="w-full grid grid-cols-1 tablet:grid-cols-2 laptop-L:grid-cols-3 gap-4 items-stretch"
+              style={{
+                gridAutoRows: 'min-content'
+              }}
             >
               {applications.map((app) => (
-                <div key={app.id} className="snap-start w-full h-full">
+                <div key={app.id} className="snap-start h-full">
                   <AppliedJobCard
                     job={app}
                     variant="card"
@@ -76,11 +55,6 @@ const ApplicationsSection: React.FC<Props> = ({
                 </div>
               ))}
             </div>
-            {!isAtBottom && isScrollable && (
-              <div className="sticky bottom-0 left-0 right-0 flex items-center justify-center gap-2 bg-gradient-to-t from-white via-white/95 to-transparent pt-4 pb-2 text-sm text-gray-neutral500 pointer-events-none">
-                <HiArrowDown className="w-4 h-4 animate-bounce" />
-              </div>
-            )}
           </div>
         </div>
       ) : (
