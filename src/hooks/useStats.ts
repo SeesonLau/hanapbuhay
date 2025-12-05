@@ -70,29 +70,52 @@ export function useStats(options: { variant: Variant; userId?: string | null }) 
   }, [load]);
 
   useEffect(() => {
-    if (variant !== 'manageJobs' || !userId) {
-      return;
+    const channels: any[] = [];
+
+    const createSubscription = (
+      channelName: string,
+      table: string,
+      filter: string | undefined,
+      callback: () => void
+    ) => {
+      const channel = supabase
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table,
+            filter,
+          },
+          callback
+        )
+        .subscribe();
+      channels.push(channel);
+    };
+
+    const handleStatReload = () => {
+        console.log('Change detected, reloading stats...');
+        load();
+    };
+
+    if (variant === 'findJobs') {
+      // For totalJobs, listens to all post changes
+      createSubscription('realtime-all-posts', 'posts', undefined, handleStatReload);
+      if (userId) {
+        // For user-specific stats on findJobs page (completed, ratings, user's posts)
+        createSubscription(`realtime-user-applications-${userId}`, 'applications', `userId=eq.${userId}`, handleStatReload);
+        createSubscription(`realtime-user-reviews-${userId}`, 'reviews', `revieweeId=eq.${userId}`, handleStatReload);
+        createSubscription(`realtime-user-posts-${userId}`, 'posts', `userId=eq.${userId}`, handleStatReload);
+      }
+    } else if (variant === 'appliedJobs' && userId) {
+      createSubscription(`realtime-user-applications-${userId}`, 'applications', `userId=eq.${userId}`, handleStatReload);
+    } else if (variant === 'manageJobs' && userId) {
+      createSubscription(`realtime-user-posts-${userId}`, 'posts', `userId=eq.${userId}`, handleStatReload);
     }
 
-    const channel = supabase
-      .channel('realtime-posts-stats')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'posts',
-          filter: `userId=eq.${userId}`,
-        },
-        () => {
-          console.log('Post change detected, reloading stats...');
-          load();
-        }
-      )
-      .subscribe();
-
     return () => {
-      supabase.removeChannel(channel);
+      channels.forEach(channel => supabase.removeChannel(channel));
     };
   }, [userId, variant, load]);
 
