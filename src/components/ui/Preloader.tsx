@@ -83,7 +83,7 @@ export const Preloader: React.FC<PreloaderProps> = ({
       </div>
 
       {/* Message */}
-      <p className={`font-inter text-xl md:text-2xl font-semibold ${variant === "goodbye" ? "text-primary-primary500" : "text-white"} text-center`}>
+      <p className={`font-inter text-xl md:text-2xl font-semibold text-primary-primary500 text-center`}>
         {message}
         {variant !== "goodbye" && <span className="inline-block w-8 text-left">{dots}</span>}
       </p>
