@@ -10,15 +10,12 @@ import { Post } from '@/lib/models/posts';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
 import { SubTypes } from '@/lib/constants/job-types';
-import JobPostViewModal, { JobPostViewData } from '@/components/modals/JobPostViewModal';
 
 export default function RecommendedJobsSection() {
   const ref = useRef(null);
   const router = useRouter();
   // Bidirectional scroll animation - replays when scrolling back into view
   const isInView = useInView(ref, { once: false, amount: 0.15 });
-  const [isJobViewOpen, setIsJobViewOpen] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
 
   // Prefetch login page for instant navigation
   useEffect(() => {
@@ -46,28 +43,6 @@ export default function RecommendedJobsSection() {
     sessionStorage.setItem('pendingJobApplication', postId);
     router.push('/login');
   }, [router]);
-
-  const handleOpenJob = useCallback((jobData: any) => {
-    const job = jobs.find((j) => j.id === jobData.id);
-    if (!job) return;
-
-    setSelectedJob({
-      id: job.id,
-      title: job.title,
-      description: job.description,
-      location: job.location,
-      salary: job.salary,
-      salaryPeriod: job.salaryPeriod,
-      postedDate: job.postedDate,
-      applicantCount: job.applicantCount || 0,
-      genderTags: job.genderTags,
-      experienceTags: job.experienceTags,
-      jobTypeTags: job.jobTypeTags,
-      requirements: job.requirements,
-      raw: job.raw,
-    });
-    setIsJobViewOpen(true);
-  }, [jobs]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -158,8 +133,8 @@ export default function RecommendedJobsSection() {
                 <JobPostCard
                   variant="glassy"
                   jobData={job}
+                  disableCardClick={true}
                   onApply={handleApplyNow}
-                  onOpen={handleOpenJob}
                 />
               </motion.div>
             ))
@@ -189,14 +164,6 @@ export default function RecommendedJobsSection() {
           </motion.button>
         </motion.div>
       </div>
-
-      {/* Job View Modal */}
-      <JobPostViewModal
-        isOpen={isJobViewOpen}
-        onClose={() => setIsJobViewOpen(false)}
-        job={selectedJob}
-        onApply={selectedJob ? () => handleApplyNow(selectedJob.id) : undefined}
-      />
     </section>
   );
 }

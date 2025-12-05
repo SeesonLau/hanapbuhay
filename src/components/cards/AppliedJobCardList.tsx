@@ -296,7 +296,7 @@ export default function AppliedJobCard({
   return (
     <div
       onClick={handleClick}
-      className={`relative group w-full h-full min-h-[220px] bg-white rounded-lg shadow-[0px_0px_10px_rgba(0,0,0,0.25)] p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-[2px] cursor-pointer ${className}`}
+      className={`relative group w-full h-full min-h-[220px] bg-white rounded-lg shadow-[0px_0px_10px_rgba(0,0,0,0.25)] p-6 flex flex-col transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-[2px] cursor-pointer ${className}`}
     >
       {/* Header with Title and Delete Button */}
       <div className="flex-shrink-0 mb-[16px] flex items-start justify-between gap-2">
@@ -305,18 +305,33 @@ export default function AppliedJobCard({
           <p className="font-inter font-light text-[12px] line-clamp-1 text-gray-neutral600">{aboutText}</p>
         </div>
         
-        {/* Delete "-" Button - Aligned with title, shows on hover */}
+        {/* Delete "-" Button - Always visible on mobile/tablet, shows on hover for laptop+ */}
         {onDelete && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDelete();
-            }}
-            className="flex-shrink-0 bg-white/80 border-2 border-error-error500 text-error-error500 rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-sm leading-none text-xl font-normal"
-            title="Delete application"
-          >
-            <span className="mt-[-2px]">−</span>
-          </button>
+          <>
+            {/* Mobile/Tablet version - always visible (below 1024px) */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete();
+              }}
+              style={{ display: 'flex' }}
+              className="laptop:!hidden z-10 flex-shrink-0 bg-white border-2 border-error-error500 text-error-error500 rounded-full w-6 h-6 items-center justify-center hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-md leading-none text-xl font-medium"
+              title="Delete application"
+            >
+              −
+            </button>
+            {/* Laptop+ version - shows on hover (1024px and above) */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete();
+              }}
+              className="hidden laptop:!flex z-10 flex-shrink-0 bg-white border-2 border-error-error500 text-error-error500 rounded-full w-6 h-6 items-center justify-center hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-md leading-none text-xl font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+              title="Delete application"
+            >
+              −
+            </button>
+          </>
         )}
       </div>
 

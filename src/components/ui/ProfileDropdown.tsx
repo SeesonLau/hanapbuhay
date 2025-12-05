@@ -28,14 +28,16 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
 }) => {
   if (!isOpen) return null;
 
+  const dropdownWidth = 128; // w-32 = 128px
   const top = anchorRect ? (anchorRect.bottom + 8) : 72;
-  const left = anchorRect ? Math.max(8, Math.min(window.innerWidth - 200, anchorRect.right - 192)) : undefined;
+  // Align right edge of dropdown with right edge of anchor (profile button)
+  const left = anchorRect ? Math.max(8, anchorRect.right - dropdownWidth) : undefined;
   const right = left === undefined ? 8 : undefined;
 
   return createPortal(
     <div 
       id="profile-dropdown"
-      className="fixed w-48 rounded-md shadow-lg py-1 z-[1000] transition-all duration-300 ease-in-out pointer-events-auto"
+      className="fixed w-32 rounded-md shadow-lg py-1 z-[1000] transition-all duration-300 ease-in-out pointer-events-auto"
       style={{ 
         backgroundColor: getWhiteColor(),
         border: `1px solid ${getGrayColor('border')}`,

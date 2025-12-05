@@ -32,7 +32,7 @@ export class AuthService {
         email,
         password,
         options: {
-          emailRedirectTo: `${siteUrl}/auth/callback?next=/findJobs`,
+          emailRedirectTo: `${siteUrl}/auth/confirm`,
         },
       });
 
