@@ -46,11 +46,12 @@ export const StaticJobTypeTag: React.FC<StaticTagProps> = ({ label, className = 
 interface StaticLocationTagProps {
   label: string;
   className?: string;
+  showFullAddress?: boolean;
 }
 
-export const StaticLocationTag: React.FC<StaticLocationTagProps> = ({ label, className = '' }) => {
+export const StaticLocationTag: React.FC<StaticLocationTagProps> = ({ label, className = '', showFullAddress = true }) => {
   const { province, city, address } = parseLocationDetailed(label || '');
-  const hasAddress = !!address;
+  const hasAddress = showFullAddress && !!address;
   return (
     <div 
       className={`inline-flex items-center px-3 h-[25px] rounded-[5px] font-alexandria font-normal text-[10px] text-black bg-gray-default min-w-0 max-w-full ${className}`}

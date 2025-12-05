@@ -180,7 +180,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
       <div className="mt-auto space-y-3 mobile-M:space-y-4 tablet:space-y-[16px]">
         {/* Location and Salary */}
         <div className="flex items-center gap-2 flex-wrap">
-          <StaticLocationTag label={location} />
+          <StaticLocationTag label={location} showFullAddress={false} />
           <StaticSalaryTag label={`${salary} /${salaryPeriod}`} />
         </div>
 
