@@ -124,11 +124,36 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
-  const [sort, setSort] = useState<{ sortBy: string; sortOrder: 'asc' | 'desc' }>({
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
+  
+  const parseUrlParams = useCallback(() => {
+    if (typeof window === 'undefined') return { q: '', location: '', sortVal: '', parsedFilters: null, postId: '' };
+    
+    const url = new URL(window.location.href);
+    const q = url.searchParams.get('q') || '';
+    const location = url.searchParams.get('location') || '';
+    const sortVal = url.searchParams.get('sort') || '';
+    const filtersStr = url.searchParams.get('filters');
+    const postId = url.searchParams.get('postId') || '';
+    
+    return { q, location, sortVal, parsedFilters: parseFiltersFromUrl(filtersStr), postId };
+  }, []);
+
+  const [sort, setSort] = useState<{ sortBy: string; sortOrder: 'asc' | 'desc' }>(() => {
+    const { sortVal } = parseUrlParams();
+    let sortBy = 'createdAt';
+    let sortOrder: 'asc' | 'desc' = 'desc';
+    if (sortVal) {
+      const parts = sortVal.split('_');
+      sortBy = parts[0] || 'createdAt';
+      sortOrder = parts[1] === 'asc' ? 'asc' : 'desc';
+    }
+    return { sortBy, sortOrder };
   });
-  const [filters, setFilters] = useState<FilterOptions | null>(null);
+
+  const [filters, setFilters] = useState<FilterOptions | null>(() => {
+    const { parsedFilters } = parseUrlParams();
+    return parsedFilters;
+  });
 
   const REQUIREMENTS_MARKER = "[requirements]";
   const splitDescriptionAndRequirements = (desc?: string): { about: string; requirements: string[] } => {
@@ -193,19 +218,6 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       const method = push ? 'pushState' : 'replaceState';
       window.history[method]({}, '', newUrl);
     };
-  
-    const parseUrlParams = () => {
-      if (typeof window === 'undefined') return { q: '', location: '', sortVal: '', parsedFilters: null, postId: '' };
-      
-      const url = new URL(window.location.href);
-      const q = url.searchParams.get('q') || '';
-      const location = url.searchParams.get('location') || '';
-      const sortVal = url.searchParams.get('sort') || '';
-      const filtersStr = url.searchParams.get('filters');
-      const postId = url.searchParams.get('postId') || '';
-      
-      return { q, location, sortVal, parsedFilters: parseFiltersFromUrl(filtersStr), postId };
-    };
 
   const load = useCallback(async (params: { page?: number; isLoadMore?: boolean; searchTerm?: string; location?: string; sortBy?: string; sortOrder?: 'asc' | 'desc'; filters?: FilterOptions | null } = {}) => {
     const page = params.page ?? 1;
@@ -223,6 +235,21 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
         sortBy: params.sortBy ?? sort.sortBy,
         sortOrder: params.sortOrder ?? sort.sortOrder,
       };
+
+      if (userId && options.excludeMine) {
+        requestParams.excludeUserId = userId;
+      }
+
+      if (userId && options.excludeApplied) {
+        try {
+          const appliedPostIds = await ApplicationService.getAppliedPostIdsByUser(userId);
+          if (appliedPostIds && appliedPostIds.length > 0) {
+            requestParams.excludePostIds = appliedPostIds;
+          }
+        } catch (err) {
+          // swallow error
+        }
+      }
 
       // Apply filters (job types, subtypes, price range) to request params if provided
       const appliedFilters = 'filters' in params ? params.filters : filters;
@@ -348,22 +375,6 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       let posts: Post[] = svcResult?.posts ?? [];
       console.log('Retrieved posts from API:', posts.length, 'posts');
 
-      // If requested, exclude posts that belong to the current user
-      if (userId && options.excludeMine) {
-        posts = posts.filter((p) => p.userId !== userId);
-      }
-
-      // If requested, exclude posts that the current user already applied for
-      if (userId && options.excludeApplied) {
-        try {
-          const appliedPostIds = await ApplicationService.getAppliedPostIdsByUser(userId);
-          const set = new Set(appliedPostIds);
-          posts = posts.filter((p) => !set.has(p.postId));
-        } catch (err) {
-          // swallow error and proceed without excluding
-        }
-      }
-
       const counts = await Promise.all(posts.map((p) => ApplicationService.getTotalApplicationsByPostIdCount(p.postId).catch(() => 0)));
       const mapped = posts.map((p, idx) => mapPost(p, counts[idx] ?? 0));
 
@@ -392,34 +403,22 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
   }, [load, updateQueryParams]);
 
   useEffect(() => {
-    const { q, location: loc, sortVal, parsedFilters } = parseUrlParams();
-
-    let sortBy = 'createdAt';
-    let sortOrder: 'asc' | 'desc' = 'desc';
-    if (sortVal) {
-      const parts = sortVal.split('_');
-      sortBy = parts[0] || 'createdAt';
-      sortOrder = parts[1] === 'asc' ? 'asc' : 'desc';
+    if (options.skip) {
+      return;
     }
-
-    setSort({ sortBy, sortOrder });
-    if (parsedFilters) {
-      setFilters(parsedFilters);
+    
+    if ((options.excludeMine || options.excludeApplied) && !userId) {
+        return;
     }
+    
+    const { q, location: loc } = parseUrlParams();
 
-    if (q || loc || sortVal || parsedFilters) {
-      load({
-        page: 1,
-        searchTerm: q,
-        location: loc,
-        sortBy,
-        sortOrder,
-        filters: parsedFilters,
-      });
-    } else if (!options.skip) {
-      load({ page: 1 });
-    }
-  }, [options.skip]);
+    load({
+      page: 1,
+      searchTerm: q,
+      location: loc,
+    });
+  }, [userId, sort, filters, options.skip, options.excludeMine, options.excludeApplied, load, parseUrlParams]);
   
   const setSelectedPostId = (id?: string | null, push = true) => {
     updateQueryParams({ postId: id || undefined }, push);

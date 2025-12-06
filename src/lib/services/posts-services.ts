@@ -14,7 +14,8 @@ interface RequestParams {
   experienceLevel?: string | string[];
   preferredGender?: string | string[];
   matchMode?: 'mixed'; // For when both subType and type filtering is needed
-  // ... other filter params
+  excludeUserId?: string;
+  excludePostIds?: string[];
 }
 
 export class PostService {
@@ -22,7 +23,7 @@ export class PostService {
    * Fetches all job posts with pagination, search, and filtering.
    */
   static async getAllPosts(params: RequestParams): Promise<{ posts: Post[], hasMore: boolean }> {
-    const { page, pageSize, searchTerm, location, sortBy, sortOrder, jobType, subType, priceRange, matchMode } = params;
+    const { page, pageSize, searchTerm, location, sortBy, sortOrder, jobType, subType, priceRange, matchMode, excludeUserId, excludePostIds } = params;
     const offset = (page - 1) * pageSize;
 
     // Log filter params for debugging
@@ -33,6 +34,14 @@ export class PostService {
       .select('*', { count: 'exact' })
       .eq('isLocked', false)
       .is('deletedAt', null); // Exclude soft-deleted posts
+
+    if (excludeUserId) {
+      query = query.neq('userId', excludeUserId);
+    }
+
+    if (excludePostIds && excludePostIds.length > 0) {
+      query = query.not('postId', 'in', `(${excludePostIds.join(',')})`);
+    }
 
     // Apply search term filter (for title, description, etc.)
     // Search using ilike on title and description fields
