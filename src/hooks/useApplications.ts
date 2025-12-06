@@ -2,12 +2,16 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 import { ApplicationService } from '@/lib/services/applications-services';
+import { ProfileService } from '@/lib/services/profile-services';
+import { ROUTES } from '@/lib/constants';
 import type { AppliedJob } from '@/components/cards/AppliedJobCardList';
 import type { FilterOptions } from '@/components/ui/FilterSection';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
-import { JobType, SubTypes } from '@/lib/constants/job-types';
+import { SubTypes } from '@/lib/constants/job-types';
+import { parseStoredName } from '@/lib/utils/profile-utils';
 
 const PAGE_SIZE = 10;
 
@@ -34,6 +38,7 @@ function formatAppliedDate(iso?: string) {
 }
 
 export function useApplications(userId?: string | null, options: UseApplicationsOptions = {}) {
+  const router = useRouter();
   const [applications, setApplications] = useState<AppliedJob[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
@@ -223,6 +228,16 @@ export function useApplications(userId?: string | null, options: UseApplications
   const confirmApplication = useCallback(async () => {
     if (!postIdToApply || !userId) return;
     try {
+      const profile = await ProfileService.getProfileByUserId(userId);
+      const { firstName, lastName } = parseStoredName(profile?.name);
+      const isProfileComplete = profile && firstName && lastName && profile.phoneNumber && profile.birthdate && profile.sex && profile.address;
+
+      if (!isProfileComplete) {
+        toast.error("Application unsuccessful. Must complete profile details first.");
+        router.push(ROUTES.PROFILE);
+        return;
+      }
+      
       await ApplicationService.createApplication(postIdToApply, userId);
       if (options.onSuccess) {
         options.onSuccess();
@@ -233,7 +248,7 @@ export function useApplications(userId?: string | null, options: UseApplications
       setIsConfirming(false);
       setPostIdToApply(null);
     }
-  }, [postIdToApply, userId, options.onSuccess]);
+  }, [postIdToApply, userId, options, router]);
 
   const cancelApplication = useCallback(() => {
     setIsConfirming(false);
