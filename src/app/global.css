@@ -7,6 +7,26 @@
 :root {
   --font-inter: 'Inter', sans-serif;
   --font-alexandria: 'Alexandria', serif;
+  
+  /* Default Theme Variables (Classic) */
+  --theme-primary: #59ACFF;
+  --theme-primaryHover: #3289FF;
+  --theme-secondary: #4A46FF;
+  --theme-secondaryHover: #3E2AD8;
+  --theme-accent: #8ECAFF;
+  --theme-accentHover: #59ACFF;
+  --theme-background: #E6E7E7;
+  --theme-backgroundSecondary: #CFD2D1;
+  --theme-surface: #FFFFFF;
+  --theme-text: #141515;
+  --theme-textSecondary: #3B3E3E;
+  --theme-border: #3B3E3E;
+  --theme-success: #46BB27;
+  --theme-warning: #EF8F11;
+  --theme-error: #ED4A4A;
+  --theme-gradient-hero: linear-gradient(135deg, #59ACFF 0%, #4A46FF 100%);
+  --theme-gradient-card: linear-gradient(180deg, #FFFFFF 0%, #EEF7FF 100%);
+  --theme-gradient-button: linear-gradient(90deg, #59ACFF 0%, #3289FF 100%);
 }
 
 html {
@@ -28,6 +48,7 @@ body {
   display: none;  /* Chrome, Safari, Opera */
 }
 
+/* Typography Classes */
 h1 { @apply text-h1; }
 h2 { @apply text-h2; }
 h3 { @apply text-h3; }
@@ -124,6 +145,8 @@ h3 { @apply text-h3; }
 .toggle:checked::before {
   transform: translateX(20px);
 }
+
+/* Pulse Animation */
 @keyframes pulse {
   0% {
     opacity: 0.7;
@@ -136,6 +159,7 @@ h3 { @apply text-h3; }
   }
 }
 
+/* Scrollbar Hide Utilities */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -143,6 +167,129 @@ h3 { @apply text-h3; }
   -ms-overflow-style: none; 
   scrollbar-width: none;  
 }
+
+/* Fade In Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.6s ease-out both;
+}
+
+/* ============================================ */
+/* THEME UTILITY CLASSES */
+/* ============================================ */
+
+/* Background Colors */
+.theme-bg-primary { 
+  background-color: var(--theme-primary); 
+}
+.theme-bg-secondary { 
+  background-color: var(--theme-secondary); 
+}
+.theme-bg-accent { 
+  background-color: var(--theme-accent); 
+}
+.theme-bg-surface { 
+  background-color: var(--theme-surface); 
+}
+.theme-bg { 
+  background-color: var(--theme-background); 
+}
+.theme-bg-secondary-bg { 
+  background-color: var(--theme-backgroundSecondary); 
+}
+
+/* Hover Background Colors */
+.theme-hover-bg-primary:hover { 
+  background-color: var(--theme-primaryHover); 
+}
+.theme-hover-bg-secondary:hover { 
+  background-color: var(--theme-secondaryHover); 
+}
+.theme-hover-bg-accent:hover { 
+  background-color: var(--theme-accentHover); 
+}
+
+/* Text Colors */
+.theme-text-primary { 
+  color: var(--theme-primary); 
+}
+.theme-text-secondary { 
+  color: var(--theme-secondary); 
+}
+.theme-text-accent { 
+  color: var(--theme-accent); 
+}
+.theme-text { 
+  color: var(--theme-text); 
+}
+.theme-text-secondary-text { 
+  color: var(--theme-textSecondary); 
+}
+
+/* Border Colors */
+.theme-border { 
+  border-color: var(--theme-border); 
+}
+
+/* Status Colors */
+.theme-text-success { 
+  color: var(--theme-success); 
+}
+.theme-text-warning { 
+  color: var(--theme-warning); 
+}
+.theme-text-error { 
+  color: var(--theme-error); 
+}
+.theme-bg-success { 
+  background-color: var(--theme-success); 
+}
+.theme-bg-warning { 
+  background-color: var(--theme-warning); 
+}
+.theme-bg-error { 
+  background-color: var(--theme-error); 
+}
+
+/* Gradients */
+.theme-gradient-hero { 
+  background: var(--theme-gradient-hero); 
+}
+.theme-gradient-card { 
+  background: var(--theme-gradient-card); 
+}
+.theme-gradient-button { 
+  background: var(--theme-gradient-button); 
+}
+
+/* Smooth transitions for theme changes */
+.theme-transition {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+/* Apply smooth transitions to elements that should animate on theme change */
+button, a, div[class*="theme-"], input, textarea, select {
+  transition: background-color 0.3s ease, 
+              color 0.3s ease, 
+              border-color 0.3s ease;
+}
+
+/* ============================================ */
+/* SHADCN UI BASE STYLES */
+/* ============================================ */
 
 @layer base {
   :root {
@@ -207,19 +354,4 @@ h3 { @apply text-h3; }
   body {
     @apply bg-background text-foreground;
   }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.6s ease-out both;
 }
