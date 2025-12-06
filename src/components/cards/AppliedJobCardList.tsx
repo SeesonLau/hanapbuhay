@@ -263,7 +263,7 @@ export default function AppliedJobCard({
                   handleDelete();
                 }}
                 className="p-1.5 text-error-error500 hover:text-error-error600 hover:bg-error-error50 rounded-md transition-colors"
-                title="Delete application"
+                title="Withdraw application"
               >
                 <RiDeleteBin6Line className="w-4 h-4" />
               </button>
@@ -317,7 +317,7 @@ export default function AppliedJobCard({
               }}
               style={{ display: 'flex' }}
               className="laptop:!hidden z-10 flex-shrink-0 bg-white border-2 border-error-error500 text-error-error500 rounded-full w-6 h-6 items-center justify-center hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-md leading-none text-xl font-medium"
-              title="Delete application"
+              title="Withdraw application"
             >
               −
             </button>
@@ -327,7 +327,7 @@ export default function AppliedJobCard({
                 handleDelete();
               }}
               className="hidden laptop:!flex z-10 flex-shrink-0 bg-white border-2 border-error-error500 text-error-error500 rounded-full w-6 h-6 items-center justify-center hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-md leading-none text-xl font-medium opacity-0 group-hover:opacity-100 transition-opacity"
-              title="Delete application"
+              title="Withdraw application"
             >
               −
             </button>
