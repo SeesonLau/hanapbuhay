@@ -22,8 +22,10 @@ import { Post } from '@/lib/models/posts';
 import FilterSection, { FilterOptions } from '@/components/ui/FilterSection';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterModal from '@/components/ui/FilterModal';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function ManageJobPostsPage() {
+  const { theme } = useTheme();
   const [user, setUser] = useState<any | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort, loadMore, refresh, deletePost, updatePost, createPost, toggleLockPost, applyFilters, setSelectedPostId, parseUrlParams, setSortInUrlForManage } = useJobPosts(userId, { skip: !userId });
@@ -251,8 +253,6 @@ export default function ManageJobPostsPage() {
   };
 
   // On mount - if URL contains postId, honor it only for internal navigation.
-  // If the post exists in current list, open the modal with that post.
-  // Otherwise, remove the postId param (replaceState) so external/bookmarked links don't persist invalid id.
   const _processedUrlPostRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -318,32 +318,58 @@ export default function ManageJobPostsPage() {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <div className="fixed inset-0 -z-10 bg-gray-default" />
+      <div 
+        className="fixed inset-0 -z-10" 
+        style={{ backgroundColor: theme.colors.background }}
+      />
       {/* Banner Section with Header and Search */}
       <Banner 
         variant="manageJobPosts" 
         onSearch={handleSearch} 
         onPostClick={handleCreatePost}
       />
-      <div className="mt-[200px] min-h-screen bg-gray-default">
+      <div 
+        className="mt-[200px] min-h-screen"
+        style={{ backgroundColor: theme.colors.background }}
+      >
         {/* Stats Section - fixed left on laptop, top on mobile/tablet */}
         <aside className="block laptop:hidden px-4 md:px-6">
           <StatsSection stats={stats} variant="manageJobs" loading={statsLoading} error={statsError} />
         </aside>
 
         {/* Stats Section - Desktop fixed left */}
-        <aside className="hidden laptop:block fixed left-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[180px] laptop-L:w-[200px] z-20 px-3 bg-transparent">
+        <aside 
+          className="hidden laptop:block fixed left-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[180px] laptop-L:w-[200px] z-20 px-3"
+          style={{ backgroundColor: 'transparent' }}
+        >
           <StatsSection stats={stats} variant="manageJobs" loading={statsLoading} error={statsError} />
         </aside>
 
         {/* Filter Section - Desktop Only (rightmost, fixed) */}
-        <aside className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-40 border-l border-gray-200 flex flex-col pointer-events-auto">
+        <aside 
+          className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] shadow-lg z-40 border-l flex flex-col pointer-events-auto transition-colors duration-300"
+          style={{ 
+            backgroundColor: theme.colors.sidebarBg,
+            borderColor: theme.colors.borderLight 
+          }}
+        >
           {/* Sort & View Controls */}
-          <div className="flex-shrink-0 bg-white border-b border-gray-200 px-3 py-2 z-10">
+          <div 
+            className="flex-shrink-0 border-b px-3 py-2 z-10 transition-colors duration-300"
+            style={{ 
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.borderLight 
+            }}
+          >
             <div className="flex items-center justify-between gap-3">
               {/* Sort By */}
               <div className="flex items-center gap-2">
-                <span className="text-small text-gray-neutral600 whitespace-nowrap font-medium">Sort by</span>
+                <span 
+                  className="text-small whitespace-nowrap font-medium"
+                  style={{ color: theme.colors.textMuted }}
+                >
+                  Sort by
+                </span>
                 <Sort variant="manageJobs" onChange={handleManageSortChange} />
               </div>
               {/* View Toggle */}
@@ -363,7 +389,10 @@ export default function ManageJobPostsPage() {
         <div className="px-4 md:px-6 laptop:px-6 pt-2 pb-6 max-w-full">
             <div className="space-y-4">
                 {/* Controls Row with Filter Button - Mobile/Tablet Only */}
-                <div className="laptop:hidden flex items-center justify-between gap-1.5 bg-white rounded-lg px-2 py-2 shadow-sm">
+                <div 
+                  className="laptop:hidden flex items-center justify-between gap-1.5 rounded-lg px-2 py-2 shadow-sm transition-colors duration-300"
+                  style={{ backgroundColor: theme.colors.surface }}
+                >
                     {/* Filter Button */}
                     <FilterButton
                         onClick={() => setIsFilterModalOpen(true)}
@@ -371,7 +400,12 @@ export default function ManageJobPostsPage() {
                     />
                     {/* Sort By and View Toggle */}
                     <div className="flex items-center gap-1.5">
-                        <span className="text-tiny text-gray-neutral600 whitespace-nowrap hidden mobile-S:inline">Sort by</span>
+                        <span 
+                          className="text-tiny whitespace-nowrap hidden mobile-S:inline"
+                          style={{ color: theme.colors.textMuted }}
+                        >
+                          Sort by
+                        </span>
                         <Sort variant="manageJobs" onChange={handleManageSortChange} />
                         <ViewToggle value={viewMode} onChange={setViewMode} />
                     </div>

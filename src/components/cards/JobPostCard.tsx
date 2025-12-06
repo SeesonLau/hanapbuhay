@@ -8,6 +8,7 @@ import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
 import { fontClasses } from '@/styles/fonts';
 import Button from '@/components/ui/Button';
+import { useTheme } from '@/hooks/useTheme';
 
 interface JobPostData {
   id: string;
@@ -32,7 +33,15 @@ interface JobPostCardProps {
   onOpen?: (data: JobPostData) => void;
 }
 
-export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '', variant = 'default', disableCardClick = false, onApply, onOpen }) => {
+export const JobPostCard: React.FC<JobPostCardProps> = ({ 
+  jobData, 
+  className = '', 
+  variant = 'default', 
+  disableCardClick = false, 
+  onApply, 
+  onOpen 
+}) => {
+  const { theme } = useTheme();
   const {
     id,
     title,
@@ -77,7 +86,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
     ...normalizedExperiences.map((label) => ({ type: 'experience' as const, label })),
     ...normalizedGenders.map((label) => ({ type: 'gender' as const, label })),
   ];
-  // Dynamically determine how many tags fit on a single row
+
   const [visibleCount, setVisibleCount] = React.useState<number>(Math.min(allTags.length, 4));
   const measureRef = React.useRef<HTMLDivElement | null>(null);
   const overflowMeasureRef = React.useRef<HTMLDivElement | null>(null);
@@ -95,8 +104,8 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
     const maxWidth = container.clientWidth;
     const children = Array.from(measure.children) as HTMLElement[];
     const widths = children.map((el) => el.offsetWidth);
-    const gapPx = 4; // gap-1
-    const overflowWidth = overflowMeasure ? overflowMeasure.offsetWidth : 24; // fallback
+    const gapPx = 4;
+    const overflowWidth = overflowMeasure ? overflowMeasure.offsetWidth : 24;
 
     let used = 0;
     let count = 0;
@@ -118,39 +127,36 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
 
   React.useLayoutEffect(() => {
     recomputeVisibleCount();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobData.title, jobData.description, jobData.location, jobData.salary, jobData.salaryPeriod, jobData.postedDate, allTags.length]);
 
   React.useEffect(() => {
     const onResize = () => recomputeVisibleCount();
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const visibleTags = allTags.slice(0, Math.max(0, visibleCount));
   const extraCount = Math.max(0, allTags.length - visibleTags.length);
 
-  // Glassy variant styles
+  // Glassy variant - uses gradient overlays
   if (variant === 'glassy') {
     return (
       <motion.div 
         className={`w-full h-full min-h-[280px] mobile-M:min-h-[300px] rounded-2xl tablet:rounded-3xl p-5 mobile-M:p-6 tablet:p-7 laptop:p-8 flex flex-col overflow-hidden ${disableCardClick ? '' : 'cursor-pointer'} ${className}`}
         style={{
-          background: 'rgba(30, 58, 138, 0.15)',
+          background: `linear-gradient(135deg, ${theme.colors.primary}15 0%, ${theme.colors.secondary}15 100%)`,
           backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(59, 130, 246, 0.2)',
-          boxShadow: '0 8px 32px rgba(30, 58, 138, 0.2)'
+          border: `1px solid ${theme.colors.primary}30`,
+          boxShadow: `0 8px 32px ${theme.colors.primary}20`
         }}
         onClick={disableCardClick ? undefined : () => onOpen?.(jobData)}
         whileHover={disableCardClick ? undefined : { 
           scale: 1.02, 
           y: -4,
-          boxShadow: '0 12px 48px rgba(30, 58, 138, 0.3)'
+          boxShadow: `0 12px 48px ${theme.colors.primary}30`
         }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        {/* Header */}
         <div className="flex-shrink-0 mb-4 mobile-M:mb-5 tablet:mb-6">
           <h3 className={`${fontClasses.heading} font-bold text-lead mobile-M:text-h3 tablet:text-h2 mb-2 mobile-M:mb-3 line-clamp-1 text-white`}>
             {title}
@@ -160,7 +166,6 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
           </p>
         </div>
 
-        {/* Tags Section */}
         <div className="mb-4 mobile-M:mb-5 tablet:mb-6">
           <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
             {allTags.map((tag, index) => (
@@ -195,7 +200,6 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
           </div>
         </div>
 
-        {/* Footer */}
         <div className="mt-auto space-y-4 mobile-M:space-y-5">
           <div className="flex items-center gap-2 flex-wrap">
             <StaticLocationTag label={location} variant="glassy" />
@@ -226,21 +230,40 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
     );
   }
 
-  // Default variant
+  // Default variant - themed
   return (
     <div 
-      className={`w-full h-full min-h-[250px] bg-white rounded-lg shadow-[0px_0px_10px_rgba(0,0,0,0.25)] p-4 mobile-M:p-5 mobile-L:p-6 tablet:p-[30px] flex flex-col overflow-hidden transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-[2px] cursor-pointer ${className}`}
+      className={`w-full h-full min-h-[250px] rounded-lg p-4 mobile-M:p-5 mobile-L:p-6 tablet:p-[30px] flex flex-col overflow-hidden transition-all duration-300 ease-out cursor-pointer ${className}`}
+      style={{
+        backgroundColor: theme.colors.cardBg,
+        boxShadow: '0px 0px 10px rgba(0,0,0,0.25)',
+      }}
       onClick={() => onOpen?.(jobData)}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.boxShadow = '0px 4px 20px rgba(0,0,0,0.3)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0px 0px 10px rgba(0,0,0,0.25)';
+      }}
     >
-      {/* Header */}
       <div className="flex-shrink-0 mb-3 mobile-M:mb-4 tablet:mb-[16px]">
-        <h3 className={`font-alexandria font-semibold text-body mobile-M:text-lead mobile-L:text-title tablet:text-[20px] mb-1 mobile-M:mb-2 line-clamp-1 text-gray-neutral900 h-[1.5em]`}>{title}</h3>
-        <p className={`font-inter font-light text-tiny mobile-M:text-small tablet:text-[12px] line-clamp-1 text-gray-neutral600 h-[1.2em]`}>{description}</p>
+        <h3 
+          className={`font-alexandria font-semibold text-body mobile-M:text-lead mobile-L:text-title tablet:text-[20px] mb-1 mobile-M:mb-2 line-clamp-1 h-[1.5em]`}
+          style={{ color: theme.colors.text }}
+        >
+          {title}
+        </h3>
+        <p 
+          className={`font-inter font-light text-tiny mobile-M:text-small tablet:text-[12px] line-clamp-1 h-[1.2em]`}
+          style={{ color: theme.colors.textSecondary }}
+        >
+          {description}
+        </p>
       </div>
 
-      {/* Tags Section - Single row that adapts to fit */}
       <div className="mb-3 mobile-M:mb-4 tablet:mb-[16px]">
-        {/* Hidden measurers to calculate widths without wrapping */}
         <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
           {allTags.map((tag, index) => (
             tag.type === 'gender' ? (
@@ -252,7 +275,6 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
             )
           ))}
         </div>
-        {/* Measure overflow indicator width */}
         <div ref={overflowMeasureRef} className="fixed -top-[9999px] -left-[9999px] inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
           99+
         </div>
@@ -268,29 +290,34 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({ jobData, className = '
             )
           ))}
           {extraCount > 0 && (
-            <div
-              className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400"
-            >
+            <div className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
               {extraCount}+
             </div>
           )}
         </div>
       </div>
 
-      {/* Footer */}
       <div className="mt-auto space-y-3 mobile-M:space-y-4 tablet:space-y-[16px]">
-        {/* Location and Salary */}
         <div className="flex items-center gap-2 flex-wrap">
           <StaticLocationTag label={location} showFullAddress={false} />
           <StaticSalaryTag label={`${salary} /${salaryPeriod}`} />
         </div>
 
-        {/* Posted Date + Applicants + Apply Button */}
         <div className="flex flex-col mobile-M:flex-row items-start mobile-M:items-center justify-between gap-2 mobile-M:gap-0">
           <div className="flex items-center gap-1.5 mobile-M:gap-2 flex-wrap">
-            <span className={`font-inter font-medium text-[9px] mobile-M:text-[10px] text-gray-neutral600`}>Posted on: {postedDate}</span>
+            <span 
+              className={`font-inter font-medium text-[9px] mobile-M:text-[10px]`}
+              style={{ color: theme.colors.textSecondary }}
+            >
+              Posted on: {postedDate}
+            </span>
             <span className="text-gray-400 hidden mobile-M:inline">•</span>
-            <span className={`font-inter text-[9px] mobile-M:text-[10px] text-gray-neutral600`}>{applicantCount} Applicants</span>
+            <span 
+              className={`font-inter text-[9px] mobile-M:text-[10px]`}
+              style={{ color: theme.colors.textSecondary }}
+            >
+              {applicantCount} Applicants
+            </span>
           </div>
           <Button
             variant="primary"
