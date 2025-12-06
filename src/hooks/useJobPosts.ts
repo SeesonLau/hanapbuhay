@@ -227,7 +227,7 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
       // Apply filters (job types, subtypes, price range) to request params if provided
       const appliedFilters = 'filters' in params ? params.filters : filters;
       if (appliedFilters) {
-        const { jobTypes, salaryRange } = appliedFilters;
+        const { jobTypes, salaryRange, experienceLevel, preferredGender } = appliedFilters;
 
         console.log('Applying filters - jobTypes object:', jobTypes);
 
@@ -303,6 +303,35 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
           } else if (key === 'moreThan20000') {
             requestParams.priceRange = { min: 20001, max: 1000000000 };
           }
+        }
+
+        // Add experienceLevel to requestParams
+        const selectedExperienceLevels = Object.entries(experienceLevel || {})
+          .filter(([_, v]) => v)
+          .map(([k]) => {
+            if (k === 'entryLevel') return ExperienceLevel.ENTRY;
+            if (k === 'intermediate') return ExperienceLevel.INTERMEDIATE;
+            if (k === 'professional') return ExperienceLevel.EXPERT;
+            return k;
+          });
+
+        if (selectedExperienceLevels.length > 0) {
+          requestParams.experienceLevel = selectedExperienceLevels;
+        }
+        
+        // Add preferredGender to requestParams
+        const selectedGenders = Object.entries(preferredGender || {})
+          .filter(([_, v]) => v)
+          .map(([k]) => {
+            if (k === 'any') return Gender.ANY;
+            if (k === 'male') return Gender.MALE;
+            if (k === 'female') return Gender.FEMALE;
+            if (k === 'others') return Gender.OTHERS;
+            return k;
+          });
+        
+        if (selectedGenders.length > 0) {
+          requestParams.preferredGender = selectedGenders;
         }
       }
 
@@ -397,53 +426,6 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
   };
 
 
-  // Client-side filtering for experience level and preferred gender
-  const getFilteredJobsByTags = (jobsToFilter: JobPostData[], filterOptions: FilterOptions | null): JobPostData[] => {
-    if (!filterOptions) return jobsToFilter;
-
-    const { experienceLevel, preferredGender } = filterOptions;
-
-    const selectedExperienceLevels = Object.entries(experienceLevel || {})
-      .filter(([_, v]) => v)
-      .map(([k]) => {
-        // Map filter keys to ExperienceLevel constants
-        if (k === 'entryLevel') return ExperienceLevel.ENTRY;
-        if (k === 'intermediate') return ExperienceLevel.INTERMEDIATE;
-        if (k === 'professional') return ExperienceLevel.EXPERT;
-        return k;
-      });
-
-    const selectedGenders = Object.entries(preferredGender || {})
-      .filter(([_, v]) => v)
-      .map(([k]) => {
-        // Map filter keys to Gender constants
-        if (k === 'any') return Gender.ANY;
-        if (k === 'male') return Gender.MALE;
-        if (k === 'female') return Gender.FEMALE;
-        if (k === 'others') return Gender.OTHERS;
-        return k;
-      });
-
-    return jobsToFilter.filter((job) => {
-      // Filter by experience level if any are selected
-      if (selectedExperienceLevels.length > 0) {
-        const jobHasSelectedExp = job.experienceTags?.some((tag) =>
-          selectedExperienceLevels.includes(tag)
-        );
-        if (!jobHasSelectedExp) return false;
-      }
-
-      // Filter by preferred gender if any are selected
-      if (selectedGenders.length > 0) {
-        const jobHasSelectedGender = job.genderTags?.some((tag) =>
-          selectedGenders.includes(tag)
-        );
-        if (!jobHasSelectedGender) return false;
-      }
-
-      return true;
-    });
-  };
 
   const handleSearch = useCallback((query: string, location?: string) => {
     (async () => {
@@ -623,13 +605,8 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     await load({ page: 1 });
   }, [load]);
 
-  // Apply tag-based filtering (experience level, preferred gender) to jobs
-  const filteredJobs = useCallback(() => {
-    return getFilteredJobsByTags(jobs, filters);
-  }, [jobs, filters]);
-
   return {
-    jobs: filteredJobs(),
+    jobs: jobs,
     loading,
     isLoadingMore,
     error,

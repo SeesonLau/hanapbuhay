@@ -70,16 +70,66 @@ export function useApplications(userId?: string | null, options: UseApplications
 
     try {
       const appliedFilters = 'filters' in params ? params.filters : filters;
+      const filterParams: any = {
+        searchTerm: params.searchTerm,
+        location: params.location,
+      };
+
+      if (appliedFilters) {
+        const { jobTypes, salaryRange, experienceLevel, preferredGender } = appliedFilters;
+
+        // Job Types
+        const jobTypeKeys = Object.keys(jobTypes || {}).filter(key => jobTypes[key]?.length > 0);
+        if (jobTypeKeys.length > 0) {
+          const otherJobTypes: string[] = [];
+          const specificSubTypes: string[] = [];
+          for (const jobType of jobTypeKeys) {
+            const subs = jobTypes[jobType];
+            if (subs.includes('Other')) otherJobTypes.push(jobType);
+            specificSubTypes.push(...subs.filter(s => s !== 'Other'));
+          }
+          if (specificSubTypes.length > 0) filterParams.subType = specificSubTypes;
+          if (otherJobTypes.length > 0) {
+            filterParams.jobType = otherJobTypes;
+            if (specificSubTypes.length > 0) filterParams.matchMode = 'mixed';
+          }
+        }
+
+        // Salary Range
+        const selectedSalaryKeys = Object.entries(salaryRange || {}).filter(([_, v]) => v).map(([k]) => k);
+        if (selectedSalaryKeys.length === 1) {
+          const key = selectedSalaryKeys[0];
+          if (key === 'lessThan5000') filterParams.priceRange = { min: 0, max: 4999 };
+          else if (key === 'range10to20') filterParams.priceRange = { min: 10000, max: 20000 };
+          else if (key === 'moreThan20000') filterParams.priceRange = { min: 20001, max: 1000000000 };
+        }
+
+        // Experience Level
+        const selectedExperienceLevels = Object.entries(experienceLevel || {}).filter(([_, v]) => v).map(([k]) => {
+          if (k === 'entryLevel') return ExperienceLevel.ENTRY;
+          if (k === 'intermediate') return ExperienceLevel.INTERMEDIATE;
+          if (k === 'professional') return ExperienceLevel.EXPERT;
+          return k;
+        });
+        if (selectedExperienceLevels.length > 0) filterParams.experienceLevel = selectedExperienceLevels;
+
+        // Preferred Gender
+        const selectedGenders = Object.entries(preferredGender || {}).filter(([_, v]) => v).map(([k]) => {
+          if (k === 'any') return Gender.ANY;
+          if (k === 'male') return Gender.MALE;
+          if (k === 'female') return Gender.FEMALE;
+          if (k === 'others') return Gender.OTHERS;
+          return k;
+        });
+        if (selectedGenders.length > 0) filterParams.preferredGender = selectedGenders;
+      }
+
       const queryParams: any = {
         page,
         pageSize: options.pageSize ?? PAGE_SIZE,
         sortBy: params.sortBy ?? sort.sortBy,
         sortOrder: params.sortOrder ?? sort.sortOrder,
-        filters: {
-          ...appliedFilters,
-          searchTerm: params.searchTerm,
-          location: params.location,
-        },
+        filters: filterParams,
       };
 
       const res = await ApplicationService.getApplicationsByUserId(userId, queryParams);
