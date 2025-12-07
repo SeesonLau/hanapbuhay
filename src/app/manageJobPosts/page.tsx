@@ -397,6 +397,7 @@ export default function ManageJobPostsPage() {
             onApply={handleApplyFilters}
             onClearAll={handleClearFilters}
             className="flex-1 min-h-0"
+            variant="default"
           />
         </aside>
 
@@ -454,6 +455,7 @@ export default function ManageJobPostsPage() {
         onApply={handleApplyFilters}
         onClearAll={handleClearFilters}
         initialFilters={activeFilters}
+        variant="default"
       />
       {/* Modals */}
       <JobPostAddModal 
