@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
+import { useTheme } from "@/hooks/useTheme";
 
 type ManageType = "total" | "inactive" | "active" | "resolved";
-type ColorVariant = "blue" | "red" | "green" | "orange";
 
 interface StatCardManageJobsProps {
   type: ManageType;
@@ -26,41 +26,43 @@ const iconForType: Record<ManageType, string> = {
   resolved: "/icons/stats-approved.svg",
 };
 
-const variantForType: Record<ManageType, ColorVariant> = {
-  total: "blue",
-  inactive: "red",
-  active: "green",
-  resolved: "orange",
-};
-
-const variantBgClass: Record<ColorVariant, string> = {
-  blue: "bg-blue-default",
-  red: "bg-error-error500",
-  green: "bg-success-success400",
-  orange: "bg-orange-400",
-};
-
 export default function StatCardManageJobs({
   type,
   title,
   value,
   className = "",
 }: StatCardManageJobsProps) {
+  const { theme } = useTheme();
   const resolvedTitle = title || titleForType[type];
   const iconSrc = iconForType[type];
-  const iconBgClass = variantBgClass[variantForType[type]];
+
+  // Map type to theme variant
+  const getIconBgColor = () => {
+    switch (type) {
+      case "total":
+        return theme.statCard.variant1;
+      case "inactive":
+        return theme.statCard.variant2;
+      case "active":
+        return theme.statCard.variant3;
+      case "resolved":
+        return theme.statCard.variant4;
+    }
+  };
 
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-0.5 mobile-M:gap-1 tablet:gap-1.5 laptop:gap-0.5 laptop-L:gap-1 p-2 mobile-M:p-3 tablet:p-4 laptop:p-2 laptop-L:p-2.5 w-full h-full rounded-lg tablet:rounded-xl bg-white shadow-md ${className}`}
+      className={`flex flex-col items-center justify-center gap-0.5 mobile-M:gap-1 tablet:gap-1.5 laptop:gap-0.5 laptop-L:gap-1 p-2 mobile-M:p-3 tablet:p-4 laptop:p-2 laptop-L:p-2.5 w-full h-full rounded-lg tablet:rounded-xl shadow-md ${className}`}
       style={{
+        backgroundColor: theme.colors.cardBg,
         boxShadow: `0 4px 16px rgba(0, 0, 0, 0.12)`,
         minHeight: 'clamp(80px, 12vh, 120px)',
       }}
     >
       <div
-        className={`flex items-center justify-center rounded-md tablet:rounded-lg flex-shrink-0 ${iconBgClass}`}
+        className="flex items-center justify-center rounded-md tablet:rounded-lg flex-shrink-0"
         style={{
+          backgroundColor: getIconBgColor(),
           width: 'clamp(28px, 6vw, 36px)',
           height: 'clamp(28px, 6vw, 36px)',
         }}
@@ -77,13 +79,15 @@ export default function StatCardManageJobs({
       </div>
 
       <span
-        className="font-inter text-mini mobile-M:text-tiny tablet:text-small laptop:text-mini laptop-L:text-tiny font-medium text-center leading-tight text-gray-neutral600 line-clamp-1"
+        className="font-inter text-mini mobile-M:text-tiny tablet:text-small laptop:text-mini laptop-L:text-tiny font-medium text-center leading-tight line-clamp-1"
+        style={{ color: theme.statCard.text }}
       >
         {resolvedTitle}
       </span>
 
       <span
-        className="font-inter text-tiny mobile-M:text-small tablet:text-body laptop:text-small laptop-L:text-body font-bold text-center text-gray-neutral900 leading-none"
+        className="font-inter text-tiny mobile-M:text-small tablet:text-body laptop:text-small laptop-L:text-body font-bold text-center leading-none"
+        style={{ color: theme.statCard.textValue }}
       >
         {value !== undefined && value !== null ? value : "—"}
       </span>

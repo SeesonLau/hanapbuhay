@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-// Refactored to Tailwind theme tokens
+import { useTheme } from "@/hooks/useTheme";
 
 type ColorVariant = "blue" | "green" | "yellow" | "red";
 
 interface StatCardFindJobsProps {
   title: string;
-  value?: string | number; // optional, will be provided by DB later
-  variant?: ColorVariant; // color of the icon background box
+  value?: string | number;
+  variant?: ColorVariant;
   className?: string;
 }
 
@@ -20,28 +20,42 @@ const iconPathForTitle = (title: string): string => {
   return "/icons/stats-posted.svg";
 };
 
-const variantBgClass: Record<ColorVariant, string> = {
-  blue: "bg-blue-default",
-  green: "bg-success-success400", // use success tint for green
-  yellow: "bg-warning-warning300",
-  red: "bg-error-error500",
-};
-
-export const StatCardFindJobs: React.FC<StatCardFindJobsProps> = ({ title, value, variant = "blue", className = "" }) => {
+export const StatCardFindJobs: React.FC<StatCardFindJobsProps> = ({ 
+  title, 
+  value, 
+  variant = "blue", 
+  className = "" 
+}) => {
+  const { theme } = useTheme();
   const iconSrc = iconPathForTitle(title);
-  const iconBgClass = variantBgClass[variant];
+
+  // Map variant to theme colors (monochrome progression)
+  const getIconBgColor = () => {
+    switch (variant) {
+      case "blue":
+        return theme.statCard.variant1;
+      case "green":
+        return theme.statCard.variant3;
+      case "yellow":
+        return theme.statCard.variant4;
+      case "red":
+        return theme.statCard.variant2;
+    }
+  };
 
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-0.5 mobile-M:gap-1 tablet:gap-1.5 laptop:gap-1 laptop-L:gap-1.5 p-2 mobile-M:p-3 tablet:p-4 laptop:p-3 laptop-L:p-3.5 w-full laptop:h-full rounded-lg tablet:rounded-xl bg-white shadow-md ${className}`}
+      className={`flex flex-col items-center justify-center gap-0.5 mobile-M:gap-1 tablet:gap-1.5 laptop:gap-1 laptop-L:gap-1.5 p-2 mobile-M:p-3 tablet:p-4 laptop:p-3 laptop-L:p-3.5 w-full laptop:h-full rounded-lg tablet:rounded-xl shadow-md ${className}`}
       style={{
+        backgroundColor: theme.colors.cardBg,
         boxShadow: `0 4px 16px rgba(0, 0, 0, 0.12)`,
       }}
     >
       {/* Icon */}
       <div
-        className={`flex items-center justify-center rounded-md tablet:rounded-lg flex-shrink-0 ${iconBgClass}`}
+        className="flex items-center justify-center rounded-md tablet:rounded-lg flex-shrink-0"
         style={{ 
+          backgroundColor: getIconBgColor(),
           width: 'clamp(32px, 8vw, 40px)', 
           height: 'clamp(32px, 8vw, 40px)', 
         }}
@@ -59,14 +73,16 @@ export const StatCardFindJobs: React.FC<StatCardFindJobsProps> = ({ title, value
       
       {/* Title */}
       <span 
-        className="font-inter text-mini mobile-M:text-tiny tablet:text-small laptop:text-mini laptop-L:text-tiny font-medium text-center leading-tight text-gray-neutral600 line-clamp-1"
+        className="font-inter text-mini mobile-M:text-tiny tablet:text-small laptop:text-mini laptop-L:text-tiny font-medium text-center leading-tight line-clamp-1"
+        style={{ color: theme.statCard.text }}
       >
         {title}
       </span>
       
       {/* Value */}
       <span 
-        className="font-inter text-tiny mobile-M:text-small tablet:text-body laptop:text-small laptop-L:text-body font-bold text-center text-gray-neutral600 leading-none"
+        className="font-inter text-tiny mobile-M:text-small tablet:text-body laptop:text-small laptop-L:text-body font-bold text-center leading-none"
+        style={{ color: theme.statCard.textValue }}
       >
         {value !== undefined && value !== null ? value : "—"}
       </span>
