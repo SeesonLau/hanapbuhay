@@ -146,8 +146,7 @@ export class ApplicationService {
       try {
         let postsQuery = supabase
           .from('posts')
-          .select('postId', { count: 'exact' })
-          .is('deletedAt', null);
+          .select('postId', { count: 'exact' });
 
         if (f.searchTerm) {
           const clean = String(f.searchTerm).replace(/\*/g, '').trim();
@@ -198,6 +197,21 @@ export class ApplicationService {
           }
         }
 
+        // Status flags filtering (appliedJobs-only): locked/deleted
+        const st: any = (f as any).status;
+        if (st) {
+          if (st.locked || st.deleted) {
+            const orConds: string[] = [];
+            if (st.locked) orConds.push('isLocked.eq.true');
+            if (st.deleted) orConds.push('deletedAt.not.is.null');
+            if (orConds.length > 0) {
+              postsQuery = postsQuery.or(orConds.join(','));
+            }
+          } else if (st.pending || st.approved || st.rejected) {
+            postsQuery = postsQuery.eq('isLocked', false).is('deletedAt', null);
+          }
+        }
+
         // Get a large enough range for matching posts (no pagination here)
         const { data: postsData, error: postsError } = await postsQuery.range(0, 9999);
         if (postsError) throw postsError;
@@ -226,7 +240,9 @@ export class ApplicationService {
           type,
           subType,
           userId,
-          createdBy
+          createdBy,
+          isLocked,
+          deletedAt
         )
       `, { count: 'exact' })
       .eq('userId', userId)

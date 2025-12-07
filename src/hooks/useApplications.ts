@@ -10,6 +10,7 @@ import type { AppliedJob } from '@/components/cards/AppliedJobCardList';
 import type { FilterOptions } from '@/components/ui/FilterSection';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
+import { ApplicationStatus } from '@/lib/constants/application-status';
 import { SubTypes } from '@/lib/constants/job-types';
 import { parseStoredName } from '@/lib/utils/profile-utils';
 
@@ -80,6 +81,7 @@ export function useApplications(userId?: string | null, options: UseApplications
         location: params.location,
       };
 
+      let statusParam: ApplicationStatus[] | undefined = undefined;
       if (appliedFilters) {
         const { jobTypes, salaryRange, experienceLevel, preferredGender } = appliedFilters;
 
@@ -127,6 +129,25 @@ export function useApplications(userId?: string | null, options: UseApplications
           return k;
         });
         if (selectedGenders.length > 0) filterParams.preferredGender = selectedGenders;
+
+        // Status (appliedJobs-only): map application status to top-level, and post flags to filters
+        const st = (appliedFilters as any).status as NonNullable<FilterOptions['status']> | undefined;
+        if (st) {
+          const appStatuses: ApplicationStatus[] = [];
+          if (st.pending) appStatuses.push(ApplicationStatus.PENDING);
+          if (st.approved) appStatuses.push(ApplicationStatus.APPROVED);
+          if (st.rejected) appStatuses.push(ApplicationStatus.REJECTED);
+          if (appStatuses.length > 0) {
+            statusParam = appStatuses;
+          }
+          filterParams.status = {
+            locked: !!st.locked,
+            deleted: !!st.deleted,
+            pending: !!st.pending,
+            approved: !!st.approved,
+            rejected: !!st.rejected,
+          };
+        }
       }
 
       const queryParams: any = {
@@ -135,6 +156,7 @@ export function useApplications(userId?: string | null, options: UseApplications
         sortBy: params.sortBy ?? sort.sortBy,
         sortOrder: params.sortOrder ?? sort.sortOrder,
         filters: filterParams,
+        status: statusParam,
       };
 
       const res = await ApplicationService.getApplicationsByUserId(userId, queryParams);
@@ -176,11 +198,34 @@ export function useApplications(userId?: string | null, options: UseApplications
           raw: a,
         } as AppliedJob;
       });
+      const score = (job: AppliedJob) => {
+        const rp = job.raw?.posts ?? job.raw?.post ?? {};
+        const deleted = Boolean(rp?.deletedAt ?? rp?.deleted_at);
+        const locked = Boolean(rp?.isLocked ?? rp?.is_locked);
+        return deleted ? 2 : (locked ? 1 : 0);
+      };
+      const getCreated = (job: AppliedJob) => {
+        const c = job.raw?.createdAt ?? job.raw?.created_at ?? '';
+        const t = new Date(c).getTime();
+        return Number.isFinite(t) ? t : 0;
+      };
+      const sortOrder = params.sortOrder ?? sort.sortOrder;
+      const sortFn = (a: AppliedJob, b: AppliedJob) => {
+        const sa = score(a);
+        const sb = score(b);
+        if (sa !== sb) return sa - sb;
+        const ca = getCreated(a);
+        const cb = getCreated(b);
+        return sortOrder === 'asc' ? ca - cb : cb - ca;
+      };
 
       if (isLoadMore) {
-        setApplications(prev => [...prev, ...mapped]);
+        setApplications(prev => {
+          const combined = [...prev, ...mapped];
+          return combined.sort(sortFn);
+        });
       } else {
-        setApplications(mapped);
+        setApplications(mapped.sort(sortFn));
       }
       setCurrentPage(page);
       setHasMoreData(res.hasMore);
@@ -447,6 +492,12 @@ const serializeFiltersForUrl = (filters: FilterOptions | null): string | undefin
     .join(',');
   if (gender) parts.push(`pg=${gender}`);
 
+  const stVals = filters.status ? Object.entries(filters.status)
+    .filter(([_, v]) => v)
+    .map(([k]) => k)
+    .join(',') : '';
+  if (stVals) parts.push(`st=${stVals}`);
+
   return parts.join('|');
 };
 
@@ -459,6 +510,7 @@ const parseFiltersFromUrl = (str: string | null): FilterOptions | null => {
     salaryRange: { lessThan5000: false, range10to20: false, moreThan20000: false, custom: false },
     experienceLevel: { entryLevel: false, intermediate: false, professional: false },
     preferredGender: { any: false, female: false, male: false, others: false },
+    status: { deleted: false, locked: false, pending: false, approved: false, rejected: false },
   };
 
   str.split('|').forEach(part => {
@@ -478,6 +530,12 @@ const parseFiltersFromUrl = (str: string | null): FilterOptions | null => {
       value.split(',').forEach(k => (filters.experienceLevel as any)[k] = true);
     } else if (key === 'pg') {
       value.split(',').forEach(k => (filters.preferredGender as any)[k] = true);
+    } else if (key === 'st') {
+      value.split(',').forEach(k => {
+        if ((filters.status as any)[k] !== undefined) {
+          (filters.status as any)[k] = true;
+        }
+      });
     }
   });
 

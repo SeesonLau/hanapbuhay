@@ -36,6 +36,7 @@ interface JobPostEditModalProps {
   // Accept a Post directly (page was passing `post`) – we'll derive initialData from it if provided
   post?: Post | null;
   onSubmit?: (data: JobPostAddFormData & { subTypes?: string[] }) => void;
+  isRestricted?: boolean;
 }
 
 function mapPostToInitial(post: Post): Partial<JobPostAddFormData> & { subTypes?: string[] } {
@@ -63,7 +64,7 @@ function mapPostToInitial(post: Post): Partial<JobPostAddFormData> & { subTypes?
   };
 }
 
-export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmit, post }: JobPostEditModalProps) {
+export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmit, post, isRestricted }: JobPostEditModalProps) {
   const resolvedInitial = initialData ?? (post ? mapPostToInitial(post) : undefined);
   const [title, setTitle] = useState(resolvedInitial?.title ?? "");
   const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>(resolvedInitial?.jobTypes ?? []);
@@ -277,7 +278,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
           <div className={page === 1 ? '' : 'hidden'}>
           {/* Tags Section */}
           <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Tags</div>
-          <div className="rounded-xl border p-4 border-gray-neutral300">
+          <div className={`rounded-xl border p-4 border-gray-neutral300 ${isRestricted ? 'opacity-60 pointer-events-none' : ''}`}>
             {/* Selected Tags Summary */}
             <div className="mb-3">
               <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Selected Tags</div>
@@ -347,15 +348,14 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                 options={jobTypeOptions}
                 selected={effectiveJobTypes.slice(0, 1)}
                 selectedSubTypes={selectedSubTypes}
-                onToggleSubType={(sub) => toggleSubType(sub)}
+                onToggleSubType={(sub) => { if (isRestricted) return; toggleSubType(sub); }}
                 onToggle={(value) => {
+                  if (isRestricted) return;
                   const subList = SubTypes[value as JobType] || [];
                   const isAlreadySelected = effectiveJobTypes[0] === value;
                   if (isAlreadySelected) {
-                    // Deselect current but preserve previously selected subtypes
                     setSelectedJobTypes([]);
                   } else {
-                    // Switch selected category; keep ALL previously selected subtypes across categories
                     setSelectedJobTypes([String(value)]);
                   }
                 }}
@@ -373,7 +373,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                     key={opt.value}
                     label={opt.label}
                     selected={selectedExperience.includes(opt.value)}
-                    onClick={() => handleExperienceSelect(String(opt.value))}
+                    onClick={isRestricted ? undefined : () => handleExperienceSelect(String(opt.value))}
                   />
                 ))}
                </div>
@@ -390,7 +390,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                     key={opt.value}
                     label={opt.label}
                     selected={selectedGenders.includes(opt.value)}
-                    onClick={() => handleGenderSelect(String(opt.value))}
+                    onClick={isRestricted ? undefined : () => handleGenderSelect(String(opt.value))}
                   />
                 ))}
                </div>
@@ -409,6 +409,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
               maxLength={50}
               helperText={`${title.length}/50`}
               required
+              disabled={!!isRestricted}
             />
           </div>
           {/* Location */}
@@ -470,6 +471,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                 min={0}
                 inputMode="decimal"
                 pattern="^[0-9]*\.?[0-9]*$"
+                disabled={!!isRestricted}
               />
               <SelectBox 
                 width="180px"
@@ -480,6 +482,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                 ]}
                 value={salaryPeriod}
                 onChange={(e) => setSalaryPeriod(e.target.value as 'day' | 'week' | 'month')}
+                disabled={!!isRestricted}
               />
             </div>
           </div>
