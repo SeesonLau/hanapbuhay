@@ -14,7 +14,8 @@ interface RequestParams {
   experienceLevel?: string | string[];
   preferredGender?: string | string[];
   matchMode?: 'mixed'; // For when both subType and type filtering is needed
-  // ... other filter params
+  excludeUserId?: string;
+  excludePostIds?: string[];
 }
 
 export class PostService {
@@ -22,7 +23,7 @@ export class PostService {
    * Fetches all job posts with pagination, search, and filtering.
    */
   static async getAllPosts(params: RequestParams): Promise<{ posts: Post[], hasMore: boolean }> {
-    const { page, pageSize, searchTerm, location, sortBy, sortOrder, jobType, subType, priceRange, matchMode } = params;
+    const { page, pageSize, searchTerm, location, sortBy, sortOrder, jobType, subType, priceRange, matchMode, excludeUserId, excludePostIds } = params;
     const offset = (page - 1) * pageSize;
 
     // Log filter params for debugging
@@ -33,6 +34,14 @@ export class PostService {
       .select('*', { count: 'exact' })
       .eq('isLocked', false)
       .is('deletedAt', null); // Exclude soft-deleted posts
+
+    if (excludeUserId) {
+      query = query.neq('userId', excludeUserId);
+    }
+
+    if (excludePostIds && excludePostIds.length > 0) {
+      query = query.not('postId', 'in', `(${excludePostIds.join(',')})`);
+    }
 
     // Apply search term filter (for title, description, etc.)
     // Search using ilike on title and description fields
@@ -253,14 +262,21 @@ export class PostService {
   /**
    * Gets the total count of posts for a specific user.
    */
-  static async getPostCountByUserId(userId: string): Promise<number> {
-    const { count, error } = await supabase
+  static async getPostCountByUserId(userId: string, options?: { isLocked?: boolean }): Promise<number> {
+    let query = supabase
       .from('posts')
       .select('*', { count: 'exact', head: true })
       .eq('userId', userId)
       .is('deletedAt', null);
 
+    if (options && options.isLocked !== undefined) {
+      query = query.eq('isLocked', options.isLocked);
+    }
+
+    const { count, error } = await query;
+
     if (error) {
+      console.error('Error in getPostCountByUserId:', error.message);
       return 0;
     }
     return count ?? 0;

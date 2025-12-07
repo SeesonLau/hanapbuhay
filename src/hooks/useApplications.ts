@@ -2,12 +2,16 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 import { ApplicationService } from '@/lib/services/applications-services';
+import { ProfileService } from '@/lib/services/profile-services';
+import { ROUTES } from '@/lib/constants';
 import type { AppliedJob } from '@/components/cards/AppliedJobCardList';
 import type { FilterOptions } from '@/components/ui/FilterSection';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
-import { JobType, SubTypes } from '@/lib/constants/job-types';
+import { SubTypes } from '@/lib/constants/job-types';
+import { parseStoredName } from '@/lib/utils/profile-utils';
 
 const PAGE_SIZE = 10;
 
@@ -34,6 +38,7 @@ function formatAppliedDate(iso?: string) {
 }
 
 export function useApplications(userId?: string | null, options: UseApplicationsOptions = {}) {
+  const router = useRouter();
   const [applications, setApplications] = useState<AppliedJob[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
@@ -70,16 +75,66 @@ export function useApplications(userId?: string | null, options: UseApplications
 
     try {
       const appliedFilters = 'filters' in params ? params.filters : filters;
+      const filterParams: any = {
+        searchTerm: params.searchTerm,
+        location: params.location,
+      };
+
+      if (appliedFilters) {
+        const { jobTypes, salaryRange, experienceLevel, preferredGender } = appliedFilters;
+
+        // Job Types
+        const jobTypeKeys = Object.keys(jobTypes || {}).filter(key => jobTypes[key]?.length > 0);
+        if (jobTypeKeys.length > 0) {
+          const otherJobTypes: string[] = [];
+          const specificSubTypes: string[] = [];
+          for (const jobType of jobTypeKeys) {
+            const subs = jobTypes[jobType];
+            if (subs.includes('Other')) otherJobTypes.push(jobType);
+            specificSubTypes.push(...subs.filter(s => s !== 'Other'));
+          }
+          if (specificSubTypes.length > 0) filterParams.subType = specificSubTypes;
+          if (otherJobTypes.length > 0) {
+            filterParams.jobType = otherJobTypes;
+            if (specificSubTypes.length > 0) filterParams.matchMode = 'mixed';
+          }
+        }
+
+        // Salary Range
+        const selectedSalaryKeys = Object.entries(salaryRange || {}).filter(([_, v]) => v).map(([k]) => k);
+        if (selectedSalaryKeys.length === 1) {
+          const key = selectedSalaryKeys[0];
+          if (key === 'lessThan5000') filterParams.priceRange = { min: 0, max: 4999 };
+          else if (key === 'range10to20') filterParams.priceRange = { min: 10000, max: 20000 };
+          else if (key === 'moreThan20000') filterParams.priceRange = { min: 20001, max: 1000000000 };
+        }
+
+        // Experience Level
+        const selectedExperienceLevels = Object.entries(experienceLevel || {}).filter(([_, v]) => v).map(([k]) => {
+          if (k === 'entryLevel') return ExperienceLevel.ENTRY;
+          if (k === 'intermediate') return ExperienceLevel.INTERMEDIATE;
+          if (k === 'professional') return ExperienceLevel.EXPERT;
+          return k;
+        });
+        if (selectedExperienceLevels.length > 0) filterParams.experienceLevel = selectedExperienceLevels;
+
+        // Preferred Gender
+        const selectedGenders = Object.entries(preferredGender || {}).filter(([_, v]) => v).map(([k]) => {
+          if (k === 'any') return Gender.ANY;
+          if (k === 'male') return Gender.MALE;
+          if (k === 'female') return Gender.FEMALE;
+          if (k === 'others') return Gender.OTHERS;
+          return k;
+        });
+        if (selectedGenders.length > 0) filterParams.preferredGender = selectedGenders;
+      }
+
       const queryParams: any = {
         page,
         pageSize: options.pageSize ?? PAGE_SIZE,
         sortBy: params.sortBy ?? sort.sortBy,
         sortOrder: params.sortOrder ?? sort.sortOrder,
-        filters: {
-          ...appliedFilters,
-          searchTerm: params.searchTerm,
-          location: params.location,
-        },
+        filters: filterParams,
       };
 
       const res = await ApplicationService.getApplicationsByUserId(userId, queryParams);
@@ -173,6 +228,16 @@ export function useApplications(userId?: string | null, options: UseApplications
   const confirmApplication = useCallback(async () => {
     if (!postIdToApply || !userId) return;
     try {
+      const profile = await ProfileService.getProfileByUserId(userId);
+      const { firstName, lastName } = parseStoredName(profile?.name);
+      const isProfileComplete = profile && firstName && lastName && profile.phoneNumber && profile.birthdate && profile.sex && profile.address;
+
+      if (!isProfileComplete) {
+        toast.error("Application unsuccessful. Must complete profile details first.");
+        router.push(ROUTES.PROFILE);
+        return;
+      }
+      
       await ApplicationService.createApplication(postIdToApply, userId);
       if (options.onSuccess) {
         options.onSuccess();
@@ -183,7 +248,7 @@ export function useApplications(userId?: string | null, options: UseApplications
       setIsConfirming(false);
       setPostIdToApply(null);
     }
-  }, [postIdToApply, userId, options.onSuccess]);
+  }, [postIdToApply, userId, options, router]);
 
   const cancelApplication = useCallback(() => {
     setIsConfirming(false);
