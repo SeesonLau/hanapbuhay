@@ -16,6 +16,7 @@ import { GenderTag, ExperienceLevelTag, JobTypeTag } from "@/components/ui/TagIt
 import JobTypeGrid from "@/components/ui/JobTypeGrid";
 import type { JobPostAddFormData } from "./JobPostAddModal";
 import type { Post } from '@/lib/models/posts';
+import { useTheme } from "@/hooks/useTheme";
 
 const REQUIREMENTS_MARKER = "[requirements]";
 function splitDescription(desc?: string): { about: string; qualifications: string } {
@@ -33,7 +34,6 @@ interface JobPostEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialData?: Partial<JobPostAddFormData> & { subTypes?: string[] };
-  // Accept a Post directly (page was passing `post`) – we'll derive initialData from it if provided
   post?: Post | null;
   onSubmit?: (data: JobPostAddFormData & { subTypes?: string[] }) => void;
   isRestricted?: boolean;
@@ -65,6 +65,7 @@ function mapPostToInitial(post: Post): Partial<JobPostAddFormData> & { subTypes?
 }
 
 export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmit, post, isRestricted }: JobPostEditModalProps) {
+  const { theme } = useTheme();
   const resolvedInitial = initialData ?? (post ? mapPostToInitial(post) : undefined);
   const [title, setTitle] = useState(resolvedInitial?.title ?? "");
   const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>(resolvedInitial?.jobTypes ?? []);
@@ -86,11 +87,11 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
       .filter((s) => s.length > 0)
   );
   const [page, setPage] = useState<1 | 2>(1);
+  
   const resetFromInitial = (ri?: Partial<JobPostAddFormData> & { subTypes?: string[] }) => {
     const nextJobTypes = ri?.jobTypes ?? [];
     const nextSubTypes = Array.from(new Set(ri?.subTypes ?? []));
 
-    // Fallback: derive job types from subTypes if jobTypes not provided
     const derivedJobTypes = (nextJobTypes.length === 0 && nextSubTypes.length > 0)
       ? Array.from(new Set(
           Object.entries(SubTypes)
@@ -120,14 +121,11 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
     );
   };
 
-  // Sync state when `initialData` or `post` changes. Compute resolvedInitial locally
-  // to avoid object-identity changes causing repeated effects.
   useEffect(() => {
     const ri = initialData ?? (post ? mapPostToInitial(post) : undefined);
     resetFromInitial(ri);
   }, [initialData, post]);
 
-  // Reset to unedited values each time the modal opens
   useEffect(() => {
     if (isOpen) {
       const ri = initialData ?? (post ? mapPostToInitial(post) : undefined);
@@ -152,7 +150,6 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
   const experienceOptions = useMemo(() => getExperienceOptions(), []);
   const genderOptions = useMemo(() => getGenderOptions(), []);
 
-  // Compute effective selections for first render before state sync
   const initialSubTypes = resolvedInitial?.subTypes ?? [];
   const initialJobTypes = resolvedInitial?.jobTypes ?? [];
   const derivedInitialJobTypes = (initialJobTypes.length === 0 && initialSubTypes.length > 0)
@@ -163,13 +160,9 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
       ))
     : initialJobTypes;
   const effectiveJobTypes = selectedJobTypes.length ? selectedJobTypes : derivedInitialJobTypes;
-  const effectiveSubTypes = selectedSubTypes.length ? selectedSubTypes : initialSubTypes;
 
   if (!isOpen || !resolvedInitial) return null;
 
-  const toggleArrayValue = (arr: string[], value: string) => {
-    return arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value];
-  };
   const toggleSubType = (subType: string) => {
     setSelectedSubTypes(prev => prev.includes(subType) ? prev.filter(s => s !== subType) : [...prev, subType]);
   };
@@ -244,17 +237,21 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
     onClose();
   };
 
-  // Using Tailwind theme classes for colors and fonts
-
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 mobile-M:p-3 tablet:p-4 bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 mobile-M:p-3 tablet:p-4"
+      style={{ backgroundColor: theme.modal.overlay }}
       onClick={() => { setPage(1); onClose(); }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
       <motion.div
-        className={`font-inter w-[700px] max-w-[95vw] max-h-[90vh] overflow-y-auto scrollbar-hide rounded-2xl shadow-lg border bg-white border-gray-neutral300 text-gray-neutral600`}
+        className="font-inter w-[700px] max-w-[95vw] max-h-[90vh] overflow-y-auto scrollbar-hide rounded-2xl shadow-lg border"
+        style={{ 
+          backgroundColor: theme.modal.background,
+          borderColor: theme.modal.headerBorder,
+          color: theme.colors.textMuted
+        }}
         onClick={(e) => e.stopPropagation()}
         initial={{ y: 20, opacity: 0, scale: 0.98 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -262,13 +259,19 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
       >
         {/* Header */}
         <div className="px-4 mobile-M:px-5 tablet:px-[50px] pt-4 tablet:pt-6 pb-3 relative">
-          <h2 className={`font-alexandria text-[24px] font-semibold text-center w-full text-gray-neutral900`}>
+          <h2 
+            className="font-alexandria text-[24px] font-semibold text-center w-full"
+            style={{ color: theme.colors.text }}
+          >
             Edit Job Post
           </h2>
           <button
             onClick={() => { setPage(1); onClose(); }}
             aria-label="Close"
-            className="text-2xl leading-none px-2 absolute right-4 mobile-M:right-5 tablet:right-[50px] top-4 tablet:top-6 text-gray-neutral600"
+            className="text-2xl leading-none px-2 absolute right-4 mobile-M:right-5 tablet:right-[50px] top-4 tablet:top-6 transition-colors"
+            style={{ color: theme.modal.buttonClose }}
+            onMouseOver={(e) => e.currentTarget.style.color = theme.modal.buttonCloseHover}
+            onMouseOut={(e) => e.currentTarget.style.color = theme.modal.buttonClose}
           >
             ×
           </button>
@@ -277,17 +280,36 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
         <div className="px-4 mobile-M:px-5 tablet:px-[50px] pb-4 tablet:pb-6 space-y-4 tablet:space-y-5">
           <div className={page === 1 ? '' : 'hidden'}>
           {/* Tags Section */}
-          <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Tags</div>
-          <div className={`rounded-xl border p-4 border-gray-neutral300 ${isRestricted ? 'opacity-60 pointer-events-none' : ''}`}>
+          <div 
+            className="text-[14px] font-semibold mb-2"
+            style={{ color: theme.colors.text }}
+          >
+            Tags
+          </div>
+          <div 
+            className={`rounded-xl border p-4 ${isRestricted ? 'opacity-60 pointer-events-none' : ''}`}
+            style={{ borderColor: theme.modal.sectionBorder }}
+          >
             {/* Selected Tags Summary */}
             <div className="mb-3">
-              <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Selected Tags</div>
+              <div 
+                className="text-[14px] font-semibold mb-2"
+                style={{ color: theme.colors.text }}
+              >
+                Selected Tags
+              </div>
               <div className="flex items-center gap-2">
                 <div
-                  className="rounded-lg border px-3 py-2 min-h-[34px] flex-1 flex flex-wrap gap-2 items-center border-gray-neutral300"
+                  className="rounded-lg border px-3 py-2 min-h-[34px] flex-1 flex flex-wrap gap-2 items-center"
+                  style={{ borderColor: theme.modal.sectionBorder }}
                 >
                   {selectedSubTypes.length === 0 && selectedExperience.length === 0 && selectedGenders.length === 0 ? (
-                    <span className="text-[12px] text-gray-neutral600">Selected tags</span>
+                    <span 
+                      className="text-[12px]"
+                      style={{ color: theme.colors.textMuted }}
+                    >
+                      Selected tags
+                    </span>
                   ) : (
                     <>
                       {selectedSubTypes.map((label) => (
@@ -321,7 +343,10 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                   <button
                     type="button"
                     aria-label="Clear selected tags"
-                    className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-error-error500 hover:bg-error-error600 transition-colors"
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors"
+                    style={{ backgroundColor: theme.colors.error }}
+                    onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
+                    onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
                     onClick={clearSelectedTags}
                   >
                     <div
@@ -343,7 +368,12 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
             </div>
             {/* Job Type */}
             <div className="mb-3">
-              <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Job Type</div>
+              <div 
+                className="text-[14px] font-semibold mb-2"
+                style={{ color: theme.colors.text }}
+              >
+                Job Type
+              </div>
               <JobTypeGrid
                 options={jobTypeOptions}
                 selected={effectiveJobTypes.slice(0, 1)}
@@ -351,7 +381,6 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                 onToggleSubType={(sub) => { if (isRestricted) return; toggleSubType(sub); }}
                 onToggle={(value) => {
                   if (isRestricted) return;
-                  const subList = SubTypes[value as JobType] || [];
                   const isAlreadySelected = effectiveJobTypes[0] === value;
                   if (isAlreadySelected) {
                     setSelectedJobTypes([]);
@@ -360,13 +389,20 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                   }
                 }}
               />
-              {/* Subtypes now render inside the selected tiles above */}
             </div>
 
-             <div className="border-t my-4 border-gray-neutral300" />
+             <div 
+               className="border-t my-4"
+               style={{ borderColor: theme.modal.sectionBorder }}
+             />
              {/* Experience Level */}
              <div className="mb-3">
-               <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Experience Level</div>
+               <div 
+                 className="text-[14px] font-semibold mb-2"
+                 style={{ color: theme.colors.text }}
+               >
+                 Experience Level
+               </div>
                <div className="flex flex-wrap gap-2">
                 {experienceOptions.map((opt) => (
                   <ExperienceLevelTag
@@ -379,11 +415,19 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                </div>
              </div>
 
-             <div className="border-t my-4 border-gray-neutral300" />
+             <div 
+               className="border-t my-4"
+               style={{ borderColor: theme.modal.sectionBorder }}
+             />
 
              {/* Preferred Gender */}
              <div>
-               <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Preferred Gender</div>
+               <div 
+                 className="text-[14px] font-semibold mb-2"
+                 style={{ color: theme.colors.text }}
+               >
+                 Preferred Gender
+               </div>
                <div className="flex flex-wrap gap-2">
                 {genderOptions.map((opt) => (
                   <GenderTag
@@ -414,7 +458,12 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
           </div>
           {/* Location */}
           <div>
-            <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Location</div>
+            <div 
+              className="text-[14px] font-semibold mb-2"
+              style={{ color: theme.colors.text }}
+            >
+              Location
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <SelectBox 
                 options={[{ value: "Philippines", label: "Philippines" }]} 
@@ -448,7 +497,12 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
 
           {/* Salary Rate */}
           <div>
-            <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Salary Rate</div>
+            <div 
+              className="text-[14px] font-semibold mb-2"
+              style={{ color: theme.colors.text }}
+            >
+              Salary Rate
+            </div>
             <div className="flex items-center gap-3">
               <TextBox 
                 type="text" 
@@ -489,7 +543,12 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
 
           {/* About this role */}
           <div>
-            <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">About this role</div>
+            <div 
+              className="text-[14px] font-semibold mb-2"
+              style={{ color: theme.colors.text }}
+            >
+              About this role
+            </div>
             <TextArea 
               placeholder="Description"
               value={about}
@@ -503,7 +562,12 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
 
           {/* Requirements */}
           <div>
-            <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Requirements</div>
+            <div 
+              className="text-[14px] font-semibold mb-2"
+              style={{ color: theme.colors.text }}
+            >
+              Requirements
+            </div>
             <div className="space-y-3">
               {requirementsList.map((req, idx) => {
                 const isLast = idx === requirementsList.length - 1;
@@ -542,7 +606,10 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                       <button
                         type="button"
                         aria-label="Clear requirement"
-                        className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-error-error500 hover:bg-error-error600 transition-colors"
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors"
+                        style={{ backgroundColor: theme.colors.error }}
+                        onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
+                        onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
                         onClick={() => {
                           setRequirementsList((prev) => prev.filter((_, i) => i !== idx));
                         }}
@@ -570,20 +637,60 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
 
         </div>
         <div className="mt-2">
-          <div className="w-full h-2 bg-gray-neutral200 rounded-full">
-            <div className={`h-2 bg-primary-primary500 rounded-full transition-all duration-300`} style={{ width: `${page === 1 ? 50 : 100}%` }}></div>
+          <div 
+            className="w-full h-2 rounded-full"
+            style={{ backgroundColor: theme.colors.borderLight }}
+          >
+            <div 
+              className="h-2 rounded-full transition-all duration-300"
+              style={{ 
+                width: `${page === 1 ? 50 : 100}%`,
+                backgroundColor: theme.colors.primary
+              }}
+            />
           </div>
-          <div className="mt-1 text-right text-mini text-gray-neutral600">{page === 1 ? 'Step 1 of 2' : 'Step 2 of 2'}</div>
+          <div 
+            className="mt-1 text-right text-mini"
+            style={{ color: theme.colors.textMuted }}
+          >
+            {page === 1 ? 'Step 1 of 2' : 'Step 2 of 2'}
+          </div>
         </div>
         <div className="pt-2 flex items-center justify-between">
           {page === 2 && (
-            <Button variant="ghost" fullRounded={true} className="w-[140px] border-2 border-primary-primary500 text-primary-primary500 hover:bg-primary-primary100" onClick={() => setPage(1)}>Back</Button>
+            <Button 
+              variant="ghost" 
+              fullRounded={true} 
+              className="w-[140px]"
+              style={{
+                border: `2px solid ${theme.colors.primary}`,
+                color: theme.colors.primary
+              }}
+              onClick={() => setPage(1)}
+            >
+              Back
+            </Button>
           )}
           {page === 1 && (
-            <Button variant="primary" fullRounded={true} className="ml-auto w-[140px]" onClick={() => setPage(2)}>Next</Button>
+            <Button 
+              variant="primary" 
+              fullRounded={true} 
+              className="ml-auto w-[140px]" 
+              onClick={() => setPage(2)}
+            >
+              Next
+            </Button>
           )}
           {page === 2 && (
-            <Button variant="primary" fullRounded={true} className="ml-auto w-[140px] disabled:opacity-50" disabled={!isFormValid} onClick={handleSubmit}>Save</Button>
+            <Button 
+              variant="primary" 
+              fullRounded={true} 
+              className="ml-auto w-[140px] disabled:opacity-50" 
+              disabled={!isFormValid} 
+              onClick={handleSubmit}
+            >
+              Save
+            </Button>
           )}
         </div>
       </div>

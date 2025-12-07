@@ -15,17 +15,18 @@ import type { JobType } from "@/lib/constants/job-types";
 import { GenderTag, ExperienceLevelTag, JobTypeTag } from "@/components/ui/TagItem";
 import JobTypeGrid from "@/components/ui/JobTypeGrid";
 import { getProvinces, getCitiesByProvince } from "@/lib/constants/philippines-locations";
+import { useTheme } from "@/hooks/useTheme";
 
 export interface JobPostAddFormData {
   title: string;
-  jobTypes: string[]; // top-level types
+  jobTypes: string[];
   experienceLevels: string[];
   genders: string[];
   country: string;
   province: string;
   city: string;
   address: string;
-  salary: string; // numeric string
+  salary: string;
   salaryPeriod: 'day' | 'week' | 'month';
   about: string;
   qualifications: string;
@@ -38,6 +39,7 @@ interface JobPostAddModalProps {
 }
 
 export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAddModalProps) {
+  const { theme } = useTheme();
   const [title, setTitle] = useState("");
   const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>([]);
   const [selectedSubTypes, setSelectedSubTypes] = useState<string[]>([]);
@@ -72,7 +74,6 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
     setPage(1);
   };
 
-  // Always start with a clean form whenever the modal opens
   useEffect(() => {
     if (isOpen) {
       resetForm();
@@ -178,22 +179,25 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
       subTypes: selectedSubTypes,
     };
     onSubmit?.(data);
-    // Reset after submit so next open is blank
     resetForm();
     onClose();
   };
 
-  // Using Tailwind theme classes for colors and fonts
-
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 mobile-M:p-3 tablet:p-4 bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 mobile-M:p-3 tablet:p-4"
+      style={{ backgroundColor: theme.modal.overlay }}
       onClick={onClose}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
       <motion.div
-        className={`font-inter w-[700px] max-w-[95vw] max-h-[90vh] overflow-y-auto scrollbar-hide rounded-2xl shadow-lg border bg-white border-gray-neutral300 text-gray-neutral600`}
+        className="font-inter w-[700px] max-w-[95vw] max-h-[90vh] overflow-y-auto scrollbar-hide rounded-2xl shadow-lg border"
+        style={{ 
+          backgroundColor: theme.modal.background,
+          borderColor: theme.modal.headerBorder,
+          color: theme.colors.textMuted
+        }}
         onClick={(e) => e.stopPropagation()}
         initial={{ y: 20, opacity: 0, scale: 0.98 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -201,13 +205,19 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
       >
         {/* Header */}
         <div className="px-4 mobile-M:px-5 tablet:px-[50px] pt-4 tablet:pt-6 pb-3 relative">
-          <h2 className={`font-alexandria text-[24px] font-semibold text-center w-full text-gray-neutral900`}>
+          <h2 
+            className="font-alexandria text-[24px] font-semibold text-center w-full"
+            style={{ color: theme.colors.text }}
+          >
             Post a Job
           </h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-2xl leading-none px-2 absolute right-4 mobile-M:right-5 tablet:right-[50px] top-4 tablet:top-6 text-gray-neutral600"
+            className="text-2xl leading-none px-2 absolute right-4 mobile-M:right-5 tablet:right-[50px] top-4 tablet:top-6 transition-colors"
+            style={{ color: theme.modal.buttonClose }}
+            onMouseOver={(e) => e.currentTarget.style.color = theme.modal.buttonCloseHover}
+            onMouseOut={(e) => e.currentTarget.style.color = theme.modal.buttonClose}
           >
             ×
           </button>
@@ -216,17 +226,36 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
         <div className="px-4 mobile-M:px-5 tablet:px-[50px] pb-4 tablet:pb-6 space-y-4 tablet:space-y-5">
           <div className={page === 1 ? '' : 'hidden'}>
           {/* Tags Section */}
-          <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Tags</div>
-          <div className="rounded-xl border p-4 border-gray-neutral300">
+          <div 
+            className="text-[14px] font-semibold mb-2"
+            style={{ color: theme.colors.text }}
+          >
+            Tags
+          </div>
+          <div 
+            className="rounded-xl border p-4"
+            style={{ borderColor: theme.modal.sectionBorder }}
+          >
             {/* Selected Tags Summary */}
             <div className="mb-3">
-              <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Selected Tags</div>
+              <div 
+                className="text-[14px] font-semibold mb-2"
+                style={{ color: theme.colors.text }}
+              >
+                Selected Tags
+              </div>
               <div className="flex items-center gap-2">
                 <div
-                  className="rounded-lg border px-3 py-2 min-h-[34px] flex-1 flex flex-wrap gap-2 items-center border-gray-neutral300"
+                  className="rounded-lg border px-3 py-2 min-h-[34px] flex-1 flex flex-wrap gap-2 items-center"
+                  style={{ borderColor: theme.modal.sectionBorder }}
                 >
                   {selectedSubTypes.length === 0 && selectedExperience.length === 0 && selectedGenders.length === 0 ? (
-                    <span className="text-[12px] text-gray-neutral600">Selected tags</span>
+                    <span 
+                      className="text-[12px]"
+                      style={{ color: theme.colors.textMuted }}
+                    >
+                      Selected tags
+                    </span>
                   ) : (
                     <>
                       {selectedSubTypes.map((label) => (
@@ -260,7 +289,10 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
                   <button
                     type="button"
                     aria-label="Clear selected tags"
-                    className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-error-error500 hover:bg-error-error600 transition-colors"
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors"
+                    style={{ backgroundColor: theme.colors.error }}
+                    onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
+                    onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
                     onClick={clearSelectedTags}
                   >
                     <div
@@ -282,7 +314,12 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
             </div>
             {/* Job Type */}
             <div className="mb-3">
-              <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Job Type</div>
+              <div 
+                className="text-[14px] font-semibold mb-2"
+                style={{ color: theme.colors.text }}
+              >
+                Job Type
+              </div>
               <JobTypeGrid
                 options={jobTypeOptions}
                 selected={selectedJobTypes.slice(0, 1)}
@@ -292,23 +329,26 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
                   const subList = SubTypes[value as JobType] || [];
                   const isAlreadySelected = selectedJobTypes[0] === value;
                   if (isAlreadySelected) {
-                    // Deselect current but preserve previously selected subtypes
                     setSelectedJobTypes([]);
                   } else {
-                    // Switch selected category; keep ALL previously selected subtypes across categories
                     setSelectedJobTypes([String(value)]);
                   }
                 }}
               />
-              {/* Subtypes now render inside the selected tiles above */}
             </div>
 
-             {/* Sub Types are now rendered directly below their selected main tag above */}
-
-             <div className="border-t my-4 border-gray-neutral300" />
+             <div 
+               className="border-t my-4"
+               style={{ borderColor: theme.modal.sectionBorder }}
+             />
              {/* Experience Level */}
              <div className="mb-3">
-               <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Experience Level</div>
+               <div 
+                 className="text-[14px] font-semibold mb-2"
+                 style={{ color: theme.colors.text }}
+               >
+                 Experience Level
+               </div>
                <div className="flex flex-wrap gap-2">
                 {experienceOptions.map((opt) => (
                   <ExperienceLevelTag
@@ -321,11 +361,19 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
                </div>
              </div>
 
-             <div className="border-t my-4 border-gray-neutral300" />
+             <div 
+               className="border-t my-4"
+               style={{ borderColor: theme.modal.sectionBorder }}
+             />
 
              {/* Preferred Gender */}
              <div>
-               <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Preferred Gender</div>
+               <div 
+                 className="text-[14px] font-semibold mb-2"
+                 style={{ color: theme.colors.text }}
+               >
+                 Preferred Gender
+               </div>
                <div className="flex flex-wrap gap-2">
                 {genderOptions.map((opt) => (
                   <GenderTag
@@ -355,7 +403,12 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
           </div>
           {/* Location */}
           <div>
-            <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Location</div>
+            <div 
+              className="text-[14px] font-semibold mb-2"
+              style={{ color: theme.colors.text }}
+            >
+              Location
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <SelectBox 
                 options={[{ value: "Philippines", label: "Philippines" }]} 
@@ -368,7 +421,6 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
                 value={province}
                 onChange={(e) => {
                   setProvince(e.target.value);
-                  // Reset city when province changes
                   const cities = getCitiesByProvince(e.target.value);
                   setCity(cities.length > 0 ? cities[0] : "");
                 }}
@@ -394,7 +446,12 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
 
           {/* Salary Rate */}
           <div>
-            <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Salary Rate</div>
+            <div 
+              className="text-[14px] font-semibold mb-2"
+              style={{ color: theme.colors.text }}
+            >
+              Salary Rate
+            </div>
             <div className="flex items-center gap-3">
               <TextBox 
                 type="text" 
@@ -433,7 +490,12 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
 
           {/* About this role */}
           <div className="mt-2">
-            <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">About this role</div>
+            <div 
+              className="text-[14px] font-semibold mb-2"
+              style={{ color: theme.colors.text }}
+            >
+              About this role
+            </div>
             <TextArea 
               placeholder="Description"
               value={about}
@@ -447,7 +509,12 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
 
         {/* Requirements */}
           <div className="mt-2">
-            <div className="text-[14px] font-semibold mb-2 text-gray-neutral900">Requirements</div>
+            <div 
+              className="text-[14px] font-semibold mb-2"
+              style={{ color: theme.colors.text }}
+            >
+              Requirements
+            </div>
             <div className="space-y-3">
               {requirementsList.map((req, idx) => {
                 const isLast = idx === requirementsList.length - 1;
@@ -486,7 +553,10 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
                       <button
                         type="button"
                         aria-label="Clear requirement"
-                        className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-error-error500 hover:bg-error-error600 transition-colors"
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors"
+                        style={{ backgroundColor: theme.colors.error }}
+                        onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
+                        onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
                         onClick={() => {
                           setRequirementsList((prev) => prev.filter((_, i) => i !== idx));
                         }}
@@ -514,14 +584,39 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
           </div>
 
           <div className="mt-2">
-            <div className="w-full h-2 bg-gray-neutral200 rounded-full">
-              <div className={`h-2 bg-primary-primary500 rounded-full transition-all duration-300`} style={{ width: `${page === 1 ? 50 : 100}%` }}></div>
+            <div 
+              className="w-full h-2 rounded-full"
+              style={{ backgroundColor: theme.colors.borderLight }}
+            >
+              <div 
+                className="h-2 rounded-full transition-all duration-300"
+                style={{ 
+                  width: `${page === 1 ? 50 : 100}%`,
+                  backgroundColor: theme.colors.primary
+                }}
+              />
             </div>
-            <div className="mt-1 text-right text-mini text-gray-neutral600">{page === 1 ? 'Step 1 of 2' : 'Step 2 of 2'}</div>
+            <div 
+              className="mt-1 text-right text-mini"
+              style={{ color: theme.colors.textMuted }}
+            >
+              {page === 1 ? 'Step 1 of 2' : 'Step 2 of 2'}
+            </div>
           </div>
           <div className="pt-2 flex items-center justify-between">
             {page === 2 && (
-              <Button variant="ghost" fullRounded={true} className="w-[140px] border-2 border-primary-primary500 text-primary-primary500 hover:bg-primary-primary100" onClick={() => setPage(1)}>Back</Button>
+              <Button 
+                variant="ghost" 
+                fullRounded={true} 
+                className="w-[140px]"
+                style={{
+                  border: `2px solid ${theme.colors.primary}`,
+                  color: theme.colors.primary
+                }}
+                onClick={() => setPage(1)}
+              >
+                Back
+              </Button>
             )}
             {page === 1 && (
               <Button 
@@ -535,7 +630,15 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
               </Button>
             )}
             {page === 2 && (
-              <Button variant="primary" fullRounded={true} className="ml-auto w-[140px] disabled:opacity-50" disabled={!isFormValid} onClick={handleSubmit}>Post</Button>
+              <Button 
+                variant="primary" 
+                fullRounded={true} 
+                className="ml-auto w-[140px] disabled:opacity-50" 
+                disabled={!isFormValid} 
+                onClick={handleSubmit}
+              >
+                Post
+              </Button>
             )}
           </div>
         </div>

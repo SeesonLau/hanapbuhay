@@ -2,14 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  getWhiteColor,
-  getNeutral100Color,
-  getNeutral300Color,
-  getNeutral600Color,
-  getBlackColor,
-  getPrimary500Color,
-} from "@/styles/colors";
 import { fontClasses } from "@/styles/fonts";
 import {
   StaticGenderTag,
@@ -24,12 +16,13 @@ import { ExperienceLevel } from "@/lib/constants/experience-level";
 import ViewProfileModal from "@/components/modals/ViewProfileModal";
 import { ProfileService } from "@/lib/services/profile-services";
 import { formatDisplayName } from "@/lib/utils/profile-utils";
+import { useTheme } from "@/hooks/useTheme";
 
 export interface JobPostViewData {
   id: string;
   title: string;
-  description: string; // Used for "About this role"
-  requirements?: string[]; // Used for requirements
+  description: string;
+  requirements?: string[];
   location: string;
   salary: string;
   salaryPeriod: string;
@@ -43,7 +36,7 @@ export interface JobPostViewData {
     role?: string;
     avatarUrl?: string;
   };
-  raw?: any; // Raw post data for additional context
+  raw?: any;
 }
 
 interface JobPostViewModalProps {
@@ -53,7 +46,6 @@ interface JobPostViewModalProps {
   onApply?: (id: string) => void;
 }
 
-// Helpers to validate tags against constants
 const normalizeJobType = (label: string): string | null => {
   const isSubType = Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(label));
   return isSubType ? label : null;
@@ -68,6 +60,7 @@ const normalizeExperience = (label: string): string | null => {
 };
 
 export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobPostViewModalProps) {
+  const { theme } = useTheme();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [poster, setPoster] = useState<{ name: string; role?: string; avatarUrl?: string } | null>(null);
   const [posterUserId, setPosterUserId] = useState<string | null>(null);
@@ -96,7 +89,6 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
         if (!userId) return;
 
         const uid = String(userId);
-        // Avoid refetching / setState if we already have the same poster id
         if (posterUserId === uid) return;
 
         setPosterUserId(uid);
@@ -106,8 +98,6 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
           setPoster({ name: displayName || "Unknown Poster", role: "Client", avatarUrl: info.profilePicUrl ?? undefined });
         }
       } catch (err) {
-        // log for visibility but don't crash the modal
-        // eslint-disable-next-line no-console
         console.error('Error fetching profile:', err);
       }
     };
@@ -134,7 +124,6 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
     postedBy,
   } = job;
 
-
   const normalizedJobTypes = jobTypeTags
     .map((label) => normalizeJobType(label))
     .filter((t): t is string => Boolean(t));
@@ -156,14 +145,18 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
   return (
     <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: getBlackColor(0.5) }}
+      style={{ backgroundColor: theme.modal.overlay }}
       onClick={onClose}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
       <motion.div
         className={`${fontClasses.body} w-[600px] max-w-[95vw] max-h-[90vh] overflow-y-auto rounded-2xl shadow-lg border`}
-        style={{ backgroundColor: getWhiteColor(), borderColor: getNeutral300Color(), color: getNeutral600Color() }}
+        style={{ 
+          backgroundColor: theme.modal.background, 
+          borderColor: theme.modal.headerBorder, 
+          color: theme.colors.textMuted 
+        }}
         onClick={(e) => e.stopPropagation()}
         initial={{ y: 20, opacity: 0, scale: 0.98 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -171,14 +164,19 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
       >
         {/* Header */}
         <div className="px-6 pt-6 pb-3 flex items-start justify-between">
-          <h2 className={`${fontClasses.heading} text-[24px] font-semibold`} style={{ color: getBlackColor() }}>
+          <h2 
+            className={`${fontClasses.heading} text-[24px] font-semibold`} 
+            style={{ color: theme.colors.text }}
+          >
             {title}
           </h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-2xl leading-none px-2"
-            style={{ color: getNeutral600Color() }}
+            className="text-2xl leading-none px-2 transition-colors"
+            style={{ color: theme.modal.buttonClose }}
+            onMouseOver={(e) => e.currentTarget.style.color = theme.modal.buttonCloseHover}
+            onMouseOut={(e) => e.currentTarget.style.color = theme.modal.buttonClose}
           >
             ×
           </button>
@@ -210,30 +208,64 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
         {/* About + Requirements panels side-by-side */}
         <div className="px-6 pt-4">
           <div className="grid grid-cols-1 tablet:grid-cols-2 gap-6">
-            <div className="rounded-xl border border-gray-neutral900/60 p-4">
-              <h3 className="text-[13px] font-semibold mb-2 text-gray-neutral900">About this role</h3>
-              <p className="text-[11px] text-gray-neutral600">{description}</p>
+            <div 
+              className="rounded-xl border p-4"
+              style={{ borderColor: theme.modal.sectionBorder }}
+            >
+              <h3 
+                className="text-[13px] font-semibold mb-2"
+                style={{ color: theme.colors.text }}
+              >
+                About this role
+              </h3>
+              <p 
+                className="text-[11px]"
+                style={{ color: theme.colors.textMuted }}
+              >
+                {description}
+              </p>
             </div>
-            <div className="rounded-xl border border-gray-neutral900/60 p-4">
-              <h3 className="text-[13px] font-semibold mb-2 text-gray-neutral900">Requirements</h3>
+            <div 
+              className="rounded-xl border p-4"
+              style={{ borderColor: theme.modal.sectionBorder }}
+            >
+              <h3 
+                className="text-[13px] font-semibold mb-2"
+                style={{ color: theme.colors.text }}
+              >
+                Requirements
+              </h3>
               {requirements.length > 0 ? (
-                <ul className="space-y-1 text-[11px] text-gray-neutral600">
+                <ul 
+                  className="space-y-1 text-[11px]"
+                  style={{ color: theme.colors.textMuted }}
+                >
                   {requirements.map((item, idx) => (
                     <li key={`req-${idx}`}>• {item}</li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-[11px] text-gray-neutral600">No specific requirements provided.</p>
+                <p 
+                  className="text-[11px]"
+                  style={{ color: theme.colors.textMuted }}
+                >
+                  No specific requirements provided.
+                </p>
               )}
             </div>
           </div>
         </div>
 
-        {/* Profile container (between Requirements and footer) */}
+        {/* Profile container */}
         <div className="px-6 pt-6">
           <div
-            className="inline-flex items-center gap-3 px-4 py-2 rounded-lg border cursor-pointer"
-            style={{ backgroundColor: getWhiteColor(), borderColor: getNeutral300Color() }}
+            className="inline-flex items-center gap-3 px-4 py-2 rounded-lg border cursor-pointer transition-colors"
+            style={{ 
+              backgroundColor: theme.modal.background, 
+              borderColor: theme.modal.sectionBorder 
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.modal.background}
             onClick={() => setIsProfileOpen(true)}
           >
             <img
@@ -242,10 +274,16 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
               className="w-9 h-9 rounded-full object-cover"
             />
             <div className="leading-tight">
-              <div className="text-[13px] font-semibold text-gray-neutral900">
+              <div 
+                className="text-[13px] font-semibold"
+                style={{ color: theme.colors.text }}
+              >
                 {(poster?.name ?? postedBy?.name) ?? "Unknown Poster"}
               </div>
-              <div className="text-[11px] text-gray-neutral600">
+              <div 
+                className="text-[11px]"
+                style={{ color: theme.colors.textMuted }}
+              >
                 {(poster?.role ?? postedBy?.role) ?? "Client"}
               </div>
             </div>
@@ -256,21 +294,27 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
         <div className="px-6 py-6">
           <div className={`flex items-center ${onApply ? 'justify-between' : 'justify-start'}`}>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-medium text-gray-neutral600">
+              <span 
+                className="text-[11px] font-medium"
+                style={{ color: theme.colors.textMuted }}
+              >
                 Posted on: {postedDate}
               </span>
-              <span className="text-gray-neutral400">•</span>
-              <span className="text-[11px] text-gray-neutral600">
+              <span style={{ color: theme.colors.borderLight }}>•</span>
+              <span 
+                className="text-[11px]"
+                style={{ color: theme.colors.textMuted }}
+              >
                 {applicantCount} Applicants
               </span>
             </div>
             {onApply && (
               <button
                 onClick={() => onApply(id)}
-                className="px-4 py-2 rounded-lg text-white text-sm"
-                style={{ backgroundColor: getPrimary500Color() }}
-                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = getPrimary500Color(0.9))}
-                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = getPrimary500Color())}
+                className="px-4 py-2 rounded-lg text-white text-sm transition-colors"
+                style={{ backgroundColor: theme.colors.primary }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.primaryHover}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.primary}
               >
                 Apply Now
               </button>
