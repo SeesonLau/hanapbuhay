@@ -11,14 +11,9 @@ type Stats = Record<string, number | null>;
 export function useStats(options: { variant: Variant; userId?: string | null }) {
   const { variant, userId } = options;
   const [stats, setStats] = useState<Stats>({});
-  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const initialLoad = useRef(true);
 
   const load = useCallback(async () => {
-    if (initialLoad.current) {
-      setLoading(true);
-    }
     setError(null);
     try {
       if (variant === 'findJobs') {
@@ -59,9 +54,6 @@ export function useStats(options: { variant: Variant; userId?: string | null }) 
       }
     } catch (err) {
       setError('Failed to load statistics');
-    } finally {
-        setLoading(false);
-        initialLoad.current = false;
     }
   }, [variant, userId]);
 
@@ -119,7 +111,7 @@ export function useStats(options: { variant: Variant; userId?: string | null }) 
     };
   }, [userId, variant, load]);
 
-  return { stats, loading, error, refresh: load };
+  return { stats, loading: false, error, refresh: load };
 }
 
 export type { Stats };

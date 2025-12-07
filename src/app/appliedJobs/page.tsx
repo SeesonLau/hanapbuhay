@@ -71,7 +71,7 @@ export default function AppliedJobsPage() {
     init();
   }, []);
 
-  const { stats, error: statsError } = useStats({ variant: 'appliedJobs', userId: currentUserId });
+  const { stats, loading: statsLoading, error: statsError } = useStats({ variant: 'appliedJobs', userId: currentUserId });
   const { 
     applications, 
     loading, 
@@ -265,7 +265,7 @@ export default function AppliedJobsPage() {
           <StatsSection 
             stats={stats} 
             variant="appliedJobs" 
-            loading={loading} 
+            loading={statsLoading} 
             error={statsError} 
             onStatClick={handleStatFilter}
           />
@@ -275,7 +275,7 @@ export default function AppliedJobsPage() {
           <StatsSection 
             stats={stats} 
             variant="appliedJobs" 
-            loading={loading} 
+            loading={statsLoading} 
             error={statsError} 
             onStatClick={handleStatFilter}
           />

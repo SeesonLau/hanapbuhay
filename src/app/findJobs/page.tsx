@@ -25,32 +25,11 @@ import FilterButton from "@/components/ui/FilterButton";
 import FilterModal from "@/components/ui/FilterModal";
 import DeleteModal from "@/components/ui/DeleteModal";
 
-// Force dynamic rendering since we use useSearchParams
-export const dynamic = 'force-dynamic';
+import { Preloader, PreloaderMessages } from "@/components/ui/Preloader";
 
-// Wrapper component to handle Suspense boundary for useSearchParams
 export default function FindJobsPage() {
-  return (
-    <Suspense fallback={<FindJobsPageFallback />}>
-      <FindJobsPageContent />
-    </Suspense>
-  );
-}
-
-// Loading fallback component
-function FindJobsPageFallback() {
-  return (
-    <div className="min-h-screen overflow-x-hidden">
-      <div className="fixed inset-0 -z-10 bg-gray-default" />
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    </div>
-  );
-}
-
-function FindJobsPageContent() {
   const searchParams = useSearchParams();
+  const [initialLoading, setInitialLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
@@ -178,8 +157,10 @@ function FindJobsPageContent() {
 
   useEffect(() => {
     const initCurrentUser = async () => {
+      setInitialLoading(true);
       const current = await AuthService.getCurrentUser();
       setCurrentUserId(current?.id ?? null);
+      setInitialLoading(false);
     };
     initCurrentUser();
   }, []);
@@ -204,6 +185,16 @@ function FindJobsPageContent() {
 
   const formatPeso = (amount: number) => {
   };
+
+  if (initialLoading) {
+    return (
+      <Preloader
+        isVisible={initialLoading}
+        message={PreloaderMessages.LOADING_JOBS}
+        variant="default"
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen overflow-x-hidden">
