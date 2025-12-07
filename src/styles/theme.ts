@@ -1,4 +1,5 @@
 //theme.ts 
+// theme.ts with added modal-specific colors
 export type ThemeName = 'classic' | 'spring' | 'summer' | 'autumn' | 'winter';
 
 export interface Theme {
@@ -58,35 +59,27 @@ export interface Theme {
     text: string;
     textValue: string;
   };
-  // Landing page specific colors
   landing: {
-    // Background gradients
     bgGradientStart: string;
     bgGradientMid: string;
     bgGradientEnd: string;
-    // Section backgrounds
     sectionBg: string;
     sectionBgLight: string;
-    // Glass morphism effects
     glassBg: string;
     glassBorder: string;
     glassHoverBg: string;
     glassHoverBorder: string;
-    // Icon backgrounds
     iconBg: string;
     iconBorder: string;
-    // Text colors
     headingPrimary: string;
     headingGradientStart: string;
     headingGradientMid: string;
     headingGradientEnd: string;
     bodyText: string;
     bodyTextMuted: string;
-    // Accent colors
     accentPrimary: string;
     accentSecondary: string;
     accentGlow: string;
-    // Job category colors
     categoryColors: {
       agriculture: { bg: string; border: string; iconBg: string };
       digital: { bg: string; border: string; iconBg: string };
@@ -97,6 +90,30 @@ export interface Theme {
       skilled: { bg: string; border: string; iconBg: string };
       other: { bg: string; border: string; iconBg: string };
     };
+  };
+  modal: {
+    overlay: string;
+    background: string;
+    headerBorder: string;
+    sectionBorder: string;
+    buttonClose: string;
+    buttonCloseHover: string;
+    accordionBorder: string;
+    accordionBorderActive: string;
+    accordionBg: string;
+    accordionBgActive: string;
+    accordionText: string;
+    accordionTextMuted: string;
+    categoryTabBg: string;
+    categoryTabBgActive: string;
+    categoryTabBorder: string;
+    categoryTabBorderActive: string;
+    categoryTabText: string;
+    categoryTabTextActive: string;
+    infoBg: string;
+    infoBorder: string;
+    infoText: string;
+    infoTextAccent: string;
   };
 }
 
@@ -190,6 +207,30 @@ export const themes: Record<ThemeName, Theme> = {
         other: { bg: 'rgba(107, 114, 128, 0.15)', border: 'rgba(107, 114, 128, 0.3)', iconBg: 'rgba(107, 114, 128, 0.2)' },
       },
     },
+    modal: {
+      overlay: 'rgba(0, 0, 0, 0.5)',
+      background: '#FFFFFF',
+      headerBorder: '#E3F2FD',
+      sectionBorder: '#CFD2D1',
+      buttonClose: '#6A706F',
+      buttonCloseHover: '#141515',
+      accordionBorder: 'rgba(59, 130, 246, 0.2)',
+      accordionBorderActive: 'rgba(59, 130, 246, 0.4)',
+      accordionBg: 'rgba(89, 172, 255, 0.05)',
+      accordionBgActive: 'rgba(59, 130, 246, 0.1)',
+      accordionText: '#141515',
+      accordionTextMuted: '#6A706F',
+      categoryTabBg: 'rgba(89, 172, 255, 0.1)',
+      categoryTabBgActive: 'rgba(59, 130, 246, 0.2)',
+      categoryTabBorder: 'rgba(59, 130, 246, 0.2)',
+      categoryTabBorderActive: 'rgba(59, 130, 246, 0.4)',
+      categoryTabText: '#6A706F',
+      categoryTabTextActive: '#59ACFF',
+      infoBg: 'rgba(89, 172, 255, 0.05)',
+      infoBorder: 'rgba(89, 172, 255, 0.2)',
+      infoText: '#6A706F',
+      infoTextAccent: '#59ACFF',
+    },
   },
   spring: {
     name: 'spring',
@@ -279,6 +320,30 @@ export const themes: Record<ThemeName, Theme> = {
         skilled: { bg: 'rgba(231, 74, 160, 0.15)', border: 'rgba(231, 74, 160, 0.3)', iconBg: 'rgba(231, 74, 160, 0.2)' },
         other: { bg: 'rgba(184, 103, 142, 0.15)', border: 'rgba(184, 103, 142, 0.3)', iconBg: 'rgba(184, 103, 142, 0.2)' },
       },
+    },
+    modal: {
+      overlay: 'rgba(45, 27, 46, 0.6)',
+      background: '#FFFFFF',
+      headerBorder: '#FFE6F4',
+      sectionBorder: '#FFEBF7',
+      buttonClose: '#B8678E',
+      buttonCloseHover: '#8C2156',
+      accordionBorder: 'rgba(255, 158, 213, 0.25)',
+      accordionBorderActive: 'rgba(255, 107, 191, 0.4)',
+      accordionBg: 'rgba(255, 158, 213, 0.08)',
+      accordionBgActive: 'rgba(255, 107, 191, 0.12)',
+      accordionText: '#8C2156',
+      accordionTextMuted: '#B8678E',
+      categoryTabBg: 'rgba(255, 158, 213, 0.12)',
+      categoryTabBgActive: 'rgba(255, 107, 191, 0.2)',
+      categoryTabBorder: 'rgba(255, 158, 213, 0.25)',
+      categoryTabBorderActive: 'rgba(255, 107, 191, 0.4)',
+      categoryTabText: '#B8678E',
+      categoryTabTextActive: '#FF9ED5',
+      infoBg: 'rgba(255, 158, 213, 0.08)',
+      infoBorder: 'rgba(255, 158, 213, 0.25)',
+      infoText: '#B8678E',
+      infoTextAccent: '#FF9ED5',
     },
   },
   summer: {
@@ -370,6 +435,30 @@ export const themes: Record<ThemeName, Theme> = {
         other: { bg: 'rgba(194, 154, 51, 0.15)', border: 'rgba(194, 154, 51, 0.3)', iconBg: 'rgba(194, 154, 51, 0.2)' },
       },
     },
+    modal: {
+      overlay: 'rgba(26, 46, 26, 0.6)',
+      background: '#FFFFFF',
+      headerBorder: '#FFF9E6',
+      sectionBorder: '#FFF4CC',
+      buttonClose: '#C29A33',
+      buttonCloseHover: '#8C6600',
+      accordionBorder: 'rgba(255, 216, 77, 0.25)',
+      accordionBorderActive: 'rgba(255, 198, 26, 0.4)',
+      accordionBg: 'rgba(255, 216, 77, 0.08)',
+      accordionBgActive: 'rgba(255, 198, 26, 0.12)',
+      accordionText: '#8C6600',
+      accordionTextMuted: '#C29A33',
+      categoryTabBg: 'rgba(255, 216, 77, 0.12)',
+      categoryTabBgActive: 'rgba(255, 198, 26, 0.2)',
+      categoryTabBorder: 'rgba(255, 216, 77, 0.25)',
+      categoryTabBorderActive: 'rgba(255, 198, 26, 0.4)',
+      categoryTabText: '#C29A33',
+      categoryTabTextActive: '#FFD84D',
+      infoBg: 'rgba(255, 216, 77, 0.08)',
+      infoBorder: 'rgba(255, 216, 77, 0.25)',
+      infoText: '#C29A33',
+      infoTextAccent: '#FFD84D',
+    },
   },
   autumn: {
     name: 'autumn',
@@ -460,7 +549,33 @@ export const themes: Record<ThemeName, Theme> = {
         other: { bg: 'rgba(153, 102, 51, 0.15)', border: 'rgba(153, 102, 51, 0.3)', iconBg: 'rgba(153, 102, 51, 0.2)' },
       },
     },
+    modal: {
+      overlay: 'rgba(42, 24, 16, 0.6)',
+      background: '#FFFFFF',
+      headerBorder: '#FFEEDD',
+      sectionBorder: '#FFD9B8',
+      buttonClose: '#996633',
+      buttonCloseHover: '#5C2E0D',
+      accordionBorder: 'rgba(255, 140, 66, 0.25)',
+      accordionBorderActive: 'rgba(255, 107, 26, 0.4)',
+      accordionBg: 'rgba(255, 140, 66, 0.08)',
+      accordionBgActive: 'rgba(255, 107, 26, 0.12)',
+      accordionText: '#5C2E0D',
+      accordionTextMuted: '#996633',
+      categoryTabBg: 'rgba(255, 140, 66, 0.12)',
+      categoryTabBgActive: 'rgba(255, 107, 26, 0.2)',
+      categoryTabBorder: 'rgba(255, 140, 66, 0.25)',
+      categoryTabBorderActive: 'rgba(255, 107, 26, 0.4)',
+      categoryTabText: '#996633',
+      categoryTabTextActive: '#FF8C42',
+      infoBg: 'rgba(255, 140, 66, 0.08)',
+      infoBorder: 'rgba(255, 140, 66, 0.25)',
+      infoText: '#996633',
+      infoTextAccent: '#FF8C42',
+    },
   },
+  
+  // WINTER THEME (COMPLETE):
   winter: {
     name: 'winter',
     displayName: 'Winter',
@@ -549,6 +664,30 @@ export const themes: Record<ThemeName, Theme> = {
         skilled: { bg: 'rgba(61, 143, 255, 0.15)', border: 'rgba(61, 143, 255, 0.3)', iconBg: 'rgba(61, 143, 255, 0.2)' },
         other: { bg: 'rgba(82, 128, 163, 0.15)', border: 'rgba(82, 128, 163, 0.3)', iconBg: 'rgba(82, 128, 163, 0.2)' },
       },
+    },
+    modal: {
+      overlay: 'rgba(26, 35, 50, 0.6)',
+      background: '#FFFFFF',
+      headerBorder: '#E8F4FF',
+      sectionBorder: '#CCE5FF',
+      buttonClose: '#5280A3',
+      buttonCloseHover: '#1A4D7A',
+      accordionBorder: 'rgba(107, 176, 255, 0.25)',
+      accordionBorderActive: 'rgba(61, 143, 255, 0.4)',
+      accordionBg: 'rgba(107, 176, 255, 0.08)',
+      accordionBgActive: 'rgba(61, 143, 255, 0.12)',
+      accordionText: '#1A4D7A',
+      accordionTextMuted: '#5280A3',
+      categoryTabBg: 'rgba(107, 176, 255, 0.12)',
+      categoryTabBgActive: 'rgba(61, 143, 255, 0.2)',
+      categoryTabBorder: 'rgba(107, 176, 255, 0.25)',
+      categoryTabBorderActive: 'rgba(61, 143, 255, 0.4)',
+      categoryTabText: '#5280A3',
+      categoryTabTextActive: '#6BB0FF',
+      infoBg: 'rgba(107, 176, 255, 0.08)',
+      infoBorder: 'rgba(107, 176, 255, 0.25)',
+      infoText: '#5280A3',
+      infoTextAccent: '#6BB0FF',
     },
   },
 };

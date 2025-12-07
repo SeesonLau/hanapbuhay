@@ -1,4 +1,5 @@
 // src/components/modals/FAQsModal.tsx
+// src/components/modals/FAQsModal.tsx
 'use client';
 
 import { useState } from 'react';
@@ -6,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaChevronDown } from 'react-icons/fa';
 import { LegalModal } from './LegalModal';
 import { fontClasses } from '@/styles/fonts';
+import { useTheme } from '@/hooks/useTheme';
 
 interface FAQsModalProps {
   isOpen: boolean;
@@ -97,25 +99,31 @@ const FAQAccordion: React.FC<{ faq: FAQItem; isOpen: boolean; onToggle: () => vo
   isOpen, 
   onToggle 
 }) => {
+  const { theme } = useTheme();
+
   return (
     <div
-      className="border rounded-xl mobile-M:rounded-2xl overflow-hidden transition-all duration-200"
+      className="rounded-xl mobile-M:rounded-2xl overflow-hidden transition-all duration-200"
       style={{
-        borderColor: isOpen ? 'rgba(59, 130, 246, 0.3)' : 'rgba(255, 255, 255, 0.08)',
-        background: isOpen ? 'rgba(59, 130, 246, 0.05)' : 'rgba(255, 255, 255, 0.02)'
+        border: `1px solid ${isOpen ? theme.modal.accordionBorderActive : theme.modal.accordionBorder}`,
+        backgroundColor: isOpen ? theme.modal.accordionBgActive : theme.modal.accordionBg
       }}
     >
       <button
         onClick={onToggle}
         className="w-full flex items-center justify-between p-3 mobile-M:p-4 tablet:p-5 text-left"
       >
-        <span className={`text-small mobile-M:text-body tablet:text-lead font-medium text-white pr-4 ${fontClasses.heading}`}>
+        <span 
+          className={`text-small mobile-M:text-body tablet:text-lead font-medium pr-4 ${fontClasses.heading}`}
+          style={{ color: theme.modal.accordionText }}
+        >
           {faq.question}
         </span>
         <motion.span
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
-          className="flex-shrink-0 text-blue-400"
+          className="flex-shrink-0"
+          style={{ color: theme.colors.primary }}
         >
           <FaChevronDown className="text-xs mobile-M:text-sm" />
         </motion.span>
@@ -129,10 +137,11 @@ const FAQAccordion: React.FC<{ faq: FAQItem; isOpen: boolean; onToggle: () => vo
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <div 
-              className="px-3 mobile-M:px-4 tablet:px-5 pb-3 mobile-M:pb-4 tablet:pb-5 pt-0"
-            >
-              <p className={`text-small mobile-M:text-body text-gray-300 leading-relaxed ${fontClasses.body}`}>
+            <div className="px-3 mobile-M:px-4 tablet:px-5 pb-3 mobile-M:pb-4 tablet:pb-5 pt-0">
+              <p 
+                className={`text-small mobile-M:text-body leading-relaxed ${fontClasses.body}`}
+                style={{ color: theme.modal.accordionTextMuted }}
+              >
                 {faq.answer}
               </p>
             </div>
@@ -144,6 +153,7 @@ const FAQAccordion: React.FC<{ faq: FAQItem; isOpen: boolean; onToggle: () => vo
 };
 
 export const FAQsModal: React.FC<FAQsModalProps> = ({ isOpen, onClose }) => {
+  const { theme } = useTheme();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('general');
 
@@ -168,13 +178,15 @@ export const FAQsModal: React.FC<FAQsModalProps> = ({ isOpen, onClose }) => {
               }}
               className={`px-3 mobile-M:px-4 py-1.5 mobile-M:py-2 rounded-full text-tiny mobile-M:text-small font-medium transition-all duration-200 ${fontClasses.body}`}
               style={{
-                background: activeCategory === category 
-                  ? 'rgba(59, 130, 246, 0.2)' 
-                  : 'rgba(255, 255, 255, 0.05)',
+                backgroundColor: activeCategory === category 
+                  ? theme.modal.categoryTabBgActive
+                  : theme.modal.categoryTabBg,
                 border: `1px solid ${activeCategory === category 
-                  ? 'rgba(59, 130, 246, 0.4)' 
-                  : 'rgba(255, 255, 255, 0.1)'}`,
-                color: activeCategory === category ? '#60a5fa' : 'rgba(255, 255, 255, 0.7)'
+                  ? theme.modal.categoryTabBorderActive
+                  : theme.modal.categoryTabBorder}`,
+                color: activeCategory === category 
+                  ? theme.modal.categoryTabTextActive
+                  : theme.modal.categoryTabText
               }}
             >
               {categoryLabels[category]}
@@ -198,15 +210,24 @@ export const FAQsModal: React.FC<FAQsModalProps> = ({ isOpen, onClose }) => {
         <div 
           className="p-4 mobile-M:p-5 rounded-xl mobile-M:rounded-2xl text-center"
           style={{
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.08)'
+            backgroundColor: theme.modal.infoBg,
+            border: `1px solid ${theme.modal.infoBorder}`
           }}
         >
-          <p className={`text-small mobile-M:text-body text-gray-300 mb-2 ${fontClasses.body}`}>
+          <p 
+            className={`text-small mobile-M:text-body mb-2 ${fontClasses.body}`}
+            style={{ color: theme.modal.infoText }}
+          >
             Can't find what you're looking for?
           </p>
-          <p className={`text-small mobile-M:text-body text-gray-400 ${fontClasses.body}`}>
-            Contact us at <span className="text-blue-400">support@hanapbuhay.com</span>
+          <p 
+            className={`text-small mobile-M:text-body ${fontClasses.body}`}
+            style={{ color: theme.modal.infoText }}
+          >
+            Contact us at{' '}
+            <span style={{ color: theme.modal.infoTextAccent }}>
+              support@hanapbuhay.com
+            </span>
           </p>
         </div>
       </div>
