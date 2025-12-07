@@ -141,18 +141,21 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
     const hasJobType = selectedJobTypes.length > 0;
     const hasExperience = selectedExperience.length > 0;
     const hasGender = selectedGenders.length > 0;
+    const hasCountry = country.trim().length > 0;
+    const hasProvince = province.trim().length > 0;
+    const hasCity = city.trim().length > 0;
     const salaryText = salary.trim();
     const sNum = Number(salaryText);
     const integerDigits = salaryText.replace(/\..*/, '').replace(/[^0-9]/g, '').length;
     const withinMaxDigits = integerDigits > 0 && integerDigits <= 6;
     const hasSalary = salaryText.length > 0 && !Number.isNaN(sNum) && sNum >= 0 && withinMaxDigits;
     const hasRequirements = requirementsList.some((s) => s.trim().length > 0);
-    return t.length > 0 && d.length > 0 && hasJobType && hasExperience && hasGender && hasSalary && hasRequirements;
+    return t.length > 0 && d.length > 0 && hasJobType && hasExperience && hasGender && hasCountry && hasProvince && hasCity && hasSalary && hasRequirements;
   })();
 
   const handleSubmit = () => {
     if (!isFormValid) {
-      alert('Please complete: Job Title, About this role, select Job Type, Experience Level, and Preferred Gender, enter a valid Salary Rate, and add at least one requirement.');
+      alert('Please complete: Job Title, About this role, Location (Country, Province, City/Municipality), select Job Type, Experience Level, Preferred Gender, enter a valid Salary Rate, and add at least one requirement.');
       return;
     }
     const data: JobPostAddFormData = {

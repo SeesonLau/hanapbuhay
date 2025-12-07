@@ -36,6 +36,7 @@ export default function ManageJobPostsPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isRestrictionModalOpen, setIsRestrictionModalOpen] = useState(false);
   const [isApplicantsModalOpen, setIsApplicantsModalOpen] = useState(false);
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
   
@@ -65,6 +66,7 @@ export default function ManageJobPostsPage() {
   
   // Selected item states
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isEditRestricted, setIsEditRestricted] = useState<boolean>(false);
   const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
   const [selectedApplicants, setSelectedApplicants] = useState<{ title: string; applicantCount: number; postId: string } | null>(null);
 
@@ -102,9 +104,22 @@ export default function ManageJobPostsPage() {
     setIsAddModalOpen(true);
   };
 
-  const handleEditPost = (post: Post) => {
-    setSelectedPost(post);
-    setIsEditModalOpen(true);
+  const handleEditPost = async (post: Post) => {
+    try {
+      setSelectedPost(post);
+      const { ApplicationService } = await import('@/lib/services/applications-services');
+      const count = await ApplicationService.getTotalApplicationsByPostIdCount(post.postId);
+      if (count > 0) {
+        setIsEditRestricted(true);
+        setIsRestrictionModalOpen(true);
+      } else {
+        setIsEditRestricted(false);
+        setIsEditModalOpen(true);
+      }
+    } catch (err) {
+      setIsEditRestricted(false);
+      setIsEditModalOpen(true);
+    }
   };
 
   const handleDeletePost = (post: Post) => {
@@ -452,6 +467,7 @@ export default function ManageJobPostsPage() {
         onClose={() => setIsEditModalOpen(false)}
         onSubmit={handlePostSaved}
         post={selectedPost}
+        isRestricted={isEditRestricted}
       />
 
       <DeleteModal
@@ -467,6 +483,13 @@ export default function ManageJobPostsPage() {
         title={selectedApplicants?.title ?? 'Applicants'}
         applicantCount={selectedApplicants?.applicantCount ?? 0}
         postId={selectedApplicants?.postId}
+      />
+
+      <DeleteModal
+        isOpen={isRestrictionModalOpen}
+        onClose={() => setIsRestrictionModalOpen(false)}
+        onConfirm={() => { setIsRestrictionModalOpen(false); setIsEditModalOpen(true); }}
+        modalType="restrictEditJobPost"
       />
 
       <JobPostViewModal 

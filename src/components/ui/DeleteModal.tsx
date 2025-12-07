@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Button from './Button';
 import { COLORS } from '@/styles/colors';
 import { TYPOGRAPHY } from '@/styles/typography';
@@ -50,7 +51,8 @@ export type ModalType =
   | 'deleteWorkExperience'
   | 'deleteWorkerReview'
   | 'createApplication'
-  | 'deleteProject';
+  | 'deleteProject'
+  | 'restrictEditJobPost';
 
 /**
  * Defines the structure for the content of each modal variant.
@@ -109,6 +111,12 @@ export const MODAL_CONTENT: Record<ModalType, ModalContent> = {
     description: 'Are you sure you want to delete this project? This action cannot be undone.',
     confirmText: 'Delete',
   },
+  restrictEditJobPost: {
+    variant: 'apply',
+    title: 'Editing Restricted',
+    description: 'This job post has pending applicants. You can open the editor, but some fields will be disabled.',
+    confirmText: 'Proceed',
+  },
 };
 
 // --- Component Props ---
@@ -151,10 +159,17 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
       };
     }
   }, [isOpen]);
-  // Render nothing if the modal is not open
-  if (!isOpen) {
-    return null;
-  }
+  const overlayVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
+  } as const;
+
+  const panelVariants = {
+    initial: { y: 16, opacity: 0, scale: 0.98 },
+    animate: { y: 0, opacity: 1, scale: 1 },
+    exit: { y: 8, opacity: 0, scale: 0.98 },
+  } as const;
 
   // Get the content for the specified modal type
   const { title, description, confirmText, variant } = MODAL_CONTENT[modalType];
@@ -193,16 +208,25 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
   const colors = colorSchemes[variant];
 
   return (
-    // Backdrop overlay
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity"
-      onClick={onClose}
-    >
-      {/* Modal Content */}
-      <div
-        className="relative mx-auto flex h-auto w-[90%] min-w-[280px] max-w-[360px] flex-col items-center overflow-hidden rounded-[20px] bg-white shadow-[0px_0px_10px_rgba(0,0,0,0.25)]"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          variants={overlayVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          onClick={onClose}
+        >
+          <motion.div
+            className="relative mx-auto flex h-auto w-[90%] min-w-[280px] max-w-[360px] flex-col items-center overflow-hidden rounded-[20px] bg-white shadow-[0px_0px_10px_rgba(0,0,0,0.25)]"
+            variants={panelVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+            onClick={(e) => e.stopPropagation()}
+          >
         {/* Red gradient bar */}
         <div 
           className="h-[12px] w-full self-stretch"
@@ -318,8 +342,10 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
             </Button>
           </div>
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
