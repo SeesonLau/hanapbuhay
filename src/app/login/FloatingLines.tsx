@@ -1,4 +1,6 @@
+// app/login/FloatingLines.tsx (Themed Version)
 import { useEffect, useRef } from 'react';
+import { useTheme } from '@/hooks/useTheme';
 import {
   Scene,
   OrthographicCamera,
@@ -99,7 +101,7 @@ vec3 getLineColor(float t, vec3 baseColor) {
   return gradientColor * 0.5;
 }
 
-  float wave(vec2 uv, float offset, vec2 screenUv, vec2 mouseUv, bool shouldBend) {
+float wave(vec2 uv, float offset, vec2 screenUv, vec2 mouseUv, bool shouldBend) {
   float time = iTime * animationSpeed;
 
   float x_offset   = offset;
@@ -109,7 +111,7 @@ vec3 getLineColor(float t, vec3 baseColor) {
 
   if (shouldBend) {
     vec2 d = screenUv - mouseUv;
-    float influence = exp(-dot(d, d) * bendRadius); // radial falloff around cursor
+    float influence = exp(-dot(d, d) * bendRadius);
     float bendOffset = (mouseUv.y - screenUv.y) * influence * bendStrength * bendInfluence;
     y += bendOffset;
   }
@@ -252,7 +254,7 @@ function hexToVec3(hex: string): Vector3 {
 }
 
 export default function FloatingLines({
-  linesGradient,
+  linesGradient: propLinesGradient,
   enabledWaves = ['top', 'middle', 'bottom'],
   lineCount = [6],
   lineDistance = [5],
@@ -268,6 +270,7 @@ export default function FloatingLines({
   parallaxStrength = 0.2,
   mixBlendMode = 'screen'
 }: FloatingLinesProps) {
+  const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const targetMouseRef = useRef<Vector2>(new Vector2(-1000, -1000));
   const currentMouseRef = useRef<Vector2>(new Vector2(-1000, -1000));
@@ -275,6 +278,9 @@ export default function FloatingLines({
   const currentInfluenceRef = useRef<number>(0);
   const targetParallaxRef = useRef<Vector2>(new Vector2(0, 0));
   const currentParallaxRef = useRef<Vector2>(new Vector2(0, 0));
+
+  // Use theme particle colors if no gradient is provided
+  const linesGradient = propLinesGradient || theme.banner.particleColors || ['#60a5fa', '#93c5fd', '#ffffff'];
 
   const getLineCount = (waveType: 'top' | 'middle' | 'bottom'): number => {
     if (typeof lineCount === 'number') return lineCount;
@@ -363,6 +369,7 @@ export default function FloatingLines({
       lineGradientCount: { value: 0 }
     };
 
+    // Apply theme gradient colors
     if (linesGradient && linesGradient.length > 0) {
       const stops = linesGradient.slice(0, MAX_GRADIENT_STOPS);
       uniforms.lineGradientCount.value = stops.length;
@@ -474,6 +481,7 @@ export default function FloatingLines({
       }
     };
   }, [
+    theme,
     linesGradient,
     enabledWaves,
     lineCount,
@@ -495,7 +503,8 @@ export default function FloatingLines({
       ref={containerRef}
       className="w-full h-full relative overflow-hidden floating-lines-container"
       style={{
-        mixBlendMode: mixBlendMode
+        mixBlendMode: mixBlendMode,
+        opacity: theme.banner.overlayOpacity || 0.95
       }}
     />
   );

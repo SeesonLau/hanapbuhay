@@ -5,10 +5,18 @@ import { Suspense } from 'react';
 import ResetPasswordForm from '@/components/auth/ResetPasswordForm';
 import Link from 'next/link';
 import FloatingLines from '../login/FloatingLines';
+import { useTheme } from '@/hooks/useTheme';
 
 function ResetPasswordContent() {
+  const { theme } = useTheme();
+
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: '#0a0a0a' }}>
+    <div 
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      style={{ 
+        background: `linear-gradient(135deg, ${theme.banner.gradientStart} 0%, ${theme.banner.gradientMid} 50%, ${theme.banner.gradientEnd} 100%)`
+      }}
+    >
       {/* Floating Lines Background */}
       <div className="absolute inset-0 z-0">
         <FloatingLines 
