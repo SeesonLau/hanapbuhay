@@ -1,6 +1,7 @@
 // src/components/chat/ChatMessage.tsx
 import { cn } from '@/lib/utils'
 import type { ChatMessage } from '@/hooks/use-realtime-chat'
+import { useTheme } from '@/hooks/useTheme'
 
 interface ChatMessageItemProps {
   message: ChatMessage
@@ -9,6 +10,8 @@ interface ChatMessageItemProps {
 }
 
 export const ChatMessageItem = ({ message, isOwnMessage, showHeader }: ChatMessageItemProps) => {
+  const { theme } = useTheme()
+  
   return (
     <div className={cn(
       'flex',
@@ -38,10 +41,16 @@ export const ChatMessageItem = ({ message, isOwnMessage, showHeader }: ChatMessa
               }
             )}
           >
-            <span className="font-medium truncate max-w-[120px] mobile-L:max-w-[150px]">
+            <span 
+              className="font-medium truncate max-w-[120px] mobile-L:max-w-[150px]"
+              style={{ color: theme.colors.text }}
+            >
               {message.sender_name}
             </span>
-            <span className="text-foreground/50 text-[10px] mobile-L:text-xs whitespace-nowrap flex-shrink-0">
+            <span 
+              className="text-[10px] mobile-L:text-xs whitespace-nowrap flex-shrink-0"
+              style={{ color: theme.colors.textMuted }}
+            >
               {new Date(message.created_at).toLocaleTimeString('en-US', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -64,11 +73,12 @@ export const ChatMessageItem = ({ message, isOwnMessage, showHeader }: ChatMessa
             'flex items-center',
             // Ensure text wraps properly
             'max-w-full',
-            'word-break',
-            isOwnMessage 
-              ? 'bg-primary text-primary-foreground' 
-              : 'bg-muted text-foreground'
+            'word-break'
           )}
+          style={{
+            backgroundColor: isOwnMessage ? theme.colors.primary : theme.colors.backgroundSecondary,
+            color: isOwnMessage ? '#ffffff' : theme.colors.text,
+          }}
         >
           <span className="inline-block max-w-full break-all">{message.content}</span>
         </div>
