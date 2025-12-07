@@ -121,11 +121,34 @@ export function useApplications(userId?: string | null, options: UseApplications
           raw: a,
         } as AppliedJob;
       });
+      const score = (job: AppliedJob) => {
+        const rp = job.raw?.posts ?? job.raw?.post ?? {};
+        const deleted = Boolean(rp?.deletedAt ?? rp?.deleted_at);
+        const locked = Boolean(rp?.isLocked ?? rp?.is_locked);
+        return deleted ? 2 : (locked ? 1 : 0);
+      };
+      const getCreated = (job: AppliedJob) => {
+        const c = job.raw?.createdAt ?? job.raw?.created_at ?? '';
+        const t = new Date(c).getTime();
+        return Number.isFinite(t) ? t : 0;
+      };
+      const sortOrder = params.sortOrder ?? sort.sortOrder;
+      const sortFn = (a: AppliedJob, b: AppliedJob) => {
+        const sa = score(a);
+        const sb = score(b);
+        if (sa !== sb) return sa - sb;
+        const ca = getCreated(a);
+        const cb = getCreated(b);
+        return sortOrder === 'asc' ? ca - cb : cb - ca;
+      };
 
       if (isLoadMore) {
-        setApplications(prev => [...prev, ...mapped]);
+        setApplications(prev => {
+          const combined = [...prev, ...mapped];
+          return combined.sort(sortFn);
+        });
       } else {
-        setApplications(mapped);
+        setApplications(mapped.sort(sortFn));
       }
       setCurrentPage(page);
       setHasMoreData(res.hasMore);

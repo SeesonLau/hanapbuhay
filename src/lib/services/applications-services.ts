@@ -146,8 +146,7 @@ export class ApplicationService {
       try {
         let postsQuery = supabase
           .from('posts')
-          .select('postId', { count: 'exact' })
-          .is('deletedAt', null);
+          .select('postId', { count: 'exact' });
 
         if (f.searchTerm) {
           const clean = String(f.searchTerm).replace(/\*/g, '').trim();
@@ -226,7 +225,9 @@ export class ApplicationService {
           type,
           subType,
           userId,
-          createdBy
+          createdBy,
+          isLocked,
+          deletedAt
         )
       `, { count: 'exact' })
       .eq('userId', userId)

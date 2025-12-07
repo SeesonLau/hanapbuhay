@@ -114,7 +114,7 @@ export const MODAL_CONTENT: Record<ModalType, ModalContent> = {
   restrictEditJobPost: {
     variant: 'apply',
     title: 'Editing Restricted',
-    description: 'This job post has pending applicants. You can open the editor, but some fields will be disabled.',
+    description: 'This job post has active applicants. You can open the editor, but some fields will be disabled.',
     confirmText: 'Proceed',
   },
 };

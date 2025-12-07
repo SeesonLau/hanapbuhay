@@ -104,7 +104,7 @@ function FindJobsPageContent() {
     applyFilters,
     setSortInUrl,
     setSelectedPostId,
-  } = useJobPosts(currentUserId ?? undefined, { excludeMine: true, excludeApplied: true });
+  } = useJobPosts(currentUserId ?? undefined, { excludeMine: true, excludeApplied: true, skip: !currentUserId });
 
   // Applications hook for apply functionality
   const { 
