@@ -122,6 +122,9 @@ export default function AppliedJobsPage() {
     count += Object.values(activeFilters.salaryRange).filter(Boolean).length;
     count += Object.values(activeFilters.experienceLevel).filter(Boolean).length;
     count += Object.values(activeFilters.preferredGender).filter(Boolean).length;
+    if (activeFilters.status) {
+      count += Object.values(activeFilters.status).filter(Boolean).length;
+    }
     return count;
   }, [activeFilters]);
 

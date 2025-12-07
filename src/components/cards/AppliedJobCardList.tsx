@@ -72,6 +72,16 @@ export default function AppliedJobCard({
 }: AppliedJobCardProps) {
   const { theme } = useTheme();
   const status = statusConfig[job.status] || statusConfig.unknown;
+  const rawPost = (job as any)?.raw?.posts ?? (job as any)?.raw?.post ?? {};
+  const isLocked = Boolean(rawPost?.isLocked ?? rawPost?.is_locked);
+  const isDeleted = Boolean(rawPost?.deletedAt ?? rawPost?.deleted_at);
+  const isMuted = isLocked || isDeleted;
+  const statusOverride = isDeleted
+    ? { text: 'Deleted', bgColor: 'bg-gray-neutral100', textColor: 'text-gray-neutral600', icon: RiDeleteBin6Line }
+    : isLocked
+      ? { text: 'Locked', bgColor: 'bg-gray-neutral100', textColor: 'text-gray-neutral600', icon: LuCircleX }
+      : null;
+  const displayStatus = statusOverride || status;
 
   const handleDelete = () => {
     if (onDelete) {
@@ -192,32 +202,36 @@ export default function AppliedJobCard({
         onClick={handleClick}
         className={`w-full h-[60px] border shadow-sm px-6 rounded-[10px] transition-all duration-300 ease-out cursor-pointer ${className}`}
         style={{
-          backgroundColor: theme.colors.cardBg,
+          backgroundColor: isMuted ? theme.colors.backgroundSecondary : theme.colors.cardBg,
           borderColor: theme.colors.cardBorder,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = theme.colors.cardHover;
-          e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+          if (!isMuted) {
+            e.currentTarget.style.backgroundColor = theme.colors.cardHover;
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+          }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = theme.colors.cardBg;
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
+          if (!isMuted) {
+            e.currentTarget.style.backgroundColor = theme.colors.cardBg;
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
+          }
         }}
       >
         <div className="grid items-center h-full gap-6 grid-cols-2 tablet:grid-cols-4 laptop:grid-cols-3 laptop-L:grid-cols-5">
           <div className="min-w-0 flex items-center mobile-S:max-w-[150px]">
             <h3 
               className="font-alexandria font-semibold text-[15px] truncate"
-              style={{ color: theme.colors.text }}
+              style={{ color: isMuted ? theme.colors.textMuted : theme.colors.text }}
             >
               {shortTitle}
             </h3>
           </div>
 
           <div className="min-w-0 hidden tablet:block">
-            <div className="flex items-center gap-2 whitespace-nowrap overflow-hidden">
+            <div className={`flex items-center gap-2 whitespace-nowrap overflow-hidden ${isMuted ? 'filter grayscale' : ''}`}>
               {firstTag && (
                 firstTag.type === 'gender' ? (
                   <StaticGenderTag label={firstTag.label} />
@@ -235,25 +249,28 @@ export default function AppliedJobCard({
             </div>
           </div>
 
-          <div className="hidden laptop-L:flex items-center gap-3 flex-1">
+          <div className={`hidden laptop-L:flex items-center gap-3 flex-1 ${isMuted ? 'filter grayscale' : ''}`}>
             <div className="w-[140px] min-w-[140px] max-w-[140px] overflow-hidden">
-              <StaticSalaryTag label={`${job.salary} /${job.salaryPeriod}`} className="whitespace-nowrap w-full" />
+              <StaticSalaryTag 
+                label={`${job.salary} /${job.salaryPeriod}`} 
+                className={`whitespace-nowrap w-full ${isMuted ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} 
+              />
             </div>
           </div>
 
           <div className="hidden tablet:flex laptop:hidden laptop-L:flex flex-shrink-0">
             <span 
               className="font-inter text-[10px] whitespace-nowrap"
-              style={{ color: theme.colors.textSecondary }}
+              style={{ color: isMuted ? theme.colors.textMuted : theme.colors.textSecondary }}
             >
               Applied on: {job.appliedOn}
             </span>
           </div>
 
           <div className="flex-shrink-0 justify-self-end flex items-center gap-3 justify-end">
-            <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${status.bgColor} ${status.textColor}`}>
-              <status.icon className="w-3 h-3" />
-              <span className="font-inter text-[10px] font-medium">{status.text}</span>
+            <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${displayStatus.bgColor} ${displayStatus.textColor}`}>
+              <displayStatus.icon className="w-3 h-3" />
+              <span className="font-inter text-[10px] font-medium">{displayStatus.text}</span>
             </div>
 
             {onDelete && (
@@ -280,29 +297,33 @@ export default function AppliedJobCard({
       onClick={handleClick}
       className={`relative group w-full h-full min-h-[220px] rounded-lg p-6 flex flex-col transition-all duration-300 ease-out cursor-pointer ${className}`}
       style={{
-        backgroundColor: theme.colors.cardBg,
+        backgroundColor: isMuted ? theme.colors.backgroundSecondary : theme.colors.cardBg,
         boxShadow: '0px 0px 10px rgba(0,0,0,0.25)',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-2px)';
-        e.currentTarget.style.boxShadow = '0px 4px 20px rgba(0,0,0,0.3)';
+        if (!isMuted) {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0px 4px 20px rgba(0,0,0,0.3)';
+        }
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = '0px 0px 10px rgba(0,0,0,0.25)';
+        if (!isMuted) {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0px 0px 10px rgba(0,0,0,0.25)';
+        }
       }}
     >
-      <div className="flex-shrink-0 mb-[16px] flex items-start justify-between gap-2">
+      <div className={`flex-shrink-0 mb-[16px] flex items-start justify-between gap-2 ${isMuted ? 'filter grayscale' : ''}`}>
         <div className="min-w-0 flex-1">
           <h3 
             className="font-alexandria font-semibold text-[20px] truncate"
-            style={{ color: theme.colors.text }}
+            style={{ color: isMuted ? theme.colors.textMuted : theme.colors.text }}
           >
             {job.title}
           </h3>
           <p 
             className="font-inter font-light text-[12px] line-clamp-1"
-            style={{ color: theme.colors.textSecondary }}
+            style={{ color: isMuted ? theme.colors.textMuted : theme.colors.textSecondary }}
           >
             {aboutText}
           </p>
@@ -335,7 +356,7 @@ export default function AppliedJobCard({
         )}
       </div>
 
-      <div className="mb-[16px]">
+      <div className={`mb-[16px] ${isMuted ? 'filter grayscale' : ''}`}>
         <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
           {allTags.map((tag, index) => (
             tag.type === 'gender' ? (
@@ -351,7 +372,7 @@ export default function AppliedJobCard({
           99+
         </div>
 
-        <div ref={tagsRowRef} className="flex flex-nowrap gap-1 overflow-hidden whitespace-nowrap items-center">
+        <div ref={tagsRowRef} className={`flex flex-nowrap gap-1 overflow-hidden whitespace-nowrap items-center ${isMuted ? 'filter grayscale' : ''}`}>
           {visibleTags.map((tag, index) => (
             tag.type === 'gender' ? (
               <StaticGenderTag key={`tag-${index}`} label={tag.label} />
@@ -370,21 +391,28 @@ export default function AppliedJobCard({
       </div>
 
       <div className="mt-auto space-y-[16px]">
-        <div className="flex flex-wrap items-center gap-2">
-          <StaticLocationTag label={job.location} showFullAddress={false} />
-          <StaticSalaryTag label={`${job.salary} /${job.salaryPeriod}`} className="whitespace-nowrap" />
+        <div className={`flex flex-wrap items-center gap-2 ${isMuted ? 'filter grayscale' : ''}`}>
+          <StaticLocationTag 
+            label={job.location} 
+            showFullAddress={false} 
+            className={`${isMuted ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} 
+          />
+          <StaticSalaryTag 
+            label={`${job.salary} /${job.salaryPeriod}`} 
+            className={`whitespace-nowrap ${isMuted ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} 
+          />
         </div>
 
         <div className="flex items-center justify-between">
           <span 
             className="font-inter font-medium text-[10px]"
-            style={{ color: theme.colors.textSecondary }}
+            style={{ color: isMuted ? theme.colors.textMuted : theme.colors.textSecondary }}
           >
             Applied on: {job.appliedOn}
           </span>
-          <div className={`flex items-center gap-1 px-3 py-1 rounded-md ${status.bgColor} ${status.textColor}`}>
-            <status.icon className="w-4 h-4" />
-            <span className="font-inter text-tiny font-medium">{status.text}</span>
+          <div className={`flex items-center gap-1 px-3 py-1 rounded-md ${displayStatus.bgColor} ${displayStatus.textColor}`}>
+            <displayStatus.icon className="w-4 h-4" />
+            <span className="font-inter text-tiny font-medium">{displayStatus.text}</span>
           </div>
         </div>
       </div>

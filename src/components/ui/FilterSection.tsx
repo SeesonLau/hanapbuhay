@@ -30,6 +30,13 @@ export interface FilterOptions {
   salaryRange: SalaryRange;
   experienceLevel: ExperienceLevel;
   preferredGender: PreferredGender;
+  status?: {
+    deleted: boolean;
+    locked: boolean;
+    pending: boolean;
+    approved: boolean;
+    rejected: boolean;
+  };
 }
 
 export interface FilterSectionProps {
@@ -72,11 +79,20 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     }
   );
 
+  const [status, setStatus] = useState<NonNullable<FilterOptions['status']>>(initialFilters?.status || {
+    deleted: false,
+    locked: false,
+    pending: false,
+    approved: false,
+    rejected: false,
+  });
+
   // Accordion states - All closed by default, except Salary Range for appliedJobs variant
   const [isJobTypeOpen, setIsJobTypeOpen] = useState(false);
   const [isSalaryOpen, setIsSalaryOpen] = useState(variant === 'appliedJobs');
   const [isExperienceOpen, setIsExperienceOpen] = useState(false);
   const [isGenderOpen, setIsGenderOpen] = useState(false);
+  const [isStatusOpen, setIsStatusOpen] = useState(variant === 'appliedJobs');
 
   // Scroll indicator state
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -131,16 +147,29 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       male: false,
       others: false,
     });
+    if (variant === 'appliedJobs') {
+      setStatus({
+        deleted: false,
+        locked: false,
+        pending: false,
+        approved: false,
+        rejected: false,
+      });
+    }
     onClearAll?.();
   };
 
   const handleApply = () => {
-    onApply?.({
+    const payload: FilterOptions = {
       jobTypes,
       salaryRange,
       experienceLevel,
       preferredGender,
-    });
+    };
+    if (variant === 'appliedJobs') {
+      (payload as any).status = status;
+    }
+    onApply?.(payload);
   };
 
   const handleSalaryChange = (key: keyof SalaryRange, checked: boolean) => {
@@ -153,6 +182,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 
   const handleGenderChange = (key: keyof PreferredGender, checked: boolean) => {
     setPreferredGender((prev) => ({ ...prev, [key]: checked }));
+  };
+
+  const handleStatusChange = (key: keyof NonNullable<FilterOptions['status']>, checked: boolean) => {
+    setStatus((prev) => ({ ...prev, [key]: checked }));
   };
 
   return (
@@ -173,6 +206,32 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         ref={scrollRef}
         className="flex-1 overflow-y-auto bg-white min-h-0 scrollbar-hide relative"
       >
+        {variant === 'appliedJobs' && (
+          <div className="">
+            <button
+              onClick={() => setIsStatusOpen(!isStatusOpen)}
+              className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="text-body font-inter font-normal text-gray-neutral900">
+                Status
+              </h3>
+              <IoChevronForward
+                className={`h-5 w-5 text-gray-neutral600 transition-transform duration-200 ${
+                  isStatusOpen ? 'rotate-90' : ''
+                }`}
+              />
+            </button>
+            {isStatusOpen && (
+              <div className="px-4 pb-3 space-y-2">
+                <Checkbox label="Deleted" checked={status.deleted} onChange={(c) => handleStatusChange('deleted', c)} size="sm" />
+                <Checkbox label="Locked" checked={status.locked} onChange={(c) => handleStatusChange('locked', c)} size="sm" />
+                <Checkbox label="Pending" checked={status.pending} onChange={(c) => handleStatusChange('pending', c)} size="sm" />
+                <Checkbox label="Approved" checked={status.approved} onChange={(c) => handleStatusChange('approved', c)} size="sm" />
+                <Checkbox label="Rejected" checked={status.rejected} onChange={(c) => handleStatusChange('rejected', c)} size="sm" />
+              </div>
+            )}
+          </div>
+        )}
         {/* Job Type Section */}
         <div className="">
           <button
@@ -199,8 +258,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           )}
         </div>
 
-        {/* Salary Range Section */}
-        <div className="">
+      {/* Salary Range Section */}
+      <div className="">
           <button
             onClick={() => setIsSalaryOpen(!isSalaryOpen)}
             className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
@@ -339,6 +398,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           </div>
         )}
       </div>
+
+        
 
       {/* Fixed bottom Apply button (blue section) */}
       <div className="flex-shrink-0 border-t border-gray-neutral200 p-3 bg-white">
