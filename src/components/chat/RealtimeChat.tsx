@@ -18,6 +18,7 @@ import {
 } from 'react-icons/fi'
 import { useRealtimeChat } from '@/hooks/use-realtime-chat'
 import { useChatScroll } from '@/hooks/use-chat-scroll'
+import { useTheme } from '@/hooks/useTheme'
 
 interface RealtimeChatProps {
   roomId: string
@@ -36,6 +37,7 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
   isGlobal,
   onNewMessage,
 }) => {
+  const { theme } = useTheme()
   const [newMessage, setNewMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
   
@@ -145,7 +147,13 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
                 src={message.sender_profile_pic_url || undefined} 
                 alt={message.sender_name} 
               />
-              <AvatarFallback className="bg-gray-300 text-gray-700 text-[10px] mobile-L:text-xs">
+              <AvatarFallback 
+                className="text-[10px] mobile-L:text-xs"
+                style={{
+                  backgroundColor: theme.colors.backgroundSecondary,
+                  color: theme.colors.textSecondary,
+                }}
+              >
                 {message.sender_name?.substring(0, 2).toUpperCase() || '??'}
               </AvatarFallback>
             </Avatar>
@@ -158,29 +166,32 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
 
         <div className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'} max-w-[85%] mobile-M:max-w-[80%] mobile-L:max-w-[75%] tablet:max-w-[70%]`}>
           {(isGlobal || !isCurrentUser) && isFirstInSequence && (
-            <p className={`text-[10px] mobile-L:text-xs font-medium mb-0.5 mobile-L:mb-1 px-1 truncate max-w-full ${
-              isCurrentUser ? 'text-blue-600' : 'text-gray-600'
-            }`}>
+            <p 
+              className="text-[10px] mobile-L:text-xs font-medium mb-0.5 mobile-L:mb-1 px-1 truncate max-w-full"
+              style={{
+                color: isCurrentUser ? theme.colors.primary : theme.colors.textSecondary,
+              }}
+            >
               {isCurrentUser ? 'You' : message.sender_name}
             </p>
           )}
           
           <div
-            className={`px-2.5 mobile-L:px-3 tablet:px-4 py-1.5 mobile-L:py-2 shadow-sm max-w-full ${
-              isCurrentUser
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-800'
-            } ${borderRadiusClass} ${message.id.startsWith('temp-') ? 'opacity-80' : ''}`}
+            className={`px-2.5 mobile-L:px-3 tablet:px-4 py-1.5 mobile-L:py-2 shadow-sm max-w-full ${borderRadiusClass} ${message.id.startsWith('temp-') ? 'opacity-80' : ''}`}
+            style={{
+              backgroundColor: isCurrentUser ? theme.colors.primary : theme.colors.backgroundSecondary,
+              color: isCurrentUser ? '#ffffff' : theme.colors.text,
+            }}
           >
             <p className="break-all overflow-wrap-anywhere text-xs mobile-L:text-sm tablet:text-base leading-relaxed">{message.content}</p>
             
             {isLastInSequence && (
               <div
-                className={`text-[10px] mobile-L:text-xs mt-0.5 mobile-L:mt-1 flex items-center gap-1 ${
-                  isCurrentUser
-                    ? 'justify-end text-blue-200'
-                    : 'justify-start text-gray-500'
-                }`}
+                className="text-[10px] mobile-L:text-xs mt-0.5 mobile-L:mt-1 flex items-center gap-1"
+                style={{
+                  justifyContent: isCurrentUser ? 'flex-end' : 'flex-start',
+                  color: isCurrentUser ? 'rgba(255, 255, 255, 0.7)' : theme.colors.textMuted,
+                }}
               >
                 <span className="whitespace-nowrap">{formatMessageTime(message.created_at)}</span>
                 {isCurrentUser && (
@@ -206,7 +217,13 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
                 src={message.sender_profile_pic_url || undefined} 
                 alt="You" 
               />
-              <AvatarFallback className="bg-blue-100 text-blue-600 text-[10px] mobile-L:text-xs">
+              <AvatarFallback 
+                className="text-[10px] mobile-L:text-xs"
+                style={{
+                  backgroundColor: theme.colors.primaryLight,
+                  color: theme.colors.primaryDark,
+                }}
+              >
                 {username?.substring(0, 2).toUpperCase() || 'YO'}
               </AvatarFallback>
             </Avatar>
@@ -221,9 +238,15 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-full w-full bg-white">
+    <div 
+      className="flex flex-col h-full w-full"
+      style={{ backgroundColor: theme.colors.surface }}
+    >
       {!isConnected && (
-        <div className="bg-yellow-500 text-white text-center py-1.5 mobile-L:py-2 px-3 mobile-L:px-4 text-xs mobile-L:text-sm flex items-center justify-center gap-2 flex-shrink-0">
+        <div 
+          className="text-white text-center py-1.5 mobile-L:py-2 px-3 mobile-L:px-4 text-xs mobile-L:text-sm flex items-center justify-center gap-2 flex-shrink-0"
+          style={{ backgroundColor: theme.colors.warning }}
+        >
           <FiWifi className="animate-pulse" />
           <span>Connecting...</span>
         </div>
@@ -237,8 +260,14 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
         )}
 
         {!isLoading && messages.length === 0 && (
-          <div className="text-center text-gray-500 py-6 mobile-L:py-8 flex flex-col items-center gap-2">
-            <FiMessageSquare className="w-10 h-10 mobile-L:w-12 mobile-L:h-12 text-gray-300" />
+          <div 
+            className="text-center py-6 mobile-L:py-8 flex flex-col items-center gap-2"
+            style={{ color: theme.colors.textMuted }}
+          >
+            <FiMessageSquare 
+              className="w-10 h-10 mobile-L:w-12 mobile-L:h-12"
+              style={{ color: theme.colors.borderLight }}
+            />
             <p className="text-base mobile-L:text-lg font-medium">No messages yet</p>
             <p className="text-xs mobile-L:text-sm">
               {roomId ? 'Start the conversation!' : 'Select a chat to start messaging'}
@@ -255,7 +284,11 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
         </div>
       </div>
 
-      <form onSubmit={handleSendMessage} className="flex w-full items-center gap-2 border-t border-gray-200 p-2 mobile-L:p-3 tablet:p-4 flex-shrink-0">
+      <form 
+        onSubmit={handleSendMessage} 
+        className="flex w-full items-center gap-2 p-2 mobile-L:p-3 tablet:p-4 flex-shrink-0"
+        style={{ borderTop: `1px solid ${theme.colors.border}` }}
+      >
         <Input
           type="text"
           placeholder={roomId ? 'Type a message...' : 'Select a chat'}

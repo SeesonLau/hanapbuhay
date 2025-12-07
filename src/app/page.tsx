@@ -17,9 +17,34 @@ import {
   fontClasses
 } from '@/styles';
 import Link from 'next/link';
+import { useTheme } from '@/hooks/useTheme';
+import {
+  SpringParticle,
+  createSpringParticle,
+  updateSpringParticle,
+  renderSpringParticle,
+} from '@/components/animations/SpringAnimate';
+import {
+  SummerParticle,
+  createSummerParticle,
+  updateSummerParticle,
+  renderSummerParticle,
+} from '@/components/animations/SummerAnimate';
+import {
+  AutumnParticle,
+  createAutumnParticle,
+  updateAutumnParticle,
+  renderAutumnParticle,
+} from '@/components/animations/AutumnAnimate';
+import {
+  WinterParticle,
+  createWinterParticle,
+  updateWinterParticle,
+  renderWinterParticle,
+} from '@/components/animations/WinterAnimate';
 
-// Dynamically import heavy WebGL component to speed up initial page load
-const Particles = dynamic(() => import('@/components/animations/Particles'), {
+// Dynamically import classic particles only
+const ClassicParticles = dynamic(() => import('@/components/animations/Particles'), {
   ssr: false,
   loading: () => null,
 });
@@ -28,7 +53,13 @@ export default function HomePage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const heroRef = useRef(null);
   const router = useRouter();
+  const { theme, themeName } = useTheme();
   const { scrollYProgress } = useScroll();
+  
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const particlesRef = useRef<(SpringParticle | SummerParticle | AutumnParticle | WinterParticle)[]>([]);
+  const animationFrameRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(Date.now());
   
   const heroY = useTransform(scrollYProgress, [0, 1], [0, -100]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
@@ -75,6 +106,96 @@ export default function HomePage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Canvas animation for seasonal themes
+  useEffect(() => {
+    if (themeName === 'classic') return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
+
+    const updateCanvasSize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    updateCanvasSize();
+
+    const particleCount = 80;
+    const initParticles = () => {
+      particlesRef.current = [];
+      
+      for (let i = 0; i < particleCount; i++) {
+        let particle: SpringParticle | SummerParticle | AutumnParticle | WinterParticle;
+        switch (themeName) {
+          case 'spring':
+            particle = createSpringParticle(canvas.width, canvas.height);
+            break;
+          case 'summer':
+            particle = createSummerParticle(canvas.width, canvas.height);
+            break;
+          case 'autumn':
+            particle = createAutumnParticle(canvas.width, canvas.height);
+            break;
+          case 'winter':
+            particle = createWinterParticle(canvas.width, canvas.height);
+            break;
+          default:
+            return;
+        }
+        particlesRef.current.push(particle);
+      }
+    };
+    initParticles();
+
+    const animate = () => {
+      const time = (Date.now() - startTimeRef.current) / 1000;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particlesRef.current.forEach((particle) => {
+        switch (themeName) {
+          case 'spring':
+            updateSpringParticle(particle as SpringParticle, time, canvas.width, canvas.height);
+            renderSpringParticle(ctx, particle as SpringParticle);
+            break;
+          case 'summer':
+            updateSummerParticle(particle as SummerParticle, time, canvas.width, canvas.height);
+            renderSummerParticle(ctx, particle as SummerParticle);
+            break;
+          case 'autumn':
+            updateAutumnParticle(particle as AutumnParticle, time, canvas.width, canvas.height);
+            renderAutumnParticle(ctx, particle as AutumnParticle);
+            break;
+          case 'winter':
+            updateWinterParticle(particle as WinterParticle, time, canvas.width, canvas.height);
+            renderWinterParticle(ctx, particle as WinterParticle);
+            break;
+        }
+      });
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+    animate();
+
+    const handleResize = () => {
+      updateCanvasSize();
+      initParticles();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [themeName]);
+
+  useEffect(() => {
+    startTimeRef.current = Date.now();
+  }, [themeName]);
+
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -103,12 +224,12 @@ export default function HomePage() {
     }
   };
 
-  return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-black via-slate-900 to-blue-950">
-      {/* 3D Particle Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <Particles
-          particleColors={['#ffffff', '#60a5fa', '#3b82f6']}
+  // Render appropriate particle animation based on theme
+  const renderParticles = () => {
+    if (themeName === 'classic') {
+      return (
+        <ClassicParticles
+          particleColors={theme.banner.particleColors}
           particleCount={150}
           particleSpread={12}
           speed={0.1}
@@ -121,6 +242,28 @@ export default function HomePage() {
           cameraDistance={25}
           pixelRatio={typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 2) : 1}
         />
+      );
+    }
+
+    return (
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 pointer-events-none"
+        style={{ width: '100%', height: '100%' }}
+      />
+    );
+  };
+
+  return (
+    <div 
+      className="min-h-screen relative overflow-hidden"
+      style={{
+        background: `linear-gradient(to bottom right, ${theme.landing.bgGradientStart}, ${theme.landing.bgGradientMid}, ${theme.landing.bgGradientEnd})`
+      }}
+    >
+      {/* Seasonal Particle Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        {renderParticles()}
       </div>
 
       {/* Header Section */}
@@ -152,7 +295,8 @@ export default function HomePage() {
               }}
             >
               <motion.h1 
-                className={`${fontClasses.heading} font-bold text-h2 mobile-M:text-h1 tablet:text-5xl laptop:text-6xl leading-tight text-white`}
+                className={`${fontClasses.heading} font-bold text-h2 mobile-M:text-h1 tablet:text-5xl laptop:text-6xl leading-tight`}
+                style={{ color: theme.landing.headingPrimary }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ 
@@ -162,13 +306,19 @@ export default function HomePage() {
                 }}
               >
                 Find Your Next{' '}
-                <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-blue-600 bg-clip-text text-transparent">
+                <span 
+                  className="bg-clip-text text-transparent"
+                  style={{
+                    backgroundImage: `linear-gradient(to right, ${theme.landing.headingGradientStart}, ${theme.landing.headingGradientMid}, ${theme.landing.headingGradientEnd})`
+                  }}
+                >
                   Opportunity
                 </span>
               </motion.h1>
 
               <motion.p
-                className={`${fontClasses.body} text-gray-300 text-body mobile-M:text-lead tablet:text-xl leading-relaxed`}
+                className={`${fontClasses.body} text-body mobile-M:text-lead tablet:text-xl leading-relaxed`}
+                style={{ color: theme.landing.bodyText }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -193,7 +343,18 @@ export default function HomePage() {
               >
                 <motion.button
                   onClick={() => router.push('/signup')}
-                  className="px-6 mobile-M:px-8 py-2.5 mobile-M:py-3 tablet:py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-small mobile-M:text-body font-semibold rounded-full transition-all duration-300 shadow-lg shadow-blue-600/50 hover:shadow-blue-600/80 cursor-pointer"
+                  className="px-6 mobile-M:px-8 py-2.5 mobile-M:py-3 tablet:py-3.5 text-small mobile-M:text-body font-semibold rounded-full transition-all duration-300 cursor-pointer"
+                  style={{
+                    backgroundColor: theme.landing.accentSecondary,
+                    color: theme.landing.headingPrimary,
+                    boxShadow: `0 4px 24px ${theme.landing.accentGlow}`
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = `0 8px 32px ${theme.landing.accentGlow}`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = `0 4px 24px ${theme.landing.accentGlow}`;
+                  }}
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -201,7 +362,20 @@ export default function HomePage() {
                 </motion.button>
                 <motion.button
                   onClick={() => router.push('/login')}
-                  className="px-6 mobile-M:px-8 py-2.5 mobile-M:py-3 tablet:py-3.5 border-2 border-white/20 hover:border-white/40 text-white text-small mobile-M:text-body font-semibold rounded-full transition-all duration-300 backdrop-blur-sm hover:bg-white/5 cursor-pointer"
+                  className="px-6 mobile-M:px-8 py-2.5 mobile-M:py-3 tablet:py-3.5 border-2 text-small mobile-M:text-body font-semibold rounded-full transition-all duration-300 backdrop-blur-sm cursor-pointer"
+                  style={{
+                    borderColor: theme.landing.glassBorder,
+                    color: theme.landing.headingPrimary,
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = theme.landing.glassHoverBorder;
+                    e.currentTarget.style.backgroundColor = theme.landing.glassHoverBg;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = theme.landing.glassBorder;
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                  }}
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -224,17 +398,17 @@ export default function HomePage() {
               <div 
                 className="rounded-2xl tablet:rounded-3xl p-6 tablet:p-8 relative overflow-hidden"
                 style={{
-                  background: 'rgba(30, 58, 138, 0.15)',
+                  background: theme.landing.glassBg,
                   backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(59, 130, 246, 0.2)',
-                  boxShadow: '0 8px 32px rgba(30, 58, 138, 0.3)'
+                  border: `1px solid ${theme.landing.glassBorder}`,
+                  boxShadow: `0 8px 32px ${theme.landing.accentGlow}`
                 }}
               >
                 {/* Decorative gradient */}
                 <div 
                   className="absolute inset-0 opacity-20"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.3) 0%, rgba(12, 74, 110, 0.2) 100%)'
+                    background: `linear-gradient(135deg, ${theme.landing.sectionBg} 0%, ${theme.landing.sectionBgLight} 100%)`
                   }}
                 />
                 
@@ -251,7 +425,8 @@ export default function HomePage() {
 
               {/* Floating elements */}
               <motion.div
-                className="absolute -top-4 -right-4 w-20 h-20 bg-blue-500/20 rounded-full blur-xl"
+                className="absolute -top-4 -right-4 w-20 h-20 rounded-full blur-xl"
+                style={{ backgroundColor: theme.landing.accentGlow }}
                 animate={{
                   y: [0, -20, 0],
                   scale: [1, 1.2, 1],
@@ -263,7 +438,8 @@ export default function HomePage() {
                 }}
               />
               <motion.div
-                className="absolute -bottom-4 -left-4 w-32 h-32 bg-cyan-500/20 rounded-full blur-xl"
+                className="absolute -bottom-4 -left-4 w-32 h-32 rounded-full blur-xl"
+                style={{ backgroundColor: theme.landing.iconBg }}
                 animate={{
                   y: [0, 20, 0],
                   scale: [1, 1.3, 1],
