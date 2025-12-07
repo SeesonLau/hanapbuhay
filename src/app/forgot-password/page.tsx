@@ -1,4 +1,5 @@
 // app/forgot-password/page.tsx
+
 'use client';
 
 import { Suspense, useState } from 'react';
@@ -8,8 +9,10 @@ import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
 import FloatingLines from '../login/FloatingLines';
+import { useTheme } from '@/hooks/useTheme';
 
 function ForgotPasswordContent() {
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -18,8 +21,14 @@ function ForgotPasswordContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: '#0a0a0a' }}>
+    <div 
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      style={{ 
+        background: `linear-gradient(135deg, ${theme.banner.gradientStart} 0%, ${theme.banner.gradientMid} 50%, ${theme.banner.gradientEnd} 100%)`
+      }}
+    >
       <Preloader isVisible={loading} message={PreloaderMessages.PROCESSING} variant="default" />
+      
       {/* Floating Lines Background */}
       <div className="absolute inset-0 z-0">
         <FloatingLines 
@@ -68,12 +77,12 @@ function ForgotPasswordContent() {
 
 export default function ForgotPasswordPage() {
   return (
-      <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-        </div>
-      }>
-        <ForgotPasswordContent />
-      </Suspense>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      </div>
+    }>
+      <ForgotPasswordContent />
+    </Suspense>
   );
 }

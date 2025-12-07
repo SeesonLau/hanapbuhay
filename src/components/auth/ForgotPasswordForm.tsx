@@ -7,13 +7,18 @@ import Button from '@/components/ui/Button';
 import TextBox from '@/components/ui/TextBox';
 import Image from 'next/image';
 import { IoArrowBack } from "react-icons/io5";
+import { useTheme } from '@/hooks/useTheme';
 
 interface ForgotPasswordFormProps {
   onBackToLogin?: () => void;
   onLoadingChange?: (loading: boolean) => void;
 }
 
-const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin, onLoadingChange }) => {
+const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ 
+  onBackToLogin, 
+  onLoadingChange 
+}) => {
+  const { theme } = useTheme();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -38,6 +43,8 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin, 
       onLoadingChange?.(false);
     }
   };
+
+  const isSuccessMessage = message.includes('sent');
 
   return (
     <div className="w-full max-w-md mx-auto px-1 sm:px-2">
@@ -68,14 +75,14 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin, 
           <div 
             className="p-3 rounded-lg text-small border"
             style={{
-              background: message.includes('sent') 
+              background: isSuccessMessage
                 ? 'rgba(16, 185, 129, 0.1)' 
                 : 'rgba(239, 68, 68, 0.1)',
               backdropFilter: 'blur(10px)',
-              borderColor: message.includes('sent') 
+              borderColor: isSuccessMessage
                 ? 'rgba(16, 185, 129, 0.3)' 
                 : 'rgba(239, 68, 68, 0.3)',
-              color: message.includes('sent') ? '#6EE7B7' : '#FCA5A5'
+              color: isSuccessMessage ? '#6EE7B7' : '#FCA5A5'
             }}
           >
             {message}

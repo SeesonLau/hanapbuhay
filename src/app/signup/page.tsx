@@ -8,8 +8,8 @@ import { SignupForm } from '@/components/auth/SignupForm';
 import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
+import { useTheme } from '@/hooks/useTheme';
 
-// Dynamically import FloatingLines to speed up initial page load
 const FloatingLines = dynamic(() => import('../login/FloatingLines'), {
   ssr: false,
   loading: () => (
@@ -18,6 +18,7 @@ const FloatingLines = dynamic(() => import('../login/FloatingLines'), {
 });
 
 function SignupContent() {
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -26,8 +27,14 @@ function SignupContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: '#0a0a0a' }}>
+    <div 
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      style={{ 
+        background: `linear-gradient(135deg, ${theme.banner.gradientStart} 0%, ${theme.banner.gradientMid} 50%, ${theme.banner.gradientEnd} 100%)`
+      }}
+    >
       <Preloader isVisible={loading} message={PreloaderMessages.PROCESSING} variant="default" />
+      
       {/* Floating Lines Background */}
       <div className="absolute inset-0 z-0">
         <FloatingLines 

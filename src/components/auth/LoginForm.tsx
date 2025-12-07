@@ -10,6 +10,7 @@ import Button from '@/components/ui/Button';
 import TextBox from '@/components/ui/TextBox';
 import Image from 'next/image';
 import { IoArrowBack } from "react-icons/io5";
+import { useTheme } from '@/hooks/useTheme';
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -18,7 +19,13 @@ interface LoginFormProps {
   onLoadingChange?: (loading: boolean) => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackClick, onSignUpClick, onLoadingChange }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ 
+  onForgotPassword, 
+  onBackClick, 
+  onSignUpClick, 
+  onLoadingChange 
+}) => {
+  const { theme } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,13 +37,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Clear previous states
     setLoading(true);
     onLoadingChange?.(true);
     setNeedsConfirmation(false);
     setError('');
 
-    // Basic validation
     if (!email || !password) {
       setError('Please enter both email and password');
       setLoading(false);
@@ -49,16 +54,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
     try {
       const result = await AuthService.login(email, password);
 
-      // CRITICAL: Only navigate if BOTH success is true AND we have user data
       if (result.success === true && result.data) {
         console.log('✅ Login successful');
         
-        // Check if there's a pending job application from landing page
         const pendingJobId = sessionStorage.getItem('pendingJobApplication');
         if (pendingJobId) {
           console.log('📋 Pending job application found:', pendingJobId);
           sessionStorage.removeItem('pendingJobApplication');
-          // Redirect to findJobs with the job ID to trigger application modal
           router.push(`${ROUTES.FINDJOBS}?applyJobId=${pendingJobId}`);
         } else {
           console.log('➡️ Redirecting to findJobs');
@@ -67,9 +69,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
       } else if (result.needsConfirmation) {
         console.log('⚠️ Email confirmation needed');
         setNeedsConfirmation(true);
-        setError(''); // Clear any previous errors
+        setError('');
       } else {
-        // Login failed - show error and stay on page
         console.log('❌ Login failed:', result.message);
         setError(result.message || 'Invalid email or password. Please try again.');
       }
@@ -114,7 +115,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
       {onBackClick && (
         <button
           onClick={onBackClick}
-          className="mb-1 hover:bg-gray-neutral100 rounded-full transition-colors"
+          className="mb-1 rounded-full transition-colors"
+          style={{
+            backgroundColor: 'transparent',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
           aria-label="Go back"
         >
           <IoArrowBack className="w-6 h-6 text-white" />
@@ -138,16 +148,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
         Sign In
       </h2>
 
-      
-
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div 
-            className="p-3 rounded-lg text-small text-red-100 border"
+            className="p-3 rounded-lg text-small border"
             style={{
               background: 'rgba(239, 68, 68, 0.1)',
               backdropFilter: 'blur(10px)',
-              borderColor: 'rgba(239, 68, 68, 0.3)'
+              borderColor: 'rgba(239, 68, 68, 0.3)',
+              color: '#FCA5A5',
             }}
           >
             {error}
@@ -189,7 +198,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
             type="button"
             onClick={onForgotPassword}
             disabled={loading}
-            className="font-alexandria font-light text-mini sm:text-small text-primary-primary400 hover:text-primary-primary500 hover:underline disabled:opacity-50"
+            className="font-alexandria font-light text-mini sm:text-small hover:underline disabled:opacity-50 transition-colors"
+            style={{ color: theme.colors.primary }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.currentTarget.style.color = theme.colors.primaryHover;
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) {
+                e.currentTarget.style.color = theme.colors.primary;
+              }
+            }}
           >
             Forgot Password?
           </button>
@@ -211,11 +231,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
 
         {needsConfirmation && (
           <div 
-            className="border rounded-lg text-small px-4 py-3 text-yellow-100"
+            className="border rounded-lg text-small px-4 py-3"
             style={{
               background: 'rgba(245, 158, 11, 0.1)',
               backdropFilter: 'blur(10px)',
-              borderColor: 'rgba(245, 158, 11, 0.3)'
+              borderColor: 'rgba(245, 158, 11, 0.3)',
+              color: '#FCD34D',
             }}
           >
             <p className="font-medium mb-2">Email Verification Required</p>
@@ -227,17 +248,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
               className="w-full justify-center"
               isLoading={resendLoading}
               style={{
-                backgroundColor: '#EF8F11',
+                backgroundColor: theme.colors.warning,
                 color: 'white'
               }}
               onMouseOver={(e) => {
                 if (!resendLoading) {
-                  e.currentTarget.style.backgroundColor = '#D46B0B';
+                  e.currentTarget.style.backgroundColor = theme.colors.warning;
+                  e.currentTarget.style.opacity = '0.9';
                 }
               }}
               onMouseOut={(e) => {
                 if (!resendLoading) {
-                  e.currentTarget.style.backgroundColor = '#EF8F11';
+                  e.currentTarget.style.backgroundColor = theme.colors.warning;
+                  e.currentTarget.style.opacity = '1';
                 }
               }}
             >
@@ -253,7 +276,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onForgotPassword, onBackCl
             type="button"
             onClick={onSignUpClick}
             disabled={loading}
-            className="font-alexandria font-light text-mini sm:text-small text-primary-primary400 hover:text-primary-primary500 hover:underline disabled:opacity-50"
+            className="font-alexandria font-light text-mini sm:text-small hover:underline disabled:opacity-50 transition-colors"
+            style={{ color: theme.colors.primary }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.currentTarget.style.color = theme.colors.primaryHover;
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) {
+                e.currentTarget.style.color = theme.colors.primary;
+              }
+            }}
           >
             here
           </button>

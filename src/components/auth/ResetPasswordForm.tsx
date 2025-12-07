@@ -10,8 +10,10 @@ import TextBox from '@/components/ui/TextBox';
 import Image from 'next/image';
 import { passwordRequirements } from '@/lib/constants';
 import { validatePassword } from '@/lib/utils/validation';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function ResetPasswordForm() {
+  const { theme } = useTheme();
   const router = useRouter();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -22,7 +24,6 @@ export default function ResetPasswordForm() {
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // Check if user is authenticated (they should be after clicking email link)
     const checkAuth = async () => {
       const user = await AuthService.getCurrentUser();
       if (user) {
@@ -162,11 +163,12 @@ export default function ResetPasswordForm() {
 
       {error && (
         <div 
-          className="mb-6 p-3 rounded-lg border text-small text-red-100"
+          className="mb-6 p-3 rounded-lg border text-small"
           style={{
             background: 'rgba(239, 68, 68, 0.1)',
             backdropFilter: 'blur(10px)',
-            borderColor: 'rgba(239, 68, 68, 0.3)'
+            borderColor: 'rgba(239, 68, 68, 0.3)',
+            color: '#FCA5A5',
           }}
         >
           {error}
@@ -210,13 +212,17 @@ export default function ResetPasswordForm() {
                       key={index}
                       className="flex items-center"
                       style={{
-                        color: status.isMet ? '#46BB27' : status.isError ? '#EE4546' : '#6A706F'
+                        color: status.isMet 
+                          ? theme.colors.success 
+                          : status.isError 
+                          ? theme.colors.error 
+                          : theme.colors.textMuted
                       }}
                     >
                       <span
                         className="mr-2"
                         style={{
-                          color: status.isMet ? '#46BB27' : '#6A706F'
+                          color: status.isMet ? theme.colors.success : theme.colors.textMuted
                         }}
                       >
                         {status.isMet ? '✓' : '•'}
@@ -262,7 +268,14 @@ export default function ResetPasswordForm() {
           <button
             type="button"
             onClick={() => router.push(ROUTES.LOGIN)}
-            className="text-blue-300 hover:text-blue-200 hover:underline"
+            className="hover:underline transition-colors"
+            style={{ color: theme.colors.primary }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = theme.colors.primaryHover;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = theme.colors.primary;
+            }}
           >
             Sign in
           </button>
