@@ -452,57 +452,11 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
                 />
               </div>
 
-              {/* Mobile Menu Button */}
-              <button
-                ref={buttonRef}
-                className="lg:hidden p-2 focus:outline-none transition-colors duration-300"
-                style={{ color: getWhiteColor() }}
-                onClick={toggleMenu}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.color = getBlueColor();
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.color = getWhiteColor();
-                }}
-                aria-label="Toggle Menu"
-              >
-                {isMenuOpen ? (
-                  <HiX className="w-6 h-6" />
-                ) : (
-                  <HiMenu className="w-6 h-6" />
-                )}
-              </button>
+              
             </div>
         </div>
 
-        {/* Mobile Menu Dropdown */}
-        {isMenuOpen && (
-          <div
-            ref={menuRef}
-            className="lg:hidden fixed right-4 top-16 rounded-xl bg-gray-900 bg-opacity-95 min-w-48 transition-all duration-300 ease-in-out z-50 shadow-lg border border-gray-700"
-            style={{
-              backdropFilter: 'blur(10px)',
-              backgroundColor: 'rgba(17, 24, 39, 0.95)'
-            }}
-          >
-            <div className="flex flex-col space-y-2 p-4">
-              {navigationLinks.map((link) => (
-                <Link key={link.id} href={link.route}>
-                  <button
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`w-full text-left px-3 py-2 text-base font-medium transition-all duration-300 focus:outline-none rounded-lg ${
-                      activeLink === link.id
-                        ? 'bg-blue-default text-white'
-                        : 'text-neutral-200 hover:bg-blue-default hover:text-white'
-                    }`}
-                  >
-                    {link.label}
-                  </button>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+        
       </header>
 
       {/* Settings Modal */}

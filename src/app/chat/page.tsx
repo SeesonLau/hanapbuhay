@@ -34,11 +34,13 @@ const useCurrentProfile = () => {
         const currentUser = await AuthService.getCurrentUser();
         
         if (currentUser) {
+          // Get display name instead of raw name
+          const displayName = await ProfileService.getDisplayNameByUserId(currentUser.id);
           const profileData = await ProfileService.getNameProfilePic(currentUser.id);
           
           setProfile({
             id: currentUser.id,
-            name: profileData?.name || 'User',
+            name: displayName || profileData?.name || 'User',
             profilePicUrl: profileData?.profilePicUrl || null,
           });
         } else {
@@ -71,6 +73,17 @@ export default function ChatPage() {
   // Fix hydration by waiting for component to mount
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  // Helper function to fetch display name for a user
+  const fetchDisplayNameForUser = useCallback(async (userId: string): Promise<string> => {
+    try {
+      const displayName = await ProfileService.getDisplayNameByUserId(userId);
+      return displayName || 'Unknown User';
+    } catch (error) {
+      console.error(`Error fetching display name for user ${userId}:`, error);
+      return 'Unknown User';
+    }
   }, []);
 
   // Centralized real-time subscription for ALL messages
@@ -174,12 +187,18 @@ export default function ChatPage() {
           room_id: GLOBAL_ROOM_ID,
         };
 
-        // Add existing DMs
-        existingRooms.forEach((contact: UserContact) => {
+        // Add existing DMs with display names
+        for (const contact of existingRooms) {
           if (contact.room_id) {
-            initialMap[contact.room_id] = contact;
+            // Fetch display name for each contact
+            const displayName = await fetchDisplayNameForUser(contact.userId);
+            
+            initialMap[contact.room_id] = {
+              ...contact,
+              name: displayName,
+            };
           }
-        });
+        }
 
         setUserContactsMap(initialMap);
 
@@ -253,7 +272,7 @@ export default function ChatPage() {
     };
     
     loadRooms();
-  }, [profile, isInitialLoad]);
+  }, [profile, isInitialLoad, fetchDisplayNameForUser]);
 
   // Helper to update roomId in URL
   const updateRoomInUrl = (roomId?: string | null, push = true) => {
@@ -338,9 +357,13 @@ export default function ChatPage() {
     if (result) {
       const newRoom = result.room;
       
-      // 2. Update the map state
+      // 2. Get display name for the contact
+      const displayName = await fetchDisplayNameForUser(contact.userId);
+      
+      // 3. Update the map state
       const contactWithRoom: UserContact = { 
         ...contact, 
+        name: displayName,
         room_id: newRoom.id, 
         unreadCount: 0,
       };
@@ -350,8 +373,11 @@ export default function ChatPage() {
         [newRoom.id]: contactWithRoom,
       }));
 
-      // 3. Set the new room as active
-      setActiveRoom(newRoom);
+      // 4. Set the new room as active
+      setActiveRoom({
+        ...newRoom,
+        name: displayName,
+      });
 
       // Update URL to include roomId for direct DM
       updateRoomInUrl(newRoom.id, true);
@@ -364,7 +390,7 @@ export default function ChatPage() {
       toast.error(`Could not start chat with ${contact.name}.`);
       console.error('❌ Failed to create DM room');
     }
-  }, [profile]);
+  }, [profile, fetchDisplayNameForUser]);
 
   // Handle back button on mobile
   const handleBackToList = () => {

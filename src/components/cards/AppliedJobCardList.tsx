@@ -9,11 +9,10 @@ import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticSala
 import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
+import { useTheme } from '@/hooks/useTheme';
 
-// Status type for better type safety
 export type ApplicationStatus = 'pending' | 'approved' | 'rejected';
 
-// Job application data interface
 export interface AppliedJob {
   id: string;
   title: string;
@@ -26,10 +25,9 @@ export interface AppliedJob {
   genderTags?: string[];
   experienceTags?: string[];
   jobTypeTags?: string[];
-  raw?: any; // Store complete application object with posts data for modal
+  raw?: any;
 }
 
-// Component props interface
 export interface AppliedJobCardProps {
   job: AppliedJob;
   variant?: 'card' | 'list';
@@ -38,7 +36,6 @@ export interface AppliedJobCardProps {
   className?: string;
 }
 
-// Status styling configuration
 const statusConfig = {
   pending: {
     text: 'Pending',
@@ -73,6 +70,7 @@ export default function AppliedJobCard({
   onClick,
   className = ''
 }: AppliedJobCardProps) {
+  const { theme } = useTheme();
   const status = statusConfig[job.status] || statusConfig.unknown;
 
   const handleDelete = () => {
@@ -87,7 +85,6 @@ export default function AppliedJobCard({
     }
   };
 
-  // Extract only the "about this role" part, excluding requirements
   const getAboutText = (description: string): string => {
     const requirementsMatch = description.match(/\[requirements\]\s*([\s\S]*)/i);
     return requirementsMatch ? description.substring(0, requirementsMatch.index).trim() : description;
@@ -95,30 +92,14 @@ export default function AppliedJobCard({
 
   const aboutText = getAboutText(job.description);
 
-  // Removed formatSalary function - we'll use StaticSalaryTag instead
-
-  // Extract and provide defaults for tag arrays
   const {
     genderTags = [],
     experienceTags = [],
     jobTypeTags = []
   } = job;
 
-  // Debug logging
-  console.log('AppliedJobCard Debug:', {
-    title: job.title,
-    genderTags,
-    experienceTags,
-    jobTypeTags,
-    hasGender: genderTags.length > 0,
-    hasExperience: experienceTags.length > 0,
-    hasJobType: jobTypeTags.length > 0
-  });
-
-  // Normalize and filter tags (same pattern as ManageJobPostCard)
   const normalizeJobType = (label: string): string | null => {
     const isSubType = Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(label));
-    console.log('normalizeJobType:', label, '→', isSubType ? label : null);
     return isSubType ? label : null;
   };
 
@@ -128,7 +109,6 @@ export default function AppliedJobCard({
 
   const normalizeGender = (label: string): string | null => {
     const isValid = Object.values(Gender).includes(label as Gender);
-    console.log('normalizeGender:', label, '→', isValid ? label : null, 'Valid genders:', Object.values(Gender));
     return isValid ? label : null;
   };
 
@@ -138,7 +118,6 @@ export default function AppliedJobCard({
 
   const normalizeExperience = (label: string): string | null => {
     const isValid = Object.values(ExperienceLevel).includes(label as ExperienceLevel);
-    console.log('normalizeExperience:', label, '→', isValid ? label : null);
     return isValid ? label : null;
   };
 
@@ -152,16 +131,10 @@ export default function AppliedJobCard({
     ...normalizedGenders.map((label) => ({ type: 'gender' as const, label })),
   ];
 
-  console.log('Final allTags:', allTags);
-
-  // Title truncation for consistent row height
   const shortTitle = job.title.length > 60 ? `${job.title.slice(0, 60)}...` : job.title;
-
-  // Get first tag and count for display (similar to ManageJobPostList)
   const firstTag = allTags[0];
   const hiddenCount = Math.max(0, allTags.length - 1);
 
-  // Dynamic tag measurement for card variant (similar to ManageJobPostCard)
   const [visibleCount, setVisibleCount] = useState<number>(Math.min(allTags.length, 4));
   const measureRef = useRef<HTMLDivElement | null>(null);
   const overflowMeasureRef = useRef<HTMLDivElement | null>(null);
@@ -179,14 +152,13 @@ export default function AppliedJobCard({
     const maxWidth = container.clientWidth;
     const children = Array.from(measure.children) as HTMLElement[];
     const widths = children.map((el) => el.offsetWidth);
-    const gapPx = 4; // gap-1
-    const overflowWidth = overflowMeasure ? overflowMeasure.offsetWidth : 24; // fallback
+    const gapPx = 4;
+    const overflowWidth = overflowMeasure ? overflowMeasure.offsetWidth : 24;
 
     let used = 0;
     let count = 0;
     for (let i = 0; i < widths.length; i++) {
       const w = widths[i] + (i > 0 ? gapPx : 0);
-      // If adding this tag means there will still be hidden tags, reserve space for overflow indicator
       const willHideSome = (i + 1) < widths.length;
       const reserve = willHideSome ? (overflowWidth + gapPx) : 0;
 
@@ -203,14 +175,12 @@ export default function AppliedJobCard({
 
   useLayoutEffect(() => {
     recomputeVisibleCount();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job.title, job.description, job.location, job.salary, job.salaryPeriod, job.appliedOn, allTags.length]);
 
   useEffect(() => {
     const onResize = () => recomputeVisibleCount();
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const visibleTags = allTags.slice(0, Math.max(0, visibleCount));
@@ -220,18 +190,32 @@ export default function AppliedJobCard({
     return (
       <div
         onClick={handleClick}
-        className={`w-full h-[60px] bg-white border border-gray-neutral200 shadow-sm px-6 rounded-[10px] transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300 cursor-pointer ${className}`}
+        className={`w-full h-[60px] border shadow-sm px-6 rounded-[10px] transition-all duration-300 ease-out cursor-pointer ${className}`}
+        style={{
+          backgroundColor: theme.colors.cardBg,
+          borderColor: theme.colors.cardBorder,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = theme.colors.cardHover;
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = theme.colors.cardBg;
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
+        }}
       >
-        {/* Grid layout: Title | Tags | Salary | Date | Status+Delete */}
         <div className="grid items-center h-full gap-6 grid-cols-2 tablet:grid-cols-4 laptop:grid-cols-3 laptop-L:grid-cols-5">
-          {/* Title */}
           <div className="min-w-0 flex items-center mobile-S:max-w-[150px]">
-            <h3 className="font-alexandria font-semibold text-[15px] truncate text-gray-neutral900">
+            <h3 
+              className="font-alexandria font-semibold text-[15px] truncate"
+              style={{ color: theme.colors.text }}
+            >
               {shortTitle}
             </h3>
           </div>
 
-          {/* Tags - shown on tablet and up */}
           <div className="min-w-0 hidden tablet:block">
             <div className="flex items-center gap-2 whitespace-nowrap overflow-hidden">
               {firstTag && (
@@ -251,29 +235,27 @@ export default function AppliedJobCard({
             </div>
           </div>
 
-          {/* Salary - Laptop-L (1440px) only */}
           <div className="hidden laptop-L:flex items-center gap-3 flex-1">
             <div className="w-[140px] min-w-[140px] max-w-[140px] overflow-hidden">
               <StaticSalaryTag label={`${job.salary} /${job.salaryPeriod}`} className="whitespace-nowrap w-full" />
             </div>
           </div>
 
-          {/* Applied Date - Tablet and Laptop-L; hidden at Laptop */}
           <div className="hidden tablet:flex laptop:hidden laptop-L:flex flex-shrink-0">
-            <span className="font-inter text-[10px] whitespace-nowrap text-gray-neutral600">
+            <span 
+              className="font-inter text-[10px] whitespace-nowrap"
+              style={{ color: theme.colors.textSecondary }}
+            >
               Applied on: {job.appliedOn}
             </span>
           </div>
 
-          {/* Status Badge + Delete Button (combined column, flush right) */}
           <div className="flex-shrink-0 justify-self-end flex items-center gap-3 justify-end">
-            {/* Status Badge */}
             <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${status.bgColor} ${status.textColor}`}>
               <status.icon className="w-3 h-3" />
               <span className="font-inter text-[10px] font-medium">{status.text}</span>
             </div>
 
-            {/* Delete Button */}
             {onDelete && (
               <button
                 onClick={(e) => {
@@ -281,7 +263,7 @@ export default function AppliedJobCard({
                   handleDelete();
                 }}
                 className="p-1.5 text-error-error500 hover:text-error-error600 hover:bg-error-error50 rounded-md transition-colors"
-                title="Delete application"
+                title="Withdraw application"
               >
                 <RiDeleteBin6Line className="w-4 h-4" />
               </button>
@@ -296,19 +278,38 @@ export default function AppliedJobCard({
   return (
     <div
       onClick={handleClick}
-      className={`relative group w-full h-full min-h-[220px] bg-white rounded-lg shadow-[0px_0px_10px_rgba(0,0,0,0.25)] p-6 flex flex-col transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-[2px] cursor-pointer ${className}`}
+      className={`relative group w-full h-full min-h-[220px] rounded-lg p-6 flex flex-col transition-all duration-300 ease-out cursor-pointer ${className}`}
+      style={{
+        backgroundColor: theme.colors.cardBg,
+        boxShadow: '0px 0px 10px rgba(0,0,0,0.25)',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.boxShadow = '0px 4px 20px rgba(0,0,0,0.3)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0px 0px 10px rgba(0,0,0,0.25)';
+      }}
     >
-      {/* Header with Title and Delete Button */}
       <div className="flex-shrink-0 mb-[16px] flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="font-alexandria font-semibold text-[20px] truncate text-gray-neutral900">{job.title}</h3>
-          <p className="font-inter font-light text-[12px] line-clamp-1 text-gray-neutral600">{aboutText}</p>
+          <h3 
+            className="font-alexandria font-semibold text-[20px] truncate"
+            style={{ color: theme.colors.text }}
+          >
+            {job.title}
+          </h3>
+          <p 
+            className="font-inter font-light text-[12px] line-clamp-1"
+            style={{ color: theme.colors.textSecondary }}
+          >
+            {aboutText}
+          </p>
         </div>
         
-        {/* Delete "-" Button - Always visible on mobile/tablet, shows on hover for laptop+ */}
         {onDelete && (
           <>
-            {/* Mobile/Tablet version - always visible (below 1024px) */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -316,18 +317,17 @@ export default function AppliedJobCard({
               }}
               style={{ display: 'flex' }}
               className="laptop:!hidden z-10 flex-shrink-0 bg-white border-2 border-error-error500 text-error-error500 rounded-full w-6 h-6 items-center justify-center hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-md leading-none text-xl font-medium"
-              title="Delete application"
+              title="Withdraw application"
             >
               −
             </button>
-            {/* Laptop+ version - shows on hover (1024px and above) */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 handleDelete();
               }}
               className="hidden laptop:!flex z-10 flex-shrink-0 bg-white border-2 border-error-error500 text-error-error500 rounded-full w-6 h-6 items-center justify-center hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-md leading-none text-xl font-medium opacity-0 group-hover:opacity-100 transition-opacity"
-              title="Delete application"
+              title="Withdraw application"
             >
               −
             </button>
@@ -335,9 +335,7 @@ export default function AppliedJobCard({
         )}
       </div>
 
-      {/* Tags Section - Single row that adapts to fit */}
       <div className="mb-[16px]">
-        {/* Hidden measurers to calculate widths without wrapping */}
         <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
           {allTags.map((tag, index) => (
             tag.type === 'gender' ? (
@@ -349,7 +347,6 @@ export default function AppliedJobCard({
             )
           ))}
         </div>
-        {/* Measure overflow indicator width */}
         <div ref={overflowMeasureRef} className="fixed -top-[9999px] -left-[9999px] inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
           99+
         </div>
@@ -372,17 +369,19 @@ export default function AppliedJobCard({
         </div>
       </div>
 
-      {/* Footer */}
       <div className="mt-auto space-y-[16px]">
-        {/* Location and Salary */}
         <div className="flex flex-wrap items-center gap-2">
           <StaticLocationTag label={job.location} showFullAddress={false} />
           <StaticSalaryTag label={`${job.salary} /${job.salaryPeriod}`} className="whitespace-nowrap" />
         </div>
 
-        {/* Applied Date and Status Badge - Same line */}
         <div className="flex items-center justify-between">
-          <span className="font-inter font-medium text-[10px] text-gray-neutral600">Applied on: {job.appliedOn}</span>
+          <span 
+            className="font-inter font-medium text-[10px]"
+            style={{ color: theme.colors.textSecondary }}
+          >
+            Applied on: {job.appliedOn}
+          </span>
           <div className={`flex items-center gap-1 px-3 py-1 rounded-md ${status.bgColor} ${status.textColor}`}>
             <status.icon className="w-4 h-4" />
             <span className="font-inter text-tiny font-medium">{status.text}</span>

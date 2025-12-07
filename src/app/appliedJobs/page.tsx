@@ -18,8 +18,10 @@ import { ApplicationStatus, AppliedJob } from '@/components/cards/AppliedJobCard
 import useApplications from '@/hooks/useApplications';
 import ApplicationsSection from '@/components/applications/ApplicationsSection';
 import JobPostViewModal, { JobPostViewData } from '@/components/modals/JobPostViewModal';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function AppliedJobsPage() {
+  const { theme } = useTheme();
   const [user, setUser] = useState<any | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -129,9 +131,6 @@ export default function AppliedJobsPage() {
 
   const handleStatFilter = (type: 'total' | 'pending' | 'approved' | 'rejected') => {
     const statusFilter = type === 'total' ? null : { status: { [type]: true } };
-    // This assumes applyFilters can handle a 'status' filter.
-    // We may need to adjust useApplications hook if not.
-    // For now, let's just log it.
     console.log("Stat filter clicked, would apply:", statusFilter);
   };
 
@@ -257,10 +256,16 @@ export default function AppliedJobsPage() {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <div className="fixed inset-0 -z-10 bg-gray-default" />
+      <div 
+        className="fixed inset-0 -z-10" 
+        style={{ backgroundColor: theme.colors.background }}
+      />
       <Banner variant="appliedJobs" onSearch={handleSearch} />
 
-      <div className="mt-[200px] min-h-screen bg-gray-default">
+      <div 
+        className="mt-[200px] min-h-screen"
+        style={{ backgroundColor: theme.colors.background }}
+      >
         <aside className="block laptop:hidden px-4 md:px-6">
           <StatsSection 
             stats={stats} 
@@ -271,7 +276,10 @@ export default function AppliedJobsPage() {
           />
         </aside>
         
-        <aside className="hidden laptop:block fixed left-0 top-[200px] bottom-0 w-[180px] laptop-L:w-[200px] z-20 px-3 bg-transparent">
+        <aside 
+          className="hidden laptop:block fixed left-0 top-[200px] bottom-0 w-[180px] laptop-L:w-[200px] z-20 px-3"
+          style={{ backgroundColor: 'transparent' }}
+        >
           <StatsSection 
             stats={stats} 
             variant="appliedJobs" 
@@ -281,11 +289,28 @@ export default function AppliedJobsPage() {
           />
         </aside>
 
-        <aside className="hidden laptop:block fixed right-0 top-[200px] bottom-0 w-[280px] bg-white shadow-lg z-40 border-l border-gray-200 flex flex-col pointer-events-auto">
-          <div className="flex-shrink-0 bg-white border-b border-gray-200 px-3 py-2 z-10">
+        <aside 
+          className="hidden laptop:block fixed right-0 top-[200px] bottom-0 w-[280px] shadow-lg z-40 border-l flex flex-col pointer-events-auto transition-colors duration-300"
+          style={{ 
+            backgroundColor: theme.colors.sidebarBg,
+            borderColor: theme.colors.borderLight 
+          }}
+        >
+          <div 
+            className="flex-shrink-0 border-b px-3 py-2 z-10 transition-colors duration-300"
+            style={{ 
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.borderLight 
+            }}
+          >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <span className="text-small text-gray-neutral600 whitespace-nowrap font-medium">Sort by</span>
+                <span 
+                  className="text-small whitespace-nowrap font-medium"
+                  style={{ color: theme.colors.textMuted }}
+                >
+                  Sort by
+                </span>
                 <Sort variant="findJobs" onChange={handleSortChange} />
               </div>
               <ViewToggle value={viewMode} onChange={setViewMode} />
@@ -304,14 +329,22 @@ export default function AppliedJobsPage() {
         <main className="w-full laptop:w-[calc(100%-460px)] laptop:ml-[180px] laptop-L:w-[calc(100%-480px)] laptop-L:ml-[200px]">
           <div className="px-4 md:px-6 laptop:px-6 pt-2 pb-6 max-w-full">
             <div className="space-y-4">
-              <div className="laptop:hidden flex items-center justify-between gap-1.5 mobile-M:gap-3 bg-white rounded-lg px-2 mobile-M:px-4 py-2 mobile-M:py-3 shadow-sm">
+              <div 
+                className="laptop:hidden flex items-center justify-between gap-1.5 mobile-M:gap-3 rounded-lg px-2 mobile-M:px-4 py-2 mobile-M:py-3 shadow-sm transition-colors duration-300"
+                style={{ backgroundColor: theme.colors.surface }}
+              >
                 <FilterButton
                   onClick={() => setIsFilterModalOpen(true)}
                   filterCount={activeFilterCount}
                 />
                 
                 <div className="flex items-center gap-1.5 mobile-M:gap-3">
-                  <span className="text-tiny mobile-M:text-small text-gray-neutral600 whitespace-nowrap hidden mobile-S:inline">Sort by</span>
+                  <span 
+                    className="text-tiny mobile-M:text-small whitespace-nowrap hidden mobile-S:inline"
+                    style={{ color: theme.colors.textMuted }}
+                  >
+                    Sort by
+                  </span>
                   <Sort variant="findJobs" onChange={handleSortChange} />
                   <ViewToggle value={viewMode} onChange={setViewMode} />
                 </div>

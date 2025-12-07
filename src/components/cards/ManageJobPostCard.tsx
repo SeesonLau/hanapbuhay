@@ -6,6 +6,7 @@ import ManageJobActionButtons from '@/components/posts/ManageJobActionButtons';
 import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
+import { useTheme } from '@/hooks/useTheme';
 
 interface JobPostData {
   id: string;
@@ -41,6 +42,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
   onDelete,
   onToggleLock,
 }) => {
+  const { theme } = useTheme();
   const {
     id,
     title,
@@ -56,9 +58,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
     jobTypeTags = []
   } = jobData;
 
-  // Combine tags and cap visible to 5, show overflow as n+
   const normalizeJobType = (label: string): string | null => {
-    // Only allow subtypes; exclude top-level JobType enums from display
     const isSubType = Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(label));
     return isSubType ? label : null;
   };
@@ -88,8 +88,9 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
     ...normalizedExperiences.map((label) => ({ type: 'experience' as const, label })),
     ...normalizedGenders.map((label) => ({ type: 'gender' as const, label })),
   ];
+
   const tagMuted = isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : '';
-  // Dynamically determine how many tags fit on a single row
+  
   const [visibleCount, setVisibleCount] = useState<number>(Math.min(allTags.length, 4));
   const measureRef = useRef<HTMLDivElement | null>(null);
   const overflowMeasureRef = useRef<HTMLDivElement | null>(null);
@@ -107,14 +108,13 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
     const maxWidth = container.clientWidth;
     const children = Array.from(measure.children) as HTMLElement[];
     const widths = children.map((el) => el.offsetWidth);
-    const gapPx = 4; // gap-1
-    const overflowWidth = overflowMeasure ? overflowMeasure.offsetWidth : 24; // fallback
+    const gapPx = 4;
+    const overflowWidth = overflowMeasure ? overflowMeasure.offsetWidth : 24;
 
     let used = 0;
     let count = 0;
     for (let i = 0; i < widths.length; i++) {
       const w = widths[i] + (i > 0 ? gapPx : 0);
-      // If adding this tag means there will still be hidden tags, reserve space for overflow indicator
       const willHideSome = (i + 1) < widths.length;
       const reserve = willHideSome ? (overflowWidth + gapPx) : 0;
 
@@ -131,34 +131,65 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
 
   useLayoutEffect(() => {
     recomputeVisibleCount();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobData.title, jobData.description, jobData.location, jobData.salary, jobData.salaryPeriod, jobData.postedDate, allTags.length]);
 
   useEffect(() => {
     const onResize = () => recomputeVisibleCount();
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const visibleTags = allTags.slice(0, Math.max(0, visibleCount));
   const extraCount = Math.max(0, allTags.length - visibleTags.length);
 
+  const cardBgColor = isLocked ? theme.colors.backgroundSecondary : theme.colors.cardBg;
+  const textColor = isLocked ? theme.colors.textMuted : theme.colors.text;
+  const textSecondaryColor = isLocked ? theme.colors.textMuted : theme.colors.textSecondary;
+
   return (
     <div 
-      className={`w-full h-full min-h-[250px] ${!isLocked ? 'bg-white' : 'bg-gray-neutral100'} rounded-lg shadow-[0px_0px_10px_rgba(0,0,0,0.25)] p-6 flex flex-col overflow-hidden transition-all duration-200 ease-out ${!isLocked ? 'hover:shadow-lg hover:-translate-y-[2px]' : ''} cursor-pointer ${className}`}
+      className={`w-full h-full min-h-[250px] rounded-lg p-6 flex flex-col overflow-hidden transition-all duration-300 ease-out cursor-pointer ${className}`}
+      style={{
+        backgroundColor: cardBgColor,
+        boxShadow: '0px 0px 10px rgba(0,0,0,0.25)',
+      }}
       onClick={() => onOpen?.(jobData)}
+      onMouseEnter={(e) => {
+        if (!isLocked) {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0px 4px 20px rgba(0,0,0,0.3)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isLocked) {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0px 0px 10px rgba(0,0,0,0.25)';
+        }
+      }}
     >
       {/* Header */}
       <div className={`flex-shrink-0 mb-[16px] flex items-start justify-between ${isLocked ? 'filter grayscale' : ''}`}>
         <div className="min-w-0">
-          <h3 className={`font-alexandria font-semibold text-[20px] mb-2 truncate ${!isLocked ? 'text-gray-neutral900' : 'text-gray-neutral700'}`}>{title}</h3>
-          <p className={`font-inter font-light text-[12px] line-clamp-1 ${!isLocked ? 'text-gray-neutral600' : 'text-gray-neutral500'}`}>{description}</p>
+          <h3 
+            className={`font-alexandria font-semibold text-[20px] mb-2 truncate`}
+            style={{ color: textColor }}
+          >
+            {title}
+          </h3>
+          <p 
+            className={`font-inter font-light text-[12px] line-clamp-1`}
+            style={{ color: textSecondaryColor }}
+          >
+            {description}
+          </p>
         </div>
         <button
           type="button"
           aria-label={!isLocked ? 'Unlock' : 'Lock'}
-          className={`inline-flex items-center justify-center h-8 w-8 bg-transparent ${!isLocked ? 'text-success-success400' : 'text-gray-neutral500'}`}
+          className={`inline-flex items-center justify-center h-8 w-8 bg-transparent`}
+          style={{ 
+            color: !isLocked ? theme.colors.success : theme.colors.textMuted 
+          }}
           onClick={(e) => {
             e.stopPropagation();
             onToggleLock?.(id, !isLocked);
@@ -180,9 +211,8 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
         </button>
       </div>
 
-      {/* Tags Section - Single row that adapts to fit */}
+      {/* Tags Section */}
       <div className={`mb-[16px] ${isLocked ? 'filter grayscale' : ''}`}>
-        {/* Hidden measurers to calculate widths without wrapping */}
         <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
           {allTags.map((tag, index) => (
             tag.type === 'gender' ? (
@@ -194,7 +224,6 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
             )
           ))}
         </div>
-        {/* Measure overflow indicator width */}
         <div ref={overflowMeasureRef} className="fixed -top-[9999px] -left-[9999px] inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
           99+
         </div>
@@ -210,9 +239,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
             )
           ))}
           {extraCount > 0 && (
-            <div
-              className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400"
-            >
+            <div className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
               {extraCount}+
             </div>
           )}
@@ -223,13 +250,25 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
       <div className="mt-auto space-y-[16px]">
         {/* Location and Salary */}
         <div className={`flex flex-wrap items-center gap-2 ${isLocked ? 'filter grayscale' : ''}`}>
-          <StaticLocationTag label={location} showFullAddress={false} className={`${isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} />
-          <StaticSalaryTag label={`${salary} /${salaryPeriod}`} className={`whitespace-nowrap ${isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} />
+          <StaticLocationTag 
+            label={location} 
+            showFullAddress={false} 
+            className={`${isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} 
+          />
+          <StaticSalaryTag 
+            label={`${salary} /${salaryPeriod}`} 
+            className={`whitespace-nowrap ${isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} 
+          />
         </div>
 
         {/* Posted Date */}
         <div className={`flex justify-start ${isLocked ? 'filter grayscale' : ''}`}>
-          <span className={`font-inter font-medium text-[10px] ${!isLocked ? 'text-gray-neutral600' : 'text-gray-neutral500'}`}>Posted on: {postedDate}</span>
+          <span 
+            className={`font-inter font-medium text-[10px]`}
+            style={{ color: textSecondaryColor }}
+          >
+            Posted on: {postedDate}
+          </span>
         </div>
         
         {/* Action Buttons */}
