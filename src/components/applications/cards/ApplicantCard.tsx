@@ -11,6 +11,7 @@ import { ApplicationService } from '@/lib/services/applications-services';
 import { ApplicationStatus } from '@/lib/constants/application-status';
 import { AuthService } from '@/lib/services/auth-services';
 import { toast } from 'react-hot-toast';
+import { useTheme } from '@/hooks/useTheme';
 
 interface ApplicantCardProps {
   applicationId: string;
@@ -34,11 +35,11 @@ export default function ApplicantCard({
   onStatusChange,
   onProfileClick
 }: ApplicantCardProps) {
+  const { theme } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string>('');
   const router = useRouter();
 
-  // Get current user (employer) on mount
   useEffect(() => {
     const fetchCurrentUser = async () => {
       const user = await AuthService.getCurrentUser();
@@ -61,7 +62,7 @@ export default function ApplicantCard({
       await ApplicationService.updateApplicationStatus(
         applicationId, 
         newStatus, 
-        currentUserId // Current logged-in user (employer)
+        currentUserId
       );
 
       if (onStatusChange) onStatusChange(newStatus);
@@ -78,12 +79,21 @@ export default function ApplicantCard({
     router.push('/chat');
   };
 
-  // Extract first 2 words of the name
   const displayName = name.trim().split(/\s+/).slice(0, 2).join(' ');
 
   return (
     <div
-      className="bg-white rounded-xl shadow-md p-4 md:p-3 w-full max-w-[300px] md:max-w-[240px] aspect-[300/172] md:aspect-[240/138] flex flex-col justify-between border border-gray-neutral200 transition-transform duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg hover:bg-gray-50 cursor-pointer"
+      className="rounded-xl shadow-md p-4 md:p-3 w-full max-w-[300px] md:max-w-[240px] aspect-[300/172] md:aspect-[240/138] flex flex-col justify-between border transition-transform duration-200 ease-in-out hover:scale-[1.02] hover:shadow-lg cursor-pointer"
+      style={{
+        backgroundColor: theme.colors.cardBg,
+        borderColor: theme.colors.cardBorder,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = theme.colors.cardHover;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = theme.colors.cardBg;
+      }}
       onClick={onProfileClick}
     >
       {/* Profile + Chat */}
@@ -99,10 +109,17 @@ export default function ApplicantCard({
               />
             </div>
           ) : (
-            <FaUserCircle className="text-gray-neutral400 w-[48px] h-[48px] md:w-[40px] md:h-[40px] flex-shrink-0" />
+            <FaUserCircle 
+              className="w-[48px] h-[48px] md:w-[40px] md:h-[40px] flex-shrink-0"
+              style={{ color: theme.colors.textMuted }}
+            />
           )}
           <div className="flex flex-col min-w-0">
-            <span className="text-gray-neutral800 font-semibold text-small md:text-xs truncate" title={name}>
+            <span 
+              className="font-semibold text-small md:text-xs truncate" 
+              title={name}
+              style={{ color: theme.colors.text }}
+            >
               {displayName}
             </span>
             <StarRating
@@ -126,14 +143,23 @@ export default function ApplicantCard({
       </div>
 
       {/* Date Applied */}
-      <div className="font-inter text-mini md:text-[10px] text-gray-neutral300 mt-2 md:mt-1.5 text-center">
+      <div 
+        className="font-inter text-mini md:text-[10px] mt-2 md:mt-1.5 text-center"
+        style={{ color: theme.colors.textMuted }}
+      >
         Applied On:{' '}
-        <span className="font-inter text-tiny md:text-[11px] font-medium text-gray-neutral500">
+        <span 
+          className="font-inter text-tiny md:text-[11px] font-medium"
+          style={{ color: theme.colors.textSecondary }}
+        >
           {dateApplied}
         </span>
       </div>
 
-      <hr className="mt-2 md:mt-1.5 border-t border-gray-neutral200" />
+      <hr 
+        className="mt-2 md:mt-1.5 border-t"
+        style={{ borderColor: theme.colors.border }}
+      />
 
       {/* Approve / Deny Buttons */}
       <div className="flex justify-between gap-3 md:gap-2 mt-3 md:mt-2">
