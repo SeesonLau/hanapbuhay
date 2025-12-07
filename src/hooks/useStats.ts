@@ -1,9 +1,8 @@
-"use client";
-
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { PostService } from '@/lib/services/posts-services';
 import { ApplicationService } from '@/lib/services/applications-services';
 import { ReviewService } from '@/lib/services/reviews-services';
+import { supabase } from '@/lib/services/supabase/client';
 
 type Variant = 'findJobs' | 'appliedJobs' | 'manageJobs';
 
@@ -12,11 +11,9 @@ type Stats = Record<string, number | null>;
 export function useStats(options: { variant: Variant; userId?: string | null }) {
   const { variant, userId } = options;
   const [stats, setStats] = useState<Stats>({});
-  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    setLoading(true);
     setError(null);
     try {
       if (variant === 'findJobs') {
@@ -43,16 +40,20 @@ export function useStats(options: { variant: Variant; userId?: string | null }) 
         }
       } else {
         // manageJobs
-        const totalPosts = userId ? await PostService.getPostCountByUserId(userId) : 0;
-        const activePosts = totalPosts;
-        const inactivePosts = 0;
-        const resolvedPosts = 0;
-        setStats({ totalPosts, activePosts, inactivePosts, resolvedPosts });
+        if (!userId) {
+          setStats({ totalPosts: 0, activePosts: 0, inactivePosts: 0, resolvedPosts: 0 });
+        } else {
+          const [totalPosts, activePosts, inactivePosts] = await Promise.all([
+            PostService.getPostCountByUserId(userId),
+            PostService.getPostCountByUserId(userId, { isLocked: false }),
+            PostService.getPostCountByUserId(userId, { isLocked: true }),
+          ]);
+          const resolvedPosts = 0; // This seems to be always 0 for now.
+          setStats({ totalPosts, activePosts, inactivePosts, resolvedPosts });
+        }
       }
     } catch (err) {
       setError('Failed to load statistics');
-    } finally {
-      setLoading(false);
     }
   }, [variant, userId]);
 
@@ -60,7 +61,57 @@ export function useStats(options: { variant: Variant; userId?: string | null }) 
     load();
   }, [load]);
 
-  return { stats, loading, error, refresh: load };
+  useEffect(() => {
+    const channels: any[] = [];
+
+    const createSubscription = (
+      channelName: string,
+      table: string,
+      filter: string | undefined,
+      callback: () => void
+    ) => {
+      const channel = supabase
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table,
+            filter,
+          },
+          callback
+        )
+        .subscribe();
+      channels.push(channel);
+    };
+
+    const handleStatReload = () => {
+        console.log('Change detected, reloading stats...');
+        load();
+    };
+
+    if (variant === 'findJobs') {
+      // For totalJobs, listens to all post changes
+      createSubscription('realtime-all-posts', 'posts', undefined, handleStatReload);
+      if (userId) {
+        // For user-specific stats on findJobs page (completed, ratings, user's posts)
+        createSubscription(`realtime-user-applications-${userId}`, 'applications', `userId=eq.${userId}`, handleStatReload);
+        createSubscription(`realtime-user-reviews-${userId}`, 'reviews', `revieweeId=eq.${userId}`, handleStatReload);
+        createSubscription(`realtime-user-posts-${userId}`, 'posts', `userId=eq.${userId}`, handleStatReload);
+      }
+    } else if (variant === 'appliedJobs' && userId) {
+      createSubscription(`realtime-user-applications-${userId}`, 'applications', `userId=eq.${userId}`, handleStatReload);
+    } else if (variant === 'manageJobs' && userId) {
+      createSubscription(`realtime-user-posts-${userId}`, 'posts', `userId=eq.${userId}`, handleStatReload);
+    }
+
+    return () => {
+      channels.forEach(channel => supabase.removeChannel(channel));
+    };
+  }, [userId, variant, load]);
+
+  return { stats, loading: false, error, refresh: load };
 }
 
 export type { Stats };
