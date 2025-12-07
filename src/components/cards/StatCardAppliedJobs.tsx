@@ -1,18 +1,16 @@
 "use client";
 
 import React from "react";
-// Refactored to Tailwind theme tokens
+import { useTheme } from "@/hooks/useTheme";
 
 type AppliedType = "total" | "pending" | "approved" | "rejected";
 
-type ColorVariant = "blue" | "green" | "yellow" | "red";
-
 interface StatCardAppliedJobsProps {
   type: AppliedType;
-  title?: string; // optional; defaults based on type
-  value?: string | number; // optional, provided by DB later
+  title?: string;
+  value?: string | number;
   className?: string;
-  onClick?: (type: AppliedType) => void; // new: click handler
+  onClick?: (type: AppliedType) => void;
 }
 
 const titleForType: Record<AppliedType, string> = {
@@ -29,20 +27,6 @@ const iconForType: Record<AppliedType, string> = {
   rejected: "/icons/stats-rejected.svg",
 };
 
-const variantForType: Record<AppliedType, ColorVariant> = {
-  total: "blue",
-  pending: "yellow",
-  approved: "green",
-  rejected: "red",
-};
-
-const variantBgClass: Record<ColorVariant, string> = {
-  blue: "bg-blue-default",
-  green: "bg-success-success400",
-  yellow: "bg-warning-warning300",
-  red: "bg-error-error500",
-};
-
 export const StatCardAppliedJobs: React.FC<StatCardAppliedJobsProps> = ({
   type,
   title,
@@ -50,14 +34,29 @@ export const StatCardAppliedJobs: React.FC<StatCardAppliedJobsProps> = ({
   className = "",
   onClick,
 }) => {
+  const { theme } = useTheme();
   const resolvedTitle = title || titleForType[type];
   const iconSrc = iconForType[type];
-  const iconBgClass = variantBgClass[variantForType[type]];
+
+  // Map type to theme variant
+  const getIconBgColor = () => {
+    switch (type) {
+      case "total":
+        return theme.statCard.variant1;
+      case "pending":
+        return theme.statCard.variant4;
+      case "approved":
+        return theme.statCard.variant3;
+      case "rejected":
+        return theme.statCard.variant2;
+    }
+  };
 
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-0.5 mobile-M:gap-1 tablet:gap-1.5 laptop:gap-0.5 laptop-L:gap-1 p-2 mobile-M:p-3 tablet:p-4 laptop:p-2 laptop-L:p-2.5 w-full h-full rounded-lg tablet:rounded-xl bg-white shadow-md transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-[2px] cursor-pointer ${className}`}
+      className={`flex flex-col items-center justify-center gap-0.5 mobile-M:gap-1 tablet:gap-1.5 laptop:gap-0.5 laptop-L:gap-1 p-2 mobile-M:p-3 tablet:p-4 laptop:p-2 laptop-L:p-2.5 w-full h-full rounded-lg tablet:rounded-xl shadow-md transition-all duration-200 ease-out cursor-pointer ${className}`}
       style={{
+        backgroundColor: theme.colors.cardBg,
         boxShadow: `0 4px 16px rgba(0, 0, 0, 0.12)`,
         minHeight: 'clamp(80px, 12vh, 120px)',
       }}
@@ -71,11 +70,20 @@ export const StatCardAppliedJobs: React.FC<StatCardAppliedJobsProps> = ({
           onClick?.(type);
         }
       }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.16)';
+        e.currentTarget.style.transform = 'translateY(-2px)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.12)';
+        e.currentTarget.style.transform = 'translateY(0)';
+      }}
     >
       {/* Icon */}
       <div
-        className={`flex items-center justify-center rounded-md tablet:rounded-lg flex-shrink-0 ${iconBgClass}`}
+        className="flex items-center justify-center rounded-md tablet:rounded-lg flex-shrink-0"
         style={{ 
+          backgroundColor: getIconBgColor(),
           width: 'clamp(28px, 6vw, 36px)', 
           height: 'clamp(28px, 6vw, 36px)', 
         }}
@@ -93,14 +101,16 @@ export const StatCardAppliedJobs: React.FC<StatCardAppliedJobsProps> = ({
       
       {/* Title */}
       <span 
-        className="font-inter text-mini mobile-M:text-tiny tablet:text-small laptop:text-mini laptop-L:text-tiny font-medium text-center leading-tight text-gray-neutral600 line-clamp-1"
+        className="font-inter text-mini mobile-M:text-tiny tablet:text-small laptop:text-mini laptop-L:text-tiny font-medium text-center leading-tight line-clamp-1"
+        style={{ color: theme.statCard.text }}
       >
         {resolvedTitle}
       </span>
       
       {/* Value */}
       <span 
-        className="font-inter text-tiny mobile-M:text-small tablet:text-body laptop:text-small laptop-L:text-body font-bold text-center text-gray-neutral900 leading-none"
+        className="font-inter text-tiny mobile-M:text-small tablet:text-body laptop:text-small laptop-L:text-body font-bold text-center leading-none"
+        style={{ color: theme.statCard.textValue }}
       >
         {value !== undefined && value !== null ? value : "—"}
       </span>

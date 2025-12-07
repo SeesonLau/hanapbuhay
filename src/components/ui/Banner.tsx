@@ -5,6 +5,7 @@ import HeaderDashboard from './HeaderDashboard';
 import SearchBar from './SearchBar';
 import Button from './Button';
 import BannerParticles from '@/components/animations/BannerParticles';
+import { useTheme } from '@/hooks/useTheme';
 
 interface BannerProps {
   variant: 'findJobs' | 'manageJobPosts' | 'appliedJobs' | 'chat' | 'profile' | 'settings';
@@ -41,6 +42,7 @@ const Banner: React.FC<BannerProps> = ({
   children,
   onPostClick
 }) => {
+  const { theme } = useTheme();
 
   const getBannerContent = () => {
     switch (variant) {
@@ -108,25 +110,39 @@ const Banner: React.FC<BannerProps> = ({
   const bannerContent = getBannerContent();
   const shouldShowSearch = showSearchBar && (bannerContent.showSearchBar !== false);
 
+  // Create gradient from theme banner colors
+  const bannerGradient = `linear-gradient(135deg, ${theme.banner.gradientStart} 0%, ${theme.banner.gradientMid} 50%, ${theme.banner.gradientEnd} 100%)`;
+
   return (
     <div 
-      className={`w-full h-[200px] font-inter fixed top-0 left-0 right-0 z-50 pointer-events-none bg-gradient-to-br from-black via-slate-900 to-blue-950 ${className}`}
+      className={`w-full h-[200px] font-inter fixed top-0 left-0 right-0 z-50 pointer-events-none transition-all duration-500 ${className}`}
+      style={{
+        background: bannerGradient,
+      }}
     >
-      {/* Particles Background - CSS-based particles spread across entire banner */}
+      {/* Themed overlay for depth */}
+      <div 
+        className="absolute inset-0 transition-opacity duration-500"
+        style={{
+          background: `radial-gradient(ellipse at top, transparent 0%, ${theme.banner.gradientStart}${Math.round(theme.banner.overlayOpacity * 255).toString(16)} 100%)`,
+        }}
+      />
+
+      {/* Particles Background - Themed and animated based on season */}
       <div className="absolute inset-0 overflow-hidden">
         <BannerParticles particleCount={25} />
       </div>
 
       {/* Header Dashboard */}
       <div className="pointer-events-auto relative z-10">
-      <HeaderDashboard
-        userName={userName}
-        userAvatar={userAvatar}
-        userEmail={userEmail}
-        userRole={userRole}
-        userId={userId}
-        userCreatedAt={userCreatedAt}
-      />
+        <HeaderDashboard
+          userName={userName}
+          userAvatar={userAvatar}
+          userEmail={userEmail}
+          userRole={userRole}
+          userId={userId}
+          userCreatedAt={userCreatedAt}
+        />
       </div>
 
       {/* Banner Content Container - Left-aligned structure */}
@@ -135,13 +151,23 @@ const Banner: React.FC<BannerProps> = ({
         <div className={`text-start mb-1 w-full ${variant === 'profile' || variant === 'chat' ? 'mt-3 sm:mt-4' : 'mt-0'} pointer-events-none`}>
           <h1 className="text-body sm:text-body md:text-description lg:text-lead font-bold font-alexandria text-white leading-tight mb-1.5 sm:mb-2">
             {bannerContent.title}{' '}
-            <span className="bg-gradient-to-r from-primary-primary400 to-primary-primary600 bg-clip-text text-transparent">
+            <span 
+              className="bg-clip-text text-transparent transition-all duration-500"
+              style={{
+                backgroundImage: `linear-gradient(to right, ${theme.colors.primary}, ${theme.colors.primaryLight})`,
+              }}
+            >
               {bannerContent.highlight}
             </span>
             {bannerContent.subtitle && (
               <>
                 {' '}{bannerContent.subtitle}{' '}
-                <span className="bg-gradient-to-r from-primary-primary400 to-primary-primary600 bg-clip-text text-transparent">
+                <span 
+                  className="bg-clip-text text-transparent transition-all duration-500"
+                  style={{
+                    backgroundImage: `linear-gradient(to right, ${theme.colors.primary}, ${theme.colors.primaryLight})`,
+                  }}
+                >
                   {bannerContent.subtitleHighlight}
                 </span>
               </>
