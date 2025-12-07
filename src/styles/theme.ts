@@ -44,6 +44,14 @@ export interface Theme {
     button: string;
     subtle: string;
   };
+  // Banner-specific colors
+  banner: {
+    gradientStart: string;
+    gradientMid: string;
+    gradientEnd: string;
+    particleColors: string[];
+    overlayOpacity: number;
+  };
 }
 
 export const themes: Record<ThemeName, Theme> = {
@@ -73,12 +81,10 @@ export const themes: Record<ThemeName, Theme> = {
       success: '#46BB27',
       warning: '#EF8F11',
       error: '#ED4A4A',
-      // Pastel colors
       pastelBg: '#EEF7FF',
       pastelBgLight: '#F8FBFF',
       pastelBorder: '#BCDEFF',
       pastelText: '#1743B6',
-      // UI colors
       cardBg: '#FFFFFF',
       cardBorder: '#E3F2FD',
       cardHover: '#F8FBFF',
@@ -90,6 +96,13 @@ export const themes: Record<ThemeName, Theme> = {
       card: 'linear-gradient(180deg, #FFFFFF 0%, #EEF7FF 100%)',
       button: 'linear-gradient(90deg, #59ACFF 0%, #3289FF 100%)',
       subtle: 'linear-gradient(180deg, #F8FBFF 0%, #FFFFFF 100%)',
+    },
+    banner: {
+      gradientStart: '#000000',
+      gradientMid: '#0f172a',
+      gradientEnd: '#1e3a8a',
+      particleColors: ['#60a5fa', '#93c5fd', '#ffffff'],
+      overlayOpacity: 0.95,
     },
   },
   spring: {
@@ -118,12 +131,10 @@ export const themes: Record<ThemeName, Theme> = {
       success: '#8ED969',
       warning: '#FFB84D',
       error: '#FF6B8A',
-      // Pastel colors
       pastelBg: '#FFF0F8',
       pastelBgLight: '#FFF8FC',
       pastelBorder: '#FFCCE6',
       pastelText: '#A83270',
-      // UI colors
       cardBg: '#FFFFFF',
       cardBorder: '#FFE6F4',
       cardHover: '#FFF9FD',
@@ -135,6 +146,13 @@ export const themes: Record<ThemeName, Theme> = {
       card: 'linear-gradient(180deg, #FFFFFF 0%, #FFF5FB 100%)',
       button: 'linear-gradient(90deg, #FF9ED5 0%, #FF6BBF 100%)',
       subtle: 'linear-gradient(180deg, #FFF9FD 0%, #FFFFFF 100%)',
+    },
+    banner: {
+      gradientStart: '#2d1b2e',
+      gradientMid: '#4a2d3f',
+      gradientEnd: '#5c3a4d',
+      particleColors: ['#d4a5a5', '#e8c4c4', '#c49999', '#f5e6e6'],
+      overlayOpacity: 0.92,
     },
   },
   summer: {
@@ -163,12 +181,10 @@ export const themes: Record<ThemeName, Theme> = {
       success: '#8ED969',
       warning: '#FFB84D',
       error: '#FF8566',
-      // Pastel colors
       pastelBg: '#FFFBF0',
       pastelBgLight: '#FFFDF8',
       pastelBorder: '#FFECB3',
       pastelText: '#B38600',
-      // UI colors
       cardBg: '#FFFFFF',
       cardBorder: '#FFF9E6',
       cardHover: '#FFFEFA',
@@ -180,6 +196,13 @@ export const themes: Record<ThemeName, Theme> = {
       card: 'linear-gradient(180deg, #FFFFFF 0%, #FFFDF5 100%)',
       button: 'linear-gradient(90deg, #FFD84D 0%, #FFC61A 100%)',
       subtle: 'linear-gradient(180deg, #FFFEFA 0%, #FFFFFF 100%)',
+    },
+    banner: {
+      gradientStart: '#1a2e1a',
+      gradientMid: '#1f3d2b',
+      gradientEnd: '#2a4a3a',
+      particleColors: ['#d4a853', '#a89968', '#e6c76f', '#c9a945'],
+      overlayOpacity: 0.90,
     },
   },
   autumn: {
@@ -208,12 +231,10 @@ export const themes: Record<ThemeName, Theme> = {
       success: '#8ED969',
       warning: '#FF8C42',
       error: '#CC5544',
-      // Pastel colors
       pastelBg: '#FFF3E8',
       pastelBgLight: '#FFF9F4',
       pastelBorder: '#FFCCA3',
       pastelText: '#7A3D14',
-      // UI colors
       cardBg: '#FFFFFF',
       cardBorder: '#FFEEDD',
       cardHover: '#FFFCF8',
@@ -225,6 +246,13 @@ export const themes: Record<ThemeName, Theme> = {
       card: 'linear-gradient(180deg, #FFFFFF 0%, #FFF8F2 100%)',
       button: 'linear-gradient(90deg, #FF8C42 0%, #FF6B1A 100%)',
       subtle: 'linear-gradient(180deg, #FFFCF8 0%, #FFFFFF 100%)',
+    },
+    banner: {
+      gradientStart: '#2a1810',
+      gradientMid: '#3d2419',
+      gradientEnd: '#4a2e1f',
+      particleColors: ['#b85d2b', '#8b4513', '#d4693d', '#704214'],
+      overlayOpacity: 0.93,
     },
   },
   winter: {
@@ -253,12 +281,10 @@ export const themes: Record<ThemeName, Theme> = {
       success: '#6BC996',
       warning: '#FFB84D',
       error: '#FF7A8A',
-      // Pastel colors
       pastelBg: '#F0F8FF',
       pastelBgLight: '#F7FCFF',
       pastelBorder: '#CCE5FF',
       pastelText: '#2B6699',
-      // UI colors
       cardBg: '#FFFFFF',
       cardBorder: '#E8F4FF',
       cardHover: '#FCFEFF',
@@ -270,6 +296,13 @@ export const themes: Record<ThemeName, Theme> = {
       card: 'linear-gradient(180deg, #FFFFFF 0%, #F7FBFF 100%)',
       button: 'linear-gradient(90deg, #6BB0FF 0%, #3D8FFF 100%)',
       subtle: 'linear-gradient(180deg, #FCFEFF 0%, #FFFFFF 100%)',
+    },
+    banner: {
+      gradientStart: '#1a2332',
+      gradientMid: '#243447',
+      gradientEnd: '#2d4159',
+      particleColors: ['#a8d8ff', '#d1e9ff', '#7ac2ff', '#ffffff'],
+      overlayOpacity: 0.94,
     },
   },
 };
