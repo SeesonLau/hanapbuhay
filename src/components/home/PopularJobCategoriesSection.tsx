@@ -7,6 +7,8 @@ import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { PostService } from '@/lib/services/posts-services';
 import { ApplicationService } from '@/lib/services/applications-services';
 import type { Post } from '@/lib/models/posts';
+import { useTheme } from '@/hooks/useTheme';
+import type { Theme } from '@/styles/theme';
 
 // Job type icon mapping
 const jobTypeIcons: Record<JobType, string> = {
@@ -20,48 +22,16 @@ const jobTypeIcons: Record<JobType, string> = {
   [JobType.OTHER]: '/icons/Service.svg', // Fallback icon
 };
 
-// Job type color schemes for glassy effect
-const jobTypeColors: Record<JobType, { bg: string; border: string; iconBg: string }> = {
-  [JobType.AGRICULTURE]: { 
-    bg: 'rgba(34, 197, 94, 0.15)', 
-    border: 'rgba(34, 197, 94, 0.3)',
-    iconBg: 'rgba(34, 197, 94, 0.2)'
-  },
-  [JobType.DIGITAL]: { 
-    bg: 'rgba(59, 130, 246, 0.15)', 
-    border: 'rgba(59, 130, 246, 0.3)',
-    iconBg: 'rgba(59, 130, 246, 0.2)'
-  },
-  [JobType.IT]: { 
-    bg: 'rgba(99, 102, 241, 0.15)', 
-    border: 'rgba(99, 102, 241, 0.3)',
-    iconBg: 'rgba(99, 102, 241, 0.2)'
-  },
-  [JobType.CREATIVE]: { 
-    bg: 'rgba(236, 72, 153, 0.15)', 
-    border: 'rgba(236, 72, 153, 0.3)',
-    iconBg: 'rgba(236, 72, 153, 0.2)'
-  },
-  [JobType.CONSTRUCTION]: { 
-    bg: 'rgba(245, 158, 11, 0.15)', 
-    border: 'rgba(245, 158, 11, 0.3)',
-    iconBg: 'rgba(245, 158, 11, 0.2)'
-  },
-  [JobType.SERVICE]: { 
-    bg: 'rgba(14, 165, 233, 0.15)', 
-    border: 'rgba(14, 165, 233, 0.3)',
-    iconBg: 'rgba(14, 165, 233, 0.2)'
-  },
-  [JobType.SKILLED]: { 
-    bg: 'rgba(168, 85, 247, 0.15)', 
-    border: 'rgba(168, 85, 247, 0.3)',
-    iconBg: 'rgba(168, 85, 247, 0.2)'
-  },
-  [JobType.OTHER]: { 
-    bg: 'rgba(107, 114, 128, 0.15)', 
-    border: 'rgba(107, 114, 128, 0.3)',
-    iconBg: 'rgba(107, 114, 128, 0.2)'
-  },
+// Map JobType to theme category colors
+const jobTypeToCategory: Record<JobType, keyof Theme['landing']['categoryColors']> = {
+  [JobType.AGRICULTURE]: 'agriculture',
+  [JobType.DIGITAL]: 'digital',
+  [JobType.IT]: 'it',
+  [JobType.CREATIVE]: 'creative',
+  [JobType.CONSTRUCTION]: 'construction',
+  [JobType.SERVICE]: 'service',
+  [JobType.SKILLED]: 'skilled',
+  [JobType.OTHER]: 'other',
 };
 
 interface CategoryData {
@@ -75,6 +45,7 @@ interface CategoryData {
 
 export default function PopularJobCategoriesSection() {
   const ref = useRef(null);
+  const { theme } = useTheme();
   // Bidirectional scroll animation - replays when scrolling back into view
   const isInView = useInView(ref, { once: false, amount: 0.15 });
 
@@ -156,19 +127,22 @@ export default function PopularJobCategoriesSection() {
     // Create sorted array by total applicants (most popular first) and take top 4
     const categories = Object.values(JobType)
       .filter(type => type !== JobType.OTHER)
-      .map(type => ({
-        type,
-        label: type,
-        icon: jobTypeIcons[type],
-        totalApplicants: applicantsByType[type] || 0,
-        openPositions: jobCountByType[type] || 0,
-        colors: jobTypeColors[type],
-      }))
+      .map(type => {
+        const categoryKey = jobTypeToCategory[type];
+        return {
+          type,
+          label: type,
+          icon: jobTypeIcons[type],
+          totalApplicants: applicantsByType[type] || 0,
+          openPositions: jobCountByType[type] || 0,
+          colors: theme.landing.categoryColors[categoryKey],
+        };
+      })
       .sort((a, b) => b.totalApplicants - a.totalApplicants)
       .slice(0, 4); // Take top 4 categories only
 
     return categories;
-  }, [posts]);
+  }, [posts, theme]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -209,12 +183,24 @@ export default function PopularJobCategoriesSection() {
           transition={{ duration: 0.6 }}
         >
           <h2 
-            className={`text-h2 mobile-M:text-h1 tablet:text-5xl laptop:text-hero font-bold text-white mb-4 ${fontClasses.heading}`}
+            className={`text-h2 mobile-M:text-h1 tablet:text-5xl laptop:text-hero font-bold mb-4 ${fontClasses.heading}`}
+            style={{ color: theme.landing.headingPrimary }}
           >
-            Popular Job <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-blue-600 bg-clip-text text-transparent">Categories</span>
+            Popular Job{' '}
+            <span 
+              className="bg-clip-text text-transparent"
+              style={{
+                backgroundImage: `linear-gradient(to right, ${theme.landing.headingGradientStart}, ${theme.landing.headingGradientMid}, ${theme.landing.headingGradientEnd})`
+              }}
+            >
+              Categories
+            </span>
           </h2>
           
-          <p className={`text-body mobile-M:text-lead tablet:text-xl text-gray-300 max-w-2xl mx-auto ${fontClasses.body}`}>
+          <p 
+            className={`text-body mobile-M:text-lead tablet:text-xl max-w-2xl mx-auto ${fontClasses.body}`}
+            style={{ color: theme.landing.bodyText }}
+          >
             Explore the most in-demand job categories in your area
           </p>
         </motion.div>
@@ -234,9 +220,9 @@ export default function PopularJobCategoriesSection() {
                 variants={cardVariants}
                 className="h-[140px] mobile-M:h-[160px] rounded-2xl animate-pulse"
                 style={{
-                  background: 'rgba(30, 58, 138, 0.1)',
+                  background: theme.landing.sectionBg,
                   backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  border: `1px solid ${theme.landing.glassBorder}`,
                 }}
               />
             ))
@@ -273,13 +259,24 @@ export default function PopularJobCategoriesSection() {
                 </div>
 
                 {/* Category Name */}
-                <h3 className={`${fontClasses.heading} font-semibold text-body mobile-M:text-lead text-white mb-2`}>
+                <h3 
+                  className={`${fontClasses.heading} font-semibold text-body mobile-M:text-lead mb-2`}
+                  style={{ color: theme.landing.headingPrimary }}
+                >
                   {category.label}
                 </h3>
 
                 {/* Total Applicants Count */}
-                <p className={`${fontClasses.body} text-small text-gray-300`}>
-                  <span className="text-blue-400 font-semibold">{category.totalApplicants}</span>
+                <p 
+                  className={`${fontClasses.body} text-small`}
+                  style={{ color: theme.landing.bodyText }}
+                >
+                  <span 
+                    className="font-semibold"
+                    style={{ color: theme.landing.accentPrimary }}
+                  >
+                    {category.totalApplicants}
+                  </span>
                   {' '}applicant{category.totalApplicants !== 1 ? 's' : ''}
                 </p>
 

@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { FaHandshake, FaBriefcase, FaStar, FaMapMarkerAlt, FaBolt, FaShieldAlt } from 'react-icons/fa';
 import { fontClasses } from '@/styles/fonts';
+import { useTheme } from '@/hooks/useTheme';
 
 interface Feature {
   icon: React.ReactNode;
@@ -13,7 +14,7 @@ interface Feature {
 
 export default function BenefitsSection() {
   const ref = useRef(null);
-  // Bidirectional scroll animation - replays when scrolling back into view
+  const { theme } = useTheme();
   const isInView = useInView(ref, { once: false, amount: 0.15 });
 
   const features: Feature[] = [
@@ -95,21 +96,33 @@ export default function BenefitsSection() {
             variants={itemVariants}
           >
             <h2 
-              className={`text-h2 tablet:text-h1 laptop:text-hero font-bold text-white mb-6 leading-tight ${fontClasses.heading}`}
+              className={`text-h2 tablet:text-h1 laptop:text-hero font-bold mb-6 leading-tight ${fontClasses.heading}`}
+              style={{ color: theme.landing.headingPrimary }}
             >
               Core Features That{' '}
-              <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-blue-600 bg-clip-text text-transparent">
+              <span 
+                className="bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${theme.landing.headingGradientStart}, ${theme.landing.headingGradientMid}, ${theme.landing.headingGradientEnd})`
+                }}
+              >
                 Power Your Success
               </span>
             </h2>
             
-            <p className={`text-body tablet:text-lead text-gray-400 leading-relaxed ${fontClasses.body}`}>
+            <p 
+              className={`text-body tablet:text-lead leading-relaxed ${fontClasses.body}`}
+              style={{ color: theme.landing.bodyText }}
+            >
               A platform designed to connect local talent with opportunities, making hiring and finding work simpler than ever before.
             </p>
 
             {/* Decorative line */}
             <motion.div 
-              className="hidden laptop:block mt-8 h-1 w-20 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400"
+              className="hidden laptop:block mt-8 h-1 w-20 rounded-full"
+              style={{
+                backgroundImage: `linear-gradient(to right, ${theme.landing.accentSecondary}, ${theme.landing.accentPrimary})`
+              }}
               initial={{ scaleX: 0, originX: 0 }}
               animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
@@ -129,34 +142,46 @@ export default function BenefitsSection() {
                   className="group"
                 >
                   <div
-                    className="h-full p-6 tablet:p-8 rounded-2xl border transition-all duration-500 hover:scale-[1.02] hover:border-blue-500/30"
+                    className="h-full p-6 tablet:p-8 rounded-2xl border transition-all duration-500 hover:scale-[1.02]"
                     style={{
-                      background: 'rgba(255, 255, 255, 0.03)',
+                      background: theme.landing.glassBg,
                       backdropFilter: 'blur(20px)',
-                      borderColor: 'rgba(255, 255, 255, 0.08)',
+                      borderColor: theme.landing.glassBorder,
                       boxShadow: '0 4px 24px rgba(0, 0, 0, 0.1)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = theme.landing.glassHoverBorder;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = theme.landing.glassBorder;
                     }}
                   >
                     {/* Icon */}
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-all duration-300 group-hover:scale-110"
                       style={{
-                        background: 'rgba(59, 130, 246, 0.1)',
-                        border: '1px solid rgba(59, 130, 246, 0.2)'
+                        background: theme.landing.iconBg,
+                        border: `1px solid ${theme.landing.iconBorder}`
                       }}
                     >
-                      <span className="text-blue-400">
+                      <span style={{ color: theme.landing.accentPrimary }}>
                         {feature.icon}
                       </span>
                     </div>
 
                     {/* Title */}
-                    <h3 className={`text-lead tablet:text-h3 font-semibold text-white mb-3 ${fontClasses.heading}`}>
+                    <h3 
+                      className={`text-lead tablet:text-h3 font-semibold mb-3 ${fontClasses.heading}`}
+                      style={{ color: theme.landing.headingPrimary }}
+                    >
                       {feature.title}
                     </h3>
 
                     {/* Description */}
-                    <p className={`text-small tablet:text-body text-gray-400 leading-relaxed ${fontClasses.body}`}>
+                    <p 
+                      className={`text-small tablet:text-body leading-relaxed ${fontClasses.body}`}
+                      style={{ color: theme.landing.bodyText }}
+                    >
                       {feature.description}
                     </p>
                   </div>
