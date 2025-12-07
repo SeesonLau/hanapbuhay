@@ -5,6 +5,7 @@ import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticSala
 import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
+import { useTheme } from '@/hooks/useTheme';
 
 interface JobPostData {
   id: string;
@@ -28,6 +29,8 @@ interface JobPostListProps {
 }
 
 export const JobPostList: React.FC<JobPostListProps> = ({ jobData, className = '', onApply, onOpen }) => {
+  const { theme } = useTheme();
+  
   const {
     id,
     title,
@@ -79,8 +82,24 @@ export const JobPostList: React.FC<JobPostListProps> = ({ jobData, className = '
 
   return (
     <div 
-      className={`w-full h-[60px] bg-white border border-gray-neutral200 shadow-sm px-6 rounded-[10px] transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300 cursor-pointer ${className}`}
+      className={`w-full h-[60px] border shadow-sm px-6 rounded-[10px] transition-all duration-300 ease-out cursor-pointer ${className}`}
+      style={{
+        backgroundColor: theme.colors.cardBg,
+        borderColor: theme.colors.cardBorder,
+      }}
       onClick={() => onOpen?.(jobData)}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = theme.colors.cardHover;
+        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+        e.currentTarget.style.borderColor = theme.colors.border;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = theme.colors.cardBg;
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
+        e.currentTarget.style.borderColor = theme.colors.cardBorder;
+      }}
     >
       {/* Table-like aligned columns; collapse progressively by breakpoint */}
       <div
@@ -88,7 +107,10 @@ export const JobPostList: React.FC<JobPostListProps> = ({ jobData, className = '
       >
         {/* Title */}
         <div className="min-w-0 mobile-S:max-w-[150px]">
-          <h3 className={`font-alexandria font-semibold text-[15px] truncate text-gray-neutral900`}>
+          <h3 
+            className="font-alexandria font-semibold text-[15px] truncate"
+            style={{ color: theme.colors.text }}
+          >
             {shortTitle}
           </h3>
         </div>
@@ -115,19 +137,31 @@ export const JobPostList: React.FC<JobPostListProps> = ({ jobData, className = '
         </div>
 
         <div className="hidden tablet:flex laptop:hidden laptop-L:flex items-center">
-          <span className={`font-inter text-[10px] whitespace-nowrap text-gray-neutral600`}>Posted on: {postedDate}</span>
+          <span 
+            className="font-inter text-[10px] whitespace-nowrap"
+            style={{ color: theme.colors.textSecondary }}
+          >
+            Posted on: {postedDate}
+          </span>
         </div>
 
         <div className="flex-shrink-0 justify-self-end flex justify-end">
           <button
             onClick={(e) => { e.stopPropagation(); onApply?.(id); }}
-            className="px-4 py-2 bg-primary-primary500 text-white rounded-lg hover:bg-primary-primary600 transition-colors text-sm w-[140px] laptop:w-[130px] mobile-L:w-[120px] mobile-M:w-[110px] mobile-S:w-[100px]"
+            className="px-4 py-2 text-white rounded-lg transition-all text-sm w-[140px] laptop:w-[130px] mobile-L:w-[120px] mobile-M:w-[110px] mobile-S:w-[100px]"
+            style={{
+              backgroundColor: theme.colors.primary,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme.colors.primaryHover;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = theme.colors.primary;
+            }}
           >
             Apply Now
           </button>
         </div>
-
-        
       </div>
     </div>
   );

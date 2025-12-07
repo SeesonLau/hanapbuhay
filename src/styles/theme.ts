@@ -1,3 +1,4 @@
+//theme.ts 
 export type ThemeName = 'classic' | 'spring' | 'summer' | 'autumn' | 'winter';
 
 export interface Theme {
@@ -52,6 +53,15 @@ export interface Theme {
     particleColors: string[];
     overlayOpacity: number;
   };
+  // StatCard monochrome colors
+  statCard: {
+    variant1: string; // lightest
+    variant2: string;
+    variant3: string;
+    variant4: string; // darkest
+    text: string;
+    textValue: string;
+  };
 }
 
 export const themes: Record<ThemeName, Theme> = {
@@ -104,6 +114,14 @@ export const themes: Record<ThemeName, Theme> = {
       particleColors: ['#60a5fa', '#93c5fd', '#ffffff'],
       overlayOpacity: 0.95,
     },
+    statCard: {
+      variant1: '#59ACFF', // blue - total
+      variant2: '#ED4A4A', // red - inactive/rejected
+      variant3: '#46BB27', // green - active/approved
+      variant4: '#FF8800', // orange - resolved/pending
+      text: '#6A706F',
+      textValue: '#141515',
+    },
   },
   spring: {
     name: 'spring',
@@ -153,6 +171,14 @@ export const themes: Record<ThemeName, Theme> = {
       gradientEnd: '#5c3a4d',
       particleColors: ['#d4a5a5', '#e8c4c4', '#c49999', '#f5e6e6'],
       overlayOpacity: 0.92,
+    },
+    statCard: {
+      variant1: '#FFCCE6', // light pink
+      variant2: '#FFB3D9', // medium pink
+      variant3: '#FF9ED5', // main pink
+      variant4: '#E74AA0', // dark pink
+      text: '#A83270',
+      textValue: '#8C2156',
     },
   },
   summer: {
@@ -204,6 +230,14 @@ export const themes: Record<ThemeName, Theme> = {
       particleColors: ['#d4a853', '#a89968', '#e6c76f', '#c9a945'],
       overlayOpacity: 0.90,
     },
+    statCard: {
+      variant1: '#FFF4CC', // light yellow
+      variant2: '#FFEB99', // medium yellow
+      variant3: '#FFD84D', // main yellow
+      variant4: '#E6B300', // dark yellow
+      text: '#B38600',
+      textValue: '#8C6600',
+    },
   },
   autumn: {
     name: 'autumn',
@@ -254,6 +288,14 @@ export const themes: Record<ThemeName, Theme> = {
       particleColors: ['#b85d2b', '#8b4513', '#d4693d', '#704214'],
       overlayOpacity: 0.93,
     },
+    statCard: {
+      variant1: '#FFCCA3', // light orange
+      variant2: '#FFAD70', // medium orange
+      variant3: '#FF8C42', // main orange
+      variant4: '#D4693D', // dark orange
+      text: '#7A3D14',
+      textValue: '#5C2E0D',
+    },
   },
   winter: {
     name: 'winter',
@@ -303,6 +345,14 @@ export const themes: Record<ThemeName, Theme> = {
       gradientEnd: '#2d4159',
       particleColors: ['#a8d8ff', '#d1e9ff', '#7ac2ff', '#ffffff'],
       overlayOpacity: 0.94,
+    },
+    statCard: {
+      variant1: '#D6ECFF', // light blue
+      variant2: '#A3D0FF', // medium blue
+      variant3: '#6BB0FF', // main blue
+      variant4: '#1A6FE0', // dark blue
+      text: '#2B6699',
+      textValue: '#1A4D7A',
     },
   },
 };

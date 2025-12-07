@@ -1,12 +1,10 @@
-"use client";
-
 import React from 'react';
-// Use public assets for icons
 import { StaticGenderTag, StaticExperienceLevelTag, StaticJobTypeTag, StaticSalaryTag } from '@/components/ui/TagItem';
 import ManageJobActionButtons from '@/components/posts/ManageJobActionButtons';
 import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
+import { useTheme } from '@/hooks/useTheme';
 
 interface JobPostData {
   id: string;
@@ -42,6 +40,8 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
   onDelete,
   onToggleLock,
 }) => {
+  const { theme } = useTheme();
+  
   const {
     id,
     title,
@@ -57,11 +57,9 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
     jobTypeTags = []
   } = jobData;
 
-  // Title truncation for consistent row height
   const shortTitle = title.length > 60 ? `${title.slice(0, 60)}...` : title;
 
   const normalizeJobType = (label: string): string | null => {
-    // Only allow subtypes; exclude top-level JobType enums from display
     const isSubType = Object.values(JobType).some((jt) => (SubTypes[jt] || []).includes(label));
     return isSubType ? label : null;
   };
@@ -94,18 +92,45 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
   const firstTag = allTags[0];
   const hiddenCount = Math.max(0, allTags.length - 1);
 
+  const listBgColor = isLocked ? theme.colors.backgroundSecondary : theme.colors.cardBg;
+  const listBorderColor = isLocked ? theme.colors.borderLight : theme.colors.cardBorder;
+  const titleColor = isLocked ? theme.colors.textMuted : theme.colors.text;
+  const dateColor = isLocked ? theme.colors.textMuted : theme.colors.textSecondary;
+
   return (
     <div 
-      className={`w-full h-[60px] ${!isLocked ? 'bg-white' : 'bg-gray-neutral100'} border ${!isLocked ? 'border-gray-neutral200' : 'border-gray-neutral300'} shadow-sm px-6 rounded-[10px] transition-all duration-200 ease-out ${!isLocked ? 'hover:shadow-md hover:-translate-y-[2px] hover:border-gray-neutral300' : ''} cursor-pointer ${className}`}
+      className={`w-full h-[60px] border shadow-sm px-6 rounded-[10px] transition-all duration-300 ease-out cursor-pointer ${className}`}
+      style={{
+        backgroundColor: listBgColor,
+        borderColor: listBorderColor,
+      }}
       onClick={() => onOpen?.(jobData)}
+      onMouseEnter={(e) => {
+        if (!isLocked) {
+          e.currentTarget.style.backgroundColor = theme.colors.cardHover;
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+          e.currentTarget.style.borderColor = theme.colors.border;
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isLocked) {
+          e.currentTarget.style.backgroundColor = theme.colors.cardBg;
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
+          e.currentTarget.style.borderColor = theme.colors.cardBorder;
+        }
+      }}
     >
-      {/* Table-like aligned columns: Title | Tags | Location+Salary+Date | Actions */}
       <div
         className="grid items-center h-full gap-6 grid-cols-2 tablet:grid-cols-4 laptop:grid-cols-3 laptop-L:grid-cols-5"
       >
         {/* Title */}
         <div className={`min-w-0 flex items-center mobile-S:max-w-[150px] ${isLocked ? 'filter grayscale' : ''}`}>
-          <h3 className={`font-alexandria font-semibold text-[15px] truncate ${!isLocked ? 'text-gray-neutral900' : 'text-gray-neutral700'}`}>
+          <h3 
+            className="font-alexandria font-semibold text-[15px] truncate"
+            style={{ color: titleColor }}
+          >
             {shortTitle}
           </h3>
         </div>
@@ -136,7 +161,12 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
 
         {/* Date Posted - Tablet and Laptop-L; hidden at Laptop */}
         <div className={`hidden tablet:flex laptop:hidden laptop-L:flex flex-shrink-0 ${isLocked ? 'filter grayscale' : ''}`}>
-          <span className={`font-inter text-[10px] whitespace-nowrap ${!isLocked ? 'text-gray-neutral600' : 'text-gray-neutral500'}`}>Posted on: {postedDate}</span>
+          <span 
+            className="font-inter text-[10px] whitespace-nowrap"
+            style={{ color: dateColor }}
+          >
+            Posted on: {postedDate}
+          </span>
         </div>
 
         {/* Action Buttons (flush right, compact/hug content) */}
