@@ -294,6 +294,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { FiX, FiLock, FiGlobe, FiBell, FiCheck } from 'react-icons/fi';
 import { AuthService } from '@/lib/services/auth-services';
 import { useTheme } from '@/hooks/useTheme';
@@ -411,13 +412,15 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div 
-      className="fixed inset-0 flex items-center justify-center z-50 p-3 mobile-M:p-4 transition-opacity duration-300 animate-in fade-in bg-black/50"
+      className="fixed inset-0 flex items-center justify-center p-3 mobile-M:p-4 transition-opacity duration-300 animate-in fade-in bg-black/50"
+      style={{ zIndex: 2147483647 }}
       onClick={onClose}
     >
       <div 
-        className="font-inter bg-white rounded-xl shadow-2xl w-full max-w-[280px] mobile-M:max-w-[320px] mobile-L:max-w-[380px] tablet:max-w-md animate-in zoom-in-95 duration-300"
+        className="relative font-inter bg-white rounded-xl shadow-2xl w-full max-w-[280px] mobile-M:max-w-[320px] mobile-L:max-w-[380px] tablet:max-w-md animate-in zoom-in-95 duration-300"
+        style={{ zIndex: 2147483648 }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -666,4 +669,6 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
