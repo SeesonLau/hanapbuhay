@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTheme } from '@/hooks/useTheme';
 
 interface ProjectViewModalProps {
   projectId: string;
   title: string;
   description?: string;
-  projectPictureUrls?: string[]; // Changed to array
+  projectPictureUrls?: string[];
   isOpen: boolean;
   onClose: () => void;
 }
@@ -19,6 +20,7 @@ export default function ProjectViewModal({
   isOpen,
   onClose,
 }: ProjectViewModalProps) {
+  const { theme } = useTheme();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   if (!isOpen) return null;
@@ -38,22 +40,26 @@ export default function ProjectViewModal({
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-auto"
+      style={{ backgroundColor: theme.modal.overlay }}
       onClick={onClose}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
       <motion.div
-        className="bg-white rounded-[10px] shadow-xl w-full max-w-md h-[550px] p-8 flex flex-col relative"
+        className="rounded-[10px] shadow-xl w-full max-w-md h-[550px] p-8 flex flex-col relative"
+        style={{ backgroundColor: theme.modal.background }}
         onClick={(e) => e.stopPropagation()}
         initial={{ y: 20, opacity: 0, scale: 0.98 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       >
-
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute top-4 right-4 text-2xl text-gray-neutral600 hover:text-gray-800 transition-colors"
+          className="absolute top-4 right-4 text-2xl transition-colors"
+          style={{ color: theme.modal.buttonClose }}
+          onMouseOver={(e) => e.currentTarget.style.color = theme.modal.buttonCloseHover}
+          onMouseOut={(e) => e.currentTarget.style.color = theme.modal.buttonClose}
           aria-label="Close modal"
         >
           ×
@@ -62,11 +68,15 @@ export default function ProjectViewModal({
         {/* Image Carousel */}
         {hasImages ? (
           <div className="relative w-full h-[180px] mb-4 flex-shrink-0">
-            <div className="w-full h-full rounded-[10px] overflow-hidden bg-gray-100 flex items-center justify-center relative group">
+            <div 
+              className="w-full h-full rounded-[10px] overflow-hidden flex items-center justify-center relative group"
+              style={{ backgroundColor: theme.colors.background }}
+            >
               <img
                 src={projectPictureUrls[currentImageIndex]}
                 alt={`${title} ${currentImageIndex + 1}`}
-                className="w-full h-full object-contain bg-white"
+                className="w-full h-full object-contain"
+                style={{ backgroundColor: theme.modal.background }}
               />
 
               {/* Carousel Navigation */}
@@ -78,7 +88,10 @@ export default function ProjectViewModal({
                       e.stopPropagation();
                       prevImage();
                     }}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-gray-800 hover:bg-gray-700 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                    style={{ backgroundColor: theme.colors.textSecondary }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.text}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.textSecondary}
                   >
                     ←
                   </button>
@@ -88,7 +101,10 @@ export default function ProjectViewModal({
                       e.stopPropagation();
                       nextImage();
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-800 hover:bg-gray-700 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                    style={{ backgroundColor: theme.colors.textSecondary }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.text}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.textSecondary}
                   >
                     →
                   </button>
@@ -106,9 +122,10 @@ export default function ProjectViewModal({
                         e.stopPropagation();
                         setCurrentImageIndex(index);
                       }}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        index === currentImageIndex ? 'bg-gray-800' : 'bg-gray-400'
-                      }`}
+                      className="w-2 h-2 rounded-full transition-all"
+                      style={{
+                        backgroundColor: index === currentImageIndex ? theme.colors.text : theme.colors.textMuted
+                      }}
                     />
                   ))}
                 </div>
@@ -116,18 +133,32 @@ export default function ProjectViewModal({
             </div>
           </div>
         ) : (
-          <div className="w-full h-[180px] bg-gray-200 rounded-[10px] flex items-center justify-center text-gray-neutral500 mb-4 flex-shrink-0">
+          <div 
+            className="w-full h-[180px] rounded-[10px] flex items-center justify-center mb-4 flex-shrink-0"
+            style={{ 
+              backgroundColor: theme.colors.background,
+              color: theme.colors.textMuted
+            }}
+          >
             No Image
           </div>
         )}
 
         {/* Title */}
-        <h2 className="font-inter font-bold mb-4 text-gray-neutral800">{title}</h2>
+        <h2 
+          className="font-inter font-bold mb-4"
+          style={{ color: theme.colors.text }}
+        >
+          {title}
+        </h2>
 
         {/* Description */}
         {description && (
           <div className="overflow-y-auto">
-            <p className="font-alexandria font-light text-gray-neutral600 whitespace-pre-wrap break-words body">
+            <p 
+              className="font-alexandria font-light whitespace-pre-wrap break-words body"
+              style={{ color: theme.colors.textMuted }}
+            >
               {description}
             </p>
           </div>

@@ -9,6 +9,7 @@ import { ProjectMessages } from '@/resources/messages/project';
 import TextBox from "../ui/TextBox";
 import TextArea from "../ui/TextArea";
 import Button from "../ui/Button";
+import { useTheme } from '@/hooks/useTheme';
 
 interface ProjectAddModalProps {
   userId: string;
@@ -23,6 +24,7 @@ export default function ProjectAddModal({
   onClose,
   onProjectAdded,
 }: ProjectAddModalProps) {
+  const { theme } = useTheme();
   const [title, setTitle] = useState(project?.title || '');
   const [description, setDescription] = useState(project?.description || '');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -110,11 +112,9 @@ export default function ProjectAddModal({
       if (success) {
         onProjectAdded();
         onClose();
-      } else {
-        //toast.error(ProjectMessages.SAVE_PROJECT_ERROR);
       }
     } catch (err) {
-     // toast.error(GeneralMessages.UNEXPECTED_ERROR);
+      // Error handling
     } finally {
       setLoading(false);
     }
@@ -137,13 +137,15 @@ export default function ProjectAddModal({
 
   return (
     <motion.div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style={{ backgroundColor: theme.modal.overlay }}
       onClick={onClose}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
       <motion.div
-        className="bg-white rounded-2xl w-full max-w-[750px] max-h-[90vh] p-6 md:p-10 overflow-y-auto flex flex-col items-center scrollbar-hide relative"
+        className="rounded-2xl w-full max-w-[750px] max-h-[90vh] p-6 md:p-10 overflow-y-auto flex flex-col items-center scrollbar-hide relative"
+        style={{ backgroundColor: theme.modal.background }}
         onClick={(e) => e.stopPropagation()}
         initial={{ y: 20, opacity: 0, scale: 0.98 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -152,13 +154,19 @@ export default function ProjectAddModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-2xl text-gray-neutral600 hover:text-gray-800 transition-colors"
+          className="absolute top-4 right-4 text-2xl transition-colors"
+          style={{ color: theme.modal.buttonClose }}
+          onMouseOver={(e) => e.currentTarget.style.color = theme.modal.buttonCloseHover}
+          onMouseOut={(e) => e.currentTarget.style.color = theme.modal.buttonClose}
           aria-label="Close modal"
         >
           ×
         </button>
 
-        <h3 className="font-inter font-bold text-lg md:text-2xl mb-4 md:mb-6">
+        <h3 
+          className="font-inter font-bold text-lg md:text-2xl mb-4 md:mb-6"
+          style={{ color: theme.colors.text }}
+        >
           {project ? 'Edit Work Experience' : 'Add Work Experience'}
         </h3>
 
@@ -167,22 +175,24 @@ export default function ProjectAddModal({
           {viewMode === 'carousel' && allImages.length > 0 ? (
             /* Carousel View */
             <div className="relative">
-              {/* Main Carousel Display */}
               <div
-                className="w-full h-[180px] md:h-[260px] rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center relative group cursor-pointer"
+                className="w-full h-[180px] md:h-[260px] rounded-2xl overflow-hidden flex items-center justify-center relative group cursor-pointer"
+                style={{ backgroundColor: theme.colors.background }}
                 onClick={() => setViewMode('grid')} 
               >
                 {allImages[currentImageIndex].type === 'existing' ? (
                   <img
                     src={allImages[currentImageIndex].url}
                     alt={`Project ${currentImageIndex + 1}`}
-                    className="w-full h-full object-contain bg-white"
+                    className="w-full h-full object-contain"
+                    style={{ backgroundColor: theme.modal.background }}
                   />
                 ) : (
                   <img
                     src={URL.createObjectURL(allImages[currentImageIndex].file)}
                     alt={`New ${currentImageIndex + 1}`}
-                    className="w-full h-full object-contain bg-white"
+                    className="w-full h-full object-contain"
+                    style={{ backgroundColor: theme.modal.background }}
                   />
                 )}
 
@@ -192,14 +202,20 @@ export default function ProjectAddModal({
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); prevImage(); }} 
-                      className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-gray-800 hover:bg-gray-700 text-white rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                      className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 text-white rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                      style={{ backgroundColor: theme.colors.textSecondary }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.text}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.textSecondary}
                     >
                       ←
                     </button>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); nextImage(); }} 
-                      className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-gray-800 hover:bg-gray-700 text-white rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                      className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 text-white rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                      style={{ backgroundColor: theme.colors.textSecondary }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.text}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.textSecondary}
                     >
                       →
                     </button>
@@ -211,17 +227,16 @@ export default function ProjectAddModal({
                   {allImages.map((_, index) => (
                     <span
                       key={index}
-                      className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all ${
-                        index === currentImageIndex ? 'bg-gray-800' : 'bg-gray-400'
-                      }`}
+                      className="w-2 h-2 md:w-3 md:h-3 rounded-full transition-all"
+                      style={{
+                        backgroundColor: index === currentImageIndex ? theme.colors.text : theme.colors.textMuted
+                      }}
                     />
                   ))}
                 </div>
               </div>
-
             </div>
           ) : (
-            
             /* Grid View */
             <div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
@@ -231,12 +246,16 @@ export default function ProjectAddModal({
                     <img
                       src={url}
                       alt={`Project ${index + 1}`}
-                      className="w-full h-full object-cover rounded-lg border-2 border-gray-neutral300"
+                      className="w-full h-full object-cover rounded-lg border-2"
+                      style={{ borderColor: theme.modal.sectionBorder }}
                     />
                     <button
                       type="button"
                       onClick={() => removeExistingImage(index)}
-                      className="absolute top-1 right-1 md:top-2 md:right-2 bg-red-500 text-white rounded-full w-6 h-6 md:w-7 md:h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg text-sm md:text-base"
+                      className="absolute top-1 right-1 md:top-2 md:right-2 text-white rounded-full w-6 h-6 md:w-7 md:h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg text-sm md:text-base"
+                      style={{ backgroundColor: theme.colors.error }}
+                      onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
+                      onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
                     >
                       ×
                     </button>
@@ -249,12 +268,16 @@ export default function ProjectAddModal({
                     <img
                       src={URL.createObjectURL(file)}
                       alt={`New ${index + 1}`}
-                      className="w-full h-full object-cover rounded-lg border-2 border-gray-neutral300" 
+                      className="w-full h-full object-cover rounded-lg border-2"
+                      style={{ borderColor: theme.modal.sectionBorder }}
                     />
                     <button
                       type="button"
                       onClick={() => removeNewImage(index)}
-                      className="absolute top-1 right-1 md:top-2 md:right-2 bg-red-500 text-white rounded-full w-6 h-6 md:w-7 md:h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg text-sm md:text-base"
+                      className="absolute top-1 right-1 md:top-2 md:right-2 text-white rounded-full w-6 h-6 md:w-7 md:h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg text-sm md:text-base"
+                      style={{ backgroundColor: theme.colors.error }}
+                      onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
+                      onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
                     >
                       ×
                     </button>
@@ -263,11 +286,34 @@ export default function ProjectAddModal({
 
                 {/* Upload Button */}
                 {canAddMore && (
-                  <label className="aspect-square rounded-lg border-2 border-dashed border-gray-neutral400 hover:border-blue-500 hover:bg-blue-50 flex flex-col items-center justify-center cursor-pointer transition-all group">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 md:h-10 md:w-10 text-gray-neutral400 group-hover:text-blue-500 mb-1 md:mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <label 
+                    className="aspect-square rounded-lg border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all group"
+                    style={{ borderColor: theme.colors.border }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.borderColor = theme.colors.primary;
+                      e.currentTarget.style.backgroundColor = theme.colors.pastelBg;
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.borderColor = theme.colors.border;
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className="h-7 w-7 md:h-10 md:w-10 mb-1 md:mb-2 transition-colors" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                      style={{ color: theme.colors.textMuted }}
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    <p className="text-xs text-gray-neutral500 group-hover:text-blue-500 font-medium">Add Photo</p>
+                    <p 
+                      className="text-xs font-medium"
+                      style={{ color: theme.colors.textMuted }}
+                    >
+                      Add Photo
+                    </p>
                     <input
                       type="file"
                       accept="image/*"
@@ -281,12 +327,14 @@ export default function ProjectAddModal({
 
               {/* Image Count Info */}
               <div className="mt-2 md:mt-3 text-center">
-                <p className="text-xs md:text-sm text-grayneutral500">
+                <p 
+                  className="text-xs md:text-sm"
+                  style={{ color: theme.colors.textMuted }}
+                >
                   {totalImages} / {MAX_IMAGES} images
-                  {!canAddMore && <span className="text-red-500 ml-2">• Maximum reached</span>}
+                  {!canAddMore && <span style={{ color: theme.colors.error }} className="ml-2">• Maximum reached</span>}
                 </p>
               </div>
-
             </div>
           )}
         </div>

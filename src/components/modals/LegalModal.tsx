@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes } from 'react-icons/fa';
 import { fontClasses } from '@/styles/fonts';
+import { useTheme } from '@/hooks/useTheme';
 
 interface LegalModalProps {
   isOpen: boolean;
@@ -14,10 +15,10 @@ interface LegalModalProps {
 }
 
 export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, title, children }) => {
-  // Disable body scroll when modal is open (simpler approach that doesn't affect scroll position)
+  const { theme } = useTheme();
+
   useEffect(() => {
     if (isOpen) {
-      // Just prevent scrolling on html and body without changing position
       const originalHtmlOverflow = document.documentElement.style.overflow;
       const originalBodyOverflow = document.body.style.overflow;
       
@@ -33,12 +34,10 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, title, 
 
   if (!isOpen) return null;
 
-  // Stop wheel events from propagating to Lenis
   const handleWheel = (e: React.WheelEvent) => {
     e.stopPropagation();
   };
 
-  // Stop touch events from propagating
   const handleTouchMove = (e: React.TouchEvent) => {
     e.stopPropagation();
   };
@@ -57,7 +56,8 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, title, 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 backdrop-blur-sm"
+            style={{ backgroundColor: theme.modal.overlay }}
             onClick={onClose}
           />
           
@@ -69,9 +69,9 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, title, 
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="relative w-full max-w-[95vw] mobile-M:max-w-[90vw] tablet:max-w-2xl laptop:max-w-3xl max-h-[85vh] rounded-2xl mobile-M:rounded-3xl flex flex-col"
             style={{
-              background: 'rgba(20, 21, 21, 0.95)',
+              background: theme.modal.background,
               backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              border: `1px solid ${theme.modal.headerBorder}`,
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
             }}
             onClick={(e) => e.stopPropagation()}
@@ -80,17 +80,28 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, title, 
             <div 
               className="flex-shrink-0 flex items-center justify-between p-4 mobile-M:p-5 tablet:p-6 border-b"
               style={{ 
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-                background: 'rgba(20, 21, 21, 0.98)'
+                borderColor: theme.modal.headerBorder,
+                background: theme.modal.background
               }}
             >
-              <h2 className={`text-lead mobile-M:text-h3 tablet:text-h2 font-bold text-white ${fontClasses.heading}`}>
+              <h2 
+                className={`text-lead mobile-M:text-h3 tablet:text-h2 font-bold ${fontClasses.heading}`}
+                style={{ color: theme.colors.text }}
+              >
                 {title}
               </h2>
               <button
                 onClick={onClose}
-                className="w-8 h-8 mobile-M:w-10 mobile-M:h-10 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/10"
-                style={{ color: 'rgba(255, 255, 255, 0.6)' }}
+                className="w-8 h-8 mobile-M:w-10 mobile-M:h-10 flex items-center justify-center rounded-full transition-all duration-200"
+                style={{ color: theme.modal.buttonClose }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = theme.colors.surfaceHover;
+                  e.currentTarget.style.color = theme.modal.buttonCloseHover;
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = theme.modal.buttonClose;
+                }}
               >
                 <FaTimes className="text-sm mobile-M:text-base" />
               </button>
