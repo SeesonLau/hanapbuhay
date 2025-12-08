@@ -8,6 +8,7 @@ import { ProfileService } from '@/lib/services/profile-services';
 import { ReviewService } from '@/lib/services/reviews-services';
 import { ApplicationStatus } from '@/lib/constants/application-status';
 import ViewProfileModal from '../modals/ViewProfileModal';
+import { useTheme } from '@/hooks/useTheme';
 
 interface Applicant {
   userId: string;
@@ -36,6 +37,7 @@ export default function NewApplicantsSection({
   refreshTrigger = 0,
   onStatusChange,
 }: NewApplicantsSectionProps) {
+  const { theme } = useTheme();
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
@@ -104,7 +106,6 @@ export default function NewApplicantsSection({
     fetchApplicants();
   }, [fetchApplicants, refreshTrigger]);
 
-  // Filter and sort applicants
   const filteredAndSortedApplicants = useMemo(() => {
     let filtered = applicants;
     if (searchQuery.trim()) {
@@ -152,7 +153,10 @@ export default function NewApplicantsSection({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400"></div>
+        <div 
+          className="animate-spin rounded-full h-8 w-8 border-b-2"
+          style={{ borderColor: theme.colors.primary }}
+        ></div>
       </div>
     );
   }
@@ -164,7 +168,10 @@ export default function NewApplicantsSection({
         className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 justify-items-center p-2 max-h-[500px] overflow-y-auto scrollbar-hide scroll-smooth"
       >
         {filteredAndSortedApplicants.length === 0 ? (
-          <div className="col-span-full text-center py-8 text-gray-neutral400">
+          <div 
+            className="col-span-full text-center py-8"
+            style={{ color: theme.colors.textMuted }}
+          >
             {searchQuery.trim()
               ? `No applicants found matching "${searchQuery}"`
               : 'No pending applicants yet'}
@@ -189,7 +196,10 @@ export default function NewApplicantsSection({
 
       {isScrollable && !isAtBottom && filteredAndSortedApplicants.length > 0 && (
         <div className="absolute bottom-2 left-0 right-0 flex items-center justify-center">
-          <HiArrowDown className="w-4 h-4 animate-bounce text-gray-neutral500" />
+          <HiArrowDown 
+            className="w-4 h-4 animate-bounce"
+            style={{ color: theme.colors.textMuted }}
+          />
         </div>
       )}
 
