@@ -10,13 +10,9 @@ import RecommendedJobsSection from '@/components/home/RecommendedJobsSection';
 import PopularJobCategoriesSection from '@/components/home/PopularJobCategoriesSection';
 import Footer from '@/components/ui/Footer';
 import Image from 'next/image';
-import Button from '@/components/ui/Button';
 import {
-  getBlueDarkColor,
-  TYPOGRAPHY,
   fontClasses
 } from '@/styles';
-import Link from 'next/link';
 import { useTheme } from '@/hooks/useTheme';
 import {
   SpringParticle,

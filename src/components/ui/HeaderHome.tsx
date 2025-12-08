@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { getWhiteColor, TYPOGRAPHY, fontClasses } from '@/styles';
+import { getWhiteColor, TYPOGRAPHY } from '@/styles';
 import { useEffect, useState } from 'react';
 import { ROUTES } from '@/lib/constants';
 import { useTheme } from '@/hooks/useTheme';

@@ -1,6 +1,5 @@
 'use client';
 
-import { toast } from 'react-hot-toast';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import Banner from '@/components/ui/Banner';
 import StatsSection from '@/components/posts/StatsSection';

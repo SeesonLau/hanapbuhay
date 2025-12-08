@@ -1,6 +1,5 @@
 // src/components/ui/Footer.tsx
 'use client';
-import { getNeutral100Color, getNeutral600Color } from '@/styles/colors';
 import { fontClasses } from '@/styles/fonts';
 import { useState } from 'react';
 import { FaTwitter, FaFacebook, FaEnvelope } from "react-icons/fa";

@@ -10,15 +10,7 @@ import Button from '@/components/ui/Button';
 import TextBox from '@/components/ui/TextBox';
 import Image from 'next/image';
 import { IoArrowBack } from "react-icons/io5";
-import { 
-  getGrayColor, 
-  getNeutral600Color, 
-  TYPOGRAPHY_CLASSES, 
-  getBlueColor, 
-  getRedColor, 
-  getGreenColor,
-  getBlueDarkColor
-} from '@/styles';
+
 
 interface SignupFormProps {
   onBackClick?: () => void;

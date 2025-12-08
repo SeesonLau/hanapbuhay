@@ -4,20 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { HiMenu, HiX, HiBell, HiChevronDown } from 'react-icons/hi';
-import { FiSun } from 'react-icons/fi';
-import { 
-  getBlueColor, 
-  getGrayColor, 
-  getWhiteColor, 
-  getRedColor,
-  getNeutral100Color,
-  getNeutral300Color,
-  getNeutral600Color,
-  getPrimary500Color
-} from '@/styles/colors';
+import { HiBell, HiChevronDown } from 'react-icons/hi';
+import { getRedColor } from '@/styles/colors';
 import { fontClasses } from '@/styles/fonts';
-import { TYPOGRAPHY } from '@/styles/typography';
 import { AuthService } from '@/lib/services/auth-services';
 import { NotificationService } from '@/lib/services/notifications-services';
 import { ROUTES } from '@/lib/constants';

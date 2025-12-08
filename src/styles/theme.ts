@@ -1,5 +1,4 @@
 //theme.ts 
-// theme.ts with added modal-specific colors
 export type ThemeName = 'classic' | 'spring' | 'summer' | 'autumn' | 'winter';
 
 export interface Theme {
@@ -574,8 +573,6 @@ export const themes: Record<ThemeName, Theme> = {
       infoTextAccent: '#FF8C42',
     },
   },
-  
-  // WINTER THEME (COMPLETE):
   winter: {
     name: 'winter',
     displayName: 'Winter',

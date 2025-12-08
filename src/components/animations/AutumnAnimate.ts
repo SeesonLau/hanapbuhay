@@ -1,5 +1,4 @@
 // AutumnAnimate - Falling Leaves with heavy gravity and tumbling physics
-
 export interface AutumnParticle {
   x: number;
   y: number;

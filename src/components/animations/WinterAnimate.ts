@@ -1,5 +1,4 @@
 // WinterAnimate - Crystalline Snowfall with parallax depth and shimmer
-
 export interface WinterParticle {
   x: number;
   y: number;

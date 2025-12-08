@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from './Button';
 import { COLORS } from '@/styles/colors';
-import { TYPOGRAPHY } from '@/styles/typography';
 import { useTheme } from '@/hooks/useTheme';
 
 // --- SVG Icons ---

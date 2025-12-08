@@ -6,7 +6,6 @@ import { AuthService } from '@/lib/services/auth-services';
 import Button from '@/components/ui/Button';
 import TextBox from '@/components/ui/TextBox';
 import Image from 'next/image';
-import { IoArrowBack } from "react-icons/io5";
 import { useTheme } from '@/hooks/useTheme';
 
 interface ForgotPasswordFormProps {

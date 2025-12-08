@@ -1,5 +1,4 @@
 // SummerAnimate - Fireflies with wandering steering behaviors
-
 export interface SummerParticle {
   x: number;
   y: number;

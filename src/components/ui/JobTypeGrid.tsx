@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import { SubTypes, JobType } from "@/lib/constants/job-types";
 import { JobTypeTag, StaticJobTypeTag } from "@/components/ui/TagItem";
 import { useTheme } from "@/hooks/useTheme";
