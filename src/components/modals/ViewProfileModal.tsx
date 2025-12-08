@@ -6,6 +6,7 @@ import ProfileContactSection from "../view-profile/ProfileContactSection";
 import JobListSection from "../view-profile/JobListSection";
 import ReviewListSection from "../view-profile/ReviewListSection";
 import ProjectListSection from "../view-profile/ProjectListSection";
+import { useTheme } from '@/hooks/useTheme';
 
 interface ViewProfileModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ interface ViewProfileModalProps {
 type MobileSection = 'contact' | 'reviews' | 'projects' | 'jobs';
 
 export default function ViewProfileModal({ isOpen, onClose, userId, userType = 'applicant' }: ViewProfileModalProps) {
+  const { theme } = useTheme();
   const [activeSection, setActiveSection] = useState<MobileSection>('contact');
 
   useEffect(() => {
@@ -49,13 +51,15 @@ export default function ViewProfileModal({ isOpen, onClose, userId, userType = '
 
   return (
     <motion.div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50 px-2 sm:px-4"
+      className="fixed inset-0 z-40 flex items-center justify-center px-2 sm:px-4"
+      style={{ backgroundColor: theme.modal.overlay }}
       onClick={handleBackdropClick}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
       <motion.div
-        className="bg-white rounded-lg shadow-lg w-full max-w-6xl h-[70vh] md:h-[90vh] overflow-hidden relative z-50 flex flex-col"
+        className="rounded-lg shadow-lg w-full max-w-6xl h-[70vh] md:h-[90vh] overflow-hidden relative z-50 flex flex-col"
+        style={{ backgroundColor: theme.modal.background }}
         onClick={(e) => e.stopPropagation()}
         initial={{ y: 20, opacity: 0, scale: 0.98 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -63,23 +67,42 @@ export default function ViewProfileModal({ isOpen, onClose, userId, userType = '
       >
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="absolute top-4 right-4 z-50 text-2xl text-gray-600 hover:text-gray-800 transition-colors"
+          className="absolute top-4 right-4 z-50 text-2xl transition-colors"
+          style={{ color: theme.modal.buttonClose }}
+          onMouseOver={(e) => e.currentTarget.style.color = theme.modal.buttonCloseHover}
+          onMouseOut={(e) => e.currentTarget.style.color = theme.modal.buttonClose}
           aria-label="Close modal"
         >
           ×
         </button>
 
         {/* Mobile Navigation Tabs */}
-        <div className="flex md:hidden border-b border-gray-200 pt-10 px-2 bg-white">
+        <div 
+          className="flex md:hidden border-b pt-10 px-2"
+          style={{ 
+            backgroundColor: theme.modal.background,
+            borderBottomColor: theme.modal.headerBorder
+          }}
+        >
           {sections.map((section) => (
             <button
               key={section.id}
               onClick={() => setActiveSection(section.id)}
-              className={`flex-1 py-3 text-sm font-medium transition-colors border-b-2 ${
-                activeSection === section.id
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+              className="flex-1 py-3 text-sm font-medium transition-colors border-b-2"
+              style={{
+                borderBottomColor: activeSection === section.id ? theme.colors.primary : 'transparent',
+                color: activeSection === section.id ? theme.colors.primary : theme.colors.textMuted
+              }}
+              onMouseOver={(e) => {
+                if (activeSection !== section.id) {
+                  e.currentTarget.style.color = theme.colors.textSecondary;
+                }
+              }}
+              onMouseOut={(e) => {
+                if (activeSection !== section.id) {
+                  e.currentTarget.style.color = theme.colors.textMuted;
+                }
+              }}
             >
               {section.label}
             </button>
@@ -112,15 +135,24 @@ export default function ViewProfileModal({ isOpen, onClose, userId, userType = '
 
         {/* Desktop Two Column Layout */}
         <div className="hidden md:flex flex-row h-full overflow-hidden">
-          <div className="flex flex-col flex-shrink-0 border-r border-gray-200 overflow-y-auto">
+          <div 
+            className="flex flex-col flex-shrink-0 border-r overflow-y-auto"
+            style={{ borderRightColor: theme.modal.sectionBorder }}
+          >
             <ProfileContactSection userId={userId} />
-            <div className="border-t border-gray-200 my-2"></div>
+            <div 
+              className="border-t my-2"
+              style={{ borderTopColor: theme.modal.sectionBorder }}
+            />
             <ReviewListSection userId={userId} />
           </div>
 
           <div className="flex flex-col flex-1 min-w-0 overflow-y-auto">
             <ProjectListSection userId={userId} />
-            <div className="border-t border-gray-200 my-2"></div>
+            <div 
+              className="border-t my-2"
+              style={{ borderTopColor: theme.modal.sectionBorder }}
+            />
             <JobListSection userId={userId} userType={userType} />
           </div>
         </div>
