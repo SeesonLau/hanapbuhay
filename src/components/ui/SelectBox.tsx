@@ -1,5 +1,8 @@
 // src/components/ui/SelectBox.tsx
+'use client';
+
 import React, { forwardRef } from 'react';
+import { useTheme } from '@/hooks/useTheme';
 
 export interface SelectBoxProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
@@ -31,6 +34,7 @@ const SelectBox = forwardRef<HTMLSelectElement, SelectBoxProps>(({
   placeholder,
   ...props
 }, ref) => {
+  const { theme } = useTheme();
 
   const containerClasses = `flex flex-col items-start gap-[5px] ${className}`.trim();
   const containerWidth = width || (responsive ? '100%' : '400px');
@@ -42,31 +46,54 @@ const SelectBox = forwardRef<HTMLSelectElement, SelectBoxProps>(({
     border rounded-[10px] 
     ${responsive ? 'text-small sm:text-small' : 'text-small'}
     font-inter font-normal 
-    bg-white 
     transition-all duration-200
-    focus:outline-none focus:ring-2 focus:ring-primary-primary400 focus:border-transparent
-    disabled:bg-gray-neutral50 disabled:cursor-not-allowed
+    focus:outline-none focus:ring-2
+    disabled:cursor-not-allowed
     appearance-none
-    ${hasError || !!error ? 
-      'border-error-error500 focus:ring-error-error200' : 
-      'border-gray-neutral300 hover:border-gray-neutral400 focus:border-primary-primary500'
-    }
     ${responsive ? 'pr-9 sm:pr-9' : 'pr-9'}
   `.trim();
 
   const labelClasses = `
     ${responsive ? 'text-body sm:text-body' : 'text-body'}
-    font-semibold font-inter text-black
-    ${hasError || !!error ? 'text-error-error600' : ''}
-    ${required ? 'after:content-["*"] after:text-error-error500 after:ml-1' : ''}
+    font-semibold font-inter
+    ${required ? 'after:content-["*"] after:ml-1' : ''}
   `.trim();
 
-  const errorTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter text-error-error600 mt-1`;
-  const helperTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter text-gray-neutral500 mt-1`;
+  const errorTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter mt-1`;
+  const helperTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter mt-1`;
+
+  const selectStyle: React.CSSProperties = {
+    backgroundColor: disabled ? theme.colors.backgroundSecondary : theme.colors.surface,
+    borderColor: hasError || error ? theme.colors.error : theme.colors.border,
+    color: theme.colors.text,
+  };
+
+  const labelStyle: React.CSSProperties = {
+    color: hasError || error ? theme.colors.error : theme.colors.text,
+  };
+
+  const errorTextStyle: React.CSSProperties = {
+    color: theme.colors.error,
+  };
+
+  const helperTextStyle: React.CSSProperties = {
+    color: theme.colors.textMuted,
+  };
+
+  const iconStyle: React.CSSProperties = {
+    color: theme.colors.textMuted,
+  };
 
   return (
     <div className={containerClasses} style={{ width: containerWidth, maxWidth: responsive ? '100%' : undefined }}>
-      {label && <label className={labelClasses}>{label}</label>}
+      {label && (
+        <label className={labelClasses} style={labelStyle}>
+          {label}
+          {required && (
+            <span style={{ color: theme.colors.error }}>*</span>
+          )}
+        </label>
+      )}
 
       <div className="relative w-full">
         <select
@@ -76,6 +103,7 @@ const SelectBox = forwardRef<HTMLSelectElement, SelectBoxProps>(({
           disabled={disabled}
           required={required}
           className={selectClasses}
+          style={selectStyle}
           {...props}
         >
           {placeholder && (
@@ -89,14 +117,14 @@ const SelectBox = forwardRef<HTMLSelectElement, SelectBoxProps>(({
         </select>
 
         <div className="pointer-events-none absolute right-4 top-1/2 transform -translate-y-1/2">
-          <svg className="w-4 h-4 text-gray-neutral400" viewBox="0 0 20 20" fill="currentColor">
+          <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" style={iconStyle}>
             <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.585l3.71-3.354a.75.75 0 011.04 1.084l-4.25 3.834a.75.75 0 01-1.04 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
           </svg>
         </div>
       </div>
 
-      {error && <span className={errorTextClasses}>{error}</span>}
-      {!error && helperText && <span className={helperTextClasses}>{helperText}</span>}
+      {error && <span className={errorTextClasses} style={errorTextStyle}>{error}</span>}
+      {!error && helperText && <span className={helperTextClasses} style={helperTextStyle}>{helperText}</span>}
     </div>
   );
 });
