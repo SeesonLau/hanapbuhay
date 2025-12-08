@@ -2,7 +2,6 @@
 
 import React from "react";
 import { HiArrowDown } from "react-icons/hi";
-import { ViewToggle } from "@/components/ui/ViewToggle";
 import { JobPostCard } from "@/components/cards/JobPostCard";
 import { JobPostList } from "@/components/cards/JobPostList";
 import { ManageJobPostCard } from "@/components/cards/ManageJobPostCard";

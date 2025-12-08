@@ -1,5 +1,4 @@
 // SpringAnimate - Sakura/Pollen particles with gentle sine-wave swaying motion
-
 export interface SpringParticle {
   x: number;
   y: number;

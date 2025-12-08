@@ -6,10 +6,6 @@ import { motion, useInView } from 'framer-motion';
 import { JobPostCard } from '@/components/cards/JobPostCard';
 import { fontClasses } from '@/styles/fonts';
 import { useJobPosts } from '@/hooks/useJobPosts';
-import { Post } from '@/lib/models/posts';
-import { Gender } from '@/lib/constants/gender';
-import { ExperienceLevel } from '@/lib/constants/experience-level';
-import { SubTypes } from '@/lib/constants/job-types';
 import { useTheme } from '@/hooks/useTheme';
 
 export default function RecommendedJobsSection() {

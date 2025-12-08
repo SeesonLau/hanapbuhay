@@ -1,6 +1,5 @@
 // src/components/ui/TextBox.tsx
 import React, { forwardRef, useState, useEffect } from 'react';
-import { COLORS } from '@/styles';
 import { VscEye } from "react-icons/vsc";
 import { VscEyeClosed } from "react-icons/vsc";
 import { FaCheck } from "react-icons/fa6";

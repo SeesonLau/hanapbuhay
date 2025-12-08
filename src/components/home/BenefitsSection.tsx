@@ -2,7 +2,7 @@
 'use client';
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { FaHandshake, FaBriefcase, FaStar, FaMapMarkerAlt, FaBolt, FaShieldAlt } from 'react-icons/fa';
+import { FaStar, FaMapMarkerAlt, FaBolt, FaShieldAlt } from 'react-icons/fa';
 import { fontClasses } from '@/styles/fonts';
 import { useTheme } from '@/hooks/useTheme';
 

@@ -3,12 +3,6 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { 
-  getBlueColor, 
-  getGrayColor, 
-  getWhiteColor,
-  getNeutral100Color
-} from '@/styles/colors';
 import { ROUTES } from '@/lib/constants';
 import { useTheme } from '@/hooks/useTheme';
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { IoChevronDown, IoChevronForward } from 'react-icons/io5';
 import { JobType, SubTypes, getJobTypeOptions } from '@/lib/constants/job-types';
 import Checkbox from './Checkbox';
-import { getGrayColor, getTypographyClass, getTypographyStyle} from '@/styles';
+import { getTypographyClass, getTypographyStyle} from '@/styles';
 import { useTheme } from '@/hooks/useTheme';
 
 export interface JobTypeSelection {
