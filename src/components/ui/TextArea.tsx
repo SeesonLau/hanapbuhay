@@ -1,5 +1,8 @@
 // src/components/ui/TextArea.tsx
+'use client';
+
 import React, { forwardRef, useState, useEffect } from 'react';
+import { useTheme } from '@/hooks/useTheme';
 
 export interface TextAreaProps extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'type'> {
   label?: string;
@@ -18,7 +21,6 @@ export interface TextAreaProps extends Omit<React.TextareaHTMLAttributes<HTMLTex
   onValidationChange?: (isValid: boolean, error?: string) => void;
   showCharCount?: boolean;
   height?: string;
-  /** Visual variant: 'default' or 'glassmorphism' */
   variant?: 'default' | 'glassmorphism';
 }
 
@@ -47,6 +49,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
   onBlur,
   ...props
 }, ref) => {
+  const { theme } = useTheme();
   const [internalValue, setInternalValue] = useState(value || defaultValue || '');
   const [validationError, setValidationError] = useState<string | undefined>();
   const [touched, setTouched] = useState(false);
@@ -102,69 +105,59 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
   const currentError = error || (touched ? validationError : undefined);
   const isInErrorState = hasError || !!currentError;
 
-  const containerClasses = `
-    flex flex-col items-start gap-[5px] 
-    ${className}
+  const containerClasses = `flex flex-col items-start gap-[5px] ${className}`.trim();
+  const textareaWrapperClasses = `relative flex w-full ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`.trim();
+
+  const textareaClasses = `
+    w-full 
+    ${responsive ? 'px-4 py-3 sm:px-5 sm:py-3' : 'px-5 py-3'}
+    border rounded-[10px] 
+    ${responsive ? 'text-small sm:text-small' : 'text-small'}
+    font-inter font-normal 
+    transition-all duration-200
+    focus:outline-none focus:ring-2 focus:border-transparent
+    disabled:cursor-not-allowed
+    resize-none
+    placeholder:font-inter placeholder:font-normal placeholder:text-small
   `.trim();
 
-  const textareaWrapperClasses = `
-    relative flex w-full
-    ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+  const textareaStyle: React.CSSProperties = variant === 'glassmorphism' 
+    ? {
+        color: '#FFFFFF',
+        backgroundColor: isInErrorState ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(10px)',
+        borderColor: isInErrorState ? 'rgba(248, 113, 113, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+        ...(disabled && { backgroundColor: 'rgba(255, 255, 255, 0.05)', opacity: 0.5 }),
+      }
+    : {
+        backgroundColor: disabled ? theme.colors.backgroundSecondary : theme.colors.surface,
+        borderColor: isInErrorState ? theme.colors.error : theme.colors.border,
+        color: theme.colors.text,
+      };
+
+  const labelClasses = `
+    ${responsive ? 'text-body sm:text-body' : 'text-body'}
+    font-semibold font-inter
   `.trim();
 
-  const textareaClasses = variant === 'glassmorphism'
-    ? `
-      w-full 
-      ${responsive ? 'px-4 py-3 sm:px-5 sm:py-3' : 'px-5 py-3'}
-      border rounded-[10px] 
-      ${responsive ? 'text-small sm:text-small' : 'text-small'}
-      font-inter font-normal 
-      text-white
-      transition-all duration-200
-      focus:outline-none focus:ring-2 focus:border-transparent
-      disabled:cursor-not-allowed
-      resize-none
-      ${isInErrorState ? 
-        'border-red-400/50 focus:ring-red-400/20 bg-red-500/10 backdrop-blur-[10px]' : 
-        'border-white/20 hover:border-white/30 focus:border-blue-300/50 focus:ring-blue-300/20 bg-white/10 backdrop-blur-[10px] hover:bg-white/15'
+  const labelStyle: React.CSSProperties = variant === 'glassmorphism'
+    ? {
+        color: isInErrorState ? '#fca5a5' : '#FFFFFF',
       }
-      placeholder:text-white/50 placeholder:font-inter placeholder:font-normal placeholder:text-small
-      disabled:bg-white/5 disabled:opacity-50
-    `.trim()
-    : `
-      w-full 
-      ${responsive ? 'px-4 py-3 sm:px-5 sm:py-3' : 'px-5 py-3'}
-      border rounded-[10px] 
-      ${responsive ? 'text-small sm:text-small' : 'text-small'}
-      font-inter font-normal 
-      bg-white 
-      transition-all duration-200
-      focus:outline-none focus:ring-2 focus:ring-primary-primary400 focus:border-transparent
-      disabled:bg-gray-neutral50 disabled:cursor-not-allowed
-      resize-none
-      ${isInErrorState ? 
-        'border-error-error500 focus:ring-error-error200' : 
-        'border-gray-neutral300 hover:border-gray-neutral400 focus:border-primary-primary500'
-      }
-      placeholder:text-gray-neutral400 placeholder:font-inter placeholder:font-normal placeholder:text-small
-    `.trim();
+    : {
+        color: isInErrorState ? theme.colors.error : theme.colors.text,
+      };
 
-  const labelClasses = variant === 'glassmorphism'
-    ? `
-      ${responsive ? 'text-body sm:text-body' : 'text-body'}
-      font-semibold font-inter text-white
-      ${isInErrorState ? 'text-red-300' : ''}
-      ${required ? 'after:content-["*"] after:text-red-300 after:ml-1' : ''}
-    `.trim()
-    : `
-      ${responsive ? 'text-body sm:text-body' : 'text-body'}
-      font-semibold font-inter text-gray-neutral900
-      ${isInErrorState ? 'text-error-error600' : ''}
-      ${required ? 'after:content-["*"] after:text-error-error500 after:ml-1' : ''}
-    `.trim();
+  const helperTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter mt-1`;
+  const charCountClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter text-right`;
 
-  const helperTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter text-gray-neutral500 mt-1`;
-  const charCountClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter text-gray-neutral500 text-right`;
+  const helperTextStyle: React.CSSProperties = {
+    color: theme.colors.textMuted,
+  };
+
+  const charCountStyle: React.CSSProperties = {
+    color: theme.colors.textMuted,
+  };
 
   const containerWidth = width || (responsive ? '100%' : '400px');
   
@@ -177,8 +170,11 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
       style={{ width: containerWidth, maxWidth: responsive ? '100%' : undefined }}
     >
       {label && (
-        <label className={labelClasses}>
+        <label className={labelClasses} style={labelStyle}>
           {label}
+          {required && (
+            <span style={{ color: variant === 'glassmorphism' ? '#fca5a5' : theme.colors.error }}>*</span>
+          )}
         </label>
       )}
 
@@ -198,31 +194,34 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({
           onChange={handleChange}
           onBlur={handleBlur}
           className={textareaClasses}
-          style={{ height }}
+          style={{ ...textareaStyle, height }}
           {...props}
         />
 
-        {/* Validation Error Tooltip */}
         {currentError && showTooltip && (
           <div className="absolute right-0 bottom-full mb-2 z-50 pointer-events-none">
-            <div className="relative bg-error-error600 text-white px-2 py-1 rounded shadow-lg text-mini font-inter whitespace-nowrap max-w-xs">
+            <div 
+              className="relative px-2 py-1 rounded shadow-lg text-mini font-inter whitespace-nowrap max-w-xs"
+              style={{ backgroundColor: theme.colors.error, color: '#FFFFFF' }}
+            >
               {currentError}
-              {/* Arrow pointing down */}
-              <div className="absolute right-4 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-error-error600"></div>
+              <div 
+                className="absolute right-4 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px]"
+                style={{ borderTopColor: theme.colors.error }}
+              />
             </div>
           </div>
         )}
       </div>
 
       {showCharCount && !currentError && (
-        <span className={charCountClasses}>
+        <span className={charCountClasses} style={charCountStyle}>
           {charCountText}
         </span>
       )}
 
-      {/* Helper Text (errors now shown in tooltip on hover) */}
       {helperText && (
-        <span className={helperTextClasses}>
+        <span className={helperTextClasses} style={helperTextStyle}>
           {helperText}
         </span>
       )}

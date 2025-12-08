@@ -12,6 +12,7 @@ import {
   validatePassword,
   ValidationResult 
 } from '@/lib/utils/textbox-validation';
+import { useTheme } from '@/hooks/useTheme';
 
 export interface TextBoxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   /** The type of input field */
@@ -96,6 +97,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
   phonePrefix,
   ...props
 }, ref) => {
+  const { theme } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [internalValue, setInternalValue] = useState(value || defaultValue || '');
   const [validationError, setValidationError] = useState<string | undefined>();
@@ -105,19 +107,15 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
   
   const inputType = type === 'password' && showPassword ? 'text' : type;
 
-  // Validation function
   const validateInput = (inputValue: string): ValidationResult => {
-    // Custom validator takes precedence
     if (customValidator) {
       return customValidator(inputValue);
     }
 
-    // Required validation
     if (required && !inputValue.trim()) {
       return validateRequired(inputValue, label);
     }
 
-    // Type-specific validation (only if field has content)
     if (inputValue.trim()) {
       switch (type) {
         case 'email':
@@ -138,7 +136,6 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
     return { isValid: true };
   };
 
-  // Handle validation
   useEffect(() => {
     if (enableValidation && touched) {
       const validation = validateInput(String(internalValue));
@@ -148,7 +145,6 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
     }
   }, [internalValue, touched, enableValidation, required, type, min, max, minPasswordLength]);
 
-  // Update internal value when external value changes
   useEffect(() => {
     if (value !== undefined) {
       setInternalValue(value);
@@ -158,13 +154,9 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newValue = e.target.value;
     
-    // For phone type, only allow numbers and limit to 11 digits
     if (type === 'tel') {
-      // Remove any non-digit characters
       newValue = newValue.replace(/\D/g, '');
-      // Limit to 11 digits
       newValue = newValue.slice(0, 11);
-      // Update the event value
       e.target.value = newValue;
     }
     
@@ -177,26 +169,16 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
     onBlur?.(e);
   };
 
-  // Determine if we should show an error
   const currentError = error || (touched ? validationError : undefined);
   const isInErrorState = hasError || !!currentError;
 
-  // Icon size handling: allow 'sm' (12px), 'md' (16px) or explicit pixel number
   const computedIconSizeClass = typeof iconSize === 'number' ? '' : (iconSize === 'sm' ? 'w-3 h-3' : 'w-4 h-4');
   const computedIconInlineStyle: React.CSSProperties | undefined = typeof iconSize === 'number' ? { width: iconSize, height: iconSize } : undefined;
   const iconInnerClass = `${computedIconSizeClass} flex items-center justify-center`;
 
-  const containerClasses = `
-    flex flex-col items-start gap-[5px] 
-    ${className}
-  `.trim();
+  const containerClasses = `flex flex-col items-start gap-[5px] ${className}`.trim();
+  const inputWrapperClasses = `relative flex items-center w-full ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`.trim();
 
-  const inputWrapperClasses = `
-    relative flex items-center w-full
-    ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
-  `.trim();
-
-  // Determine if we have a right-side icon
   const hasRightIcon = (type === 'password' && (internalValue || value)) || 
                       (rightIcon !== undefined && type !== 'password') || 
                       (showSuccessIcon && isValid && touched && !currentError) || 
@@ -204,73 +186,64 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
 
   const hasPhonePrefix = type === 'tel' && phonePrefix;
   
-  const inputClasses = variant === 'glassmorphism' 
-    ? `
-      w-full 
-      ${responsive ? 'h-10 sm:h-10' : 'h-10'}
-      ${responsive ? 'px-4 py-1 sm:px-5 sm:py-2' : 'px-5 py-2'}
-      border rounded-[10px] 
-      ${responsive ? 'text-small sm:text-small' : 'text-small'}
-      font-inter font-normal 
-      text-white
-      transition-all duration-200
-      focus:outline-none focus:ring-2 focus:border-transparent
-      disabled:cursor-not-allowed
-      ${leftIcon ? (responsive ? 'pl-9 sm:pl-9' : 'pl-9') : (responsive ? 'pl-4 sm:pl-5' : 'pl-5')}
-      ${hasRightIcon ? (responsive ? 'pr-9 sm:pr-9' : 'pr-9') : (responsive ? 'pr-4 sm:pr-5' : 'pr-5')}
-      ${isInErrorState ? 
-        'border-red-400/50 focus:ring-red-400/20 bg-red-500/10 backdrop-blur-[10px]' : 
-        'border-white/20 hover:border-white/30 focus:border-blue-300/50 focus:ring-blue-300/20 bg-white/10 backdrop-blur-[10px] hover:bg-white/15'
-      }
-      placeholder:text-white/50 placeholder:font-inter placeholder:font-normal placeholder:text-small
-      disabled:bg-white/5 disabled:opacity-50
-    `.trim()
-    : `
-      w-full 
-      ${responsive ? 'h-10 sm:h-10' : 'h-10'}
-      ${responsive ? 'px-4 py-1 sm:px-5 sm:py-2' : 'px-5 py-2'}
-      border rounded-[10px] 
-      ${responsive ? 'text-small sm:text-small' : 'text-small'}
-      font-inter font-normal 
-      bg-white 
-      transition-all duration-200
-      focus:outline-none focus:ring-2 focus:ring-primary-primary400 focus:border-transparent
-      disabled:bg-gray-neutral50 disabled:cursor-not-allowed
-      ${leftIcon ? (responsive ? 'pl-9 sm:pl-9' : 'pl-9') : (responsive ? 'pl-4 sm:pl-5' : 'pl-5')}
-      ${hasRightIcon ? (responsive ? 'pr-9 sm:pr-9' : 'pr-9') : (responsive ? 'pr-4 sm:pr-5' : 'pr-5')}
-      ${isInErrorState ? 
-        'border-error-error500 focus:ring-error-error200' : 
-        'border-gray-neutral300 hover:border-gray-neutral400 focus:border-primary-primary500'
-      }
-      placeholder:text-gray-neutral400 placeholder:font-inter placeholder:font-normal placeholder:text-small
-    `.trim();
+  const inputClasses = `
+    w-full 
+    ${responsive ? 'h-10 sm:h-10' : 'h-10'}
+    ${responsive ? 'px-4 py-1 sm:px-5 sm:py-2' : 'px-5 py-2'}
+    border rounded-[10px] 
+    ${responsive ? 'text-small sm:text-small' : 'text-small'}
+    font-inter font-normal 
+    transition-all duration-200
+    focus:outline-none focus:ring-2 focus:border-transparent
+    disabled:cursor-not-allowed
+    ${leftIcon ? (responsive ? 'pl-9 sm:pl-9' : 'pl-9') : (responsive ? 'pl-4 sm:pl-5' : 'pl-5')}
+    ${hasRightIcon ? (responsive ? 'pr-9 sm:pr-9' : 'pr-9') : (responsive ? 'pr-4 sm:pr-5' : 'pr-5')}
+    placeholder:font-inter placeholder:font-normal placeholder:text-small
+    ${type === 'password' ? '[&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden' : ''}
+  `.trim();
 
-  // CSS to hide browser's default password toggle
+  const inputStyle: React.CSSProperties = variant === 'glassmorphism' 
+    ? {
+        color: '#FFFFFF',
+        backgroundColor: isInErrorState ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(10px)',
+        borderColor: isInErrorState ? 'rgba(248, 113, 113, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+        ...(disabled && { backgroundColor: 'rgba(255, 255, 255, 0.05)', opacity: 0.5 }),
+      }
+    : {
+        backgroundColor: disabled ? theme.colors.backgroundSecondary : theme.colors.surface,
+        borderColor: isInErrorState ? theme.colors.error : theme.colors.border,
+        color: theme.colors.text,
+      };
+
   const passwordInputStyles = type === 'password' ? {
-    // Hide Edge/IE password reveal button  
     WebkitTextSecurity: showPassword ? 'none' : 'disc',
   } as React.CSSProperties : {};
 
-  const labelClasses = variant === 'glassmorphism'
-    ? `
-      ${responsive ? 'text-body sm:text-body' : 'text-body'}
-      font-semibold font-inter text-white
-      ${isInErrorState ? 'text-red-300' : ''}
-    `.trim()
-    : `
-      ${responsive ? 'text-body sm:text-body' : 'text-body'}
-      font-semibold font-inter text-black
-      ${isInErrorState ? 'text-error-error600' : ''}
-    `.trim();
+  const labelClasses = `
+    ${responsive ? 'text-body sm:text-body' : 'text-body'}
+    font-semibold font-inter
+  `.trim();
 
-  const iconClasses = variant === 'glassmorphism'
-    ? `absolute top-1/2 transform -translate-y-1/2 text-white/60 flex items-center justify-center ${responsive ? 'w-4 h-4 sm:w-4 sm:h-4' : 'w-4 h-4'}`
-    : `absolute top-1/2 transform -translate-y-1/2 text-gray-neutral400 flex items-center justify-center ${responsive ? 'w-4 h-4 sm:w-4 sm:h-4' : 'w-4 h-4'}`;
+  const labelStyle: React.CSSProperties = variant === 'glassmorphism'
+    ? {
+        color: isInErrorState ? '#fca5a5' : '#FFFFFF',
+      }
+    : {
+        color: isInErrorState ? theme.colors.error : theme.colors.text,
+      };
 
-  const errorTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter text-error-error600 mt-1`;
-  const helperTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter text-gray-neutral500 mt-1`;
+  const iconClasses = `absolute top-1/2 transform -translate-y-1/2 flex items-center justify-center ${responsive ? 'w-4 h-4 sm:w-4 sm:h-4' : 'w-4 h-4'}`;
+  
+  const iconStyle: React.CSSProperties = variant === 'glassmorphism'
+    ? { color: 'rgba(255, 255, 255, 0.6)' }
+    : { color: theme.colors.textMuted };
 
-  // Determine container width - match original design specs
+  const helperTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter mt-1`;
+  const helperTextStyle: React.CSSProperties = {
+    color: theme.colors.textMuted,
+  };
+
   const containerWidth = width || (responsive ? '100%' : '400px');
 
   return (
@@ -278,29 +251,28 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
       className={containerClasses}
       style={{ width: containerWidth, maxWidth: responsive ? '100%' : undefined }}
     >
-        {/* Label */}
       {label && (
-        <label className={labelClasses}>
+        <label className={labelClasses} style={labelStyle}>
           {label}
+          {required && (
+            <span style={{ color: variant === 'glassmorphism' ? '#fca5a5' : theme.colors.error }}>*</span>
+          )}
         </label>
       )}
 
-      {/* Input Container */}
       <div 
         className={inputWrapperClasses}
         onMouseEnter={() => currentError && setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
-        {/* Left Icon */}
         {leftIcon && (
-          <div className={`${iconClasses} ${responsive ? 'left-3 sm:left-3' : 'left-3'}`}>
+          <div className={`${iconClasses} ${responsive ? 'left-3 sm:left-3' : 'left-3'}`} style={iconStyle}>
             <div className={iconInnerClass} style={computedIconInlineStyle}>
               {leftIcon}
             </div>
           </div>
         )}
 
-        {/* Input Field */}
         <input
           ref={ref}
           type={inputType}
@@ -312,23 +284,26 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
           value={value !== undefined ? value : internalValue}
           onChange={handleChange}
           onBlur={handleBlur}
-          className={`${inputClasses} ${type === 'password' ? '[&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-credentials-auto-fill-button]:hidden [&::-webkit-strong-password-auto-fill-button]:hidden' : ''}`}
-          style={passwordInputStyles}
+          className={inputClasses}
+          style={{ ...inputStyle, ...passwordInputStyles }}
           {...props}
         />
 
-        {/* Validation Error Tooltip */}
         {currentError && showTooltip && (
           <div className="absolute right-0 bottom-full mb-2 z-50 pointer-events-none">
-            <div className="relative bg-error-error600 text-white px-2 py-1 rounded shadow-lg text-mini font-inter whitespace-nowrap max-w-xs">
+            <div 
+              className="relative px-2 py-1 rounded shadow-lg text-mini font-inter whitespace-nowrap max-w-xs"
+              style={{ backgroundColor: theme.colors.error, color: '#FFFFFF' }}
+            >
               {currentError}
-              {/* Arrow pointing down */}
-              <div className="absolute right-4 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-error-error600"></div>
+              <div 
+                className="absolute right-4 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px]"
+                style={{ borderTopColor: theme.colors.error }}
+              />
             </div>
           </div>
         )}
 
-        {/* Right Icon or Password Toggle */}
         {hasRightIcon && (
           <div className={`${iconClasses} ${responsive ? 'right-3 sm:right-3' : 'right-3'}`}>
             <div className={iconInnerClass} style={computedIconInlineStyle}>
@@ -336,7 +311,8 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className={`${variant === 'glassmorphism' ? 'text-white/60 hover:text-white/90' : 'text-gray-neutral400 hover:text-gray-neutral600'} transition-colors duration-200 ${computedIconSizeClass} flex items-center justify-center`}
+                  className={`transition-colors duration-200 ${computedIconSizeClass} flex items-center justify-center`}
+                  style={{ color: variant === 'glassmorphism' ? 'rgba(255, 255, 255, 0.6)' : theme.colors.textMuted }}
                   tabIndex={-1}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
@@ -347,22 +323,28 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
                   )}
                 </button>
               ) : showLoadingIcon ? (
-                <div className={`${computedIconSizeClass} border ${variant === 'glassmorphism' ? 'border-white/40 border-t-transparent' : 'border-gray-400 border-t-transparent'} rounded-full animate-spin`} style={computedIconInlineStyle}></div>
+                <div 
+                  className={`${computedIconSizeClass} rounded-full animate-spin`} 
+                  style={{
+                    ...computedIconInlineStyle,
+                    border: `2px solid ${variant === 'glassmorphism' ? 'rgba(255, 255, 255, 0.4)' : theme.colors.textMuted}`,
+                    borderTopColor: 'transparent',
+                  }}
+                />
               ) : showSuccessIcon && isValid && touched && !currentError ? (
                 successIcon || (
-                  <FaCheck className={`${computedIconSizeClass} text-success-success500`} style={computedIconInlineStyle} />
+                  <FaCheck className={computedIconSizeClass} style={{ ...computedIconInlineStyle, color: theme.colors.success }} />
                 )
               ) : (
-                rightIcon
+                <div style={iconStyle}>{rightIcon}</div>
               )}
             </div>
           </div>
         )}
       </div>
 
-      {/* Helper Text (errors now shown in tooltip on hover) */}
       {helperText && (
-        <span className={helperTextClasses}>
+        <span className={helperTextClasses} style={helperTextStyle}>
           {helperText}
         </span>
       )}
