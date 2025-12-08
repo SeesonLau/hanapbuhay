@@ -92,7 +92,7 @@ export const JobPostList: React.FC<JobPostListProps> = ({ jobData, className = '
         e.currentTarget.style.backgroundColor = theme.colors.cardHover;
         e.currentTarget.style.transform = 'translateY(-2px)';
         e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
-        e.currentTarget.style.borderColor = theme.colors.border;
+        e.currentTarget.style.borderColor = theme.colors.borderLight;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = theme.colors.cardBg;
