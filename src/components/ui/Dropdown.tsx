@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { CgSortAz, CgSortZa } from "react-icons/cg";
+import { useTheme } from '@/hooks/useTheme';
 
 export type DropdownOption = {
   id: string;
@@ -19,35 +20,44 @@ type Props = {
   className?: string;
   fullWidth?: boolean;
   renderOption?: (opt: DropdownOption, isSelected: boolean) => React.ReactNode;
-  defaultToFirst?: boolean; // New prop to control auto-selection of first option
+  defaultToFirst?: boolean;
 };
 
-function CaretIcon({ className = '', isOpen = false }: { className?: string; isOpen?: boolean }) {
+function CaretIcon({ className = '', isOpen = false, style }: { className?: string; isOpen?: boolean; style?: React.CSSProperties }) {
   return isOpen ? (
-    <IoIosArrowUp className={className} />
+    <IoIosArrowUp className={className} style={style} />
   ) : (
-    <IoIosArrowDown className={className} />
+    <IoIosArrowDown className={className} style={style} />
   );
 }
 
-function SortIcon({ flipped = false, className = '' }: { flipped?: boolean; className?: string }) {
+function SortIcon({ flipped = false, className = '', style }: { flipped?: boolean; className?: string; style?: React.CSSProperties }) {
   return flipped ? (
-    <CgSortZa className={className} />
+    <CgSortZa className={className} style={style} />
   ) : (
-    <CgSortAz className={className} />
+    <CgSortAz className={className} style={style} />
   );
 }
 
 export const IconSortAsc = (props: { className?: string }) => <CgSortAz className={props.className} />;
 export const IconSortDesc = (props: { className?: string }) => <CgSortZa className={props.className} />;
 
-const Dropdown = memo(function Dropdown({ options, value = null, onChange, placeholder = 'Sort', className = '', fullWidth = false, renderOption, defaultToFirst = true }: Props) {
+const Dropdown = memo(function Dropdown({ 
+  options, 
+  value = null, 
+  onChange, 
+  placeholder = 'Sort', 
+  className = '', 
+  fullWidth = false, 
+  renderOption, 
+  defaultToFirst = true 
+}: Props) {
+  const { theme } = useTheme();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<DropdownOption | null>(() => {
     if (value != null) {
       return options.find((o) => o.value === value || o.id === String(value)) ?? null;
     }
-    // If no value provided and defaultToFirst is true, select the first option
     return defaultToFirst && options.length > 0 ? options[0] : null;
   });
   const [activeIndex, setActiveIndex] = useState<number>(-1);
@@ -104,7 +114,6 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
       setSelected(found);
       return;
     }
-    // If no value provided and defaultToFirst is true, select the first option
     if (defaultToFirst && options.length > 0) {
       setSelected(options[0]);
     } else {
@@ -112,7 +121,6 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
     }
   }, [value, options, defaultToFirst]);
 
-  // Auto-call onChange when first option is selected by default
   useEffect(() => {
     if (value == null && defaultToFirst && options.length > 0 && selected === options[0]) {
       onChange?.(options[0]);
@@ -130,7 +138,6 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
     if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       setOpen(true);
-      // Remove setTimeout to make it more responsive
       listRef.current?.focus();
     }
   }, []);
@@ -168,25 +175,67 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
         aria-expanded={open}
         onClick={toggleOpen}
         onKeyDown={onTriggerKeyDown}
-        className={`flex items-center justify-start ${fullWidth ? 'w-full' : 'w-auto'} px-1.5 mobile-M:px-2 py-1.5 mobile-M:py-2 bg-white hover:bg-gray-neutral50 shadow rounded-md text-body font-medium text-gray-neutral900 border border-gray-neutral200 transition-all duration-150 focus:outline-none focus:border-gray-neutral400 focus:shadow-md ${open ? 'border-gray-neutral400 shadow-md' : ''}`}
+        className={`flex items-center justify-start ${fullWidth ? 'w-full' : 'w-auto'} px-1.5 mobile-M:px-2 py-1.5 mobile-M:py-2 shadow rounded-md text-body font-medium border transition-all duration-300`}
+        style={{
+          backgroundColor: theme.colors.surface,
+          color: theme.colors.text,
+          borderColor: open ? theme.colors.border : theme.colors.borderLight,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = theme.colors.surfaceHover;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = theme.colors.surface;
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = theme.colors.border;
+        }}
+        onBlur={(e) => {
+          if (!open) {
+            e.currentTarget.style.borderColor = theme.colors.borderLight;
+          }
+        }}
       >
         <div className="flex items-center gap-1 mobile-M:gap-2 truncate">
           {selected ? (
             <>
               {selected.icon && (
-                <span className="w-4 h-4 mobile-M:w-5 mobile-M:h-5 flex-shrink-0 text-gray-neutral600">{selected.icon}</span>
+                <span 
+                  className="w-4 h-4 mobile-M:w-5 mobile-M:h-5 flex-shrink-0 transition-colors duration-300"
+                  style={{ color: theme.colors.textMuted }}
+                >
+                  {selected.icon}
+                </span>
               )}
-              <span className="truncate text-tiny mobile-M:text-small font-inter">{selected.label}</span>
+              <span 
+                className="truncate text-tiny mobile-M:text-small font-inter transition-colors duration-300"
+                style={{ color: theme.colors.text }}
+              >
+                {selected.label}
+              </span>
               {selected.id.includes('salary') && (
-                <SortIcon flipped={selected.id.includes('desc')} className="w-4 h-4 mobile-M:w-5 mobile-M:h-5 text-gray-neutral600" />
+                <SortIcon 
+                  flipped={selected.id.includes('desc')} 
+                  className="w-4 h-4 mobile-M:w-5 mobile-M:h-5 transition-colors duration-300" 
+                  style={{ color: theme.colors.textMuted }}
+                />
               )}
             </>
           ) : (
-            <span className="truncate text-tiny mobile-M:text-small font-inter">{placeholder}</span>
+            <span 
+              className="truncate text-tiny mobile-M:text-small font-inter transition-colors duration-300"
+              style={{ color: theme.colors.textMuted }}
+            >
+              {placeholder}
+            </span>
           )}
         </div>
         <span className="ml-1 mobile-M:ml-2">
-          <CaretIcon className="w-2.5 h-2.5 mobile-M:w-3 mobile-M:h-3 text-gray-neutral600 transition-colors duration-150" isOpen={open} />
+          <CaretIcon 
+            className="w-2.5 h-2.5 mobile-M:w-3 mobile-M:h-3 transition-colors duration-300" 
+            isOpen={open}
+            style={{ color: theme.colors.textMuted }}
+          />
         </span>
       </button>
 
@@ -196,7 +245,6 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
           tabIndex={0}
           onKeyDown={onListKeyDown}
           onMouseLeave={() => {
-            // When mouse leaves the dropdown, reset active index to selected item
             if (selected) {
               const selectedIndex = options.findIndex(opt => opt.id === selected.id);
               setActiveIndex(selectedIndex >= 0 ? selectedIndex : -1);
@@ -206,8 +254,15 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
           }}
           role="menu"
           aria-orientation="vertical"
-          style={triggerWidth && !fullWidth ? { minWidth: `${triggerWidth}px` } : undefined}
-          className={`absolute mt-2 ${fullWidth ? 'left-0 right-0' : ''} ${fullWidth ? 'w-full' : ''} bg-white shadow-lg rounded-lg z-50 focus:outline-none border border-gray-neutral200`}
+          style={triggerWidth && !fullWidth ? { 
+            minWidth: `${triggerWidth}px`,
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.borderLight,
+          } : {
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.borderLight,
+          }}
+          className={`absolute mt-2 ${fullWidth ? 'left-0 right-0' : ''} ${fullWidth ? 'w-full' : ''} shadow-lg rounded-lg z-50 focus:outline-none border transition-colors duration-300`}
         >
           <div className="flex flex-col py-2">
             {options.map((opt, idx) => {
@@ -221,13 +276,16 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
                   aria-current={isSelected || undefined}
                   onClick={() => handleSelect(opt)}
                   onMouseEnter={() => setActiveIndex(idx)}
-                  className={`flex items-center gap-2 px-3 py-1 text-tiny font-medium font-inter text-gray-neutral900 text-left w-full transition-colors duration-150 ${
-                    isActive 
-                      ? 'bg-gray-neutral100' 
+                  className={`flex items-center gap-2 px-3 py-1 text-tiny font-medium font-inter text-left w-full transition-colors duration-300`}
+                  style={{
+                    backgroundColor: isActive 
+                      ? theme.colors.surfaceHover
                       : isSelected 
-                        ? 'bg-gray-neutral50 font-semibold' 
-                        : 'hover:bg-gray-neutral100'
-                  }`}
+                        ? theme.colors.pastelBgLight
+                        : 'transparent',
+                    color: theme.colors.text,
+                    fontWeight: isSelected ? 600 : 500,
+                  }}
                 >
                   {renderOption ? (
                     <div className="w-full">
@@ -235,9 +293,22 @@ const Dropdown = memo(function Dropdown({ options, value = null, onChange, place
                     </div>
                   ) : (
                     <>
-                      {opt.icon ? <span className="w-5 h-5 flex-shrink-0 text-gray-neutral600">{opt.icon}</span> : null}
+                      {opt.icon ? (
+                        <span 
+                          className="w-5 h-5 flex-shrink-0 transition-colors duration-300"
+                          style={{ color: theme.colors.textMuted }}
+                        >
+                          {opt.icon}
+                        </span>
+                      ) : null}
                       <span className="flex-1 text-small font-inter">{opt.label}</span>
-                      {opt.id.includes('salary') && <SortIcon flipped={opt.id.includes('desc')} className="w-6 h-6 text-gray-neutral600" />}
+                      {opt.id.includes('salary') && (
+                        <SortIcon 
+                          flipped={opt.id.includes('desc')} 
+                          className="w-6 h-6 transition-colors duration-300"
+                          style={{ color: theme.colors.textMuted }}
+                        />
+                      )}
                     </>
                   )}
                 </button>

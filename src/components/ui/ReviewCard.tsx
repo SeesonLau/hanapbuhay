@@ -1,5 +1,6 @@
 import React from 'react'
 import StarRating from './StarRating'
+import { useTheme } from '@/hooks/useTheme'
 
 interface ReviewCardProps {
   rating: number
@@ -16,6 +17,8 @@ export default function ReviewCard({
   avatarUrl,
   className = ''
 }: ReviewCardProps) {
+  const { theme } = useTheme();
+
   // Generate initials from name for fallback avatar
   const getInitials = (name: string) => {
     return name
@@ -27,20 +30,30 @@ export default function ReviewCard({
   }
 
   return (
-    <div className={`
-      flex flex-col
-      px-5 py-3
-      w-full min-h-[81px]
-      bg-white
-      border border-gray-neutral300
-      rounded-[10px]
-      box-border
-      ${className}
-    `}>
+    <div 
+      className={`
+        flex flex-col
+        px-5 py-3
+        w-full min-h-[81px]
+        rounded-[10px]
+        box-border
+        transition-all duration-300
+        ${className}
+      `}
+      style={{
+        backgroundColor: theme.colors.cardBg,
+        border: `1px solid ${theme.colors.cardBorder}`
+      }}
+    >
       {/* Header Row: Avatar + Name/Rating Column */}
       <div className="flex items-center gap-3 mb-2">
         {/* Avatar */}
-        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center overflow-hidden">
+        <div 
+          className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center overflow-hidden transition-colors duration-300"
+          style={{
+            backgroundColor: theme.colors.pastelBg
+          }}
+        >
           {avatarUrl ? (
             <img 
               src={avatarUrl} 
@@ -48,7 +61,12 @@ export default function ReviewCard({
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="text-tiny font-medium text-purple-700">
+            <span 
+              className="text-tiny font-medium transition-colors duration-300"
+              style={{
+                color: theme.colors.pastelText
+              }}
+            >
               {getInitials(reviewerName)}
             </span>
           )}
@@ -57,7 +75,12 @@ export default function ReviewCard({
         {/* Name and Rating Column */}
         <div className="flex flex-col gap-0 flex-1">
           {/* Name */}
-          <h4 className="text-mini font-alexandria font-semibold text-gray-neutral900">
+          <h4 
+            className="text-mini font-alexandria font-semibold transition-colors duration-300"
+            style={{
+              color: theme.colors.text
+            }}
+          >
             {reviewerName}
           </h4>
 
@@ -72,7 +95,12 @@ export default function ReviewCard({
       </div>
 
       {/* Review text - full width, aligned with left edge */}
-      <p className="text-mini font-alexandria font-light text-gray-neutral600">
+      <p 
+        className="text-mini font-alexandria font-light transition-colors duration-300"
+        style={{
+          color: theme.colors.textSecondary
+        }}
+      >
         {reviewText}
       </p>
     </div>

@@ -1,5 +1,6 @@
 import React, { forwardRef, useId, useState, useEffect } from 'react';
 import { ImCheckboxChecked, ImCheckboxUnchecked } from "react-icons/im";
+import { useTheme } from '@/hooks/useTheme';
 
 export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size'> {
   label?: string;
@@ -32,6 +33,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
     ...rest
   } = props;
 
+  const { theme } = useTheme();
   const autoId = useId();
   const inputId = id || `checkbox-${autoId}`;
 
@@ -59,34 +61,39 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
       className={`inline-flex items-center gap-1 select-none ${responsive ? 'w-full sm:w-auto' : ''} ${className}`}
     >
       <div
-        className={`flex items-center w-full px-3 py-1 gap-1 transition-colors duration-150 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        className={`flex items-center w-full px-3 py-1 gap-1 transition-colors duration-300 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       >
         {/* Visual checkbox */}
         <div
           aria-hidden
-          className={`flex items-center justify-center transition-all duration-150 ${s.icon}`}
+          className={`flex items-center justify-center transition-all duration-300 ${s.icon}`}
         >
           {checked ? (
             <ImCheckboxChecked
-              className={`${s.icon} transition-all duration-150 ${
-                disabled
-                  ? 'text-gray-neutral300'
-                  : 'text-primary-primary500'
-              }`}
+              className={`${s.icon} transition-all duration-300`}
+              style={{
+                color: disabled ? theme.colors.borderLight : theme.colors.primary
+              }}
             />
           ) : (
             <ImCheckboxUnchecked
-              className={`${s.icon} transition-all duration-150 ${
-                disabled
-                  ? 'text-gray-neutral300'
-                  : 'text-gray-neutral400'
-              }`}
+              className={`${s.icon} transition-all duration-300`}
+              style={{
+                color: disabled ? theme.colors.borderLight : theme.colors.textMuted
+              }}
             />
           )}
         </div>
 
-    {/* Text label */}
-    <span className={`${s.text} font-normal text-gray-neutral600 ${disabled ? 'text-gray-neutral400' : ''}`}>{label}</span>
+        {/* Text label */}
+        <span 
+          className={`${s.text} font-normal transition-colors duration-300`}
+          style={{
+            color: disabled ? theme.colors.textMuted : theme.colors.textSecondary
+          }}
+        >
+          {label}
+        </span>
 
         {/* Hidden native checkbox for accessibility */}
         <input

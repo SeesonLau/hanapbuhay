@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import FilterSection, { FilterOptions } from './FilterSection';
+import { useTheme } from '@/hooks/useTheme';
 
 export interface FilterModalProps {
   isOpen: boolean;
@@ -18,6 +19,8 @@ const FilterModal: React.FC<FilterModalProps> = ({
   initialFilters,
   variant = 'default',
 }) => {
+  const { theme } = useTheme();
+
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -46,7 +49,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
   // Close modal when screen size changes to large
   useEffect(() => {
     const handleResize = () => {
-      // Check if screen is lg or larger (1024px)
       if (window.innerWidth >= 1024 && isOpen) {
         onClose();
       }
@@ -67,21 +69,22 @@ const FilterModal: React.FC<FilterModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop with animation */}
       <div
-        className="absolute inset-0 bg-black transition-opacity duration-300 ease-in-out"
+        className="absolute inset-0 transition-opacity duration-300 ease-in-out"
         style={{
-          opacity: isOpen ? 0.5 : 0,
+          backgroundColor: theme.modal.overlay,
+          opacity: isOpen ? 1 : 0,
         }}
         onClick={onClose}
       />
 
       {/* Modal Panel - Slide from left */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-full max-w-[240px] bg-white shadow-2xl transform transition-transform duration-300 ease-out flex flex-col"
+        className="absolute left-0 top-0 bottom-0 w-full max-w-[240px] shadow-2xl transform transition-all duration-300 ease-out flex flex-col"
         style={{
+          backgroundColor: theme.modal.background,
           transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
         }}
       >
-
         {/* Filter Content - Scrollable */}
         <div className="flex-1 overflow-y-auto">
           <FilterSection
@@ -94,8 +97,13 @@ const FilterModal: React.FC<FilterModalProps> = ({
         </div>
 
         {/* Swipe indicator for mobile */}
-        <div className="sm:hidden absolute top-2 left-1/2 transform -translate-x-1/2">
-          <div className="w-12 h-1 bg-gray-neutral300 rounded-full" />
+        <div 
+          className="sm:hidden absolute top-2 left-1/2 transform -translate-x-1/2"
+        >
+          <div 
+            className="w-12 h-1 rounded-full transition-colors duration-300"
+            style={{ backgroundColor: theme.colors.borderLight }}
+          />
         </div>
       </div>
     </div>
