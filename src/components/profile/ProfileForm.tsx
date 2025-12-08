@@ -10,6 +10,7 @@ import TextBox from "../ui/TextBox";
 import SelectBox from "../ui/SelectBox";
 import Button from "../ui/Button";
 import { getProvinces, getCitiesByProvince } from "@/lib/constants/philippines-locations";
+import { useTheme } from '@/hooks/useTheme';
 
 interface ProfileFormProps {
   userId: string;
@@ -17,7 +18,7 @@ interface ProfileFormProps {
 }
 
 export default function ProfileForm({ userId, className }: ProfileFormProps) {
-
+  const { theme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState<Profile & { email?: string | null } | null>(null);
@@ -130,7 +131,6 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
         uploadedUrl = result;
       }
 
-      // Combine location into a single address string (format: "province | city | specificaddress")
       const fullAddress = [province, city, streetAddress]
         .filter(Boolean)
         .join(' | ');
@@ -156,17 +156,36 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div style={{ color: theme.colors.textSecondary }}>Loading...</div>
+    );
+  }
 
   return (
-    <div className={`${className} relative h-full py-3 max-[425px]:py-2 md:py-6 lg:py-8 px-3 max-[425px]:px-2 md:px-10 lg:px-12 bg-white rounded-xl shadow-md flex flex-col gap-2.5 max-[425px]:gap-2 md:gap-5 overflow-y-auto`}>
-
+    <div 
+      className={`${className} relative h-full py-3 max-[425px]:py-2 md:py-6 lg:py-8 px-3 max-[425px]:px-2 md:px-10 lg:px-12 rounded-xl shadow-md flex flex-col gap-2.5 max-[425px]:gap-2 md:gap-5 overflow-y-auto`}
+      style={{ backgroundColor: theme.colors.cardBg }}
+    >
       {/* Edit Icon */}
       <button
         onClick={() => setIsEditing(!isEditing)}
-        className="absolute top-3 right-3 max-[425px]:top-2 max-[425px]:right-2 p-1.5 max-[425px]:p-1 rounded-full hover:bg-gray-neutral100 transition z-10"
+        className="absolute top-3 right-3 max-[425px]:top-2 max-[425px]:right-2 p-1.5 max-[425px]:p-1 rounded-full transition z-10"
+        style={{
+          backgroundColor: 'transparent',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = theme.colors.backgroundSecondary;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
       >
-        <Edit3 size={18} className="text-gray-neutral600 max-[425px]:w-3.5 max-[425px]:h-3.5" />
+        <Edit3 
+          size={18} 
+          className="max-[425px]:w-3.5 max-[425px]:h-3.5"
+          style={{ color: theme.colors.textSecondary }}
+        />
       </button>
 
       {/* Profile Picture Upload */}
@@ -181,6 +200,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
                 src={previewUrl}
                 alt="Profile"
                 className={`w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 object-cover rounded-full border ${isEditing ? 'group-hover:brightness-75 transition-all duration-200' : ''}`}
+                style={{ borderColor: theme.colors.border }}
               />
               {isEditing && (
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -189,17 +209,35 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
               )}
             </>
           ) : (
-            <div className={`w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 flex items-center justify-center rounded-full bg-gray-neutral100 relative ${isEditing ? 'group-hover:bg-gray-neutral200 transition' : ''}`}>
-              <FaUserCircle className="w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 text-gray-neutral400" />
+            <div 
+              className={`w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 flex items-center justify-center rounded-full relative ${isEditing ? 'transition' : ''}`}
+              style={{ backgroundColor: theme.colors.backgroundSecondary }}
+              onMouseEnter={(e) => {
+                if (isEditing) {
+                  e.currentTarget.style.backgroundColor = theme.colors.background;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (isEditing) {
+                  e.currentTarget.style.backgroundColor = theme.colors.backgroundSecondary;
+                }
+              }}
+            >
+              <FaUserCircle 
+                className="w-20 h-20 max-[425px]:w-12 max-[425px]:h-12"
+                style={{ color: theme.colors.textMuted }}
+              />
               {isEditing && (
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <Camera className="w-8 h-8 max-[425px]:w-5 max-[425px]:h-5 text-gray-neutral600" />
+                  <Camera 
+                    className="w-8 h-8 max-[425px]:w-5 max-[425px]:h-5"
+                    style={{ color: theme.colors.textSecondary }}
+                  />
                 </div>
               )}
             </div>
           )}
           
-          {/* Hidden file input */}
           <input
             ref={fileInputRef}
             type="file"
@@ -211,10 +249,16 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
 
         {displayName && (
           <div className="flex flex-col gap-0.5 max-[425px]:gap-0">
-            <p className="font-alexandria font-bold text-gray-neutral700 text-body max-[425px]:text-sm">
+            <p 
+              className="font-alexandria font-bold text-body max-[425px]:text-sm"
+              style={{ color: theme.colors.text }}
+            >
               {displayName}
             </p>
-            <p className="font-alexandria text-gray-neutral400 text-xs max-[425px]:text-[10px] max-[425px]:leading-tight">
+            <p 
+              className="font-alexandria text-xs max-[425px]:text-[10px] max-[425px]:leading-tight"
+              style={{ color: theme.colors.textMuted }}
+            >
               {email}
             </p>
           </div>
@@ -305,7 +349,12 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
 
       {/* Address Section*/}
       <div>
-        <div className="text-small max-[425px]:text-xs font-semibold mb-1.5 max-[425px]:mb-1 text-gray-neutral900">Address</div>
+        <div 
+          className="text-small max-[425px]:text-xs font-semibold mb-1.5 max-[425px]:mb-1"
+          style={{ color: theme.colors.text }}
+        >
+          Address
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-[425px]:gap-2">
           <SelectBox 
             options={getProvinces().map((prov) => ({ value: prov, label: prov }))}
@@ -339,7 +388,7 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
         </div>
       </div>
         
-      {/* Save Button - Always rendered but only visible when editing */}
+      {/* Save Button */}
       <div className={`flex justify-center transition-opacity duration-200 ${isEditing ? 'opacity-100' : 'opacity-0 pointer-events-none h-0'}`}>
         <Button
           onClick={handleSave}

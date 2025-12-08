@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Button from '@/components/ui/Button';
+import { useTheme } from '@/hooks/useTheme';
 
 interface ManageJobActionButtonsProps {
   onEdit: () => void;
@@ -26,22 +27,63 @@ export const ManageJobActionButtons: React.FC<ManageJobActionButtonsProps> = ({
   isOpenLock = true,
   onToggleLock,
 }) => {
+  const { theme } = useTheme();
+
   if (variant === 'compact') {
     return (
       <div className={`inline-flex items-center gap-1 ${className}`}>
-        <button className="inline-flex items-center justify-center h-[30px] px-3 bg-white border border-gray-300 rounded-[10px] text-xs font-medium hover:bg-gray-50 transition-colors" onClick={(e) => { e.stopPropagation(); onViewApplicants(); }}>
-          <span className="text-blue-600 mr-1">{applicantCount}</span>
+        <button 
+          className="inline-flex items-center justify-center h-[30px] px-3 border rounded-[10px] text-xs font-medium transition-colors" 
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.border,
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.surface}
+          onClick={(e) => { e.stopPropagation(); onViewApplicants(); }}
+        >
+          <span 
+            className="mr-1"
+            style={{ color: theme.colors.primary }}
+          >
+            {applicantCount}
+          </span>
           <img src="/icons/profile.svg" alt="Applicants" className="w-[15px] h-[15px]" />
         </button>
-        <button className="inline-flex items-center justify-center h-[30px] w-[36px] bg-white border border-gray-300 rounded-[10px] hover:bg-gray-50 transition-colors" onClick={(e) => { e.stopPropagation(); onEdit(); }}>
+        <button 
+          className="inline-flex items-center justify-center h-[30px] w-[36px] border rounded-[10px] transition-colors" 
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.border,
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.surface}
+          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+        >
           <img src="/icons/edit.svg" alt="Edit" className="w-[15px] h-[15px]" />
         </button>
-        <button className="inline-flex items-center justify-center h-[30px] w-[36px] bg-white border border-gray-300 rounded-[10px] hover:bg-gray-50 transition-colors" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+        <button 
+          className="inline-flex items-center justify-center h-[30px] w-[36px] border rounded-[10px] transition-colors" 
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.border,
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.surface}
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+        >
           <img src="/icons/delete.svg" alt="Delete" className="w-[15px] h-[15px]" />
         </button>
         {showLockToggle && (
           <button
-            className={`inline-flex items-center justify-center h-[30px] px-2 rounded-[10px] bg-white border border-gray-300 ${isOpenLock ? 'text-success-success400' : 'text-gray-neutral500'}`}
+            className="inline-flex items-center justify-center h-[30px] px-2 rounded-[10px] border transition-colors"
+            style={{
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.border,
+              color: isOpenLock ? theme.colors.success : theme.colors.textMuted
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.surface}
             onClick={(e) => { e.stopPropagation(); onToggleLock?.(); }}
             aria-label={isOpenLock ? 'Open' : 'Closed'}
           >
@@ -67,14 +109,46 @@ export const ManageJobActionButtons: React.FC<ManageJobActionButtonsProps> = ({
   if (variant === 'horizontal') {
     return (
       <div className={`flex gap-0 ${className}`}>
-        <button className="flex items-center justify-center flex-1 h-[30px] bg-white border border-gray-300 rounded-l-[10px] text-xs font-medium hover:bg-gray-50 transition-colors" onClick={(e) => { e.stopPropagation(); onViewApplicants(); }}>
-          <span className="text-blue-600 mr-1">{applicantCount}</span>
+        <button 
+          className="flex items-center justify-center flex-1 h-[30px] border rounded-l-[10px] text-xs font-medium transition-colors" 
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.border,
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.surface}
+          onClick={(e) => { e.stopPropagation(); onViewApplicants(); }}
+        >
+          <span 
+            className="mr-1"
+            style={{ color: theme.colors.primary }}
+          >
+            {applicantCount}
+          </span>
           <img src="/icons/profile.svg" alt="Applicants" className="w-[15px] h-[15px]" />
         </button>
-        <button className="flex items-center justify-center flex-1 h-[30px] bg-white border-t border-b border-gray-300 hover:bg-gray-50 transition-colors" onClick={(e) => { e.stopPropagation(); onEdit(); }}>
+        <button 
+          className="flex items-center justify-center flex-1 h-[30px] border-t border-b transition-colors" 
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.border,
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.surface}
+          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+        >
           <img src="/icons/edit.svg" alt="Edit" className="w-[15px] h-[15px]" />
         </button>
-        <button className="flex items-center justify-center flex-1 h-[30px] bg-white border border-gray-300 rounded-r-[10px] hover:bg-gray-50 transition-colors" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
+        <button 
+          className="flex items-center justify-center flex-1 h-[30px] border rounded-r-[10px] transition-colors" 
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.border,
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.surface}
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+        >
           <img src="/icons/delete.svg" alt="Delete" className="w-[15px] h-[15px]" />
         </button>
       </div>

@@ -8,6 +8,7 @@ import { JobPostList } from "@/components/cards/JobPostList";
 import { ManageJobPostCard } from "@/components/cards/ManageJobPostCard";
 import { ManageJobPostList } from "@/components/cards/ManageJobPostList";
 import type { JobPostData } from "@/hooks/useJobPosts";
+import { useTheme } from "@/hooks/useTheme";
 
 type Variant = "find" | "manage";
 
@@ -46,6 +47,7 @@ const PostsSection: React.FC<Props> = ({
   onDelete,
   onToggleLock,
 }) => {
+  const { theme } = useTheme();
   const observerTarget = React.useRef<HTMLDivElement>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [isScrollable, setIsScrollable] = React.useState(false);
@@ -85,9 +87,38 @@ const PostsSection: React.FC<Props> = ({
     return () => el.removeEventListener("scroll", handleScroll);
   }, [jobs, viewMode]);
 
-  if (loading && (!jobs || jobs.length === 0)) return <div className="text-center py-8">Loading job posts...</div>;
-  if (error) return <div className="text-center py-8 text-red-600">{error}</div>;
-  if (!jobs || jobs.length === 0) return <div className="text-center py-8 text-gray-500">No job posts available.</div>;
+  if (loading && (!jobs || jobs.length === 0)) {
+    return (
+      <div 
+        className="text-center py-8"
+        style={{ color: theme.colors.textMuted }}
+      >
+        Loading job posts...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div 
+        className="text-center py-8"
+        style={{ color: theme.colors.error }}
+      >
+        {error}
+      </div>
+    );
+  }
+
+  if (!jobs || jobs.length === 0) {
+    return (
+      <div 
+        className="text-center py-8"
+        style={{ color: theme.colors.textMuted }}
+      >
+        No job posts available.
+      </div>
+    );
+  }
 
   const isManage = variant === "manage";
 
@@ -130,20 +161,39 @@ const PostsSection: React.FC<Props> = ({
               <div ref={observerTarget} className="w-full flex justify-center items-center py-6 snap-start">
                 <button
                   onClick={onLoadMore}
-                  className="flex flex-col items-center gap-2 px-6 py-4 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer border-none bg-transparent"
+                  className="flex flex-col items-center gap-2 px-6 py-4 rounded-lg transition-colors cursor-pointer border-none bg-transparent"
+                  style={{
+                    backgroundColor: 'transparent',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <HiArrowDown className="w-6 h-6 text-primary-primary500 animate-bounce" />
-                  <span className="text-small text-gray-neutral600 font-medium">Scroll for more</span>
+                  <HiArrowDown 
+                    className="w-6 h-6 animate-bounce" 
+                    style={{ color: theme.colors.primary }}
+                  />
+                  <span 
+                    className="text-small font-medium"
+                    style={{ color: theme.colors.textMuted }}
+                  >
+                    Scroll for more
+                  </span>
                 </button>
               </div>
             )}
             {hasMore && jobs.length > 0 && isLoadingMore && (
-              <div className="w-full text-center py-4 snap-start">
-                <div className="text-gray-600">Loading more job posts...</div>
+              <div 
+                className="w-full text-center py-4 snap-start"
+                style={{ color: theme.colors.textMuted }}
+              >
+                Loading more job posts...
               </div>
             )}
             {!hasMore && jobs.length > 0 && (
-              <div className="w-full text-center py-4 text-gray-500 snap-start">
+              <div 
+                className="w-full text-center py-4 snap-start"
+                style={{ color: theme.colors.textMuted }}
+              >
               </div>
             )}
           </div>
@@ -170,18 +220,27 @@ const PostsSection: React.FC<Props> = ({
           {hasMore && jobs.length > 0 && !isLoadingMore && (
             <div ref={observerTarget} className="w-full flex justify-center items-center py-6">
               <div className="flex flex-col items-center gap-2">
-                <HiArrowDown className="w-6 h-6 text-primary-primary500 animate-bounce" />
-                <span className="text-small text-gray-neutral600"></span>
+                <HiArrowDown 
+                  className="w-6 h-6 animate-bounce" 
+                  style={{ color: theme.colors.primary }}
+                />
+                <span className="text-small"></span>
               </div>
             </div>
           )}
           {hasMore && jobs.length > 0 && isLoadingMore && (
-            <div className="w-full text-center py-4">
-              <div className="text-gray-600">Loading more job posts...</div>
+            <div 
+              className="w-full text-center py-4"
+              style={{ color: theme.colors.textMuted }}
+            >
+              Loading more job posts...
             </div>
           )}
           {!hasMore && jobs.length > 0 && (
-            <div className="w-full text-center py-4 text-gray-500">
+            <div 
+              className="w-full text-center py-4"
+              style={{ color: theme.colors.textMuted }}
+            >
               You&apos;ve reached the end
             </div>
           )}

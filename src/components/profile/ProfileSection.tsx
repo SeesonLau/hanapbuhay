@@ -1,6 +1,7 @@
 'use client';
 
 import ProfileForm from "./ProfileForm";
+import { useTheme } from '@/hooks/useTheme';
 
 interface ProfileSectionProps {
   userId: string;
@@ -8,6 +9,8 @@ interface ProfileSectionProps {
 }
 
 export default function ProfileSection({ userId, className }: ProfileSectionProps) {
+  const { theme } = useTheme();
+  
   return (
     <div
       className={`
@@ -16,7 +19,10 @@ export default function ProfileSection({ userId, className }: ProfileSectionProp
         md:items-start md:text-left 
       `}
     >
-      <h3 className="text-description font-inter font-bold text-gray-neutral700">
+      <h3 
+        className="text-description font-inter font-bold"
+        style={{ color: theme.colors.text }}
+      >
         Personal Details
       </h3>
       <ProfileForm userId={userId} className="w-full" />

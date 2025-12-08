@@ -11,10 +11,12 @@ import ProjectsSection from '@/components/profile/ProjectSection';
 import Banner from '@/components/ui/Banner';
 import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 import { ArrowLeft, Briefcase } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 
 type ViewMode = 'profile' | 'work-experience';
 
 export default function ProfilePage() {
+  const { theme } = useTheme();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [contentReady, setContentReady] = useState(false);
@@ -88,8 +90,14 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-default overflow-x-hidden">
-      <div className="fixed inset-0 -z-10 bg-gray-default" />
+    <div 
+      className="min-h-screen flex flex-col overflow-x-hidden"
+      style={{ backgroundColor: theme.colors.background }}
+    >
+      <div 
+        className="fixed inset-0 -z-10"
+        style={{ backgroundColor: theme.colors.background }}
+      />
       <Preloader
         message={PreloaderMessages.LOADING_PROFILE}
         isVisible={!contentReady}
@@ -109,7 +117,16 @@ export default function ProfilePage() {
                     {/* View Work Experience Button */}
                     <button
                       onClick={handleViewProjects}
-                      className="absolute top-0 right-0 z-10 flex items-center justify-center w-10 h-10 bg-blue-400 hover:bg-blue-500 text-white rounded-full transition-colors duration-200 shadow-md"
+                      className="absolute top-0 right-0 z-10 flex items-center justify-center w-10 h-10 text-white rounded-full transition-colors duration-200 shadow-md"
+                      style={{
+                        backgroundColor: theme.colors.primary,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = theme.colors.primaryHover;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = theme.colors.primary;
+                      }}
                       aria-label="View Work Experience"
                     >
                       <Briefcase className="w-5 h-5" />
@@ -124,7 +141,16 @@ export default function ProfilePage() {
                     {/* Back to Profile Button */}
                     <button
                       onClick={handleBackToProfile}
-                      className="absolute top-0 left-0 z-10 flex items-center justify-center w-10 h-10 bg-blue-400 hover:bg-blue-500 text-white rounded-full transition-colors duration-200 shadow-md"
+                      className="absolute top-0 left-0 z-10 flex items-center justify-center w-10 h-10 text-white rounded-full transition-colors duration-200 shadow-md"
+                      style={{
+                        backgroundColor: theme.colors.primary,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = theme.colors.primaryHover;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = theme.colors.primary;
+                      }}
                       aria-label="Back to Profile"
                     >
                       <ArrowLeft className="w-5 h-5" />
@@ -138,7 +164,10 @@ export default function ProfilePage() {
               {/* Desktop View (above 768px) */}
               <div className="hidden lg:flex w-full">
                 {user && <ProfileSection userId={user.userId} className="flex-1" />}
-                <div className="w-px bg-gray-neutral300 -my-3 flex-shrink-0"></div>
+                <div 
+                  className="w-px -my-3 flex-shrink-0"
+                  style={{ backgroundColor: theme.colors.border }}
+                ></div>
                 {user && <ProjectsSection userId={user.userId} className="flex-1" />}
               </div>
             </div>

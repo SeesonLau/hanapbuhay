@@ -5,6 +5,7 @@ import StatCardFindJobs from '@/components/cards/StatCardFindJobs';
 import StatCardAppliedJobs from '@/components/cards/StatCardAppliedJobs';
 import StatCardManageJobs from '@/components/cards/StatCardManageJobs';
 import type { Stats } from '@/hooks/useStats';
+import { useTheme } from '@/hooks/useTheme';
 
 type Variant = 'findJobs' | 'appliedJobs' | 'manageJobs';
 
@@ -17,8 +18,29 @@ interface Props {
 }
 
 const StatsSection: React.FC<Props> = ({ stats, variant, loading, error, onStatClick }) => {
-  if (loading) return <div className="max-w-4xl mx-auto text-center py-6">Loading statistics...</div>;
-  if (error) return <div className="max-w-4xl mx-auto text-center py-6 text-red-600">{error}</div>;
+  const { theme } = useTheme();
+
+  if (loading) {
+    return (
+      <div 
+        className="max-w-4xl mx-auto text-center py-6"
+        style={{ color: theme.colors.textMuted }}
+      >
+        Loading statistics...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div 
+        className="max-w-4xl mx-auto text-center py-6"
+        style={{ color: theme.colors.error }}
+      >
+        {error}
+      </div>
+    );
+  }
 
   if (variant === 'findJobs') {
     return (

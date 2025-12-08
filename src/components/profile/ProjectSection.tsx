@@ -7,6 +7,7 @@ import { ProjectService } from '@/lib/services/project-services';
 import ProjectAddModal from '../modals/ProjectModal';
 import ProjectCard from '../cards/ProjectCard'; 
 import AddButton from "@/assets/add.svg";
+import { useTheme } from '@/hooks/useTheme';
 
 interface ProjectsSectionProps {
   userId: string;
@@ -14,6 +15,7 @@ interface ProjectsSectionProps {
 }
 
 export default function ProjectsSection({ userId, className }: ProjectsSectionProps) {
+  const { theme } = useTheme();
   const [projects, setProjects] = useState<Project[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -63,7 +65,10 @@ export default function ProjectsSection({ userId, className }: ProjectsSectionPr
     <>
       <div className={`${className} flex flex-col gap-3 px-5 relative`}>
         <div className="flex items-center justify-center gap-4 lg:justify-start">
-          <h3 className="text-description font-inter font-bold text-gray-neutral700">
+          <h3 
+            className="text-description font-inter font-bold"
+            style={{ color: theme.colors.text }}
+          >
             Work Experience
           </h3>
           {/* Desktop Add Button */}
@@ -107,14 +112,17 @@ export default function ProjectsSection({ userId, className }: ProjectsSectionPr
         </div>
 
         <div
-          className="absolute left-0 right-0 flex items-center justify-center p-2 text-sm text-gray-neutral500 pointer-events-none"
-          style={{ bottom: '-0.5rem' }} 
+          className="absolute left-0 right-0 flex items-center justify-center p-2 text-sm pointer-events-none"
+          style={{ 
+            bottom: '-0.5rem',
+            color: theme.colors.textMuted
+          }}
         >
           <HiArrowDown className="w-4 h-4 animate-bounce" />
         </div>
       </div>
 
-      {/* Floating Add Button - Mobile/Tablet only (768px and below) */}
+      {/* Floating Add Button - Mobile/Tablet only */}
       {!showModal && (
         <button
           aria-label="Work Experience"
