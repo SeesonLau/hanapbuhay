@@ -11,6 +11,7 @@ import { getNotificationRoute } from "@/lib/utils/notification-router";
 import { HiBell } from "react-icons/hi";
 import { IoClose } from "react-icons/io5";
 import Button from "@/components/ui/Button";
+import { useTheme } from "@/hooks/useTheme";
 
 interface NotificationPopUpProps {
   isScrolled?: boolean;
@@ -18,9 +19,10 @@ interface NotificationPopUpProps {
 }
 
 const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = false, onClose }) => {
+  const { theme } = useTheme();
   const router = useRouter();
   const [displayCount, setDisplayCount] = useState(5);
-  const [maxHeight, setMaxHeight] = useState(380); // 5 cards * 76px = 380px
+  const [maxHeight, setMaxHeight] = useState(380);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [enableScrollLoad, setEnableScrollLoad] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -30,7 +32,6 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
   const scrollRef = useRef<HTMLDivElement>(null);
   const isLoadingRef = useRef(false);
 
-  // Ensure we're on the client side for portal
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -83,7 +84,7 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
   };
 
   const handleDeleteClick = async (e: React.MouseEvent, notificationId: string) => {
-    e.stopPropagation(); // Prevent notification click
+    e.stopPropagation();
     await deleteNotification(notificationId);
   };
 
@@ -125,7 +126,6 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
   const handleSeePrevious = () => {
     setMaxHeight(456);
     setEnableScrollLoad(true);
-
     setDisplayCount(prev => Math.min(6, notifications.length));
   };
 
@@ -134,29 +134,40 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
   const remainingCount = notifications.length - displayCount;
   const showSeePreviousButton = !enableScrollLoad && notifications.length > 5;
 
-  // Don't render until mounted (client-side only for portal)
   if (!mounted) return null;
 
   const notificationContent = (
     <div 
-      className={`fixed right-4 w-[500px] max-w-[calc(100vw-2rem)] bg-white shadow-lg rounded-2xl border border-gray-200 z-[60] overflow-hidden transition-all duration-300 ${
+      className={`fixed right-4 w-[500px] max-w-[calc(100vw-2rem)] shadow-lg rounded-2xl border z-[60] overflow-hidden transition-all duration-300 ${
         isScrolled ? 'top-14' : 'top-16'
       }`}
       style={{
         backdropFilter: 'blur(10px)',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backgroundColor: theme.modal.background,
+        borderColor: theme.modal.headerBorder,
         boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
       }}
     >
       {/* Header */}
-      <div className="relative p-3 border-b border-gray-200 flex items-center sm:justify-center">
-
-        <div className="flex items-center gap-2 ">
-          <HiBell className="w-4 h-4 sm:w-5 sm:h-5 text-gray-neutral700" />
-          <span className="font-bold text-gray-neutral700 text-base sm:text-lead">
+      <div 
+        className="relative p-3 border-b flex items-center sm:justify-center"
+        style={{ borderBottomColor: theme.modal.headerBorder }}
+      >
+        <div className="flex items-center gap-2">
+          <HiBell 
+            className="w-4 h-4 sm:w-5 sm:h-5" 
+            style={{ color: theme.colors.textSecondary }}
+          />
+          <span 
+            className="font-bold text-base sm:text-lead"
+            style={{ color: theme.colors.textSecondary }}
+          >
             Notifications
             {unreadCount > 0 && (
-              <span className="ml-2 px-1.5 py-0.5 text-[10px] sm:text-xs font-medium text-white bg-blue-600 rounded-full">
+              <span 
+                className="ml-2 px-1.5 py-0.5 text-[10px] sm:text-xs font-medium text-white rounded-full"
+                style={{ backgroundColor: theme.colors.primary }}
+              >
                 {unreadCount}
               </span>
             )}
@@ -166,7 +177,10 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
         {unreadCount > 0 && (
           <button
             onClick={markAllAsRead}
-            className="absolute right-3 text-[10px] sm:text-xs text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap"
+            className="absolute right-3 text-[10px] sm:text-xs font-medium whitespace-nowrap transition-colors"
+            style={{ color: theme.colors.primary }}
+            onMouseOver={(e) => e.currentTarget.style.color = theme.colors.primaryHover}
+            onMouseOut={(e) => e.currentTarget.style.color = theme.colors.primary}
           >
             Mark all read
           </button>
@@ -187,16 +201,28 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
         }}
       >
         {(userLoading || loading) && notifications.length === 0 ? (
-          <div className="p-8 text-center text-gray-neutral500">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+          <div 
+            className="p-8 text-center"
+            style={{ color: theme.colors.textMuted }}
+          >
+            <div 
+              className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto"
+              style={{ borderColor: theme.colors.primary }}
+            />
             <p className="mt-2 text-sm">Loading notifications...</p>
           </div>
         ) : !userId ? (
-          <div className="p-8 text-center text-gray-neutral500">
+          <div 
+            className="p-8 text-center"
+            style={{ color: theme.colors.textMuted }}
+          >
             <p className="text-sm">Please log in to view notifications</p>
           </div>
         ) : notifications.length === 0 ? (
-          <div className="p-8 text-center text-gray-neutral500">
+          <div 
+            className="p-8 text-center"
+            style={{ color: theme.colors.textMuted }}
+          >
             <HiBell className="w-12 h-12 mx-auto mb-2 opacity-30" />
             <p className="text-sm">No notifications yet</p>
           </div>
@@ -225,25 +251,55 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
                   className={`
                     absolute top-2 right-2 
                     p-1.5 rounded-full 
-                    bg-white shadow-md
-                    hover:bg-red-50 hover:shadow-lg
+                    shadow-md
                     transition-all duration-200
                     ${hoveredNotifId === notif.notificationId ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}
                   `}
+                  style={{ 
+                    backgroundColor: theme.colors.surface,
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = theme.colors.pastelBg;
+                    e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = theme.colors.surface;
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+                  }}
                   aria-label="Delete notification"
                 >
-                  <IoClose className="w-4 h-4 text-gray-600 hover:text-red-600" />
+                  <IoClose 
+                    className="w-4 h-4 transition-colors" 
+                    style={{ color: theme.colors.textMuted }}
+                    onMouseOver={(e) => e.currentTarget.style.color = theme.colors.error}
+                    onMouseOut={(e) => e.currentTarget.style.color = theme.colors.textMuted}
+                  />
                 </button>
               </div>
             ))}
             
             {/* Loading indicator */}
             {isLoadingMore && enableScrollLoad && (
-              <div className="mx-2 my-2 flex items-center justify-center min-h-[60px] gap-4 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 animate-pulse snap-start">
-                <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+              <div 
+                className="mx-2 my-2 flex items-center justify-center min-h-[60px] gap-4 px-4 py-3 rounded-lg border animate-pulse snap-start"
+                style={{
+                  backgroundColor: theme.colors.background,
+                  borderColor: theme.colors.borderLight
+                }}
+              >
+                <div 
+                  className="w-10 h-10 rounded-full"
+                  style={{ backgroundColor: theme.colors.borderLight }}
+                />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  <div 
+                    className="h-4 rounded w-3/4"
+                    style={{ backgroundColor: theme.colors.borderLight }}
+                  />
+                  <div 
+                    className="h-3 rounded w-1/2"
+                    style={{ backgroundColor: theme.colors.borderLight }}
+                  />
                 </div>
               </div>
             )}
@@ -253,7 +309,10 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
 
       {/* See Previous Notifications Button */}
       {showSeePreviousButton && (
-        <div className="p-3 border-t border-gray-200">
+        <div 
+          className="p-3 border-t"
+          style={{ borderTopColor: theme.modal.headerBorder }}
+        >
           <Button
             variant="neutral300"
             size="tiny"
@@ -267,7 +326,6 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
     </div>
   );
 
-  // Use portal to render outside of parent stacking context (Banner)
   return createPortal(notificationContent, document.body);
 };
 

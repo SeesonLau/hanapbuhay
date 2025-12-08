@@ -4,6 +4,7 @@ import React from "react";
 import { HiOutlineBriefcase, HiOutlineCheckCircle, HiOutlineChatAlt2, HiOutlineUser } from "react-icons/hi";
 import { Notification } from "@/lib/models/notification";
 import { NotificationType } from "@/lib/constants/notification-types";
+import { useTheme } from "@/hooks/useTheme";
 
 interface NotificationCardProps {
   notif: Notification;
@@ -37,23 +38,6 @@ function getNotificationIcon(type: NotificationType) {
   }
 }
 
-function getColorScheme(type: NotificationType, isRead: boolean) {
-  if (isRead) {
-    return { bg: "bg-gray-200", icon: "text-gray-500", badge: "bg-gray-600" };
-  }
-
-  switch (type) {
-    case NotificationType.JOB_APPLICATION:
-      return { bg: "bg-blue-500", icon: "text-white", badge: "bg-blue-600" };
-    case NotificationType.APPLICATION_ACCEPTED:
-      return { bg: "bg-green-500", icon: "text-white", badge: "bg-green-600" };
-    case NotificationType.NEW_MESSAGE:
-      return { bg: "bg-purple-500", icon: "text-white", badge: "bg-purple-600" };
-    default:
-      return { bg: "bg-blue-500", icon: "text-white", badge: "bg-blue-600" };
-  }
-}
-
 function parseMessageWithItalic(message: string) {
   const parts = message.split(/(\*[^*]+\*)/g);
   
@@ -72,21 +56,63 @@ export default function NotificationCard({
   actorAvatar, 
   onClick 
 }: NotificationCardProps) {
+  const { theme } = useTheme();
   const timeAgo = getTimeAgo(notif.createdAt);
   const Icon = getNotificationIcon(notif.type);
-  const colors = getColorScheme(notif.type, notif.isRead);
+
+  // Get color scheme based on notification type and read status
+  const getIconBgColor = () => {
+    if (notif.isRead) return theme.colors.borderLight;
+    
+    switch (notif.type) {
+      case NotificationType.JOB_APPLICATION:
+        return theme.colors.primary;
+      case NotificationType.APPLICATION_ACCEPTED:
+        return theme.colors.success;
+      case NotificationType.NEW_MESSAGE:
+        return theme.colors.secondary;
+      default:
+        return theme.colors.primary;
+    }
+  };
+
+  const getBadgeColor = () => {
+    switch (notif.type) {
+      case NotificationType.JOB_APPLICATION:
+        return theme.colors.primaryDark;
+      case NotificationType.APPLICATION_ACCEPTED:
+        return theme.colors.success;
+      case NotificationType.NEW_MESSAGE:
+        return theme.colors.secondaryHover;
+      default:
+        return theme.colors.primaryDark;
+    }
+  };
 
   return (
     <div
       onClick={onClick}
-      className={`mx-2 my-2 cursor-pointer flex items-center transition-all duration-200
-        min-h-[60px] gap-4 px-4 py-3
-        bg-white hover:bg-gray-50 active:bg-gray-100
-        rounded-lg hover:rounded-2xl border border-gray-200
-        ${!notif.isRead ? 'bg-blue-50/30' : ''}`}
+      className="mx-2 my-2 cursor-pointer flex items-center transition-all duration-200 min-h-[60px] gap-4 px-4 py-3 rounded-lg hover:rounded-2xl border"
+      style={{
+        backgroundColor: notif.isRead ? theme.colors.surface : theme.colors.pastelBgLight,
+        borderColor: notif.isRead ? theme.colors.borderLight : theme.colors.pastelBorder,
+      }}
+      onMouseOver={(e) => {
+        e.currentTarget.style.backgroundColor = notif.isRead 
+          ? theme.colors.surfaceHover 
+          : theme.colors.pastelBg;
+      }}
+      onMouseOut={(e) => {
+        e.currentTarget.style.backgroundColor = notif.isRead 
+          ? theme.colors.surface 
+          : theme.colors.pastelBgLight;
+      }}
     >
       {/* Icon/Avatar */}
-      <div className={`w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full ${colors.bg}`}>
+      <div 
+        className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full"
+        style={{ backgroundColor: getIconBgColor() }}
+      >
         {actorAvatar ? (
           <img 
             src={actorAvatar} 
@@ -94,13 +120,19 @@ export default function NotificationCard({
             className="w-full h-full rounded-full object-cover"
           />
         ) : (
-          <Icon className={`w-6 h-6 ${colors.icon}`} />
+          <Icon 
+            className="w-6 h-6" 
+            style={{ color: notif.isRead ? theme.colors.textMuted : '#FFFFFF' }}
+          />
         )}
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className={`text-small truncate ${notif.isRead ? "text-gray-neutral600" : "text-gray-neutral900"}`}>
+        <p 
+          className="text-small truncate"
+          style={{ color: notif.isRead ? theme.colors.textMuted : theme.colors.text }}
+        >
           {actorName && (
             <span className="font-semibold">{actorName} </span>
           )}
@@ -109,15 +141,22 @@ export default function NotificationCard({
       </div>
 
       {/* Time */}
-      <div className={`flex-shrink-0 text-xs whitespace-nowrap text-mini ${
-        notif.isRead ? "text-gray-400" : "text-blue-600 font-medium"
-      }`}>
+      <div 
+        className="flex-shrink-0 text-xs whitespace-nowrap text-mini"
+        style={{ 
+          color: notif.isRead ? theme.colors.textMuted : theme.colors.primary,
+          fontWeight: notif.isRead ? 'normal' : '500'
+        }}
+      >
         {timeAgo}
       </div>
 
       {/* Unread indicator dot */}
       {!notif.isRead && (
-        <div className={`w-2 h-2 rounded-full ${colors.badge} flex-shrink-0`} />
+        <div 
+          className="w-2 h-2 rounded-full flex-shrink-0"
+          style={{ backgroundColor: getBadgeColor() }}
+        />
       )}
     </div>
   );
