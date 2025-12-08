@@ -4,6 +4,7 @@ import Checkbox from './Checkbox';
 import SimpleJobTypeAccordion, { JobTypeSelection } from './JobTypeAccordion';
 import { IoChevronForward } from 'react-icons/io5';
 import { HiArrowDown } from 'react-icons/hi';
+import { useTheme } from '@/hooks/useTheme';
 
 export interface SalaryRange {
   lessThan5000: boolean;
@@ -44,7 +45,7 @@ export interface FilterSectionProps {
   onApply?: (filters: FilterOptions) => void;
   onClearAll?: () => void;
   className?: string;
-  variant?: 'default' | 'appliedJobs'; // Add variant to control which filters to show
+  variant?: 'default' | 'appliedJobs';
 }
 
 const FilterSection: React.FC<FilterSectionProps> = ({
@@ -54,6 +55,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   className = '',
   variant = 'default'
 }) => {
+  const { theme } = useTheme();
   const [jobTypes, setJobTypes] = useState<JobTypeSelection>(initialFilters?.jobTypes || {});
   const [salaryRange, setSalaryRange] = useState<SalaryRange>(
     initialFilters?.salaryRange || {
@@ -87,24 +89,21 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     rejected: false,
   });
 
-  // Accordion states - All closed by default, except Salary Range for appliedJobs variant
   const [isJobTypeOpen, setIsJobTypeOpen] = useState(false);
   const [isSalaryOpen, setIsSalaryOpen] = useState(variant === 'appliedJobs');
   const [isExperienceOpen, setIsExperienceOpen] = useState(false);
   const [isGenderOpen, setIsGenderOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(variant === 'appliedJobs');
 
-  // Scroll indicator state
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [hasScroll, setHasScroll] = useState(false);
 
-  // Check if content is scrollable and if user is at bottom
   useEffect(() => {
     const checkScroll = () => {
       if (scrollRef.current) {
         const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-        const atBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px threshold
+        const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
         const scrollable = scrollHeight > clientHeight;
         
         setIsAtBottom(atBottom);
@@ -116,7 +115,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     const scrollElement = scrollRef.current;
     scrollElement?.addEventListener('scroll', checkScroll);
     
-    // Re-check when accordion sections expand/collapse
     const observer = new ResizeObserver(checkScroll);
     if (scrollElement) {
       observer.observe(scrollElement);
@@ -191,34 +189,65 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   return (
     <div className={`flex flex-col h-[calc(100%-64px)] ${className}`}>
       {/* Header (static) */}
-      <div className="flex-shrink-0 flex flex-row items-center justify-between px-4 py-4 bg-white">
-        <h2 className="text-lead font-alexandria font-bold text-gray-neutral900">Filter</h2>
+      <div 
+        className="flex-shrink-0 flex flex-row items-center justify-between px-4 py-4 transition-colors duration-300"
+        style={{ backgroundColor: theme.colors.surface }}
+      >
+        <h2 
+          className="text-lead font-alexandria font-bold transition-colors duration-300"
+          style={{ color: theme.colors.text }}
+        >
+          Filter
+        </h2>
         <button
           onClick={handleClearAll}
-          className="text-small font-inter font-normal text-primary-primary500 hover:text-primary-primary600 transition-colors duration-150"
+          className="text-small font-inter font-normal transition-colors duration-300"
+          style={{ color: theme.colors.primary }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = theme.colors.primaryHover;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = theme.colors.primary;
+          }}
         >
           Clear All
         </button>
       </div>
 
-      {/* Scrollable content (red section) - Hide scrollbar but keep scrolling */}
+      {/* Scrollable content */}
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto bg-white min-h-0 scrollbar-hide relative"
+        className="flex-1 overflow-y-auto min-h-0 scrollbar-hide relative transition-colors duration-300"
+        style={{ backgroundColor: theme.colors.surface }}
       >
         {variant === 'appliedJobs' && (
           <div className="">
             <button
               onClick={() => setIsStatusOpen(!isStatusOpen)}
-              className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-between px-5 py-3 transition-colors duration-300"
+              style={{ 
+                backgroundColor: isStatusOpen ? theme.modal.accordionBgActive : 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                if (!isStatusOpen) {
+                  e.currentTarget.style.backgroundColor = theme.colors.surfaceHover;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isStatusOpen) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
             >
-              <h3 className="text-body font-inter font-normal text-gray-neutral900">
+              <h3 
+                className="text-body font-inter font-normal transition-colors duration-300"
+                style={{ color: theme.modal.accordionText }}
+              >
                 Status
               </h3>
               <IoChevronForward
-                className={`h-5 w-5 text-gray-neutral600 transition-transform duration-200 ${
-                  isStatusOpen ? 'rotate-90' : ''
-                }`}
+                className={`h-5 w-5 transition-all duration-300 ${isStatusOpen ? 'rotate-90' : ''}`}
+                style={{ color: theme.colors.textMuted }}
               />
             </button>
             {isStatusOpen && (
@@ -232,19 +261,35 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             )}
           </div>
         )}
+
         {/* Job Type Section */}
         <div className="">
           <button
             onClick={() => setIsJobTypeOpen(!isJobTypeOpen)}
-            className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-3 transition-colors duration-300"
+            style={{ 
+              backgroundColor: isJobTypeOpen ? theme.modal.accordionBgActive : 'transparent'
+            }}
+            onMouseEnter={(e) => {
+              if (!isJobTypeOpen) {
+                e.currentTarget.style.backgroundColor = theme.colors.surfaceHover;
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isJobTypeOpen) {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }
+            }}
           >
-            <h3 className="text-body font-inter font-normal text-gray-neutral900">
+            <h3 
+              className="text-body font-inter font-normal transition-colors duration-300"
+              style={{ color: theme.modal.accordionText }}
+            >
               Job Type
             </h3>
             <IoChevronForward
-              className={`h-5 w-5 text-gray-neutral600 transition-transform duration-200 ${
-                isJobTypeOpen ? 'rotate-90' : ''
-              }`}
+              className={`h-5 w-5 transition-all duration-300 ${isJobTypeOpen ? 'rotate-90' : ''}`}
+              style={{ color: theme.colors.textMuted }}
             />
           </button>
           {isJobTypeOpen && (
@@ -258,151 +303,151 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           )}
         </div>
 
-      {/* Salary Range Section */}
-      <div className="">
+        {/* Salary Range Section */}
+        <div className="">
           <button
             onClick={() => setIsSalaryOpen(!isSalaryOpen)}
-            className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
+            className="w-full flex items-center justify-between px-5 py-3 transition-colors duration-300"
+            style={{ 
+              backgroundColor: isSalaryOpen ? theme.modal.accordionBgActive : 'transparent'
+            }}
+            onMouseEnter={(e) => {
+              if (!isSalaryOpen) {
+                e.currentTarget.style.backgroundColor = theme.colors.surfaceHover;
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isSalaryOpen) {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }
+            }}
           >
-            <h3 className="text-body font-inter font-normal text-gray-neutral900">
+            <h3 
+              className="text-body font-inter font-normal transition-colors duration-300"
+              style={{ color: theme.modal.accordionText }}
+            >
               Salary Range
             </h3>
             <IoChevronForward
-              className={`h-5 w-5 text-gray-neutral600 transition-transform duration-200 ${
-                isSalaryOpen ? 'rotate-90' : ''
-              }`}
+              className={`h-5 w-5 transition-all duration-300 ${isSalaryOpen ? 'rotate-90' : ''}`}
+              style={{ color: theme.colors.textMuted }}
             />
           </button>
           {isSalaryOpen && (
             <div className="px-4 pb-3 space-y-2">
-              <Checkbox
-                label="Less than Php 5000"
-                checked={salaryRange.lessThan5000}
-                onChange={(checked) => handleSalaryChange('lessThan5000', checked)}
-                size="sm"
-              />
-              <Checkbox
-                label="Php 10,000 - Php 20,000"
-                checked={salaryRange.range10to20}
-                onChange={(checked) => handleSalaryChange('range10to20', checked)}
-                size="sm"
-              />
-              <Checkbox
-                label="More than Php 20,000"
-                checked={salaryRange.moreThan20000}
-                onChange={(checked) => handleSalaryChange('moreThan20000', checked)}
-                size="sm"
-              />
-              <Checkbox
-                label="Custom"
-                checked={salaryRange.custom}
-                onChange={(checked) => handleSalaryChange('custom', checked)}
-                size="sm"
-              />
+              <Checkbox label="Less than Php 5000" checked={salaryRange.lessThan5000} onChange={(checked) => handleSalaryChange('lessThan5000', checked)} size="sm" />
+              <Checkbox label="Php 10,000 - Php 20,000" checked={salaryRange.range10to20} onChange={(checked) => handleSalaryChange('range10to20', checked)} size="sm" />
+              <Checkbox label="More than Php 20,000" checked={salaryRange.moreThan20000} onChange={(checked) => handleSalaryChange('moreThan20000', checked)} size="sm" />
+              <Checkbox label="Custom" checked={salaryRange.custom} onChange={(checked) => handleSalaryChange('custom', checked)} size="sm" />
             </div>
           )}
         </div>
 
-        {/* Experience Level Section - Hidden for appliedJobs variant */}
+        {/* Experience Level Section */}
         {variant !== 'appliedJobs' && (
           <div className="">
             <button
               onClick={() => setIsExperienceOpen(!isExperienceOpen)}
-              className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-between px-5 py-3 transition-colors duration-300"
+              style={{ 
+                backgroundColor: isExperienceOpen ? theme.modal.accordionBgActive : 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                if (!isExperienceOpen) {
+                  e.currentTarget.style.backgroundColor = theme.colors.surfaceHover;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isExperienceOpen) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
             >
-              <h3 className="text-body font-inter font-normal text-gray-neutral900">
+              <h3 
+                className="text-body font-inter font-normal transition-colors duration-300"
+                style={{ color: theme.modal.accordionText }}
+              >
                 Experience level
               </h3>
               <IoChevronForward
-                className={`h-5 w-5 text-gray-neutral600 transition-transform duration-200 ${
-                  isExperienceOpen ? 'rotate-90' : ''
-                }`}
+                className={`h-5 w-5 transition-all duration-300 ${isExperienceOpen ? 'rotate-90' : ''}`}
+                style={{ color: theme.colors.textMuted }}
               />
             </button>
             {isExperienceOpen && (
               <div className="px-4 pb-3 space-y-2">
-                <Checkbox
-                  label="Entry level"
-                  checked={experienceLevel.entryLevel}
-                  onChange={(checked) => handleExperienceChange('entryLevel', checked)}
-                  size="sm"
-                />
-                <Checkbox
-                  label="Intermediate"
-                  checked={experienceLevel.intermediate}
-                  onChange={(checked) => handleExperienceChange('intermediate', checked)}
-                  size="sm"
-                />
-                <Checkbox
-                  label="Professional"
-                  checked={experienceLevel.professional}
-                  onChange={(checked) => handleExperienceChange('professional', checked)}
-                  size="sm"
-                />
+                <Checkbox label="Entry level" checked={experienceLevel.entryLevel} onChange={(checked) => handleExperienceChange('entryLevel', checked)} size="sm" />
+                <Checkbox label="Intermediate" checked={experienceLevel.intermediate} onChange={(checked) => handleExperienceChange('intermediate', checked)} size="sm" />
+                <Checkbox label="Professional" checked={experienceLevel.professional} onChange={(checked) => handleExperienceChange('professional', checked)} size="sm" />
               </div>
             )}
           </div>
         )}
 
-        {/* Preferred Gender Section - Hidden for appliedJobs variant */}
+        {/* Preferred Gender Section */}
         {variant !== 'appliedJobs' && (
           <div className="">
             <button
               onClick={() => setIsGenderOpen(!isGenderOpen)}
-              className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-between px-5 py-3 transition-colors duration-300"
+              style={{ 
+                backgroundColor: isGenderOpen ? theme.modal.accordionBgActive : 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                if (!isGenderOpen) {
+                  e.currentTarget.style.backgroundColor = theme.colors.surfaceHover;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isGenderOpen) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
             >
-              <h3 className="text-body font-inter font-normal text-gray-neutral900">
+              <h3 
+                className="text-body font-inter font-normal transition-colors duration-300"
+                style={{ color: theme.modal.accordionText }}
+              >
                 Preferred Gender
               </h3>
               <IoChevronForward
-                className={`h-5 w-5 text-gray-neutral600 transition-transform duration-200 ${
-                  isGenderOpen ? 'rotate-90' : ''
-                }`}
+                className={`h-5 w-5 transition-all duration-300 ${isGenderOpen ? 'rotate-90' : ''}`}
+                style={{ color: theme.colors.textMuted }}
               />
             </button>
             {isGenderOpen && (
               <div className="px-4 pb-3 space-y-2">
-                <Checkbox
-                  label="Any"
-                  checked={preferredGender.any}
-                  onChange={(checked) => handleGenderChange('any', checked)}
-                  size="sm"
-                />
-                <Checkbox
-                  label="Female"
-                  checked={preferredGender.female}
-                  onChange={(checked) => handleGenderChange('female', checked)}
-                  size="sm"
-                />
-                <Checkbox
-                  label="Male"
-                  checked={preferredGender.male}
-                  onChange={(checked) => handleGenderChange('male', checked)}
-                  size="sm"
-                />
-                <Checkbox
-                  label="Others"
-                  checked={preferredGender.others}
-                  onChange={(checked) => handleGenderChange('others', checked)}
-                  size="sm"
-                />
+                <Checkbox label="Any" checked={preferredGender.any} onChange={(checked) => handleGenderChange('any', checked)} size="sm" />
+                <Checkbox label="Female" checked={preferredGender.female} onChange={(checked) => handleGenderChange('female', checked)} size="sm" />
+                <Checkbox label="Male" checked={preferredGender.male} onChange={(checked) => handleGenderChange('male', checked)} size="sm" />
+                <Checkbox label="Others" checked={preferredGender.others} onChange={(checked) => handleGenderChange('others', checked)} size="sm" />
               </div>
             )}
           </div>
         )}
 
-        {/* Scroll indicator - shows when there's more content below */}
+        {/* Scroll indicator */}
         {hasScroll && !isAtBottom && (
-          <div className="sticky bottom-0 left-0 right-0 flex items-center justify-center gap-2 bg-gradient-to-t from-white via-white/95 to-transparent pt-4 pb-2 text-sm text-gray-neutral500 pointer-events-none">
+          <div 
+            className="sticky bottom-0 left-0 right-0 flex items-center justify-center gap-2 pt-4 pb-2 text-sm pointer-events-none transition-colors duration-300"
+            style={{
+              background: `linear-gradient(to top, ${theme.colors.surface}, ${theme.colors.surface}F2, transparent)`,
+              color: theme.colors.textMuted
+            }}
+          >
             <HiArrowDown className="w-4 h-4 animate-bounce" />
           </div>
         )}
       </div>
 
-        
-
-      {/* Fixed bottom Apply button (blue section) */}
-      <div className="flex-shrink-0 border-t border-gray-neutral200 p-3 bg-white">
+      {/* Fixed bottom Apply button */}
+      <div 
+        className="flex-shrink-0 p-3 transition-colors duration-300"
+        style={{ 
+          backgroundColor: theme.colors.surface,
+          borderTop: `1px solid ${theme.colors.borderLight}`
+        }}
+      >
         <Button
           variant="primary"
           size="md"

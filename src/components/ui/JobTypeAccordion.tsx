@@ -3,6 +3,7 @@ import { IoChevronDown, IoChevronForward } from 'react-icons/io5';
 import { JobType, SubTypes, getJobTypeOptions } from '@/lib/constants/job-types';
 import Checkbox from './Checkbox';
 import { getGrayColor, getTypographyClass, getTypographyStyle} from '@/styles';
+import { useTheme } from '@/hooks/useTheme';
 
 export interface JobTypeSelection {
   [jobType: string]: string[];
@@ -19,6 +20,7 @@ const SimpleJobTypeAccordion: React.FC<SimpleJobTypeAccordionProps> = ({
   onChange,
   className = ''
 }) => {
+  const { theme } = useTheme();
   const [expandedSections, setExpandedSections] = useState<Set<JobType>>(new Set());
   const jobTypeOptions = getJobTypeOptions();
 
@@ -47,7 +49,6 @@ const SimpleJobTypeAccordion: React.FC<SimpleJobTypeAccordionProps> = ({
       [jobType]: newSelection
     };
 
-    // Remove empty arrays to keep the object clean
     if (newSelection.length === 0) {
       delete updatedJobTypes[jobType];
     }
@@ -56,7 +57,10 @@ const SimpleJobTypeAccordion: React.FC<SimpleJobTypeAccordionProps> = ({
   };
 
   return (
-    <div className={`w-full max-w-[240px] bg-white ${className}`}>
+    <div 
+      className={`w-full max-w-[240px] transition-colors duration-300 ${className}`}
+      style={{ backgroundColor: theme.colors.surface }}
+    >
       {jobTypeOptions.map(({ value: jobType, label }) => {
         const isExpanded = expandedSections.has(jobType as JobType);
         const subTypes = SubTypes[jobType as JobType] || [];
@@ -65,13 +69,26 @@ const SimpleJobTypeAccordion: React.FC<SimpleJobTypeAccordionProps> = ({
           <div key={jobType}>
             {/* Job Type Header */}
             <div
-              className="flex items-center justify-between px-2 py-3 cursor-pointer hover:bg-gray-50"
-              style={{...getTypographyStyle('body')}}
+              className="flex items-center justify-between px-2 py-3 cursor-pointer transition-colors duration-300"
+              style={{
+                ...getTypographyStyle('body'),
+                backgroundColor: isExpanded ? theme.modal.accordionBgActive : 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                if (!isExpanded) {
+                  e.currentTarget.style.backgroundColor = theme.colors.surfaceHover;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isExpanded) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
               onClick={() => subTypes.length > 0 && toggleSection(jobType as JobType)}
             >
               <span 
-                className={getTypographyClass('small')}
-                style={{ color: getGrayColor('neutral700') }}
+                className={`${getTypographyClass('small')} transition-colors duration-300`}
+                style={{ color: theme.modal.accordionText }}
               >
                 {label}
               </span>
@@ -80,13 +97,13 @@ const SimpleJobTypeAccordion: React.FC<SimpleJobTypeAccordionProps> = ({
                 <div className="flex-shrink-0">
                   {isExpanded ? (
                     <IoChevronDown 
-                      className="w-4 h-4" 
-                      style={{ color: getGrayColor('neutral600') }}
+                      className="w-4 h-4 transition-all duration-300" 
+                      style={{ color: theme.colors.textMuted }}
                     />
                   ) : (
                     <IoChevronForward 
-                      className="w-4 h-4" 
-                      style={{ color: getGrayColor('neutral600') }}
+                      className="w-4 h-4 transition-all duration-300" 
+                      style={{ color: theme.colors.textMuted }}
                     />
                   )}
                 </div>
@@ -95,7 +112,10 @@ const SimpleJobTypeAccordion: React.FC<SimpleJobTypeAccordionProps> = ({
 
             {/* Subtypes - Only show when expanded */}
             {subTypes.length > 0 && isExpanded && (
-              <div className="bg-white">
+              <div 
+                className="transition-colors duration-300"
+                style={{ backgroundColor: theme.colors.surface }}
+              >
                 {subTypes.map((subType) => {
                   const isChecked = selectedJobTypes[jobType]?.includes(subType) || false;
                   

@@ -6,6 +6,7 @@ import ClearIcon from '@/assets/x.svg';
 import Button from './Button';
 import { PHILIPPINES_LOCATIONS } from '@/resources/locations/philippines';
 import { PostService } from '@/lib/services/posts-services';
+import { useTheme } from '@/hooks/useTheme';
 
 interface SearchBarProps {
   variant?: 'simple' | 'advanced';
@@ -26,6 +27,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onQuerySuggestionsChange,
   onLocationSuggestionsChange
 }) => {
+  const { theme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
   const [querySuggestions, setQuerySuggestions] = useState<string[]>([]);
@@ -51,27 +53,21 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   };
 
-  // Update location suggestions as user types
   useEffect(() => {
     if (location.trim() && variant === 'advanced') {
       const locationInput = location.toLowerCase().trim();
-      
-      // Find matching provinces and cities
       const suggestions: Array<{ type: 'province' | 'city'; name: string; parent?: string }> = [];
       
       PHILIPPINES_LOCATIONS.forEach((province) => {
         const provinceLower = province.name.toLowerCase();
         
-        // If input matches province name, show all cities under it
         if (provinceLower.includes(locationInput) || provinceLower.startsWith(locationInput)) {
           suggestions.push({ type: 'province', name: province.name });
-          // Add cities under this province
           province.cities.slice(0, 3).forEach((city) => {
             suggestions.push({ type: 'city', name: city.name, parent: province.name });
           });
         }
         
-        // Also search for matching cities
         province.cities.forEach((city) => {
           const cityLower = city.name.toLowerCase();
           if (cityLower.includes(locationInput) || cityLower.startsWith(locationInput)) {
@@ -83,7 +79,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
         });
       });
 
-      // Limit to 8 suggestions total
       const limitedSuggestions = suggestions.slice(0, 8);
       setLocationSuggestions(limitedSuggestions as any);
       onLocationSuggestionsChange?.(limitedSuggestions.map((s) => s.parent ? `${s.parent} > ${s.name}` : s.name));
@@ -94,7 +89,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [location, variant, onLocationSuggestionsChange]);
 
-  // Update job title suggestions as user types
   useEffect(() => {
     if (searchQuery.trim() && variant === 'advanced') {
       const fetchSuggestions = async () => {
@@ -108,7 +102,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
         }
       };
       
-      // Debounce to avoid too many requests
       const timeoutId = setTimeout(fetchSuggestions, 300);
       return () => clearTimeout(timeoutId);
     } else {
@@ -117,7 +110,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   }, [searchQuery, variant, onQuerySuggestionsChange]);
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (queryDropdownRef.current && !queryDropdownRef.current.contains(event.target as Node)) {
@@ -132,14 +124,18 @@ const SearchBar: React.FC<SearchBarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Search Icon Component
   const SearchIcon = () => (
-    <IoSearchOutline className="w-[18px] h-[18px] text-gray-neutral400 flex-shrink-0" />
+    <IoSearchOutline 
+      className="w-[18px] h-[18px] flex-shrink-0 transition-colors duration-300" 
+      style={{ color: theme.colors.textMuted }}
+    />
   );
 
-  // Location Icon Component
   const LocationIcon = () => (
-    <CiLocationOn className="w-[18px] h-[18px] text-gray-neutral400 flex-shrink-0" />
+    <CiLocationOn 
+      className="w-[18px] h-[18px] flex-shrink-0 transition-colors duration-300" 
+      style={{ color: theme.colors.textMuted }}
+    />
   );
 
   const handleClearQuery = () => {
@@ -155,7 +151,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
   if (variant === 'simple') {
     return (
       <div className={`w-full ${className}`}>
-        <div className="flex flex-row items-center justify-between bg-white rounded-full shadow-lg h-[48px] border border-gray-neutral200">
+        <div 
+          className="flex flex-row items-center justify-between rounded-full shadow-lg h-[48px] border transition-all duration-300"
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.borderLight
+          }}
+        >
           {/* Search Input Section */}
           <div className="flex items-center gap-2 px-4 flex-1 min-w-0">
             <SearchIcon />
@@ -165,7 +167,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={placeholder}
-              className="text-gray-neutral800 placeholder:text-gray-neutral400 text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-150"
+              className="text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-300"
+              style={{
+                color: theme.colors.text,
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.outline = 'none';
+              }}
             />
             {searchQuery && (
               <button onClick={handleClearQuery} className="focus:outline-none">
@@ -194,7 +202,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
   // Advanced variant with job title and location
   return (
     <div className={`w-full relative ${className}`}>
-      <div className="flex flex-row items-center justify-between bg-white rounded-full shadow-lg h-[48px] border border-gray-neutral200">
+      <div 
+        className="flex flex-row items-center justify-between rounded-full shadow-lg h-[48px] border transition-all duration-300"
+        style={{
+          backgroundColor: theme.colors.surface,
+          borderColor: theme.colors.borderLight
+        }}
+      >
         {/* Content Container */}
         <div className="flex flex-row items-center flex-1 min-w-0">
           {/* Job Title/Keyword Input */}
@@ -206,7 +220,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
-                // Show suggestions if there's text
                 if (e.target.value.trim()) {
                   setShowQuerySuggestions(true);
                 } else {
@@ -218,7 +231,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
               }}
               onKeyPress={handleKeyPress}
               placeholder={placeholder}
-              className="text-gray-neutral800 placeholder:text-gray-neutral400 text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-150"
+              className="text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-300"
+              style={{
+                color: theme.colors.text,
+              }}
             />
             {searchQuery && (
               <button onClick={handleClearQuery} className="focus:outline-none">
@@ -230,8 +246,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
             {showQuerySuggestions && querySuggestions.length > 0 && (
               <div
                 ref={queryDropdownRef}
-                className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-neutral200 rounded-lg shadow-lg z-50 max-h-[240px] overflow-y-auto"
-                style={{ minWidth: '280px' }}
+                className="absolute top-full left-0 right-0 mt-2 rounded-lg shadow-lg z-50 max-h-[240px] overflow-y-auto transition-colors duration-300"
+                style={{ 
+                  minWidth: '280px',
+                  backgroundColor: theme.colors.surface,
+                  border: `1px solid ${theme.colors.borderLight}`
+                }}
               >
                 {querySuggestions.map((suggestion, index) => (
                   <div
@@ -240,9 +260,22 @@ const SearchBar: React.FC<SearchBarProps> = ({
                       setSearchQuery(suggestion);
                       setShowQuerySuggestions(false);
                     }}
-                    className="px-4 py-2 hover:bg-gray-neutral100 cursor-pointer text-gray-neutral800 text-small transition-colors border-b border-gray-neutral100 last:border-b-0"
+                    className="px-4 py-2 cursor-pointer text-small transition-colors duration-300 border-b last:border-b-0"
+                    style={{
+                      color: theme.colors.text,
+                      borderColor: theme.colors.borderLight
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = theme.colors.surfaceHover;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
                   >
-                    <IoSearchOutline className="inline w-4 h-4 mr-2 text-gray-neutral400" />
+                    <IoSearchOutline 
+                      className="inline w-4 h-4 mr-2" 
+                      style={{ color: theme.colors.textMuted }}
+                    />
                     {suggestion}
                   </div>
                 ))}
@@ -252,7 +285,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
           {/* Divider */}
           <div className="flex items-center justify-center px-2">
-            <div className="w-px h-8 bg-gray-neutral300"></div>
+            <div 
+              className="w-px h-8 transition-colors duration-300"
+              style={{ backgroundColor: theme.colors.borderLight }}
+            />
           </div>
 
           {/* Location Input */}
@@ -268,7 +304,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
               }}
               onKeyPress={handleKeyPress}
               placeholder={locationPlaceholder}
-              className="text-gray-neutral800 placeholder:text-gray-neutral400 text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-150"
+              className="text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-300"
+              style={{
+                color: theme.colors.text,
+              }}
             />
             {location && (
               <button onClick={handleClearLocation} className="focus:outline-none">
@@ -280,8 +319,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
             {showLocationSuggestions && locationSuggestions.length > 0 && (
               <div
                 ref={locationDropdownRef}
-                className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-neutral200 rounded-lg shadow-lg z-50 max-h-[280px] overflow-y-auto"
-                style={{ minWidth: '300px' }}
+                className="absolute top-full left-0 right-0 mt-2 rounded-lg shadow-lg z-50 max-h-[280px] overflow-y-auto transition-colors duration-300"
+                style={{ 
+                  minWidth: '300px',
+                  backgroundColor: theme.colors.surface,
+                  border: `1px solid ${theme.colors.borderLight}`
+                }}
               >
                 {(locationSuggestions as any).map((suggestion: any, index: number) => (
                   <div
@@ -293,13 +336,26 @@ const SearchBar: React.FC<SearchBarProps> = ({
                       setLocation(displayValue);
                       setShowLocationSuggestions(false);
                     }}
-                    className={`px-4 py-2 cursor-pointer text-small transition-colors border-b border-gray-neutral100 last:border-b-0 ${
-                      suggestion.type === 'province'
-                        ? 'bg-gray-neutral50 hover:bg-gray-neutral100 font-semibold text-gray-neutral800'
-                        : 'hover:bg-gray-neutral100 text-gray-neutral700 pl-8'
+                    className={`px-4 py-2 cursor-pointer text-small transition-colors duration-300 border-b last:border-b-0 ${
+                      suggestion.type === 'city' ? 'pl-8' : ''
                     }`}
+                    style={{
+                      backgroundColor: suggestion.type === 'province' ? theme.colors.pastelBgLight : 'transparent',
+                      color: suggestion.type === 'province' ? theme.colors.text : theme.colors.textSecondary,
+                      fontWeight: suggestion.type === 'province' ? 600 : 400,
+                      borderColor: theme.colors.borderLight
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = theme.colors.surfaceHover;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = suggestion.type === 'province' ? theme.colors.pastelBgLight : 'transparent';
+                    }}
                   >
-                    <CiLocationOn className="inline w-4 h-4 mr-2 text-gray-neutral400" />
+                    <CiLocationOn 
+                      className="inline w-4 h-4 mr-2" 
+                      style={{ color: theme.colors.textMuted }}
+                    />
                     {suggestion.type === 'province' && suggestion.name}
                     {suggestion.type === 'city' && suggestion.name}
                   </div>
