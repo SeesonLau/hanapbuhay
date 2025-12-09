@@ -18,13 +18,21 @@ interface Review {
 
 interface ReviewListSectionProps {
   userId: string;
+  reviewsData?: Review[];
+  averageRating?: number;
+  userReviewCount?: number;
 }
 
-export default function ReviewListSection({ userId }: ReviewListSectionProps) {
+export default function ReviewListSection({
+  userId,
+  reviewsData: externalReviewsData,
+  averageRating: externalAverageRating,
+  userReviewCount: externalUserReviewCount
+}: ReviewListSectionProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [averageRating, setAverageRating] = useState<number>(0);
-  const [userReviewCount, setUserReviewCount] = useState<number>(0);
+  const [loading, setLoading] = useState(!externalReviewsData);
+  const [averageRating, setAverageRating] = useState<number>(externalAverageRating || 0);
+  const [userReviewCount, setUserReviewCount] = useState<number>(externalUserReviewCount || 0);
   const [containerWidth, setContainerWidth] = useState<number>(0);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -40,12 +48,12 @@ export default function ReviewListSection({ userId }: ReviewListSectionProps) {
     const baseWidth = 300;
     const baseChars = 75;
     const charsPerHundredPx = 25;
-    
+
     if (width <= baseWidth) return baseChars;
-    
+
     const additionalWidth = width - baseWidth;
     const additionalChars = Math.floor((additionalWidth / 100) * charsPerHundredPx);
-    
+
     return baseChars + additionalChars;
   };
 
@@ -55,6 +63,16 @@ export default function ReviewListSection({ userId }: ReviewListSectionProps) {
   };
 
   useEffect(() => {
+    // If data is provided externally, use it directly
+    if (externalReviewsData && externalAverageRating !== undefined && externalUserReviewCount !== undefined) {
+      setReviews(externalReviewsData);
+      setAverageRating(externalAverageRating);
+      setUserReviewCount(externalUserReviewCount);
+      setLoading(false);
+      return;
+    }
+
+    // Otherwise, fetch the data
     const fetchReviews = async () => {
       try {
         setLoading(true);
@@ -77,7 +95,7 @@ export default function ReviewListSection({ userId }: ReviewListSectionProps) {
         const reviewsWithProfiles = await Promise.all(
           reviewsData.map(async (review) => {
             const profileData = await ProfileService.getNameProfilePic(review.createdBy);
-            const displayName = profileData?.name 
+            const displayName = profileData?.name
               ? profileData.name.split('|||')[0].split(' ').slice(0, 2).join(' ')
               : 'Anonymous';
 
@@ -101,7 +119,7 @@ export default function ReviewListSection({ userId }: ReviewListSectionProps) {
     };
 
     fetchReviews();
-  }, [userId]);
+  }, [userId, externalReviewsData, externalAverageRating, externalUserReviewCount]);
 
   useEffect(() => {
     const el = scrollRef.current;

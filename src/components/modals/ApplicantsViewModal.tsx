@@ -40,7 +40,7 @@ export default function ApplicantsModal({
     setSearchQuery(query);  
   };
 
-  const truncateTitle = (text: string, maxLength: number = 30) => {
+  const truncateTitle = (text: string, maxLength: number = 50) => {
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
   };
 
@@ -135,7 +135,7 @@ export default function ApplicantsModal({
       animate={{ opacity: 1 }}
     >
       <motion.div
-        className="rounded-lg shadow-lg w-full max-w-6xl p-4 md:p-4 p-2 relative mx-4"
+        className="rounded-lg shadow-lg w-full max-w-6xl max-h-[85vh] sm:max-h-[90vh] p-4 md:p-4 p-2 relative mx-4 flex flex-col"
         style={{ backgroundColor: theme.modal.background }}
         onClick={(e) => e.stopPropagation()}
         initial={{ y: 20, opacity: 0, scale: 0.98 }}
@@ -153,7 +153,7 @@ export default function ApplicantsModal({
                 className="font-inter font-semibold text-sm sm:text-subtitle md:text-subtitle"
                 style={{ color: theme.colors.text }}
               >
-                {truncateTitle(title, 20)}
+                {truncateTitle(title, 50)}
               </h3>
               <span 
                 className="font-inter font-semibold text-xs sm:text-small md:text-small ml-2"

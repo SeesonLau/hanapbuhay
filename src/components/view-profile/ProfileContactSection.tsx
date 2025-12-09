@@ -5,23 +5,34 @@ import ProfileContactForm from "./cards/ProfileContactForm";
 import { ProfileService } from '@/lib/services/profile-services';
 import { formatDisplayName } from '@/lib/utils/profile-utils';
 
-interface ProfileContactSectionProps {
-  userId: string;
+interface ProfileData {
+  profilePicUrl: string | null;
+  name: string | null;
+  sex: string | null;
+  age: number | null;
+  email: string | null;
+  phoneNumber: string | null;
+  address: string | null;
 }
 
-export default function ProfileContactSection({ userId }: ProfileContactSectionProps) {
-  const [profile, setProfile] = useState<{
-    profilePicUrl: string | null;
-    name: string | null;
-    sex: string | null;
-    age: number | null;
-    email: string | null;
-    phoneNumber: string | null;
-    address: string | null;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
+interface ProfileContactSectionProps {
+  userId: string;
+  profileData?: ProfileData | null;
+}
+
+export default function ProfileContactSection({ userId, profileData: externalProfileData }: ProfileContactSectionProps) {
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState(!externalProfileData);
 
   useEffect(() => {
+    // If data is provided externally, use it directly
+    if (externalProfileData) {
+      setProfile(externalProfileData);
+      setLoading(false);
+      return;
+    }
+
+    // Otherwise, fetch the data
     const fetchProfile = async () => {
       try {
         setLoading(true);
@@ -35,7 +46,7 @@ export default function ProfileContactSection({ userId }: ProfileContactSectionP
     };
 
     fetchProfile();
-  }, [userId]);
+  }, [userId, externalProfileData]);
 
   const formatAddress = (address: string | null): string => {
     if (!address) return "Not provided";
