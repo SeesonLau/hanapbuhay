@@ -4,12 +4,17 @@
     "appliedJobs": "Applied Jobs",
     "manageJobPosts": "Manage Job Posts",
     "profile": "Profile",
+    "chat": "Chat",
     "messages": "Messages",
     "notifications": "Notifications",
     "settings": "Settings",
     "logout": "Logout",
     "login": "Login",
-    "signup": "Sign Up"
+    "signup": "Sign Up",
+    "benefits": "Benefits",
+    "recommendations": "Recommendations",
+    "popularCategories": "Popular Categories",
+    "contactUs": "Contact Us"
   },
   "footer": {
     "about": "About",
@@ -19,7 +24,13 @@
     "faq": "FAQs",
     "legal": "Legal",
     "copyright": "© 2025 HanapBuhay. All rights reserved.",
-    "followUs": "Follow Us"
+    "followUs": "Follow Us",
+    "quickLinks": "Quick Links",
+    "support": "Support",
+    "benefits": "Benefits",
+    "recommendedJobs": "Recommended Jobs",
+    "popularCategories": "Popular Categories",
+    "emailCopied": "Copied!"
   },
   "filters": {
     "title": "Filters",

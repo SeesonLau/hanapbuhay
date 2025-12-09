@@ -39,7 +39,8 @@
     "date": "Petsa",
     "loading": "Naglo-load...",
     "noResults": "Walang resulta",
-    "na": "Wala"
+    "na": "Wala",
+    "user": "Gumagamit"
   },
   "messages": {
     "authRequired": "Kailangan ng Authentication",

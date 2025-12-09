@@ -39,7 +39,8 @@
     "date": "Date",
     "loading": "Loading...",
     "noResults": "No results found",
-    "na": "N/A"
+    "na": "N/A",
+    "user": "User"
   },
   "messages": {
     "authRequired": "Authentication Required",

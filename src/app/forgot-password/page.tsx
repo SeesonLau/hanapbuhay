@@ -10,9 +10,11 @@ import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
 import FloatingLines from '../login/FloatingLines';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 function ForgotPasswordContent() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -55,14 +57,14 @@ function ForgotPasswordContent() {
           }}
         >
           {/* Back to Login */}
-          <Link 
+          <Link
             href="/login"
             className="inline-flex items-center gap-2 text-gray-300 hover:text-white mb-6 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to Login
+            {t.common.navigation.backToLogin}
           </Link>
 
           <ForgotPasswordForm 

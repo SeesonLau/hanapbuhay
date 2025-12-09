@@ -10,6 +10,7 @@ import Button from '@/components/ui/Button';
 import TextBox from '@/components/ui/TextBox';
 import Image from 'next/image';
 import { IoArrowBack } from "react-icons/io5";
+import { useLanguage } from '@/hooks/useLanguage';
 
 
 interface SignupFormProps {
@@ -19,6 +20,7 @@ interface SignupFormProps {
 }
 
 export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInClick, onLoadingChange }) => {
+  const { t } = useLanguage();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,7 +38,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
 
     // Validate passwords match
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t.auth.signup.errors.passwordMismatch);
       setLoading(false);
       return;
     }
@@ -44,7 +46,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
     // Validate password requirements
     const validationErrors = validatePassword(password);
     if (validationErrors.length > 0) {
-      setError('Please fix the password requirements below');
+      setError(t.auth.signup.errors.weakPassword);
       setLoading(false);
       return;
     }
@@ -55,10 +57,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
       if (result.success) {
         setShowValidationModal(true);
       } else {
-        setError(result.message || 'Failed to create account. Please try again.');
+        setError(result.message || t.auth.signup.errors.requiredField);
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      setError(t.common.messages.errorOccurred);
     } finally {
       setLoading(false);
       onLoadingChange?.(false);
@@ -114,7 +116,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
 
         {/* Title */}
         <h2 className="text-h4 tablet: text-h3 font-bold text-white text-center mb-4 font-alexandria">
-          Sign Up
+          {t.auth.signup.title}
         </h2>
 
         
@@ -137,10 +139,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
           <div>
             <TextBox
               type="email"
-              label="Email"
+              label={t.auth.signup.emailLabel}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
+              placeholder={t.auth.signup.emailPlaceholder}
               variant="glassmorphism"
             />
           </div>
@@ -149,13 +151,13 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
           <div>
             <TextBox
               type="password"
-              label="Password"
+              label={t.auth.signup.passwordLabel}
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
                 checkPasswordRequirements(e.target.value);
               }}
-              placeholder="Password"
+              placeholder={t.auth.signup.passwordPlaceholder}
               enableValidation={false}
               variant="glassmorphism"
             />
@@ -205,10 +207,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
           <div>
             <TextBox
               type="password"
-              label="Confirm Password"
+              label={t.auth.signup.confirmPasswordLabel}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Password"
+              placeholder={t.auth.signup.confirmPasswordPlaceholder}
               enableValidation={false}
               variant="glassmorphism"
             />
@@ -225,18 +227,18 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onBackClick, onSignInCli
             fullRounded={true}
             useCustomHover={true}
           >
-            {loading ? 'Creating account...' : 'Sign Up'}
+            {loading ? `${t.auth.signup.signupButton}...` : t.auth.signup.signupButton}
           </Button>
 
           {/* Sign In Link */}
           <p className="text-center text-mini sm:text-small text-gray-300 mt-6 font-alexandria font-light">
-            Already have an account? Sign in{' '}
+            {t.auth.signup.haveAccount} {' '}
             <button
               type="button"
               onClick={onSignInClick}
               className="font-alexandria font-light text-mini sm:text-small text-blue-300 hover:text-blue-200 font-light hover:underline"
             >
-            here
+            {t.auth.signup.loginLink}
             </button>
           </p>
         </form>

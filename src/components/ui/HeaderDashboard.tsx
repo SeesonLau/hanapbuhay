@@ -16,6 +16,7 @@ import { Preloader, PreloaderMessages } from "./Preloader";
 import ProfileDropdown from './ProfileDropdown';
 import { ProfileService } from "@/lib/services/profile-services";
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface HeaderDashboardProps {
   userName?: string;
@@ -37,6 +38,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const { theme, themeName, toggleTheme } = useTheme();
+  const { t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -91,7 +93,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
           const userEmail = await ProfileService.getEmailByUserId(userId);
           
           const newUserData = {
-            name: profileData?.name || 'User',
+            name: profileData?.name || t.common.labels.user,
             email: userEmail || '',
             profilePicUrl: profileData?.profilePicUrl || '',
             userId: userId
@@ -106,7 +108,7 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
       } catch (error) {
         console.error('Error fetching user data:', error);
         const fallbackData = {
-          name: userName || 'User',
+          name: userName || t.common.labels.user,
           email: userEmail || '',
           profilePicUrl: userAvatar || '',
           userId: userId || ''
@@ -273,10 +275,10 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   }, [isMenuOpen, isProfileOpen]);
 
   const navigationLinks = [
-    { id: 'find-jobs', label: 'Find Jobs', route: ROUTES.FINDJOBS },
-    { id: 'manage-posts', label: 'Manage Job Posts', route: ROUTES.MANAGEJOBPOSTS },
-    { id: 'applied-jobs', label: 'Applied Jobs', route: ROUTES.APPLIEDJOBS },
-    { id: 'chat', label: 'Chat', route: ROUTES.CHAT },
+    { id: 'find-jobs', label: t.components.header.findJobs, route: ROUTES.FINDJOBS },
+    { id: 'manage-posts', label: t.components.header.manageJobPosts, route: ROUTES.MANAGEJOBPOSTS },
+    { id: 'applied-jobs', label: t.components.header.appliedJobs, route: ROUTES.APPLIEDJOBS },
+    { id: 'chat', label: t.components.header.chat, route: ROUTES.CHAT },
   ];
 
   const settingsUserData = {
@@ -287,8 +289,8 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   };
 
   const getDisplayName = () => {
-    if (isLoading) return 'Loading...';
-    if (!userData.name) return 'User';
+    if (isLoading) return t.common.labels.loading;
+    if (!userData.name) return t.common.labels.user;
     const firstName = userData.name.split(' ')[0];
     return firstName || userData.name;
   };

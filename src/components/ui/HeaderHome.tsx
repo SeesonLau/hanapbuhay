@@ -5,7 +5,8 @@ import { getWhiteColor, TYPOGRAPHY } from '@/styles';
 import { useEffect, useState } from 'react';
 import { ROUTES } from '@/lib/constants';
 import { useTheme } from '@/hooks/useTheme';
-import { FiSun } from 'react-icons/fi';
+import { useLanguage } from '@/hooks/useLanguage';
+import { FiSun, FiGlobe } from 'react-icons/fi';
 
 interface HeaderHomeProps {
   onNavigateToSection: (sectionId: string) => void;
@@ -29,6 +30,7 @@ export default function HeaderHome({
   const pathname = usePathname();
   const router = useRouter();
   const { theme, themeName, setTheme, toggleTheme } = useTheme();
+  const { locale, setLocale, t } = useLanguage();
 
   const isHomePage = pathname === '/';
 
@@ -47,6 +49,10 @@ export default function HeaderHome({
 
   const handleThemeToggle = () => {
     toggleTheme();
+  };
+
+  const handleLanguageToggle = () => {
+    setLocale(locale === 'en' ? 'tl' : 'en');
   };
 
   // Get theme icon and label based on current theme
@@ -179,7 +185,7 @@ export default function HeaderHome({
               e.currentTarget.style.color = theme.landing.bodyText;
             }}
           >
-            Benefits
+            {t.components.header.benefits}
           </div>
         </button>
 
@@ -188,7 +194,7 @@ export default function HeaderHome({
           onClick={() => onNavigateToSection('recommended-jobs')}
           className="flex justify-center items-center cursor-pointer transition-all duration-300 hover:scale-105"
         >
-          <div 
+          <div
             className="text-center px-2 py-2 text-sm tablet:text-base whitespace-nowrap transition-colors duration-300"
             style={{
               color: theme.landing.bodyText,
@@ -204,7 +210,7 @@ export default function HeaderHome({
               e.currentTarget.style.color = theme.landing.bodyText;
             }}
           >
-            Recommendations
+            {t.components.header.recommendations}
           </div>
         </button>
 
@@ -213,7 +219,7 @@ export default function HeaderHome({
           onClick={() => onNavigateToSection('popular-categories')}
           className="flex justify-center items-center cursor-pointer transition-all duration-300 hover:scale-105"
         >
-          <div 
+          <div
             className="text-center px-2 py-2 text-sm tablet:text-base whitespace-nowrap transition-colors duration-300"
             style={{
               color: theme.landing.bodyText,
@@ -229,7 +235,7 @@ export default function HeaderHome({
               e.currentTarget.style.color = theme.landing.bodyText;
             }}
           >
-            Popular
+            {t.components.header.popularCategories}
           </div>
         </button>
 
@@ -238,7 +244,7 @@ export default function HeaderHome({
           onClick={onNavigateToFooter}
           className="flex justify-center items-center cursor-pointer transition-all duration-300 hover:scale-105"
         >
-          <div 
+          <div
             className="text-center px-2 py-2 text-sm tablet:text-base whitespace-nowrap transition-colors duration-300"
             style={{
               color: theme.landing.bodyText,
@@ -254,13 +260,13 @@ export default function HeaderHome({
               e.currentTarget.style.color = theme.landing.bodyText;
             }}
           >
-            Contact Us
+            {t.components.header.contactUs}
           </div>
         </button>
       </nav>
 
-      {/* Theme Switcher Button */}
-      <div className="flex-shrink-0">
+      {/* Action Buttons - Theme & Language Switcher */}
+      <div className="flex-shrink-0 flex items-center gap-2 sm:gap-3">
         <button
           onClick={handleThemeToggle}
           className="group relative p-2 sm:p-2.5 rounded-full transition-all duration-300 hover:scale-110 active:scale-95"
@@ -295,6 +301,44 @@ export default function HeaderHome({
             }}
           >
             {themeInfo.icon} {themeInfo.label}
+          </div>
+        </button>
+
+        {/* Language Switcher Button */}
+        <button
+          onClick={handleLanguageToggle}
+          className="group relative p-2 sm:p-2.5 rounded-full transition-all duration-300 hover:scale-110 active:scale-95"
+          style={{
+            backgroundColor: theme.landing.iconBg,
+            border: `2px solid ${theme.landing.iconBorder}`,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = theme.landing.glassHoverBg;
+            e.currentTarget.style.borderColor = theme.landing.glassHoverBorder;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = theme.landing.iconBg;
+            e.currentTarget.style.borderColor = theme.landing.iconBorder;
+          }}
+          title={`Switch language (Current: ${locale === 'en' ? 'English' : 'Tagalog'})`}
+          aria-label={`Switch language. Current: ${locale === 'en' ? 'English' : 'Tagalog'}`}
+        >
+          <FiGlobe
+            size={20}
+            className="transition-colors duration-300"
+            style={{ color: theme.landing.accentPrimary }}
+          />
+
+          {/* Tooltip */}
+          <div
+            className="absolute -bottom-10 right-0 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 backdrop-blur-sm"
+            style={{
+              backgroundColor: theme.landing.glassBg,
+              border: `1px solid ${theme.landing.glassBorder}`,
+              color: theme.landing.headingPrimary,
+            }}
+          >
+            {locale === 'en' ? '🇬🇧 English' : '🇵🇭 Tagalog'}
           </div>
         </button>
       </div>
