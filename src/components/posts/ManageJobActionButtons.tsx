@@ -36,7 +36,7 @@ export const ManageJobActionButtons: React.FC<ManageJobActionButtonsProps> = ({
           className="inline-flex items-center justify-center h-[30px] px-3 border rounded-[10px] text-xs font-medium transition-colors" 
           style={{
             backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.border,
+            borderColor: theme.colors.borderLight,
           }}
           onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
           onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.surface}
@@ -54,7 +54,7 @@ export const ManageJobActionButtons: React.FC<ManageJobActionButtonsProps> = ({
           className="inline-flex items-center justify-center h-[30px] w-[36px] border rounded-[10px] transition-colors" 
           style={{
             backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.border,
+            borderColor: theme.colors.borderLight,
           }}
           onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
           onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.surface}
@@ -66,7 +66,7 @@ export const ManageJobActionButtons: React.FC<ManageJobActionButtonsProps> = ({
           className="inline-flex items-center justify-center h-[30px] w-[36px] border rounded-[10px] transition-colors" 
           style={{
             backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.border,
+            borderColor: theme.colors.borderLight,
           }}
           onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
           onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.surface}
@@ -79,7 +79,7 @@ export const ManageJobActionButtons: React.FC<ManageJobActionButtonsProps> = ({
             className="inline-flex items-center justify-center h-[30px] px-2 rounded-[10px] border transition-colors"
             style={{
               backgroundColor: theme.colors.surface,
-              borderColor: theme.colors.border,
+              borderColor: theme.colors.borderLight,
               color: isOpenLock ? theme.colors.success : theme.colors.textMuted
             }}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
@@ -113,7 +113,7 @@ export const ManageJobActionButtons: React.FC<ManageJobActionButtonsProps> = ({
           className="flex items-center justify-center flex-1 h-[30px] border rounded-l-[10px] text-xs font-medium transition-colors" 
           style={{
             backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.border,
+            borderColor: theme.colors.borderLight,
           }}
           onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
           onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.surface}
@@ -131,7 +131,7 @@ export const ManageJobActionButtons: React.FC<ManageJobActionButtonsProps> = ({
           className="flex items-center justify-center flex-1 h-[30px] border-t border-b transition-colors" 
           style={{
             backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.border,
+            borderColor: theme.colors.borderLight,
           }}
           onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
           onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.surface}
@@ -143,7 +143,7 @@ export const ManageJobActionButtons: React.FC<ManageJobActionButtonsProps> = ({
           className="flex items-center justify-center flex-1 h-[30px] border rounded-r-[10px] transition-colors" 
           style={{
             backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.border,
+            borderColor: theme.colors.borderLight,
           }}
           onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.surfaceHover}
           onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.surface}

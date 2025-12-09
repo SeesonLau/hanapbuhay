@@ -90,10 +90,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   });
 
   const [isJobTypeOpen, setIsJobTypeOpen] = useState(false);
-  const [isSalaryOpen, setIsSalaryOpen] = useState(variant === 'appliedJobs');
+  const [isSalaryOpen, setIsSalaryOpen] = useState(false);
   const [isExperienceOpen, setIsExperienceOpen] = useState(false);
   const [isGenderOpen, setIsGenderOpen] = useState(false);
-  const [isStatusOpen, setIsStatusOpen] = useState(variant === 'appliedJobs');
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(false);
@@ -124,7 +124,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       scrollElement?.removeEventListener('scroll', checkScroll);
       observer.disconnect();
     };
-  }, [isJobTypeOpen, isSalaryOpen, isExperienceOpen, isGenderOpen]);
+  }, [isJobTypeOpen, isSalaryOpen, isExperienceOpen, isGenderOpen, isStatusOpen]);
 
   const handleClearAll = () => {
     setJobTypes({});

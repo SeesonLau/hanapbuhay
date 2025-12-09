@@ -204,18 +204,18 @@ export default function FindJobsPage() {
 
         {/* Filter Section - Desktop Only */}
         <aside 
-          className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] shadow-lg z-40 flex flex-col pointer-events-auto"
+          className="hidden laptop:block fixed right-0 top-[200px] mobile-M:top-[205px] mobile-L:top-[210px] tablet:top-[220px] laptop:top-[200px] laptop-L:top-[200px] bottom-0 w-[280px] shadow-lg z-40 border-l flex flex-col pointer-events-auto transition-colors duration-300"
           style={{
-            backgroundColor: theme.colors.surface,
-            borderLeft: `1px solid ${theme.colors.border}`,
+            backgroundColor: theme.colors.sidebarBg,
+            borderColor: theme.colors.borderLight,
           }}
         >
           {/* Sort & View Controls */}
           <div 
-            className="flex-shrink-0 px-3 py-2 z-10"
+            className="flex-shrink-0 border-b px-3 py-2 z-10 transition-colors duration-300"
             style={{
               backgroundColor: theme.colors.surface,
-              borderBottom: `1px solid ${theme.colors.border}`,
+              borderColor: theme.colors.borderLight,
             }}
           >
             <div className="flex items-center justify-between gap-3">
