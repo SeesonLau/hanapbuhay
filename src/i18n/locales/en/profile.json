@@ -1,0 +1,48 @@
+{
+  "title": "Profile",
+  "subtitle": "Manage your profile information",
+  "sections": {
+    "personalInfo": "Personal Information",
+    "workExperience": "Work Experience",
+    "education": "Education",
+    "skills": "Skills",
+    "projects": "Projects",
+    "reviews": "Reviews"
+  },
+  "fields": {
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "birthdate": "Birthdate",
+    "sex": "Sex",
+    "age": "Age",
+    "location": "Location",
+    "bio": "Bio",
+    "website": "Website",
+    "linkedin": "LinkedIn",
+    "github": "GitHub"
+  },
+  "placeholders": {
+    "fullName": "Enter your full name",
+    "email": "Enter your email",
+    "phone": "Enter your phone number",
+    "bio": "Tell us about yourself",
+    "website": "Your website URL",
+    "linkedin": "LinkedIn profile URL",
+    "github": "GitHub profile URL"
+  },
+  "buttons": {
+    "editProfile": "Edit Profile",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "addExperience": "Add Experience",
+    "addEducation": "Add Education",
+    "addProject": "Add Project",
+    "viewWorkExperience": "View Work Experience"
+  },
+  "messages": {
+    "profileUpdated": "Profile updated successfully",
+    "updateFailed": "Failed to update profile",
+    "fillRequired": "Please fill in all required fields"
+  }
+}

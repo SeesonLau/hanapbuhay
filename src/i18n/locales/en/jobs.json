@@ -1,0 +1,56 @@
+{
+  "findJobs": {
+    "title": "Find Jobs",
+    "subtitle": "Discover opportunities that match your skills",
+    "searchPlaceholder": "Search for jobs...",
+    "noJobsFound": "No jobs found",
+    "filters": {
+      "title": "Filters",
+      "jobType": "Job Type",
+      "location": "Location",
+      "salary": "Salary Range",
+      "experience": "Experience Level",
+      "posted": "Posted Date"
+    }
+  },
+  "appliedJobs": {
+    "title": "Applied Jobs",
+    "subtitle": "Track your job applications",
+    "noApplications": "You haven't applied to any jobs yet",
+    "status": {
+      "pending": "Pending",
+      "reviewing": "Under Review",
+      "accepted": "Accepted",
+      "rejected": "Rejected"
+    }
+  },
+  "manageJobPosts": {
+    "title": "Manage Job Posts",
+    "subtitle": "Manage your job postings",
+    "addNewPost": "Add New Post",
+    "noPosts": "You don't have any job posts yet",
+    "editPost": "Edit Post",
+    "deletePost": "Delete Post",
+    "viewApplicants": "View Applicants"
+  },
+  "jobCard": {
+    "posted": "Posted",
+    "applicants": "Applicants",
+    "viewDetails": "View Details",
+    "applyNow": "Apply Now",
+    "applied": "Applied",
+    "salaryRange": "Salary Range"
+  },
+  "jobDetails": {
+    "description": "Job Description",
+    "requirements": "Requirements",
+    "responsibilities": "Responsibilities",
+    "benefits": "Benefits",
+    "location": "Location",
+    "jobType": "Job Type",
+    "experience": "Experience Required",
+    "education": "Education Required",
+    "deadline": "Application Deadline",
+    "contactInfo": "Contact Information"
+  }
+}

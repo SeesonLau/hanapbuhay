@@ -1,0 +1,43 @@
+{
+  "hero": {
+    "title": "Hanapin ang Iyong Susunod na",
+    "titleHighlight": "Oportunidad",
+    "description": "Kumonekta sa mga oportunidad na mahalaga. Naghahanap man ng trabaho o nag-aalok nito, ginagawang madali at gantimpala ng HanapBuhay ang paghanap ng perpektong tugma."
+  },
+  "benefits": {
+    "title": "Bakit Pipiliin ang HanapBuhay?",
+    "subtitle": "Tuklasin ang mga bentahe ng paggamit ng aming platform",
+    "items": [
+      {
+        "title": "Madaling Gamitin",
+        "description": "Simple at madaling maintindihang interface para sa lahat"
+      },
+      {
+        "title": "Naberipikang mga Oportunidad",
+        "description": "Lahat ng job post ay naberipika para sa katotohanan"
+      },
+      {
+        "title": "Secure na Platform",
+        "description": "Ang iyong data ay protektado ng industry-standard security"
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "Paano Ito Gumagana",
+    "subtitle": "Magsimula sa tatlong simpleng hakbang",
+    "steps": [
+      {
+        "title": "Gumawa ng Iyong Profile",
+        "description": "Mag-sign up at sabihin sa amin ang tungkol sa iyo"
+      },
+      {
+        "title": "Mag-browse ng mga Oportunidad",
+        "description": "Maghanap ng mga trabahong tugma sa iyong mga kasanayan"
+      },
+      {
+        "title": "Mag-apply at Kumonekta",
+        "description": "Magsumite ng mga aplikasyon at magsimulang makipag-usap"
+      }
+    ]
+  }
+}

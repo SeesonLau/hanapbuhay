@@ -1,0 +1,43 @@
+{
+  "hero": {
+    "title": "Find Your Next",
+    "titleHighlight": "Opportunity",
+    "description": "Connect with opportunities that matter. Whether you're seeking work or offering it, HanapBuhay makes finding the perfect match effortless and rewarding."
+  },
+  "benefits": {
+    "title": "Why Choose HanapBuhay?",
+    "subtitle": "Discover the advantages of using our platform",
+    "items": [
+      {
+        "title": "Easy to Use",
+        "description": "Simple and intuitive interface for everyone"
+      },
+      {
+        "title": "Verified Opportunities",
+        "description": "All job posts are verified for authenticity"
+      },
+      {
+        "title": "Secure Platform",
+        "description": "Your data is protected with industry-standard security"
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "Get started in three simple steps",
+    "steps": [
+      {
+        "title": "Create Your Profile",
+        "description": "Sign up and tell us about yourself"
+      },
+      {
+        "title": "Browse Opportunities",
+        "description": "Find jobs that match your skills"
+      },
+      {
+        "title": "Apply & Connect",
+        "description": "Submit applications and start conversations"
+      }
+    ]
+  }
+}

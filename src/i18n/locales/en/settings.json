@@ -17,16 +17,16 @@
     "title": "Preferences",
     "theme": {
       "label": "Theme",
-      "light": "Light",
-      "dark": "Dark",
-      "system": "System"
+      "classic": "Classic",
+      "spring": "Spring",
+      "summer": "Summer",
+      "autumn": "Autumn",
+      "winter": "Winter"
     },
     "language": {
       "label": "Language",
       "en": "English",
-      "es": "Spanish",
-      "fr": "French",
-      "de": "German"
+      "tl": "Tagalog"
     },
     "notifications": {
       "title": "Notifications",

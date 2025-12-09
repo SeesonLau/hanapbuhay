@@ -1,0 +1,56 @@
+{
+  "findJobs": {
+    "title": "Maghanap ng Trabaho",
+    "subtitle": "Tuklasin ang mga oportunidad na tugma sa iyong mga kasanayan",
+    "searchPlaceholder": "Maghanap ng mga trabaho...",
+    "noJobsFound": "Walang nahanap na trabaho",
+    "filters": {
+      "title": "Mga Filter",
+      "jobType": "Uri ng Trabaho",
+      "location": "Lokasyon",
+      "salary": "Saklaw ng Sahod",
+      "experience": "Antas ng Karanasan",
+      "posted": "Petsa ng Pag-post"
+    }
+  },
+  "appliedJobs": {
+    "title": "Mga Inaplayan na Trabaho",
+    "subtitle": "Subaybayan ang iyong mga aplikasyon sa trabaho",
+    "noApplications": "Wala ka pang naaplayan na trabaho",
+    "status": {
+      "pending": "Naghihintay",
+      "reviewing": "Sinusuri",
+      "accepted": "Tinanggap",
+      "rejected": "Tinanggihan"
+    }
+  },
+  "manageJobPosts": {
+    "title": "Pamahalaan ang mga Job Post",
+    "subtitle": "Pamahalaan ang iyong mga job posting",
+    "addNewPost": "Magdagdag ng Bagong Post",
+    "noPosts": "Wala ka pang job post",
+    "editPost": "I-edit ang Post",
+    "deletePost": "Tanggalin ang Post",
+    "viewApplicants": "Tingnan ang mga Aplikante"
+  },
+  "jobCard": {
+    "posted": "Na-post",
+    "applicants": "Mga Aplikante",
+    "viewDetails": "Tingnan ang Detalye",
+    "applyNow": "Mag-apply Ngayon",
+    "applied": "Naaplayan na",
+    "salaryRange": "Saklaw ng Sahod"
+  },
+  "jobDetails": {
+    "description": "Deskripsyon ng Trabaho",
+    "requirements": "Mga Kinakailangan",
+    "responsibilities": "Mga Responsibilidad",
+    "benefits": "Mga Benepisyo",
+    "location": "Lokasyon",
+    "jobType": "Uri ng Trabaho",
+    "experience": "Kinakailangang Karanasan",
+    "education": "Kinakailangang Edukasyon",
+    "deadline": "Deadline ng Aplikasyon",
+    "contactInfo": "Impormasyon sa Pakikipag-ugnayan"
+  }
+}

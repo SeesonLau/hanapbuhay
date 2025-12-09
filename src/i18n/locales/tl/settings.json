@@ -17,16 +17,16 @@
     "title": "Mga Kagustuhan",
     "theme": {
       "label": "Tema",
-      "light": "Maliwanag",
-      "dark": "Madilim",
-      "system": "Sistema"
+      "classic": "Klasiko",
+      "spring": "Tagsibol",
+      "summer": "Tag-init",
+      "autumn": "Taglagas",
+      "winter": "Taglamig"
     },
     "language": {
       "label": "Wika",
       "en": "Ingles",
-      "es": "Espanyol",
-      "fr": "Pranses",
-      "de": "Aleman"
+      "tl": "Tagalog"
     },
     "notifications": {
       "title": "Mga Abiso",
