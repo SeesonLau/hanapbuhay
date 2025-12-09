@@ -15,6 +15,7 @@ import { ChatService } from "@/lib/services/chat/chat-services";
 import { toast } from 'react-hot-toast';
 import { supabase } from '@/lib/services/supabase/client';
 import { FiArrowLeft, FiMenu } from 'react-icons/fi';
+import ViewProfileModal from '@/components/modals/ViewProfileModal';
 
 // --- Custom Hook to Fetch Profile Data ---
 interface UserProfile {
@@ -69,6 +70,8 @@ export default function ChatPage() {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
   const [showMobileChatView, setShowMobileChatView] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedProfileUserId, setSelectedProfileUserId] = useState<string | null>(null);
 
   // Fix hydration by waiting for component to mount
   useEffect(() => {
@@ -397,6 +400,27 @@ export default function ChatPage() {
     setShowMobileChatView(false);
   };
 
+  // Handle opening profile modal
+  const handleOpenProfile = () => {
+    if (activeRoom?.type === 'global') {
+      // Don't open profile for global chat
+      return;
+    }
+
+    // Get the user ID from the active contact
+    const contactUserId = activeContact.userId;
+    if (contactUserId && contactUserId !== 'global') {
+      setSelectedProfileUserId(contactUserId);
+      setIsProfileModalOpen(true);
+    }
+  };
+
+  // Handle closing profile modal
+  const handleCloseProfileModal = () => {
+    setIsProfileModalOpen(false);
+    setSelectedProfileUserId(null);
+  };
+
   // Memoize active contact
   const activeContact = useMemo(() => {
     return userContactsMap[activeRoom?.id || ''] || { 
@@ -483,22 +507,31 @@ export default function ChatPage() {
                       <FiArrowLeft size={20} className="text-gray-700" />
                     </button>
 
-                    <Avatar className="h-8 w-8 mobile-L:h-10 mobile-L:w-10 flex-shrink-0">
-                      <AvatarImage src={activeContact.profilePicUrl || undefined} alt={activeContact.name} />
-                      <AvatarFallback className="bg-gray-300 text-gray-700 text-xs mobile-L:text-sm">
-                        {activeContact.name ? activeContact.name.substring(0, 2).toUpperCase() : '??'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base mobile-L:text-lg font-semibold text-gray-800 truncate">
-                        {activeContact.name}
-                      </h3>
-                      {activeRoom && (
-                        <p className="text-xs mobile-L:text-sm text-gray-500 truncate">
-                          {activeRoom.type === 'global' ? 'Global chat room' : 'Direct message'}
-                        </p>
-                      )}
-                    </div>
+                    {/* Clickable profile section for DMs */}
+                    <button
+                      onClick={handleOpenProfile}
+                      className={`flex items-center space-x-2 mobile-L:space-x-3 flex-1 min-w-0 -mx-2 px-2 py-1.5 rounded-lg transition-colors ${
+                        activeRoom?.type === 'global' ? 'cursor-default' : 'hover:bg-gray-100 cursor-pointer'
+                      }`}
+                      disabled={activeRoom?.type === 'global'}
+                    >
+                      <Avatar className="h-8 w-8 mobile-L:h-10 mobile-L:w-10 flex-shrink-0">
+                        <AvatarImage src={activeContact.profilePicUrl || undefined} alt={activeContact.name} />
+                        <AvatarFallback className="bg-gray-300 text-gray-700 text-xs mobile-L:text-sm">
+                          {activeContact.name ? activeContact.name.substring(0, 2).toUpperCase() : '??'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0 text-left">
+                        <h3 className="text-base mobile-L:text-lg font-semibold text-gray-800 truncate">
+                          {activeContact.name}
+                        </h3>
+                        {activeRoom && (
+                          <p className="text-xs mobile-L:text-sm text-gray-500 truncate">
+                            {activeRoom.type === 'global' ? 'Global chat room' : 'Direct message'}
+                          </p>
+                        )}
+                      </div>
+                    </button>
                   </div>
                 </div>
 
@@ -532,6 +565,16 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
+
+      {/* View Profile Modal */}
+      {selectedProfileUserId && (
+        <ViewProfileModal
+          isOpen={isProfileModalOpen}
+          onClose={handleCloseProfileModal}
+          userId={selectedProfileUserId}
+          userType="applicant"
+        />
+      )}
     </div>
   );
 }

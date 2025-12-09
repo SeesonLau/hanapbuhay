@@ -69,14 +69,29 @@ export async function notifyEmployerOfApplication({
       return;
     }
 
-    console.log('Creating notification...');
+    // Fetch the postId from posts table
+    console.log('Fetching postId from posts table...');
+    const { data: postData, error: postError } = await supabase
+      .from('posts')
+      .select('postId')
+      .eq('postId', postId)
+      .maybeSingle();
+
+    console.log('Post fetch result:', { postData, postError });
+
+    if (postError || !postData) {
+      console.error('Failed to fetch post for relatedId:', postError);
+      return;
+    }
+
+    console.log('Creating notification with postId as relatedId:', postData.postId);
 
     const notification = await NotificationService.createNotification({
       userId: employerId,
       createdBy: applicantId,
       type: NotificationType.JOB_APPLICATION,
       message: `applied to your *${post.title}* job post`,
-      relatedId: applicationId,
+      relatedId: postData.postId,
       isRead: false,
       updatedBy: applicantId
     });

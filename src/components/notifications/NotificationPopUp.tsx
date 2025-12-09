@@ -71,12 +71,26 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
     try {
       if (!userId) return;
 
+      console.log('Notification clicked:', notif);
+      console.log('Related ID:', notif.relatedId);
+
+      // Mark as read first
       if (!notif.isRead) {
         await markAsRead(notif.notificationId);
       }
 
+      // Get the route
       const route = getNotificationRoute(notif);
-      router.push(route);
+      console.log('Navigating to route:', route);
+
+      // Close the popup if onClose is provided
+      if (onClose) {
+        onClose();
+      }
+
+      // Always use window.location.href for full navigation with reload
+      // This ensures query params trigger page effects and modals
+      window.location.href = route;
       
     } catch (error) {
       console.error('Error handling notification click:', error);

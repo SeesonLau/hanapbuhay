@@ -168,7 +168,7 @@ export default function AllApplicantsSection({
     <div className="relative">
       <div
         ref={scrollRef}
-        className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 justify-items-center p-2 max-h-[500px] overflow-y-auto scrollbar-hide scroll-smooth"
+        className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 justify-items-center p-2 max-h-[350px] md:max-h-[500px] overflow-y-auto scrollbar-hide scroll-smooth"
       >
         {filteredAndSortedApplicants.length === 0 ? (
           <div 

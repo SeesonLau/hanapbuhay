@@ -18,16 +18,25 @@ interface Job {
 interface JobListSectionProps {
   userId: string;
   userType: 'applicant' | 'employer';
+  jobsData?: Job[];
 }
 
-export default function JobListSection({ userId, userType }: JobListSectionProps) {
+export default function JobListSection({ userId, userType, jobsData: externalJobsData }: JobListSectionProps) {
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!externalJobsData);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isScrollable, setIsScrollable] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
 
   useEffect(() => {
+    // If data is provided externally, use it directly
+    if (externalJobsData) {
+      setJobs(externalJobsData);
+      setLoading(false);
+      return;
+    }
+
+    // Otherwise, fetch the data
     const fetchJobs = async () => {
       try {
         setLoading(true);
@@ -47,7 +56,7 @@ export default function JobListSection({ userId, userType }: JobListSectionProps
               // Access the joined posts data from the application response
               const postTitle = app.posts?.title || 'Unknown Job';
               const postLocation = app.posts?.location || 'Unknown Location';
-              
+
               return {
                 postId: app.postId,
                 title: postTitle,
@@ -92,7 +101,7 @@ export default function JobListSection({ userId, userType }: JobListSectionProps
     };
 
     fetchJobs();
-  }, [userId, userType]);
+  }, [userId, userType, externalJobsData]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -134,42 +143,47 @@ export default function JobListSection({ userId, userType }: JobListSectionProps
   }
 
   return (
-    <div className="p-6 relative">
-      <p className="font-inter font-semibold -mt-4 body">
-        {userType === 'applicant' ? 'Previous Applied Jobs at' : 'Previous Posted Jobs at'}{" "}
-        <span className="font-inter font-extrabold text-primary-primary500 transition duration-200 ease-in-out hover:text-primary-600 hover:scale-105 inline-block cursor-pointer">
-          HANAPBUHAY
-        </span>
-      </p>
-
-      {/* Jobs container */}
-      <div
-        ref={scrollRef}
-        className="rounded-lg max-h-[330px] overflow-y-auto scrollbar-hide py-2 px-2 snap-y snap-mandatory scroll-smooth"
-        style={{
-          scrollPaddingTop: '0.5rem',
-          scrollPaddingBottom: '0.5rem'
-        }}
-      >
-        <div className="flex flex-col gap-4">
-          {jobs.map((job) => (
-            <div key={job.postId} className="snap-start">
-              <PastJobCard
-                postId={job.postId}
-                title={job.title}
-                address={job.location}
-                hiredDate={job.hiredDate}
-              />
-            </div>
-          ))}
-        </div>
+    <div className="flex flex-col h-full relative">
+      <div className="p-6 pb-2 flex-shrink-0">
+        <p className="font-inter font-semibold -mt-4 body">
+          {userType === 'applicant' ? 'Previous Applied Jobs at' : 'Previous Posted Jobs at'}{" "}
+          <span className="font-inter font-extrabold text-primary-primary500 transition duration-200 ease-in-out hover:text-primary-600 hover:scale-105 inline-block cursor-pointer">
+            HANAPBUHAY
+          </span>
+        </p>
       </div>
 
-      {isScrollable && !isAtBottom && (
-        <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 bg-gradient-to-t from-white/95 to-transparent p-0 text-sm text-gray-neutral500">
-          <HiArrowDown className="w-4 h-4 animate-bounce" />
+      {/* Jobs container - takes remaining space */}
+      <div className="flex-1 px-6 pb-6 relative overflow-hidden">
+        <div
+          ref={scrollRef}
+          className="h-full rounded-lg overflow-y-auto scrollbar-hide py-2 px-2 snap-y snap-mandatory scroll-smooth"
+          style={{
+            scrollPaddingTop: '0.5rem',
+            scrollPaddingBottom: '0.5rem'
+          }}
+        >
+          <div className="flex flex-col gap-4">
+            {jobs.map((job) => (
+              <div key={job.postId} className="snap-start">
+                <PastJobCard
+                  postId={job.postId}
+                  title={job.title}
+                  address={job.location}
+                  hiredDate={job.hiredDate}
+                  userType={userType}
+                />
+              </div>
+            ))}
+          </div>
         </div>
-      )}
+
+        {isScrollable && !isAtBottom && (
+          <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 bg-gradient-to-t from-white/95 to-transparent p-2 text-sm text-gray-neutral500 pointer-events-none">
+            <HiArrowDown className="w-4 h-4 animate-bounce" />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
