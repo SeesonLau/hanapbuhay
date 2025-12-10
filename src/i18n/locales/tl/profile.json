@@ -1,6 +1,10 @@
 {
   "title": "Profile",
   "subtitle": "Pamahalaan ang iyong impormasyon ng profile",
+  "banner": {
+    "title": "I-customize ang iyong",
+    "highlight": "Profile"
+  },
   "sections": {
     "personalInfo": "Personal na Impormasyon",
     "workExperience": "Karanasan sa Trabaho",
@@ -44,5 +48,24 @@
     "profileUpdated": "Matagumpay na na-update ang profile",
     "updateFailed": "Nabigo ang pag-update ng profile",
     "fillRequired": "Pakipunan ang lahat ng kinakailangang field"
+  },
+  "viewProfileModal": {
+    "profile": "Profile",
+    "reviews": "Mga Review",
+    "projects": "Mga Proyekto",
+    "jobs": "Mga Trabaho"
+  },
+  "projectModal": {
+    "addTitle": "Magdagdag ng Karanasan sa Trabaho",
+    "editTitle": "I-edit ang Karanasan sa Trabaho",
+    "title": "Titulo",
+    "titlePlaceholder": "Magdagdag ng titulo",
+    "description": "Deskripsyon",
+    "descriptionPlaceholder": "Magdagdag ng deskripsyon",
+    "addPhoto": "Magdagdag ng Larawan",
+    "images": "mga larawan",
+    "maxReached": "Naabot na ang maximum",
+    "update": "I-update",
+    "add": "Magdagdag"
   }
 }

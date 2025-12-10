@@ -5,6 +5,7 @@ import { HiArrowDown } from "react-icons/hi";
 import AppliedJobCard from "@/components/cards/AppliedJobCardList";
 import type { AppliedJob } from "@/components/cards/AppliedJobCardList";
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Props {
   applications: AppliedJob[];
@@ -30,6 +31,7 @@ const ApplicationsSection: React.FC<Props> = ({
   onLoadMore,
 }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const observerTarget = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -53,18 +55,18 @@ const ApplicationsSection: React.FC<Props> = ({
 
   if (loading && (!applications || applications.length === 0)) {
     return (
-      <div 
+      <div
         className="text-center py-8"
         style={{ color: theme.colors.textSecondary }}
       >
-        Loading applications...
+        {t.jobs.appliedJobs.loadingApplications}
       </div>
     );
   }
-  
+
   if (error) {
     return (
-      <div 
+      <div
         className="text-center py-8"
         style={{ color: theme.colors.error }}
       >
@@ -72,14 +74,14 @@ const ApplicationsSection: React.FC<Props> = ({
       </div>
     );
   }
-  
+
   if (!applications || applications.length === 0) {
     return (
-      <div 
+      <div
         className="text-center py-8"
         style={{ color: theme.colors.textMuted }}
       >
-        No applications available.
+        {t.jobs.appliedJobs.noApplicationsAvailable}
       </div>
     );
   }
@@ -105,29 +107,29 @@ const ApplicationsSection: React.FC<Props> = ({
               className="w-6 h-6 animate-bounce"
               style={{ color: theme.colors.primary }}
             />
-            <span 
+            <span
               className="text-small font-medium"
               style={{ color: theme.colors.textSecondary }}
             >
-              Scroll for more
+              {t.jobs.appliedJobs.scrollForMore}
             </span>
           </button>
         </div>
       )}
       {isLoadingMore && (
-        <div 
+        <div
           className="w-full text-center py-4"
           style={{ color: theme.colors.textSecondary }}
         >
-          Loading more applications...
+          {t.jobs.appliedJobs.loadingMoreApplications}
         </div>
       )}
       {!hasMore && applications.length > 0 && (
-        <div 
+        <div
           className="w-full text-center py-4"
           style={{ color: theme.colors.textMuted }}
         >
-          You've reached the end
+          {t.jobs.appliedJobs.reachedEnd}
         </div>
       )}
     </>

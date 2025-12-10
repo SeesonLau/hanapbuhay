@@ -10,6 +10,7 @@ import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export type ApplicationStatus = 'pending' | 'approved' | 'rejected';
 
@@ -36,33 +37,6 @@ export interface AppliedJobCardProps {
   className?: string;
 }
 
-const statusConfig = {
-  pending: {
-    text: 'Pending',
-    bgColor: 'bg-warning-warning100',
-    textColor: 'text-warning-warning700',
-    icon: GoClock
-  },
-  approved: {
-    text: 'Approved',
-    bgColor: 'bg-success-success100',
-    textColor: 'text-success-success700',
-    icon: IoCheckmarkCircleOutline
-  },
-  rejected: {
-    text: 'Rejected',
-    bgColor: 'bg-error-error100',
-    textColor: 'text-error-error700',
-    icon: LuCircleX
-  },
-  unknown: {
-    text: 'Unknown',
-    bgColor: 'bg-gray-neutral100',
-    textColor: 'text-gray-neutral700',
-    icon: GoClock
-  },
-};
-
 export default function AppliedJobCard({
   job,
   variant = 'card',
@@ -71,15 +45,44 @@ export default function AppliedJobCard({
   className = ''
 }: AppliedJobCardProps) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
+
+  const statusConfig = {
+    pending: {
+      text: t.jobs.appliedJobs.status.pending,
+      bgColor: 'bg-warning-warning100',
+      textColor: 'text-warning-warning700',
+      icon: GoClock
+    },
+    approved: {
+      text: t.jobs.appliedJobs.status.approved,
+      bgColor: 'bg-success-success100',
+      textColor: 'text-success-success700',
+      icon: IoCheckmarkCircleOutline
+    },
+    rejected: {
+      text: t.jobs.appliedJobs.status.rejected,
+      bgColor: 'bg-error-error100',
+      textColor: 'text-error-error700',
+      icon: LuCircleX
+    },
+    unknown: {
+      text: t.jobs.appliedJobs.status.unknown,
+      bgColor: 'bg-gray-neutral100',
+      textColor: 'text-gray-neutral700',
+      icon: GoClock
+    },
+  };
+
   const status = statusConfig[job.status] || statusConfig.unknown;
   const rawPost = (job as any)?.raw?.posts ?? (job as any)?.raw?.post ?? {};
   const isLocked = Boolean(rawPost?.isLocked ?? rawPost?.is_locked);
   const isDeleted = Boolean(rawPost?.deletedAt ?? rawPost?.deleted_at);
   const isMuted = isLocked || isDeleted;
   const statusOverride = isDeleted
-    ? { text: 'Deleted', bgColor: 'bg-gray-neutral100', textColor: 'text-gray-neutral600', icon: RiDeleteBin6Line }
+    ? { text: t.jobs.appliedJobs.status.deleted, bgColor: 'bg-gray-neutral100', textColor: 'text-gray-neutral600', icon: RiDeleteBin6Line }
     : isLocked
-      ? { text: 'Locked', bgColor: 'bg-gray-neutral100', textColor: 'text-gray-neutral600', icon: LuCircleX }
+      ? { text: t.jobs.appliedJobs.status.locked, bgColor: 'bg-gray-neutral100', textColor: 'text-gray-neutral600', icon: LuCircleX }
       : null;
   const displayStatus = statusOverride || status;
 
@@ -263,7 +266,7 @@ export default function AppliedJobCard({
               className="font-inter text-[10px] whitespace-nowrap"
               style={{ color: isMuted ? theme.colors.textMuted : theme.colors.textSecondary }}
             >
-              Applied on: {job.appliedOn}
+              {t.jobs.appliedJobs.appliedOn}: {job.appliedOn}
             </span>
           </div>
 
@@ -280,7 +283,7 @@ export default function AppliedJobCard({
                   handleDelete();
                 }}
                 className="p-1.5 text-error-error500 hover:text-error-error600 hover:bg-error-error50 rounded-md transition-colors"
-                title="Withdraw application"
+                title={t.jobs.appliedJobs.withdrawApplication}
               >
                 <RiDeleteBin6Line className="w-4 h-4" />
               </button>

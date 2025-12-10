@@ -2,6 +2,12 @@
   "title": "Mga Mensahe",
   "subtitle": "Makipag-chat sa mga employer at naghahanap ng trabaho",
   "searchPlaceholder": "Maghanap ng mga pag-uusap...",
+  "banner": {
+    "title": "Makipag-chat sa mga",
+    "highlight": "Kliyente",
+    "subtitle": "at",
+    "subtitleHighlight": "Manggagawa"
+  },
   "noConversations": "Wala pang mga pag-uusap",
   "selectConversation": "Pumili ng pag-uusap upang magsimulang mag-message",
   "typePlaceholder": "Mag-type ng mensahe...",
@@ -20,6 +26,8 @@
   "today": "Ngayon",
   "yesterday": "Kahapon",
   "seen": "Nakita",
-  "delivered": "Naipadala",
-  "sent": "Naipadala"
+  "delivered": "Naihatid",
+  "sent": "Naipadala",
+  "guestUser": "Bisita",
+  "unknownUser": "Hindi Kilalang User"
 }

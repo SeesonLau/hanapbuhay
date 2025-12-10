@@ -20,6 +20,7 @@
     "close": "Isara",
     "retry": "Subukan Muli",
     "refresh": "I-refresh",
+    "post": "Mag-post",
     "addPost": "Magdagdag ng Post",
     "apply": "Mag-apply",
     "viewMore": "Tingnan pa",
@@ -27,7 +28,7 @@
     "next": "Susunod"
   },
   "labels": {
-    "sortBy": "Pagbukud-bukurin ayon sa",
+    "sortBy": "Sort By",
     "filterBy": "Salain ayon sa",
     "search": "Maghanap",
     "email": "Email",

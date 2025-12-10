@@ -6,6 +6,7 @@ import StatCardAppliedJobs from '@/components/cards/StatCardAppliedJobs';
 import StatCardManageJobs from '@/components/cards/StatCardManageJobs';
 import type { Stats } from '@/hooks/useStats';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 type Variant = 'findJobs' | 'appliedJobs' | 'manageJobs';
 
@@ -19,14 +20,15 @@ interface Props {
 
 const StatsSection: React.FC<Props> = ({ stats, variant, loading, error, onStatClick }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
 
   if (loading) {
     return (
-      <div 
+      <div
         className="max-w-4xl mx-auto text-center py-6"
         style={{ color: theme.colors.textMuted }}
       >
-        Loading statistics...
+        {t.common.labels.loading}
       </div>
     );
   }
@@ -47,10 +49,10 @@ const StatsSection: React.FC<Props> = ({ stats, variant, loading, error, onStatC
       <div className="w-full h-full flex items-center justify-center py-4 laptop:py-6">
         {/* 2x2 grid on mobile, horizontal row on tablet, vertical column on laptop */}
         <div className="grid grid-cols-2 gap-2 mobile-M:gap-2.5 tablet:grid-cols-4 tablet:gap-3 laptop:grid-cols-1 laptop:gap-4 laptop-L:gap-5 w-full laptop:h-full auto-rows-fr">
-          <StatCardFindJobs title="Total Jobs" value={stats.totalJobs ?? 0} variant="blue" className="min-w-0" />
-          <StatCardFindJobs title="Ratings" value={stats.ratings ?? 0} variant="yellow" className="min-w-0" />
-          <StatCardFindJobs title="Completed" value={stats.completed ?? 0} variant="green" className="min-w-0" />
-          <StatCardFindJobs title="Posted" value={stats.posts ?? 0} variant="red" className="min-w-0" />
+          <StatCardFindJobs title={t.jobs.findJobs.stats.totalJobs} value={stats.totalJobs ?? 0} variant="blue" className="min-w-0" />
+          <StatCardFindJobs title={t.jobs.findJobs.stats.ratings} value={stats.ratings ?? 0} variant="yellow" className="min-w-0" />
+          <StatCardFindJobs title={t.jobs.findJobs.stats.completed} value={stats.completed ?? 0} variant="green" className="min-w-0" />
+          <StatCardFindJobs title={t.jobs.findJobs.stats.posted} value={stats.posts ?? 0} variant="red" className="min-w-0" />
         </div>
       </div>
     );

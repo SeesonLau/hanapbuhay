@@ -5,6 +5,7 @@ import { HiOutlineBriefcase, HiOutlineCheckCircle, HiOutlineChatAlt2, HiOutlineU
 import { Notification } from "@/lib/models/notification";
 import { NotificationType } from "@/lib/constants/notification-types";
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface NotificationCardProps {
   notif: Notification;
@@ -13,15 +14,15 @@ interface NotificationCardProps {
   onClick?: () => void;
 }
 
-function getTimeAgo(date: string): string {
+function getTimeAgo(date: string, t: any): string {
   const now = new Date();
   const notifDate = new Date(date);
   const diffInSeconds = Math.floor((now.getTime() - notifDate.getTime()) / 1000);
 
-  if (diffInSeconds < 60) return 'Just now';
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  if (diffInSeconds < 60) return t.components.notifications.justNow;
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}${t.components.notifications.minutesAgo}`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}${t.components.notifications.hoursAgo}`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}${t.components.notifications.daysAgo}`;
   return notifDate.toLocaleDateString();
 }
 
@@ -50,14 +51,15 @@ function parseMessageWithItalic(message: string) {
   });
 }
 
-export default function NotificationCard({ 
-  notif, 
-  actorName, 
-  actorAvatar, 
-  onClick 
+export default function NotificationCard({
+  notif,
+  actorName,
+  actorAvatar,
+  onClick
 }: NotificationCardProps) {
   const { theme } = useTheme();
-  const timeAgo = getTimeAgo(notif.createdAt);
+  const { t } = useLanguage();
+  const timeAgo = getTimeAgo(notif.createdAt, t);
   const Icon = getNotificationIcon(notif.type);
 
   // Get color scheme based on notification type and read status

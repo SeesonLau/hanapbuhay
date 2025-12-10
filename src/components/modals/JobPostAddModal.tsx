@@ -16,6 +16,7 @@ import { GenderTag, ExperienceLevelTag, JobTypeTag } from "@/components/ui/TagIt
 import JobTypeGrid from "@/components/ui/JobTypeGrid";
 import { getProvinces, getCitiesByProvince } from "@/lib/constants/philippines-locations";
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export interface JobPostAddFormData {
   title: string;
@@ -40,6 +41,7 @@ interface JobPostAddModalProps {
 
 export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAddModalProps) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [title, setTitle] = useState("");
   const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>([]);
   const [selectedSubTypes, setSelectedSubTypes] = useState<string[]>([]);
@@ -156,7 +158,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
 
   const handleSubmit = () => {
     if (!isFormValid) {
-      alert('Please complete: Job Title, About this role, Location (Country, Province, City/Municipality), select Job Type, Experience Level, Preferred Gender, enter a valid Salary Rate, and add at least one requirement.');
+      alert(t.jobs.jobPostModal.messages.fillRequired);
       return;
     }
     const data: JobPostAddFormData = {
@@ -205,11 +207,11 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
       >
         {/* Header */}
         <div className="px-4 mobile-M:px-5 tablet:px-[50px] pt-4 tablet:pt-6 pb-3 relative">
-          <h2 
+          <h2
             className="font-alexandria text-[24px] font-semibold text-center w-full"
             style={{ color: theme.colors.text }}
           >
-            Post a Job
+            {t.jobs.jobPostModal.addTitle}
           </h2>
           <button
             onClick={onClose}
@@ -226,11 +228,11 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
         <div className="px-4 mobile-M:px-5 tablet:px-[50px] pb-4 tablet:pb-6 space-y-4 tablet:space-y-5">
           <div className={page === 1 ? '' : 'hidden'}>
           {/* Tags Section */}
-          <div 
+          <div
             className="text-[14px] font-semibold mb-2"
             style={{ color: theme.colors.text }}
           >
-            Tags
+            {t.jobs.jobPostModal.fields.tags}
           </div>
           <div 
             className="rounded-xl border p-4"
@@ -238,11 +240,11 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
           >
             {/* Selected Tags Summary */}
             <div className="mb-3">
-              <div 
+              <div
                 className="text-[14px] font-semibold mb-2"
                 style={{ color: theme.colors.text }}
               >
-                Selected Tags
+                {t.jobs.jobPostModal.fields.selectedTags}
               </div>
               <div className="flex items-center gap-2">
                 <div
@@ -250,11 +252,11 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
                   style={{ borderColor: theme.modal.sectionBorder }}
                 >
                   {selectedSubTypes.length === 0 && selectedExperience.length === 0 && selectedGenders.length === 0 ? (
-                    <span 
+                    <span
                       className="text-[12px]"
                       style={{ color: theme.colors.textMuted }}
                     >
-                      Selected tags
+                      {t.jobs.jobPostModal.fields.selectedTags}
                     </span>
                   ) : (
                     <>
@@ -314,11 +316,11 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
             </div>
             {/* Job Type */}
             <div className="mb-3">
-              <div 
+              <div
                 className="text-[14px] font-semibold mb-2"
                 style={{ color: theme.colors.text }}
               >
-                Job Type
+                {t.jobs.jobPostModal.fields.jobType}
               </div>
               <JobTypeGrid
                 options={jobTypeOptions}
@@ -343,11 +345,11 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
              />
              {/* Experience Level */}
              <div className="mb-3">
-               <div 
+               <div
                  className="text-[14px] font-semibold mb-2"
                  style={{ color: theme.colors.text }}
                >
-                 Experience Level
+                 {t.jobs.jobPostModal.fields.experienceLevel}
                </div>
                <div className="flex flex-wrap gap-2">
                 {experienceOptions.map((opt) => (
@@ -368,11 +370,11 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
 
              {/* Preferred Gender */}
              <div>
-               <div 
+               <div
                  className="text-[14px] font-semibold mb-2"
                  style={{ color: theme.colors.text }}
                >
-                 Preferred Gender
+                 {t.jobs.jobPostModal.fields.gender}
                </div>
                <div className="flex flex-wrap gap-2">
                 {genderOptions.map((opt) => (
@@ -391,9 +393,9 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
           <div className={page === 2 ? '' : 'hidden'}>
           {/* Job Title */}
           <div className="mb-3">
-            <TextBox 
-              label="Job Title" 
-              placeholder="Enter job title (e.g., Landscaper needed)" 
+            <TextBox
+              label={t.jobs.jobPostModal.fields.jobTitle}
+              placeholder={t.jobs.jobPostModal.fields.jobTitlePlaceholder}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               maxLength={50}
@@ -403,11 +405,11 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
           </div>
           {/* Location */}
           <div>
-            <div 
+            <div
               className="text-[14px] font-semibold mb-2"
               style={{ color: theme.colors.text }}
             >
-              Location
+              {t.jobs.jobPostModal.fields.location}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <SelectBox 
@@ -434,8 +436,8 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
               />
             </div>
             <div className="mt-3">
-              <TextBox 
-                placeholder="Enter specific street address" 
+              <TextBox
+                placeholder={t.jobs.jobPostModal.fields.addressPlaceholder}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 maxLength={50}
@@ -446,16 +448,16 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
 
           {/* Salary Rate */}
           <div>
-            <div 
+            <div
               className="text-[14px] font-semibold mb-2"
               style={{ color: theme.colors.text }}
             >
-              Salary Rate
+              {t.jobs.jobPostModal.fields.salary}
             </div>
             <div className="flex items-center gap-3">
-              <TextBox 
-                type="text" 
-                placeholder="Enter amount (e.g., 1000.00)" 
+              <TextBox
+                type="text"
+                placeholder={t.jobs.jobPostModal.fields.salaryPlaceholder}
                 value={salary}
                 onChange={(e) => {
                   let v = e.target.value.replace(/[^0-9.]/g, '');
@@ -475,12 +477,12 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
                 inputMode="decimal"
                 pattern="^[0-9]*\.?[0-9]*$"
               />
-              <SelectBox 
+              <SelectBox
                 width="180px"
                 options={[
-                  { value: 'day', label: 'per day' },
-                  { value: 'week', label: 'per week' },
-                  { value: 'month', label: 'per month' },
+                  { value: 'day', label: t.jobs.jobPostModal.fields.perDay },
+                  { value: 'week', label: t.jobs.jobPostModal.fields.perWeek },
+                  { value: 'month', label: t.jobs.jobPostModal.fields.perMonth },
                 ]}
                 value={salaryPeriod}
                 onChange={(e) => setSalaryPeriod(e.target.value as 'day' | 'week' | 'month')}
@@ -490,14 +492,14 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
 
           {/* About this role */}
           <div className="mt-2">
-            <div 
+            <div
               className="text-[14px] font-semibold mb-2"
               style={{ color: theme.colors.text }}
             >
-              About this role
+              {t.jobs.jobPostModal.fields.about}
             </div>
-            <TextArea 
-              placeholder="Description"
+            <TextArea
+              placeholder={t.jobs.jobPostModal.fields.aboutPlaceholder}
               value={about}
               onChange={(e) => setAbout(e.target.value)}
               height="100px"
@@ -509,11 +511,11 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
 
         {/* Requirements */}
           <div className="mt-2">
-            <div 
+            <div
               className="text-[14px] font-semibold mb-2"
               style={{ color: theme.colors.text }}
             >
-              Requirements
+              {t.jobs.jobPostModal.fields.requirements}
             </div>
             <div className="space-y-3">
               {requirementsList.map((req, idx) => {
@@ -600,14 +602,14 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
               className="mt-1 text-right text-mini"
               style={{ color: theme.colors.textMuted }}
             >
-              {page === 1 ? 'Step 1 of 2' : 'Step 2 of 2'}
+              {page === 1 ? `${t.jobs.jobPostModal.buttons.step} 1 ${t.jobs.jobPostModal.buttons.of} 2` : `${t.jobs.jobPostModal.buttons.step} 2 ${t.jobs.jobPostModal.buttons.of} 2`}
             </div>
           </div>
           <div className="pt-2 flex items-center justify-between">
             {page === 2 && (
-              <Button 
-                variant="ghost" 
-                fullRounded={true} 
+              <Button
+                variant="ghost"
+                fullRounded={true}
                 className="w-[140px]"
                 style={{
                   border: `2px solid ${theme.colors.primary}`,
@@ -615,29 +617,29 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
                 }}
                 onClick={() => setPage(1)}
               >
-                Back
+                {t.jobs.jobPostModal.buttons.previous}
               </Button>
             )}
             {page === 1 && (
-              <Button 
-                variant="primary" 
-                fullRounded={true} 
-                className="ml-auto w-[140px] disabled:opacity-50" 
+              <Button
+                variant="primary"
+                fullRounded={true}
+                className="ml-auto w-[140px] disabled:opacity-50"
                 disabled={selectedSubTypes.length === 0 || selectedExperience.length === 0 || selectedGenders.length === 0}
                 onClick={() => setPage(2)}
               >
-                Next
+                {t.jobs.jobPostModal.buttons.next}
               </Button>
             )}
             {page === 2 && (
-              <Button 
-                variant="primary" 
-                fullRounded={true} 
-                className="ml-auto w-[140px] disabled:opacity-50" 
-                disabled={!isFormValid} 
+              <Button
+                variant="primary"
+                fullRounded={true}
+                className="ml-auto w-[140px] disabled:opacity-50"
+                disabled={!isFormValid}
                 onClick={handleSubmit}
               >
-                Post
+                {t.jobs.jobPostModal.buttons.postJob}
               </Button>
             )}
           </div>

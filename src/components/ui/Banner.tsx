@@ -6,6 +6,7 @@ import SearchBar from './SearchBar';
 import Button from './Button';
 import BannerParticles from '@/components/animations/BannerParticles';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface BannerProps {
   variant: 'findJobs' | 'manageJobPosts' | 'appliedJobs' | 'chat' | 'profile' | 'settings';
@@ -43,49 +44,50 @@ const Banner: React.FC<BannerProps> = ({
   onPostClick
 }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
 
   const getBannerContent = () => {
     switch (variant) {
       case 'findJobs':
         return {
-          title: 'Find your Ideal Job at',
-          highlight: 'HanapBuhay',
+          title: t.jobs.findJobs.banner.title,
+          highlight: t.jobs.findJobs.banner.highlight,
           searchVariant: 'advanced' as const,
-          searchPlaceholder: searchPlaceholder || 'Job title or keyword',
-          locationPlaceholder: locationPlaceholder || 'Location'
+          searchPlaceholder: searchPlaceholder || t.jobs.findJobs.banner.searchPlaceholder,
+          locationPlaceholder: locationPlaceholder || t.jobs.findJobs.banner.locationPlaceholder
         };
       case 'manageJobPosts':
         return {
-          title: 'Need a',
-          highlight: 'Work',
-          subtitle: 'done? Post a',
-          subtitleHighlight: 'Job',
-          endText: 'now!',
+          title: t.jobs.manageJobPosts.banner.title,
+          highlight: t.jobs.manageJobPosts.banner.highlight,
+          subtitle: t.jobs.manageJobPosts.banner.subtitle,
+          subtitleHighlight: t.jobs.manageJobPosts.banner.subtitleHighlight,
+          endText: t.jobs.manageJobPosts.banner.endText,
           searchVariant: 'simple' as const,
-          searchPlaceholder: searchPlaceholder || 'Search',
+          searchPlaceholder: searchPlaceholder || t.jobs.manageJobPosts.banner.searchPlaceholder,
           showPostButton: true
         };
       case 'appliedJobs':
         return {
-          title: 'Track down your',
-          highlight: 'Job Applications',
+          title: t.jobs.appliedJobs.banner.title,
+          highlight: t.jobs.appliedJobs.banner.highlight,
           searchVariant: 'simple' as const,
-          searchPlaceholder: searchPlaceholder || 'Search'
+          searchPlaceholder: searchPlaceholder || t.jobs.appliedJobs.banner.searchPlaceholder
         };
       case 'chat':
         return {
-          title: 'Chat with',
-          highlight: 'Clients',
-          subtitle: 'and',
-          subtitleHighlight: 'Workers',
+          title: t.chat.banner.title,
+          highlight: t.chat.banner.highlight,
+          subtitle: t.chat.banner.subtitle,
+          subtitleHighlight: t.chat.banner.subtitleHighlight,
           searchVariant: 'simple' as const,
           searchPlaceholder: searchPlaceholder || 'Search',
           showSearchBar: false
         };
       case 'profile':
         return {
-          title: 'Customize your',
-          highlight: 'Profile',
+          title: t.profile.banner.title,
+          highlight: t.profile.banner.highlight,
           searchVariant: 'simple' as const,
           searchPlaceholder: searchPlaceholder || 'Search',
           showSearchBar: false
@@ -185,7 +187,7 @@ const Banner: React.FC<BannerProps> = ({
                   className="px-4 py-1 text-sm"
                   onClick={onPostClick}
                 >
-                  Post
+                  {t.common.buttons.post}
                 </Button>
               </span>
             )}

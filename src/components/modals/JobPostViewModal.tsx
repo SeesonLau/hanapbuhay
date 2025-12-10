@@ -17,6 +17,7 @@ import ViewProfileModal from "@/components/modals/ViewProfileModal";
 import { ProfileService } from "@/lib/services/profile-services";
 import { formatDisplayName } from "@/lib/utils/profile-utils";
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export interface JobPostViewData {
   id: string;
@@ -61,6 +62,7 @@ const normalizeExperience = (label: string): string | null => {
 
 export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobPostViewModalProps) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [poster, setPoster] = useState<{ name: string; role?: string; avatarUrl?: string } | null>(null);
   const [posterUserId, setPosterUserId] = useState<string | null>(null);
@@ -212,11 +214,11 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
               className="rounded-xl border p-4"
               style={{ borderColor: theme.modal.sectionBorder }}
             >
-              <h3 
+              <h3
                 className="text-[13px] font-semibold mb-2"
                 style={{ color: theme.colors.text }}
               >
-                About this role
+                {t.jobs.jobDetails.description}
               </h3>
               <p 
                 className="text-[11px]"
@@ -229,11 +231,11 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
               className="rounded-xl border p-4"
               style={{ borderColor: theme.modal.sectionBorder }}
             >
-              <h3 
+              <h3
                 className="text-[13px] font-semibold mb-2"
                 style={{ color: theme.colors.text }}
               >
-                Requirements
+                {t.jobs.jobDetails.requirements}
               </h3>
               {requirements.length > 0 ? (
                 <ul 
@@ -245,11 +247,11 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
                   ))}
                 </ul>
               ) : (
-                <p 
+                <p
                   className="text-[11px]"
                   style={{ color: theme.colors.textMuted }}
                 >
-                  No specific requirements provided.
+                  {t.jobs.jobDetails.requirements}
                 </p>
               )}
             </div>
@@ -294,18 +296,18 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
         <div className="px-6 py-6">
           <div className={`flex items-center ${onApply ? 'justify-between' : 'justify-start'}`}>
             <div className="flex items-center gap-2">
-              <span 
+              <span
                 className="text-[11px] font-medium"
                 style={{ color: theme.colors.textMuted }}
               >
-                Posted on: {postedDate}
+                {t.jobs.jobCard.posted}: {postedDate}
               </span>
               <span style={{ color: theme.colors.borderLight }}>•</span>
-              <span 
+              <span
                 className="text-[11px]"
                 style={{ color: theme.colors.textMuted }}
               >
-                {applicantCount} Applicants
+                {applicantCount} {t.jobs.jobCard.applicants}
               </span>
             </div>
             {onApply && (
@@ -316,7 +318,7 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.primaryHover}
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.primary}
               >
-                Apply Now
+                {t.jobs.jobCard.applyNow}
               </button>
             )}
           </div>

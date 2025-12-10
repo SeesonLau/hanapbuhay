@@ -22,9 +22,11 @@ import FilterSection, { FilterOptions } from '@/components/ui/FilterSection';
 import FilterButton from '@/components/ui/FilterButton';
 import FilterModal from '@/components/ui/FilterModal';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function ManageJobPostsPage() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [user, setUser] = useState<any | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort, loadMore, refresh, deletePost, updatePost, createPost, toggleLockPost, applyFilters, setSelectedPostId, parseUrlParams, setSortInUrlForManage } = useJobPosts(userId, { skip: !userId });
@@ -378,11 +380,11 @@ export default function ManageJobPostsPage() {
             <div className="flex items-center justify-between gap-3">
               {/* Sort By */}
               <div className="flex items-center gap-2">
-                <span 
+                <span
                   className="text-small whitespace-nowrap font-medium"
                   style={{ color: theme.colors.textMuted }}
                 >
-                  Sort by
+                  {t.common.labels.sortBy}
                 </span>
                 <Sort variant="manageJobs" onChange={handleManageSortChange} />
               </div>
@@ -415,11 +417,11 @@ export default function ManageJobPostsPage() {
                     />
                     {/* Sort By and View Toggle */}
                     <div className="flex items-center gap-1.5">
-                        <span 
+                        <span
                           className="text-tiny whitespace-nowrap hidden mobile-S:inline"
                           style={{ color: theme.colors.textMuted }}
                         >
-                          Sort by
+                          {t.common.labels.sortBy}
                         </span>
                         <Sort variant="manageJobs" onChange={handleManageSortChange} />
                         <ViewToggle value={viewMode} onChange={setViewMode} />

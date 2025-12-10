@@ -7,6 +7,7 @@ import Button from './Button';
 import { PHILIPPINES_LOCATIONS } from '@/resources/locations/philippines';
 import { PostService } from '@/lib/services/posts-services';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface SearchBarProps {
   variant?: 'simple' | 'advanced';
@@ -21,13 +22,14 @@ interface SearchBarProps {
 const SearchBar: React.FC<SearchBarProps> = ({
   variant = 'simple',
   onSearch,
-  placeholder = 'Search',
-  locationPlaceholder = 'Location',
+  placeholder,
+  locationPlaceholder,
   className = '',
   onQuerySuggestionsChange,
   onLocationSuggestionsChange
 }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
   const [querySuggestions, setQuerySuggestions] = useState<string[]>([]);
@@ -166,7 +168,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={placeholder}
+              placeholder={placeholder || t.components.searchBar.placeholder}
               className="text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-300"
               style={{
                 color: theme.colors.text,
@@ -191,7 +193,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               fullRounded={true}
               className="h-[36px] min-w-[100px]"
             >
-              Search
+              {t.components.searchBar.searchButton}
             </Button>
           </div>
         </div>
@@ -230,7 +232,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 if (searchQuery.trim()) setShowQuerySuggestions(true);
               }}
               onKeyPress={handleKeyPress}
-              placeholder={placeholder}
+              placeholder={placeholder || t.components.searchBar.placeholder}
               className="text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-300"
               style={{
                 color: theme.colors.text,
@@ -303,7 +305,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 if (location.trim()) setShowLocationSuggestions(true);
               }}
               onKeyPress={handleKeyPress}
-              placeholder={locationPlaceholder}
+              placeholder={locationPlaceholder || t.components.searchBar.locationPlaceholder}
               className="text-small font-normal font-inter bg-transparent border-none outline-none flex-1 min-w-0 w-full transition-colors duration-300"
               style={{
                 color: theme.colors.text,
@@ -374,7 +376,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             fullRounded={true}
             className="h-[36px] min-w-[100px]"
           >
-            Search
+            {t.components.searchBar.searchButton}
           </Button>
         </div>
       </div>

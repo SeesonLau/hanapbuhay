@@ -2,6 +2,12 @@
   "title": "Messages",
   "subtitle": "Chat with employers and job seekers",
   "searchPlaceholder": "Search conversations...",
+  "banner": {
+    "title": "Chat with",
+    "highlight": "Clients",
+    "subtitle": "and",
+    "subtitleHighlight": "Workers"
+  },
   "noConversations": "No conversations yet",
   "selectConversation": "Select a conversation to start messaging",
   "typePlaceholder": "Type a message...",
@@ -21,5 +27,7 @@
   "yesterday": "Yesterday",
   "seen": "Seen",
   "delivered": "Delivered",
-  "sent": "Sent"
+  "sent": "Sent",
+  "guestUser": "Guest User",
+  "unknownUser": "Unknown User"
 }

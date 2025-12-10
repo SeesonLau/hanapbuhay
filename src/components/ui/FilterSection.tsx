@@ -5,6 +5,7 @@ import SimpleJobTypeAccordion, { JobTypeSelection } from './JobTypeAccordion';
 import { IoChevronForward } from 'react-icons/io5';
 import { HiArrowDown } from 'react-icons/hi';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export interface SalaryRange {
   lessThan5000: boolean;
@@ -56,6 +57,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   variant = 'default'
 }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [jobTypes, setJobTypes] = useState<JobTypeSelection>(initialFilters?.jobTypes || {});
   const [salaryRange, setSalaryRange] = useState<SalaryRange>(
     initialFilters?.salaryRange || {
@@ -193,11 +195,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         className="flex-shrink-0 flex flex-row items-center justify-between px-4 py-4 transition-colors duration-300"
         style={{ backgroundColor: theme.colors.surface }}
       >
-        <h2 
+        <h2
           className="text-lead font-alexandria font-bold transition-colors duration-300"
           style={{ color: theme.colors.text }}
         >
-          Filter
+          {t.components.filters.title}
         </h2>
         <button
           onClick={handleClearAll}
@@ -210,7 +212,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             e.currentTarget.style.color = theme.colors.primary;
           }}
         >
-          Clear All
+          {t.components.filters.clear}
         </button>
       </div>
 
@@ -239,11 +241,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 }
               }}
             >
-              <h3 
+              <h3
                 className="text-body font-inter font-normal transition-colors duration-300"
                 style={{ color: theme.modal.accordionText }}
               >
-                Status
+                {t.components.filters.status}
               </h3>
               <IoChevronForward
                 className={`h-5 w-5 transition-all duration-300 ${isStatusOpen ? 'rotate-90' : ''}`}
@@ -252,11 +254,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             </button>
             {isStatusOpen && (
               <div className="px-4 pb-3 space-y-2">
-                <Checkbox label="Deleted" checked={status.deleted} onChange={(c) => handleStatusChange('deleted', c)} size="sm" />
-                <Checkbox label="Locked" checked={status.locked} onChange={(c) => handleStatusChange('locked', c)} size="sm" />
-                <Checkbox label="Pending" checked={status.pending} onChange={(c) => handleStatusChange('pending', c)} size="sm" />
-                <Checkbox label="Approved" checked={status.approved} onChange={(c) => handleStatusChange('approved', c)} size="sm" />
-                <Checkbox label="Rejected" checked={status.rejected} onChange={(c) => handleStatusChange('rejected', c)} size="sm" />
+                <Checkbox label={t.components.filters.statusDeleted} checked={status.deleted} onChange={(c) => handleStatusChange('deleted', c)} size="sm" />
+                <Checkbox label={t.components.filters.statusLocked} checked={status.locked} onChange={(c) => handleStatusChange('locked', c)} size="sm" />
+                <Checkbox label={t.components.filters.statusPending} checked={status.pending} onChange={(c) => handleStatusChange('pending', c)} size="sm" />
+                <Checkbox label={t.components.filters.statusApproved} checked={status.approved} onChange={(c) => handleStatusChange('approved', c)} size="sm" />
+                <Checkbox label={t.components.filters.statusRejected} checked={status.rejected} onChange={(c) => handleStatusChange('rejected', c)} size="sm" />
               </div>
             )}
           </div>
@@ -281,11 +283,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               }
             }}
           >
-            <h3 
+            <h3
               className="text-body font-inter font-normal transition-colors duration-300"
               style={{ color: theme.modal.accordionText }}
             >
-              Job Type
+              {t.components.filters.jobType}
             </h3>
             <IoChevronForward
               className={`h-5 w-5 transition-all duration-300 ${isJobTypeOpen ? 'rotate-90' : ''}`}
@@ -322,11 +324,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               }
             }}
           >
-            <h3 
+            <h3
               className="text-body font-inter font-normal transition-colors duration-300"
               style={{ color: theme.modal.accordionText }}
             >
-              Salary Range
+              {t.components.filters.salary}
             </h3>
             <IoChevronForward
               className={`h-5 w-5 transition-all duration-300 ${isSalaryOpen ? 'rotate-90' : ''}`}
@@ -335,10 +337,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           </button>
           {isSalaryOpen && (
             <div className="px-4 pb-3 space-y-2">
-              <Checkbox label="Less than Php 5000" checked={salaryRange.lessThan5000} onChange={(checked) => handleSalaryChange('lessThan5000', checked)} size="sm" />
-              <Checkbox label="Php 10,000 - Php 20,000" checked={salaryRange.range10to20} onChange={(checked) => handleSalaryChange('range10to20', checked)} size="sm" />
-              <Checkbox label="More than Php 20,000" checked={salaryRange.moreThan20000} onChange={(checked) => handleSalaryChange('moreThan20000', checked)} size="sm" />
-              <Checkbox label="Custom" checked={salaryRange.custom} onChange={(checked) => handleSalaryChange('custom', checked)} size="sm" />
+              <Checkbox label={t.components.filters.salaryLessThan5000} checked={salaryRange.lessThan5000} onChange={(checked) => handleSalaryChange('lessThan5000', checked)} size="sm" />
+              <Checkbox label={t.components.filters.salary10to20} checked={salaryRange.range10to20} onChange={(checked) => handleSalaryChange('range10to20', checked)} size="sm" />
+              <Checkbox label={t.components.filters.salaryMoreThan20000} checked={salaryRange.moreThan20000} onChange={(checked) => handleSalaryChange('moreThan20000', checked)} size="sm" />
+              <Checkbox label={t.components.filters.salaryCustom} checked={salaryRange.custom} onChange={(checked) => handleSalaryChange('custom', checked)} size="sm" />
             </div>
           )}
         </div>
@@ -363,11 +365,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 }
               }}
             >
-              <h3 
+              <h3
                 className="text-body font-inter font-normal transition-colors duration-300"
                 style={{ color: theme.modal.accordionText }}
               >
-                Experience level
+                {t.components.filters.experienceLevel}
               </h3>
               <IoChevronForward
                 className={`h-5 w-5 transition-all duration-300 ${isExperienceOpen ? 'rotate-90' : ''}`}
@@ -376,9 +378,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             </button>
             {isExperienceOpen && (
               <div className="px-4 pb-3 space-y-2">
-                <Checkbox label="Entry level" checked={experienceLevel.entryLevel} onChange={(checked) => handleExperienceChange('entryLevel', checked)} size="sm" />
-                <Checkbox label="Intermediate" checked={experienceLevel.intermediate} onChange={(checked) => handleExperienceChange('intermediate', checked)} size="sm" />
-                <Checkbox label="Professional" checked={experienceLevel.professional} onChange={(checked) => handleExperienceChange('professional', checked)} size="sm" />
+                <Checkbox label={t.components.filters.entryLevel} checked={experienceLevel.entryLevel} onChange={(checked) => handleExperienceChange('entryLevel', checked)} size="sm" />
+                <Checkbox label={t.components.filters.intermediate} checked={experienceLevel.intermediate} onChange={(checked) => handleExperienceChange('intermediate', checked)} size="sm" />
+                <Checkbox label={t.components.filters.professional} checked={experienceLevel.professional} onChange={(checked) => handleExperienceChange('professional', checked)} size="sm" />
               </div>
             )}
           </div>
@@ -404,11 +406,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 }
               }}
             >
-              <h3 
+              <h3
                 className="text-body font-inter font-normal transition-colors duration-300"
                 style={{ color: theme.modal.accordionText }}
               >
-                Preferred Gender
+                {t.components.filters.preferredGender}
               </h3>
               <IoChevronForward
                 className={`h-5 w-5 transition-all duration-300 ${isGenderOpen ? 'rotate-90' : ''}`}
@@ -417,10 +419,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             </button>
             {isGenderOpen && (
               <div className="px-4 pb-3 space-y-2">
-                <Checkbox label="Any" checked={preferredGender.any} onChange={(checked) => handleGenderChange('any', checked)} size="sm" />
-                <Checkbox label="Female" checked={preferredGender.female} onChange={(checked) => handleGenderChange('female', checked)} size="sm" />
-                <Checkbox label="Male" checked={preferredGender.male} onChange={(checked) => handleGenderChange('male', checked)} size="sm" />
-                <Checkbox label="Others" checked={preferredGender.others} onChange={(checked) => handleGenderChange('others', checked)} size="sm" />
+                <Checkbox label={t.components.filters.genderAny} checked={preferredGender.any} onChange={(checked) => handleGenderChange('any', checked)} size="sm" />
+                <Checkbox label={t.components.filters.genderFemale} checked={preferredGender.female} onChange={(checked) => handleGenderChange('female', checked)} size="sm" />
+                <Checkbox label={t.components.filters.genderMale} checked={preferredGender.male} onChange={(checked) => handleGenderChange('male', checked)} size="sm" />
+                <Checkbox label={t.components.filters.genderOthers} checked={preferredGender.others} onChange={(checked) => handleGenderChange('others', checked)} size="sm" />
               </div>
             )}
           </div>

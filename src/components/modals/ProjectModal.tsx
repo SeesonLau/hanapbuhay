@@ -10,6 +10,7 @@ import TextBox from "../ui/TextBox";
 import TextArea from "../ui/TextArea";
 import Button from "../ui/Button";
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface ProjectAddModalProps {
   userId: string;

@@ -16,6 +16,7 @@ import { toast } from 'react-hot-toast';
 import { supabase } from '@/lib/services/supabase/client';
 import { FiArrowLeft, FiMenu } from 'react-icons/fi';
 import ViewProfileModal from '@/components/modals/ViewProfileModal';
+import { useLanguage } from '@/hooks/useLanguage';
 
 // --- Custom Hook to Fetch Profile Data ---
 interface UserProfile {
@@ -24,7 +25,8 @@ interface UserProfile {
   profilePicUrl: string | null;
 }
 
-const useCurrentProfile = () => { 
+const useCurrentProfile = () => {
+  const { t } = useLanguage(); 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -49,21 +51,22 @@ const useCurrentProfile = () => {
         }
       } catch (error) {
         console.error('Error fetching user profile for chat:', error);
-        setProfile({ id: 'unknown-id', name: 'Guest User', profilePicUrl: null });
+        setProfile({ id: 'unknown-id', name: t.chat.guestUser, profilePicUrl: null });
       } finally {
         setIsLoading(false);
       }
     };
     fetchProfile();
-  }, []);
+  }, [t.chat.guestUser]);
 
   return { profile, isLoading };
 };
 
-const GLOBAL_ROOM_ID = ChatService.getGlobalRoomId(); 
-const GLOBAL_ROOM_NAME = 'Global Realtime Chat';
+const GLOBAL_ROOM_ID = ChatService.getGlobalRoomId();
 
 export default function ChatPage() {
+  const { t } = useLanguage();
+  const GLOBAL_ROOM_NAME = t.chat.globalChat;
   const { profile, isLoading } = useCurrentProfile();
   const [userContactsMap, setUserContactsMap] = useState<Record<string, UserContact>>({});
   const [activeRoom, setActiveRoom] = useState<ChatRoom | null>(null);
@@ -82,12 +85,12 @@ export default function ChatPage() {
   const fetchDisplayNameForUser = useCallback(async (userId: string): Promise<string> => {
     try {
       const displayName = await ProfileService.getDisplayNameByUserId(userId);
-      return displayName || 'Unknown User';
+      return displayName || t.chat.unknownUser;
     } catch (error) {
       console.error(`Error fetching display name for user ${userId}:`, error);
-      return 'Unknown User';
+      return t.chat.unknownUser;
     }
-  }, []);
+  }, [t.chat.unknownUser]);
 
   // Centralized real-time subscription for ALL messages
   useEffect(() => {
@@ -555,7 +558,7 @@ export default function ChatPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                           </svg>
                         </div>
-                        <p className="text-sm mobile-L:text-base">Select a conversation to start messaging</p>
+                        <p className="text-sm mobile-L:text-base">{t.chat.selectConversation}</p>
                       </div>
                     </div>
                   )}

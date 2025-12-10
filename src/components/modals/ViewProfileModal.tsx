@@ -7,6 +7,7 @@ import JobListSection from "../view-profile/JobListSection";
 import ReviewListSection from "../view-profile/ReviewListSection";
 import ProjectListSection from "../view-profile/ProjectListSection";
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 import { ProfileService } from '@/lib/services/profile-services';
 import { ApplicationService } from "@/lib/services/applications-services";
 import { PostService } from "@/lib/services/posts-services";
@@ -53,6 +54,7 @@ interface ProfileData {
 
 export default function ViewProfileModal({ isOpen, onClose, userId, userType = 'applicant' }: ViewProfileModalProps) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [activeSection, setActiveSection] = useState<MobileSection>('contact');
 
   // Data states
@@ -194,10 +196,10 @@ export default function ViewProfileModal({ isOpen, onClose, userId, userType = '
   };
 
   const sections = [
-    { id: 'contact' as MobileSection, label: 'Profile' },
-    { id: 'reviews' as MobileSection, label: 'Reviews' },
-    { id: 'projects' as MobileSection, label: 'Projects' },
-    { id: 'jobs' as MobileSection, label: 'Jobs' }
+    { id: 'contact' as MobileSection, label: t.profile.viewProfileModal.profile },
+    { id: 'reviews' as MobileSection, label: t.profile.viewProfileModal.reviews },
+    { id: 'projects' as MobileSection, label: t.profile.viewProfileModal.projects },
+    { id: 'jobs' as MobileSection, label: t.profile.viewProfileModal.jobs }
   ];
 
   return (

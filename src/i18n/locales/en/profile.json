@@ -1,6 +1,10 @@
 {
   "title": "Profile",
   "subtitle": "Manage your profile information",
+  "banner": {
+    "title": "Customize your",
+    "highlight": "Profile"
+  },
   "sections": {
     "personalInfo": "Personal Information",
     "workExperience": "Work Experience",
@@ -44,5 +48,24 @@
     "profileUpdated": "Profile updated successfully",
     "updateFailed": "Failed to update profile",
     "fillRequired": "Please fill in all required fields"
+  },
+  "viewProfileModal": {
+    "profile": "Profile",
+    "reviews": "Reviews",
+    "projects": "Projects",
+    "jobs": "Jobs"
+  },
+  "projectModal": {
+    "addTitle": "Add Work Experience",
+    "editTitle": "Edit Work Experience",
+    "title": "Title",
+    "titlePlaceholder": "Add title",
+    "description": "Description",
+    "descriptionPlaceholder": "Add description",
+    "addPhoto": "Add Photo",
+    "images": "images",
+    "maxReached": "Maximum reached",
+    "update": "Update",
+    "add": "Add"
   }
 }
