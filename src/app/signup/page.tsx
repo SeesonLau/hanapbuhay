@@ -9,6 +9,7 @@ import { Preloader, PreloaderMessages } from '@/components/ui/Preloader';
 import { ROUTES } from '@/lib/constants';
 import Link from 'next/link';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const FloatingLines = dynamic(() => import('../login/FloatingLines'), {
   ssr: false,
@@ -19,6 +20,7 @@ const FloatingLines = dynamic(() => import('../login/FloatingLines'), {
 
 function SignupContent() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -61,14 +63,14 @@ function SignupContent() {
           }}
         >
           {/* Back to Home */}
-          <Link 
+          <Link
             href="/"
             className="inline-flex items-center gap-2 text-gray-300 hover:text-white mb-6 transition-colors text-small sm:text-small"
           >
             <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to Home
+            {t.common.navigation.backToHome}
           </Link>
 
           <SignupForm onSignInClick={handleSignIn} onLoadingChange={setLoading} />

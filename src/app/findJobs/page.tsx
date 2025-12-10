@@ -18,9 +18,11 @@ import FilterModal from "@/components/ui/FilterModal";
 import DeleteModal from "@/components/ui/DeleteModal";
 import { Preloader, PreloaderMessages } from "@/components/ui/Preloader";
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function FindJobsPage() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const [initialLoading, setInitialLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -221,11 +223,11 @@ export default function FindJobsPage() {
             <div className="flex items-center justify-between gap-3">
               {/* Sort By */}
               <div className="flex items-center gap-2">
-                <span 
+                <span
                   className="text-small whitespace-nowrap font-medium"
                   style={{ color: theme.colors.textSecondary }}
                 >
-                  Sort by
+                  {t.common.labels.sortBy}
                 </span>
                 <Sort variant="findJobs" onChange={handleSortChange} />
               </div>
@@ -261,11 +263,11 @@ export default function FindJobsPage() {
                 
                 {/* Sort By and View Toggle */}
                 <div className="flex items-center gap-1.5 mobile-M:gap-3">
-                  <span 
+                  <span
                     className="text-tiny mobile-M:text-small whitespace-nowrap hidden mobile-S:inline"
                     style={{ color: theme.colors.textSecondary }}
                   >
-                    Sort by
+                    {t.common.labels.sortBy}
                   </span>
                   <Sort variant="findJobs" onChange={handleSortChange} />
                   <ViewToggle value={viewMode} onChange={setViewMode} />

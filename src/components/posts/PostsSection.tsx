@@ -8,6 +8,7 @@ import { ManageJobPostCard } from "@/components/cards/ManageJobPostCard";
 import { ManageJobPostList } from "@/components/cards/ManageJobPostList";
 import type { JobPostData } from "@/hooks/useJobPosts";
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type Variant = "find" | "manage";
 
@@ -47,6 +48,7 @@ const PostsSection: React.FC<Props> = ({
   onToggleLock,
 }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const observerTarget = React.useRef<HTMLDivElement>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [isScrollable, setIsScrollable] = React.useState(false);
@@ -88,18 +90,20 @@ const PostsSection: React.FC<Props> = ({
 
   if (loading && (!jobs || jobs.length === 0)) {
     return (
-      <div 
+      <div
         className="text-center py-8"
         style={{ color: theme.colors.textMuted }}
       >
-        Loading job posts...
+        {variant === "manage"
+          ? t.jobs.manageJobPosts.loadingJobPosts
+          : t.jobs.findJobs.loadingJobPosts}
       </div>
     );
   }
 
   if (error) {
     return (
-      <div 
+      <div
         className="text-center py-8"
         style={{ color: theme.colors.error }}
       >
@@ -110,11 +114,13 @@ const PostsSection: React.FC<Props> = ({
 
   if (!jobs || jobs.length === 0) {
     return (
-      <div 
+      <div
         className="text-center py-8"
         style={{ color: theme.colors.textMuted }}
       >
-        No job posts available.
+        {variant === "manage"
+          ? t.jobs.manageJobPosts.noJobPostsAvailable
+          : t.jobs.findJobs.noJobPostsAvailable}
       </div>
     );
   }
@@ -171,21 +177,25 @@ const PostsSection: React.FC<Props> = ({
                     className="w-6 h-6 animate-bounce" 
                     style={{ color: theme.colors.primary }}
                   />
-                  <span 
+                  <span
                     className="text-small font-medium"
                     style={{ color: theme.colors.textMuted }}
                   >
-                    Scroll for more
+                    {variant === "manage"
+                      ? t.jobs.manageJobPosts.scrollForMore
+                      : t.jobs.findJobs.scrollForMore}
                   </span>
                 </button>
               </div>
             )}
             {hasMore && jobs.length > 0 && isLoadingMore && (
-              <div 
+              <div
                 className="w-full text-center py-4 snap-start"
                 style={{ color: theme.colors.textMuted }}
               >
-                Loading more job posts...
+                {variant === "manage"
+                  ? t.jobs.manageJobPosts.loadingMoreJobPosts
+                  : t.jobs.findJobs.loadingMoreJobPosts}
               </div>
             )}
             {!hasMore && jobs.length > 0 && (
@@ -228,19 +238,23 @@ const PostsSection: React.FC<Props> = ({
             </div>
           )}
           {hasMore && jobs.length > 0 && isLoadingMore && (
-            <div 
+            <div
               className="w-full text-center py-4"
               style={{ color: theme.colors.textMuted }}
             >
-              Loading more job posts...
+              {variant === "manage"
+                ? t.jobs.manageJobPosts.loadingMoreJobPosts
+                : t.jobs.findJobs.loadingMoreJobPosts}
             </div>
           )}
           {!hasMore && jobs.length > 0 && (
-            <div 
+            <div
               className="w-full text-center py-4"
               style={{ color: theme.colors.textMuted }}
             >
-              You&apos;ve reached the end
+              {variant === "manage"
+                ? t.jobs.manageJobPosts.reachedEnd
+                : t.jobs.findJobs.reachedEnd}
             </div>
           )}
         </div>

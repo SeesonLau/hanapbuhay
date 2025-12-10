@@ -18,9 +18,11 @@ import useApplications from '@/hooks/useApplications';
 import ApplicationsSection from '@/components/applications/ApplicationsSection';
 import JobPostViewModal, { JobPostViewData } from '@/components/modals/JobPostViewModal';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function AppliedJobsPage() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [user, setUser] = useState<any | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -307,11 +309,11 @@ export default function AppliedJobsPage() {
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <span 
+                <span
                   className="text-small whitespace-nowrap font-medium"
                   style={{ color: theme.colors.textMuted }}
                 >
-                  Sort by
+                  {t.common.labels.sortBy}
                 </span>
                 <Sort variant="findJobs" onChange={handleSortChange} />
               </div>
@@ -341,11 +343,11 @@ export default function AppliedJobsPage() {
                 />
                 
                 <div className="flex items-center gap-1.5 mobile-M:gap-3">
-                  <span 
+                  <span
                     className="text-tiny mobile-M:text-small whitespace-nowrap hidden mobile-S:inline"
                     style={{ color: theme.colors.textMuted }}
                   >
-                    Sort by
+                    {t.common.labels.sortBy}
                   </span>
                   <Sort variant="findJobs" onChange={handleSortChange} />
                   <ViewToggle value={viewMode} onChange={setViewMode} />

@@ -1,0 +1,132 @@
+{
+  "privacy": {
+    "title": "Patakaran sa Privacy",
+    "lastUpdated": "Huling na-update: Disyembre 5, 2025",
+    "introduction": {
+      "title": "Panimula",
+      "content": "Maligayang pagdating sa HanapBuhay. Kami ay nakatuon sa pagprotekta ng iyong personal na impormasyon at ng iyong karapatan sa privacy. Ipinapaliwanag ng Patakaran sa Privacy na ito kung paano namin kinokolekta, ginagamit, inihahayag, at pinoprotektahan ang iyong impormasyon kapag gumagamit ka ng aming platform."
+    },
+    "informationWeCollect": {
+      "title": "Impormasyon na Aming Kinokolekta",
+      "description": "Kinokolekta namin ang impormasyon na direktang ibinibigay mo sa amin, kabilang ang:",
+      "items": [
+        "Impormasyon ng account (pangalan, email, password)",
+        "Impormasyon ng profile (mga kasanayan, karanasan, lokasyon)",
+        "Detalye ng job posting at mga aplikasyon",
+        "Komunikasyon sa pagitan ng mga user",
+        "Mga rating at review"
+      ]
+    },
+    "howWeUse": {
+      "title": "Paano Namin Ginagamit ang Iyong Impormasyon",
+      "description": "Ginagamit namin ang impormasyong aming kinokolekta upang:",
+      "items": [
+        "Magbigay, magmantene, at mapabuti ang aming mga serbisyo",
+        "Ikonekta ang mga manggagawa sa mga kliyente sa kanilang lokal na komunidad",
+        "Proseso ng mga aplikasyon sa trabaho at pagpapadali ng komunikasyon",
+        "Magpadala ng mga abiso tungkol sa mga oportunidad sa trabaho at mga update",
+        "Tiyakin ang seguridad at integridad ng aming platform",
+        "Tumugon sa iyong mga katanungan at magbigay ng suporta sa customer"
+      ]
+    },
+    "informationSharing": {
+      "title": "Pagbabahagi ng Impormasyon",
+      "description": "Hindi namin ibinebenta ang iyong personal na impormasyon. Maaari lamang naming ibahagi ang iyong impormasyon sa mga sumusunod na sitwasyon:",
+      "items": [
+        "Sa ibang mga user kung kinakailangan upang mapadali ang mga koneksyon sa trabaho",
+        "Sa mga service provider na tumutulong sa pagpapatakbo ng aming platform",
+        "Kapag kinakailangan ng batas o upang protektahan ang aming mga karapatan",
+        "Sa iyong pahintulot"
+      ]
+    },
+    "dataSecurity": {
+      "title": "Seguridad ng Data",
+      "content": "Ipinapatupad namin ang naaangkop na teknikal at organisasyonal na mga hakbang sa seguridad upang protektahan ang iyong personal na impormasyon. Gayunpaman, walang paraan ng paghahatid sa Internet na 100% secure, at hindi namin magagarantiya ang ganap na seguridad."
+    },
+    "yourRights": {
+      "title": "Ang Iyong mga Karapatan",
+      "description": "Mayroon kang karapatan na:",
+      "items": [
+        "I-access at i-update ang iyong personal na impormasyon",
+        "Tanggalin ang iyong account at kaugnay na data",
+        "Mag-opt-out sa mga marketing communication",
+        "Humiling ng kopya ng iyong data"
+      ]
+    },
+    "contactUs": {
+      "title": "Makipag-ugnayan sa Amin",
+      "content": "Kung mayroon kang mga tanong tungkol sa Patakaran sa Privacy na ito, mangyaring makipag-ugnayan sa amin sa",
+      "email": "support@hanapbuhay.com"
+    }
+  },
+  "faqs": {
+    "title": "Mga Madalas Itanong",
+    "categories": {
+      "general": "Pangkalahatan",
+      "workers": "Para sa mga Manggagawa",
+      "clients": "Para sa mga Kliyente",
+      "account": "Account at Mga Setting"
+    },
+    "general": {
+      "whatIs": {
+        "question": "Ano ang HanapBuhay?",
+        "answer": "Ang HanapBuhay ay isang platform na nag-uugnay ng mga lokal na kliyente sa mga bihasang manggagawa at freelancer sa kanilang komunidad. Kung kailangan mo ng tulong sa pag-aayos ng bahay, digital na serbisyo, o anumang bihasang trabaho, pinapadali ng HanapBuhay ang paghahanap ng mga pinagkakatiwalaang propesyonal malapit sa iyo."
+      },
+      "isFree": {
+        "question": "Libre ba ang HanapBuhay?",
+        "answer": "Oo! Ang paggawa ng account at pag-browse ng mga listahan ng trabaho ay ganap na libre. Ang mga manggagawa ay maaaring mag-apply sa mga trabaho nang walang bayad, at ang mga kliyente ay maaaring mag-post ng mga trabaho nang walang mga bayad. Naniniwala kami sa paggawa ng mga lokal na koneksyon sa trabaho na accessible sa lahat."
+      },
+      "ratingSystem": {
+        "question": "Paano gumagana ang rating system?",
+        "answer": "Pagkatapos makumpleto ang isang trabaho, parehong kliyente at manggagawa ay maaaring mag-iwan ng mga rating at review para sa isa't isa. Ang mga rating ay nasa 5-bituin na sukat at tumutulong na bumuo ng tiwala sa loob ng komunidad. Ang mga user na may mas mataas na rating ay mas malamang na mapili para sa mga trabaho."
+      }
+    },
+    "workers": {
+      "findJobs": {
+        "question": "Paano ako makakahanap ng mga trabaho sa HanapBuhay?",
+        "answer": "Pagkatapos gumawa ng iyong account, pumunta sa seksyon ng \"Maghanap ng Trabaho\". Maaari kang mag-browse ng mga available na trabaho, mag-filter ayon sa kategorya, lokasyon, at saklaw ng sahod. Kapag nakakita ka ng trabaho na tumutugma sa iyong mga kasanayan, i-click lamang ang \"Mag-apply\" at maghintay para sa tugon ng kliyente."
+      },
+      "standOut": {
+        "question": "Paano ko palalakihin ang aking profile?",
+        "answer": "Kumpletuhin ang iyong profile na may detalyadong impormasyon tungkol sa iyong mga kasanayan at karanasan. Magdagdag ng anumang mga sertipikasyon o mga halimbawa ng nakaraang trabaho. Panatilihin ang magandang rating sa pamamagitan ng pagbibigay ng de-kalidad na serbisyo, at palaging makipag-usap nang propesyonal sa mga kliyente."
+      },
+      "multipleCategories": {
+        "question": "Maaari ba akong magtrabaho sa maraming kategorya ng trabaho?",
+        "answer": "Tiyak! Maaari kang magdagdag ng maraming kasanayan sa iyong profile at mag-apply sa mga trabaho sa iba't ibang kategorya. Pinapataas nito ang iyong mga pagkakataon na makahanap ng trabaho na tumutugma sa iyong mga kakayahan."
+      }
+    },
+    "clients": {
+      "postJob": {
+        "question": "Paano ako mag-post ng trabaho?",
+        "answer": "I-click ang \"Mag-post ng Trabaho\" o pumunta sa \"Pamahalaan ang mga Job Post\" sa iyong dashboard. Punan ang mga detalye ng trabaho kabilang ang titulo, paglalarawan, mga kinakailangang kasanayan, lokasyon, at ang iyong badyet. Kapag na-post na, ang mga manggagawa sa iyong lugar ay maaaring makita at mag-apply sa iyong trabaho."
+      },
+      "chooseWorker": {
+        "question": "Paano ako pumili ng tamang manggagawa?",
+        "answer": "Suriin ang mga profile ng mga aplikante, kabilang ang kanilang mga kasanayan, karanasan, at mga rating mula sa mga nakaraang kliyente. Maaari mo ring tingnan ang kanilang mga natapos na proyekto at mga review. Maglaan ng oras upang makahanap ng taong pinakabagay sa iyong mga pangangailangan."
+      },
+      "notSatisfied": {
+        "question": "Paano kung hindi ako nasiyahan sa trabaho?",
+        "answer": "Hinihikayat namin ang bukas na komunikasyon sa pagitan ng mga kliyente at manggagawa. Kung may mga isyu, subukan munang lutasin ang mga ito nang direkta. Maaari kang mag-iwan ng tapat na review pagkatapos makumpleto ang trabaho. Para sa mga seryosong alalahanin, makipag-ugnayan sa aming support team."
+      }
+    },
+    "account": {
+      "resetPassword": {
+        "question": "Paano ko i-reset ang aking password?",
+        "answer": "I-click ang \"Nakalimutan ang Password\" sa login page. Ilagay ang iyong email address, at magpapadala kami sa iyo ng link upang i-reset ang iyong password. Siguraduhing tingnan ang iyong spam folder kung hindi mo nakikita ang email."
+      },
+      "deleteAccount": {
+        "question": "Maaari ko bang tanggalin ang aking account?",
+        "answer": "Oo, maaari mong tanggalin ang iyong account sa pamamagitan ng iyong mga setting ng profile. Paki-tandaan na ang aksyon na ito ay permanente at aalisin ang lahat ng iyong data, kabilang ang kasaysayan ng trabaho, mga review, at mga mensahe."
+      },
+      "updateProfile": {
+        "question": "Paano ko i-update ang aking impormasyon ng profile?",
+        "answer": "Pumunta sa iyong Profile page at i-click ang \"I-edit ang Profile\". Maaari mong i-update ang iyong personal na impormasyon, mga kasanayan, karanasan, at larawan ng profile. Tandaan na i-save ang iyong mga pagbabago bago umalis sa page."
+      }
+    },
+    "contactSupport": {
+      "cantFind": "Hindi mahanap ang hinahanap mo?",
+      "contactUs": "Makipag-ugnayan sa amin sa",
+      "email": "support@hanapbuhay.com"
+    }
+  }
+}

@@ -9,6 +9,7 @@ import { ExperienceLevel } from '@/lib/constants/experience-level';
 import { fontClasses } from '@/styles/fonts';
 import Button from '@/components/ui/Button';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface JobPostData {
   id: string;
@@ -33,15 +34,16 @@ interface JobPostCardProps {
   onOpen?: (data: JobPostData) => void;
 }
 
-export const JobPostCard: React.FC<JobPostCardProps> = ({ 
-  jobData, 
-  className = '', 
-  variant = 'default', 
-  disableCardClick = false, 
-  onApply, 
-  onOpen 
+export const JobPostCard: React.FC<JobPostCardProps> = ({
+  jobData,
+  className = '',
+  variant = 'default',
+  disableCardClick = false,
+  onApply,
+  onOpen
 }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const {
     id,
     title,
@@ -209,11 +211,11 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
           <div className="flex flex-col mobile-M:flex-row items-start mobile-M:items-center justify-between gap-3 mobile-M:gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <span className={`${fontClasses.body} font-medium text-small text-gray-300`}>
-                Posted: {postedDate}
+                {t.jobs.jobCard.posted}: {postedDate}
               </span>
               <span className="text-gray-400 hidden mobile-M:inline">•</span>
               <span className={`${fontClasses.body} text-small text-blue-300 font-semibold`}>
-                {applicantCount} Applicants
+                {applicantCount} {t.jobs.jobCard.applicants}
               </span>
             </div>
             <Button
@@ -222,7 +224,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
               fullRounded
               onClick={(e) => { e.stopPropagation(); onApply?.(id); }}
             >
-              Apply Now
+              {t.jobs.jobCard.applyNow}
             </Button>
           </div>
         </div>
@@ -305,18 +307,18 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
 
         <div className="flex flex-col mobile-M:flex-row items-start mobile-M:items-center justify-between gap-2 mobile-M:gap-0">
           <div className="flex items-center gap-1.5 mobile-M:gap-2 flex-wrap">
-            <span 
+            <span
               className={`font-inter font-medium text-[9px] mobile-M:text-[10px]`}
               style={{ color: theme.colors.textSecondary }}
             >
-              Posted on: {postedDate}
+              {t.jobs.jobCard.posted}: {postedDate}
             </span>
             <span className="text-gray-400 hidden mobile-M:inline">•</span>
-            <span 
+            <span
               className={`font-inter text-[9px] mobile-M:text-[10px]`}
               style={{ color: theme.colors.textSecondary }}
             >
-              {applicantCount} Applicants
+              {applicantCount} {t.jobs.jobCard.applicants}
             </span>
           </div>
           <Button
@@ -324,7 +326,7 @@ export const JobPostCard: React.FC<JobPostCardProps> = ({
             size="sm"
             onClick={(e) => { e.stopPropagation(); onApply?.(id); }}
           >
-            Apply Now
+            {t.jobs.jobCard.applyNow}
           </Button>
         </div>
       </div>

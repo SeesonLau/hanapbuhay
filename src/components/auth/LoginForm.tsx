@@ -11,6 +11,7 @@ import TextBox from '@/components/ui/TextBox';
 import Image from 'next/image';
 import { IoArrowBack } from "react-icons/io5";
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -26,6 +27,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onLoadingChange 
 }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,7 +45,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setError('');
 
     if (!email || !password) {
-      setError('Please enter both email and password');
+      setError(t.auth.login.errors.requiredField);
       setLoading(false);
       return;
     }
@@ -72,7 +74,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         setError('');
       } else {
         console.log('❌ Login failed:', result.message);
-        setError(result.message || 'Invalid email or password. Please try again.');
+        setError(result.message || t.auth.login.errors.invalidCredentials);
       }
     } catch (err: any) {
       console.error('❌ Login exception:', err);
@@ -86,7 +88,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   const handleResendConfirmation = async () => {
     if (!email) {
-      setError('Please enter your email address');
+      setError(t.auth.login.errors.requiredField);
       return;
     }
 
@@ -145,7 +147,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
       {/* Title */}
       <h2 className="text-h4 tablet: text-h3 font-bold text-white text-center mb-4 font-alexandria">
-        Sign In
+        {t.auth.login.title}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -167,11 +169,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         <div>
           <TextBox
             type="email"
-            label="Email"
+            label={t.auth.login.emailLabel}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
-            placeholder="Email"
+            placeholder={t.auth.login.emailPlaceholder}
             disabled={loading}
             variant="glassmorphism"
           />
@@ -181,11 +183,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         <div>
           <TextBox
             type="password"
-            label="Password"
+            label={t.auth.login.passwordLabel}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
-            placeholder="Password"
+            placeholder={t.auth.login.passwordPlaceholder}
             enableValidation={false}
             disabled={loading}
             variant="glassmorphism"
@@ -211,7 +213,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               }
             }}
           >
-            Forgot Password?
+            {t.auth.login.forgotPassword}
           </button>
         </div>
 
@@ -226,7 +228,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           fullRounded={true}
           useCustomHover={true}
         >
-          {loading ? 'Signing in...' : 'Log In'}
+          {loading ? `${t.auth.login.loginButton}...` : t.auth.login.loginButton}
         </Button>
 
         {needsConfirmation && (
@@ -271,7 +273,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
         {/* Sign Up Link */}
         <p className="text-center text-mini sm:text-small text-gray-300 mt-4 font-alexandria font-light">
-          Don't have an account? Sign up {' '}
+          {t.auth.login.noAccount} {' '}
           <button
             type="button"
             onClick={onSignUpClick}
@@ -289,7 +291,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               }
             }}
           >
-            here
+            {t.auth.login.signUpLink}
           </button>
         </p>
       </form>

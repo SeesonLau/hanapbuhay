@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { ROUTES } from '@/lib/constants';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface ProfileDropdownProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   anchorRect,
 }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
 
   if (!isOpen) return null;
 
@@ -31,11 +33,11 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
     : 8;
 
   const menuItems = [
-    { href: ROUTES.FINDJOBS, label: 'Find Jobs', showOnMobile: true },
-    { href: ROUTES.MANAGEJOBPOSTS, label: 'Manage Job Posts', showOnMobile: true },
-    { href: ROUTES.APPLIEDJOBS, label: 'Applied Jobs', showOnMobile: true },
-    { href: ROUTES.CHAT, label: 'Chat', showOnMobile: true },
-    { href: ROUTES.PROFILE, label: 'Profile', showOnMobile: false },
+    { href: ROUTES.FINDJOBS, label: t.components.header.findJobs, showOnMobile: true },
+    { href: ROUTES.MANAGEJOBPOSTS, label: t.components.header.manageJobPosts, showOnMobile: true },
+    { href: ROUTES.APPLIEDJOBS, label: t.components.header.appliedJobs, showOnMobile: true },
+    { href: ROUTES.CHAT, label: t.components.header.chat, showOnMobile: true },
+    { href: ROUTES.PROFILE, label: t.components.header.profile, showOnMobile: false },
     { href: ROUTES.QUERY, label: 'Query Test', showOnMobile: false },
   ];
 
@@ -79,7 +81,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
       <button
         onClick={onOpenSettings}
         className="block w-full text-left px-4 py-2 text-sm transition-colors duration-300 whitespace-nowrap"
-        style={{ 
+        style={{
           color: theme.colors.textSecondary,
           backgroundColor: 'transparent'
         }}
@@ -92,13 +94,13 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
           e.currentTarget.style.color = theme.colors.textSecondary;
         }}
       >
-        Settings
+        {t.components.header.settings}
       </button>
 
       <button
         onClick={onSignOut}
         className="block w-full text-left px-4 py-2 text-sm transition-colors duration-300 whitespace-nowrap"
-        style={{ 
+        style={{
           color: theme.colors.textSecondary,
           backgroundColor: 'transparent'
         }}
@@ -111,7 +113,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
           e.currentTarget.style.color = theme.colors.textSecondary;
         }}
       >
-        Sign out
+        {t.components.header.logout}
       </button>
     </div>,
     document.body

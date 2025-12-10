@@ -1,0 +1,33 @@
+{
+  "title": "Messages",
+  "subtitle": "Chat with employers and job seekers",
+  "searchPlaceholder": "Search conversations...",
+  "banner": {
+    "title": "Chat with",
+    "highlight": "Clients",
+    "subtitle": "and",
+    "subtitleHighlight": "Workers"
+  },
+  "noConversations": "No conversations yet",
+  "selectConversation": "Select a conversation to start messaging",
+  "typePlaceholder": "Type a message...",
+  "send": "Send",
+  "online": "Online",
+  "offline": "Offline",
+  "typing": "typing...",
+  "globalChat": "Global Realtime Chat",
+  "globalChatDescription": "Global chat room",
+  "directMessage": "Direct message",
+  "authRequired": "Authentication Required",
+  "pleaseLogin": "Please log in to access the chat feature.",
+  "loadingChat": "Loading chat...",
+  "couldNotStartChat": "Could not start chat with {{name}}.",
+  "messageDeleted": "This message has been deleted",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "seen": "Seen",
+  "delivered": "Delivered",
+  "sent": "Sent",
+  "guestUser": "Guest User",
+  "unknownUser": "Unknown User"
+}

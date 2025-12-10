@@ -1,0 +1,71 @@
+{
+  "title": "Profile",
+  "subtitle": "Pamahalaan ang iyong impormasyon ng profile",
+  "banner": {
+    "title": "I-customize ang iyong",
+    "highlight": "Profile"
+  },
+  "sections": {
+    "personalInfo": "Personal na Impormasyon",
+    "workExperience": "Karanasan sa Trabaho",
+    "education": "Edukasyon",
+    "skills": "Mga Kasanayan",
+    "projects": "Mga Proyekto",
+    "reviews": "Mga Review"
+  },
+  "fields": {
+    "fullName": "Buong Pangalan",
+    "email": "Email",
+    "phone": "Numero ng Telepono",
+    "birthdate": "Petsa ng Kapanganakan",
+    "sex": "Kasarian",
+    "age": "Edad",
+    "location": "Lokasyon",
+    "bio": "Bio",
+    "website": "Website",
+    "linkedin": "LinkedIn",
+    "github": "GitHub"
+  },
+  "placeholders": {
+    "fullName": "Ilagay ang iyong buong pangalan",
+    "email": "Ilagay ang iyong email",
+    "phone": "Ilagay ang iyong numero ng telepono",
+    "bio": "Sabihin sa amin ang tungkol sa iyo",
+    "website": "URL ng iyong website",
+    "linkedin": "URL ng LinkedIn profile",
+    "github": "URL ng GitHub profile"
+  },
+  "buttons": {
+    "editProfile": "I-edit ang Profile",
+    "saveChanges": "I-save ang mga Pagbabago",
+    "cancel": "Kanselahin",
+    "addExperience": "Magdagdag ng Karanasan",
+    "addEducation": "Magdagdag ng Edukasyon",
+    "addProject": "Magdagdag ng Proyekto",
+    "viewWorkExperience": "Tingnan ang Karanasan sa Trabaho"
+  },
+  "messages": {
+    "profileUpdated": "Matagumpay na na-update ang profile",
+    "updateFailed": "Nabigo ang pag-update ng profile",
+    "fillRequired": "Pakipunan ang lahat ng kinakailangang field"
+  },
+  "viewProfileModal": {
+    "profile": "Profile",
+    "reviews": "Mga Review",
+    "projects": "Mga Proyekto",
+    "jobs": "Mga Trabaho"
+  },
+  "projectModal": {
+    "addTitle": "Magdagdag ng Karanasan sa Trabaho",
+    "editTitle": "I-edit ang Karanasan sa Trabaho",
+    "title": "Titulo",
+    "titlePlaceholder": "Magdagdag ng titulo",
+    "description": "Deskripsyon",
+    "descriptionPlaceholder": "Magdagdag ng deskripsyon",
+    "addPhoto": "Magdagdag ng Larawan",
+    "images": "mga larawan",
+    "maxReached": "Naabot na ang maximum",
+    "update": "I-update",
+    "add": "Magdagdag"
+  }
+}

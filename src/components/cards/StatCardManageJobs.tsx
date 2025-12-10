@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type ManageType = "total" | "inactive" | "active" | "resolved";
 
@@ -11,13 +12,6 @@ interface StatCardManageJobsProps {
   value?: string | number;
   className?: string;
 }
-
-const titleForType: Record<ManageType, string> = {
-  total: "Total Job Posts",
-  inactive: "Inactive Job Posts",
-  active: "Active Job Posts",
-  resolved: "Resolved Job Posts",
-};
 
 const iconForType: Record<ManageType, string> = {
   total: "/icons/stats-posted.svg",
@@ -33,6 +27,15 @@ export default function StatCardManageJobs({
   className = "",
 }: StatCardManageJobsProps) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
+
+  const titleForType: Record<ManageType, string> = {
+    total: t.jobs.manageJobPosts.stats.totalPosts,
+    inactive: t.jobs.manageJobPosts.stats.inactive,
+    active: t.jobs.manageJobPosts.stats.active,
+    resolved: t.jobs.manageJobPosts.stats.resolved,
+  };
+
   const resolvedTitle = title || titleForType[type];
   const iconSrc = iconForType[type];
 

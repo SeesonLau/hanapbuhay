@@ -7,9 +7,11 @@ import { PrivacyPolicyModal } from '@/components/modals/PrivacyPolicyModal';
 import { TermsOfServiceModal } from '@/components/modals/TermsOfServiceModal';
 import { FAQsModal } from '@/components/modals/FAQsModal';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const Footer = () => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [emailCopied, setEmailCopied] = useState(false);
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
@@ -46,28 +48,28 @@ const Footer = () => {
                 alt="HanapBuhay Logo" 
               />
             </div>
-            <div 
+            <div
               className={`text-center tablet:text-left text-small tablet:text-body font-normal leading-relaxed ${fontClasses.body} transition-colors duration-300`}
               style={{ color: theme.landing.bodyText }}
             >
-              Connecting local clients with skilled freelancers in the community.
+              {t.home.hero.descriptionFooter}
             </div>
           </div>
 
           {/* Column 2: Quick Links */}
           <div className="flex flex-col items-center tablet:items-start">
-            <div 
+            <div
               className={`text-lead tablet:text-h3 font-bold mb-3 ${fontClasses.heading} transition-colors duration-300`}
               style={{ color: theme.landing.headingPrimary }}
             >
-              Quick Links
+              {t.components.footer.quickLinks}
             </div>
             {[
-              { name: 'Benefits', action: () => handleScrollToSection('benefits') },
-              { name: 'Recommended Jobs', action: () => handleScrollToSection('recommended-jobs') },
-              { name: 'Popular Categories', action: () => handleScrollToSection('popular-categories') },
-              { name: 'Privacy Policy', action: () => setIsPrivacyModalOpen(true) },
-              { name: 'Terms of Service', action: () => setIsTermsModalOpen(true) },
+              { name: t.components.footer.benefits, action: () => handleScrollToSection('benefits') },
+              { name: t.components.footer.recommendedJobs, action: () => handleScrollToSection('recommended-jobs') },
+              { name: t.components.footer.popularCategories, action: () => handleScrollToSection('popular-categories') },
+              { name: t.components.footer.privacy, action: () => setIsPrivacyModalOpen(true) },
+              { name: t.components.footer.terms, action: () => setIsTermsModalOpen(true) },
             ].map((link) => (
               <button
                 key={link.name}
@@ -88,11 +90,11 @@ const Footer = () => {
 
           {/* Column 3: Support */}
           <div className="flex flex-col items-center tablet:items-start">
-            <div 
+            <div
               className={`text-lead tablet:text-h3 font-bold mb-3 ${fontClasses.heading} transition-colors duration-300`}
               style={{ color: theme.landing.headingPrimary }}
             >
-              Support
+              {t.components.footer.support}
             </div>
             <button
               onClick={() => setIsFAQsModalOpen(true)}
@@ -105,17 +107,17 @@ const Footer = () => {
                 e.currentTarget.style.color = theme.landing.bodyText;
               }}
             >
-              FAQs
+              {t.components.footer.faq}
             </button>
           </div>
 
           {/* Column 4: Follow Us */}
           <div className="flex flex-col items-center tablet:items-start">
-            <div 
+            <div
               className={`text-lead tablet:text-h3 font-bold mb-3 ${fontClasses.heading} transition-colors duration-300`}
               style={{ color: theme.landing.headingPrimary }}
             >
-              Follow Us
+              {t.components.footer.followUs}
             </div>
             <div className="flex gap-3 tablet:gap-4">
               {/* Twitter Icon */}
@@ -176,7 +178,7 @@ const Footer = () => {
                 <FaEnvelope size={16} className="tablet:text-[18px]" />
                 
                 {emailCopied && (
-                  <div 
+                  <div
                     className="absolute -top-8 text-xs px-2 py-1 rounded transition-colors duration-300"
                     style={{
                       backgroundColor: theme.landing.iconBg,
@@ -184,7 +186,7 @@ const Footer = () => {
                       border: `1px solid ${theme.landing.iconBorder}`
                     }}
                   >
-                    Copied!
+                    {t.components.footer.emailCopied}
                   </div>
                 )}
               </button>
@@ -193,11 +195,11 @@ const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <div 
+        <div
           className={`text-center text-tiny tablet:text-small font-normal ${fontClasses.body} transition-colors duration-300`}
           style={{ color: theme.landing.bodyTextMuted }}
         >
-          © 2025 HanapBuhay. All rights reserved.
+          {t.components.footer.copyright}
         </div>
       </footer>
 

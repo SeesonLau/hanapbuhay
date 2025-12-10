@@ -1,0 +1,60 @@
+{
+  "hero": {
+    "title": "Find Your Next",
+    "titleHighlight": "Opportunity",
+    "description": "Connect with opportunities that matter. Whether you're seeking work or offering it, HanapBuhay makes finding the perfect match effortless and rewarding.",
+    "descriptionFooter": "Connecting local clients with skilled freelancers in the community."
+  },
+  "benefits": {
+    "heading": "Core Features That",
+    "headingHighlight": "Power Your Success",
+    "subtitle": "A platform designed to connect local talent with opportunities, making hiring and finding work simpler than ever before.",
+    "localConnections": {
+      "title": "Local Connections",
+      "description": "Find trusted workers and clients right in your community, no more searching far and wide."
+    },
+    "quickHiring": {
+      "title": "Quick Hiring",
+      "description": "Post a job in minutes and receive responses from nearby skilled professionals fast."
+    },
+    "verifiedReviews": {
+      "title": "Verified Reviews",
+      "description": "Build trust with transparent ratings and authentic feedback from the community."
+    },
+    "securePlatform": {
+      "title": "Secure Platform",
+      "description": "Your data and transactions are protected with our reliable and secure system."
+    }
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "Get started in three simple steps",
+    "steps": [
+      {
+        "title": "Create Your Profile",
+        "description": "Sign up and tell us about yourself"
+      },
+      {
+        "title": "Browse Opportunities",
+        "description": "Find jobs that match your skills"
+      },
+      {
+        "title": "Apply & Connect",
+        "description": "Submit applications and start conversations"
+      }
+    ]
+  },
+  "recommendedJobs": {
+    "title": "Recommended",
+    "titleHighlight": "Jobs",
+    "subtitle": "Discover the most popular opportunities in your area",
+    "loading": "Loading jobs...",
+    "error": "Failed to load jobs",
+    "noJobs": "No jobs available at the moment"
+  },
+  "popularCategories": {
+    "title": "Popular",
+    "titleHighlight": "Job Categories",
+    "subtitle": "Explore opportunities across different fields"
+  }
+}

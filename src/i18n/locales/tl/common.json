@@ -1,0 +1,64 @@
+{
+  "navigation": {
+    "backToHome": "Bumalik sa Home",
+    "backToLogin": "Bumalik sa Login",
+    "backToProfile": "Bumalik sa Profile",
+    "backToConversations": "Bumalik sa mga pag-uusap"
+  },
+  "buttons": {
+    "getStarted": "Magsimula",
+    "signIn": "Mag-sign In",
+    "signUp": "Mag-sign Up",
+    "login": "Mag-login",
+    "logout": "Mag-logout",
+    "save": "I-save",
+    "cancel": "Kanselahin",
+    "delete": "Tanggalin",
+    "edit": "I-edit",
+    "submit": "Isumite",
+    "confirm": "Kumpirmahin",
+    "close": "Isara",
+    "retry": "Subukan Muli",
+    "refresh": "I-refresh",
+    "post": "Mag-post",
+    "addPost": "Magdagdag ng Post",
+    "apply": "Mag-apply",
+    "viewMore": "Tingnan pa",
+    "previous": "Nakaraan",
+    "next": "Susunod"
+  },
+  "labels": {
+    "sortBy": "Sort By",
+    "filterBy": "Salain ayon sa",
+    "search": "Maghanap",
+    "email": "Email",
+    "password": "Password",
+    "name": "Pangalan",
+    "phone": "Telepono",
+    "role": "Papel",
+    "status": "Katayuan",
+    "date": "Petsa",
+    "loading": "Naglo-load...",
+    "noResults": "Walang resulta",
+    "na": "Wala",
+    "user": "Gumagamit"
+  },
+  "messages": {
+    "authRequired": "Kailangan ng Authentication",
+    "pleaseLogin": "Mangyaring mag-log in upang ma-access ang feature na ito.",
+    "loadingProfile": "Naglo-load ng profile...",
+    "loadingJobs": "Naglo-load ng mga trabaho...",
+    "loadingChat": "Naglo-load ng chat...",
+    "loadingData": "Naglo-load ng data...",
+    "errorOccurred": "May naganap na error",
+    "tryAgain": "Pakisubukan muli",
+    "success": "Tagumpay",
+    "selectConversation": "Pumili ng pag-uusap upang magsimulang mag-message"
+  },
+  "roles": {
+    "admin": "Admin",
+    "user": "User",
+    "employer": "Employer",
+    "jobseeker": "Naghahanap ng Trabaho"
+  }
+}
