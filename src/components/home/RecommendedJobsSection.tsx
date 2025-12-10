@@ -7,11 +7,13 @@ import { JobPostCard } from '@/components/cards/JobPostCard';
 import { fontClasses } from '@/styles/fonts';
 import { useJobPosts } from '@/hooks/useJobPosts';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function RecommendedJobsSection() {
   const ref = useRef(null);
   const router = useRouter();
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isInView = useInView(ref, { once: false, amount: 0.15 });
 
   useEffect(() => {
@@ -74,26 +76,26 @@ export default function RecommendedJobsSection() {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -30 }}
           transition={{ duration: 0.6 }}
         >
-          <h2 
+          <h2
             className={`text-h2 mobile-M:text-h1 tablet:text-5xl laptop:text-hero font-bold mb-4 ${fontClasses.heading}`}
             style={{ color: theme.landing.headingPrimary }}
           >
-            Recommended{' '}
-            <span 
+            {t.home.recommendedJobs.title}{' '}
+            <span
               className="bg-clip-text text-transparent"
               style={{
                 backgroundImage: `linear-gradient(to right, ${theme.landing.headingGradientStart}, ${theme.landing.headingGradientMid}, ${theme.landing.headingGradientEnd})`
               }}
             >
-              Jobs
+              {t.home.recommendedJobs.titleHighlight}
             </span>
           </h2>
-          
-          <p 
+
+          <p
             className={`text-body mobile-M:text-lead tablet:text-xl max-w-2xl mx-auto ${fontClasses.body}`}
             style={{ color: theme.landing.bodyText }}
           >
-            Discover the most popular opportunities in your area
+            {t.home.recommendedJobs.subtitle}
           </p>
         </motion.div>
         

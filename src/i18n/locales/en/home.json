@@ -6,22 +6,25 @@
     "descriptionFooter": "Connecting local clients with skilled freelancers in the community."
   },
   "benefits": {
-    "title": "Why Choose HanapBuhay?",
-    "subtitle": "Discover the advantages of using our platform",
-    "items": [
-      {
-        "title": "Easy to Use",
-        "description": "Simple and intuitive interface for everyone"
-      },
-      {
-        "title": "Verified Opportunities",
-        "description": "All job posts are verified for authenticity"
-      },
-      {
-        "title": "Secure Platform",
-        "description": "Your data is protected with industry-standard security"
-      }
-    ]
+    "heading": "Core Features That",
+    "headingHighlight": "Power Your Success",
+    "subtitle": "A platform designed to connect local talent with opportunities, making hiring and finding work simpler than ever before.",
+    "localConnections": {
+      "title": "Local Connections",
+      "description": "Find trusted workers and clients right in your community, no more searching far and wide."
+    },
+    "quickHiring": {
+      "title": "Quick Hiring",
+      "description": "Post a job in minutes and receive responses from nearby skilled professionals fast."
+    },
+    "verifiedReviews": {
+      "title": "Verified Reviews",
+      "description": "Build trust with transparent ratings and authentic feedback from the community."
+    },
+    "securePlatform": {
+      "title": "Secure Platform",
+      "description": "Your data and transactions are protected with our reliable and secure system."
+    }
   },
   "howItWorks": {
     "title": "How It Works",
@@ -40,5 +43,18 @@
         "description": "Submit applications and start conversations"
       }
     ]
+  },
+  "recommendedJobs": {
+    "title": "Recommended",
+    "titleHighlight": "Jobs",
+    "subtitle": "Discover the most popular opportunities in your area",
+    "loading": "Loading jobs...",
+    "error": "Failed to load jobs",
+    "noJobs": "No jobs available at the moment"
+  },
+  "popularCategories": {
+    "title": "Popular",
+    "titleHighlight": "Job Categories",
+    "subtitle": "Explore opportunities across different fields"
   }
 }

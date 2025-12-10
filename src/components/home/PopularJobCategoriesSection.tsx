@@ -8,6 +8,7 @@ import { PostService } from '@/lib/services/posts-services';
 import { ApplicationService } from '@/lib/services/applications-services';
 import type { Post } from '@/lib/models/posts';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 import type { Theme } from '@/styles/theme';
 
 // Job type icon mapping
@@ -46,6 +47,7 @@ interface CategoryData {
 export default function PopularJobCategoriesSection() {
   const ref = useRef(null);
   const { theme } = useTheme();
+  const { t } = useLanguage();
   // Bidirectional scroll animation - replays when scrolling back into view
   const isInView = useInView(ref, { once: false, amount: 0.15 });
 
@@ -182,26 +184,26 @@ export default function PopularJobCategoriesSection() {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -30 }}
           transition={{ duration: 0.6 }}
         >
-          <h2 
+          <h2
             className={`text-h2 mobile-M:text-h1 tablet:text-5xl laptop:text-hero font-bold mb-4 ${fontClasses.heading}`}
             style={{ color: theme.landing.headingPrimary }}
           >
-            Popular Job{' '}
-            <span 
+            {t.home.popularCategories.title}{' '}
+            <span
               className="bg-clip-text text-transparent"
               style={{
                 backgroundImage: `linear-gradient(to right, ${theme.landing.headingGradientStart}, ${theme.landing.headingGradientMid}, ${theme.landing.headingGradientEnd})`
               }}
             >
-              Categories
+              {t.home.popularCategories.titleHighlight}
             </span>
           </h2>
           
-          <p 
+          <p
             className={`text-body mobile-M:text-lead tablet:text-xl max-w-2xl mx-auto ${fontClasses.body}`}
             style={{ color: theme.landing.bodyText }}
           >
-            Explore the most in-demand job categories in your area
+            {t.home.popularCategories.subtitle}
           </p>
         </motion.div>
         

@@ -6,22 +6,25 @@
     "descriptionFooter": "Naglilingkod sa mga lokal na kliyente at mga bihasang freelancer sa komunidad."
   },
   "benefits": {
-    "title": "Bakit Pipiliin ang HanapBuhay?",
-    "subtitle": "Tuklasin ang mga bentahe ng paggamit ng aming platform",
-    "items": [
-      {
-        "title": "Madaling Gamitin",
-        "description": "Simple at madaling maintindihang interface para sa lahat"
-      },
-      {
-        "title": "Naberipikang mga Oportunidad",
-        "description": "Lahat ng job post ay naberipika para sa katotohanan"
-      },
-      {
-        "title": "Secure na Platform",
-        "description": "Ang iyong data ay protektado ng industry-standard security"
-      }
-    ]
+    "heading": "Mga Pangunahing Feature na",
+    "headingHighlight": "Magpapalakas ng Iyong Tagumpay",
+    "subtitle": "Isang platform na idinisenyo upang ikonekta ang lokal na talento sa mga oportunidad, ginagawang mas simple ang pag-hire at paghahanap ng trabaho.",
+    "localConnections": {
+      "title": "Lokal na Koneksyon",
+      "description": "Maghanap ng mga pinagkakatiwalaang manggagawa at kliyente sa iyong komunidad, hindi na kailangang maghanap nang malayo."
+    },
+    "quickHiring": {
+      "title": "Mabilis na Pag-hire",
+      "description": "Mag-post ng trabaho sa loob ng ilang minuto at makatanggap ng mga tugon mula sa malapit na bihasang propesyonal nang mabilis."
+    },
+    "verifiedReviews": {
+      "title": "Naberipikang mga Review",
+      "description": "Bumuo ng tiwala gamit ang transparent na rating at tunay na feedback mula sa komunidad."
+    },
+    "securePlatform": {
+      "title": "Secure na Platform",
+      "description": "Ang iyong data at transaksyon ay protektado ng aming maaasahan at secure na sistema."
+    }
   },
   "howItWorks": {
     "title": "Paano Ito Gumagana",
@@ -40,5 +43,18 @@
         "description": "Magsumite ng mga aplikasyon at magsimulang makipag-usap"
       }
     ]
+  },
+  "recommendedJobs": {
+    "title": "Mga Inirerekomendang",
+    "titleHighlight": "Trabaho",
+    "subtitle": "Tuklasin ang pinakasikat na oportunidad sa iyong lugar",
+    "loading": "Naglo-load ng mga trabaho...",
+    "error": "Nabigo ang paglo-load ng mga trabaho",
+    "noJobs": "Walang available na trabaho sa ngayon"
+  },
+  "popularCategories": {
+    "title": "Mga Sikat na",
+    "titleHighlight": "Kategorya ng Trabaho",
+    "subtitle": "Tuklasin ang mga oportunidad sa iba't ibang larangan"
   }
 }
