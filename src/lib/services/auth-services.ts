@@ -207,12 +207,11 @@ export class AuthService {
   static async forgotPassword(email: string): Promise<AuthResponse> {
     try {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 
-                    (typeof window !== 'undefined' ? window.location.origin : '') ||
-                    'https://hanapbuhay.vercel.app';
+                     (typeof window !== 'undefined' ? window.location.origin : '') ||
+                     'https://hanapbuhay.vercel.app';
       
-      // IMPORTANT: Point to /auth/confirm, which will then redirect to /reset-password
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${siteUrl}/auth/confirm`,
+        redirectTo: `${siteUrl}/reset-password`,
       });
 
       if (error) {
