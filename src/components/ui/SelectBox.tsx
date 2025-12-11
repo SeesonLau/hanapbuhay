@@ -1,7 +1,7 @@
 // src/components/ui/SelectBox.tsx
 'use client';
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState, useEffect } from 'react';
 import { useTheme } from '@/hooks/useTheme';
 
 export interface SelectBoxProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
@@ -18,7 +18,7 @@ export interface SelectBoxProps extends React.SelectHTMLAttributes<HTMLSelectEle
   placeholder?: string;
 }
 
-const SelectBox = forwardRef<HTMLSelectElement, SelectBoxProps>(({
+const SelectBox = forwardRef<HTMLSelectElement, SelectBoxProps>(({ 
   label,
   error,
   helperText,
@@ -31,10 +31,19 @@ const SelectBox = forwardRef<HTMLSelectElement, SelectBoxProps>(({
   responsive = true,
   value,
   onChange,
+  onBlur,
   placeholder,
   ...props
 }, ref) => {
   const { theme } = useTheme();
+  const [touched, setTouched] = useState(false);
+  const [internalValue, setInternalValue] = useState<string>(value as string ?? '');
+
+  useEffect(() => {
+    if (value !== undefined) {
+      setInternalValue(String(value));
+    }
+  }, [value]);
 
   const containerClasses = `flex flex-col items-start gap-[5px] ${className}`.trim();
   const containerWidth = width || (responsive ? '100%' : '400px');
@@ -62,9 +71,11 @@ const SelectBox = forwardRef<HTMLSelectElement, SelectBoxProps>(({
   const errorTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter mt-1`;
   const helperTextClasses = `${responsive ? 'text-mini sm:text-tiny' : 'text-mini'} font-inter mt-1`;
 
+  const isInErrorState = (hasError || !!error) || (required && touched && (!internalValue || internalValue === ''));
+
   const selectStyle: React.CSSProperties = {
     backgroundColor: disabled ? theme.colors.backgroundSecondary : theme.colors.surface,
-    borderColor: hasError || error ? theme.colors.error : theme.colors.border,
+    borderColor: isInErrorState ? theme.colors.error : theme.colors.border,
     color: theme.colors.text,
   };
 
@@ -99,11 +110,12 @@ const SelectBox = forwardRef<HTMLSelectElement, SelectBoxProps>(({
         <select
           ref={ref}
           value={value ?? ''}
-          onChange={onChange}
+          onChange={(e) => { setInternalValue(e.target.value); onChange?.(e); }}
           disabled={disabled}
           required={required}
           className={selectClasses}
           style={selectStyle}
+          onBlur={(e) => { setTouched(true); onBlur?.(e); }}
           {...props}
         >
           {placeholder && (

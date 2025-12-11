@@ -103,7 +103,7 @@ export default function JobTypeGrid({ options, selected, onToggle, selectedSubTy
             aria-pressed={isSelected}
             aria-label={opt.label}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = theme.colors.border;
+              e.currentTarget.style.borderColor = theme.colors.borderLight;
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.borderColor = theme.colors.borderLight;

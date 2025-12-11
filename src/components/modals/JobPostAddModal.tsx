@@ -391,15 +391,16 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
           <div className={page === 2 ? '' : 'hidden'}>
           {/* Job Title */}
           <div className="mb-3">
-            <TextBox 
-              label="Job Title" 
-              placeholder="Enter job title (e.g., Landscaper needed)" 
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              maxLength={50}
-              helperText={`${title.length}/50`}
-              required
-            />
+          <TextBox 
+            label="Job Title" 
+            placeholder="Enter job title (e.g., Landscaper needed)" 
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength={50}
+            helperText={`${title.length}/50`}
+            required
+            hideRequiredAsterisk
+          />
           </div>
           {/* Location */}
           <div>
@@ -410,28 +411,31 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
               Location
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <SelectBox 
-                options={[{ value: "Philippines", label: "Philippines" }]} 
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                placeholder="Select country"
-              />
-              <SelectBox 
-                options={getProvinces().map((prov) => ({ value: prov, label: prov }))}
-                value={province}
-                onChange={(e) => {
-                  setProvince(e.target.value);
-                  const cities = getCitiesByProvince(e.target.value);
-                  setCity(cities.length > 0 ? cities[0] : "");
-                }}
-                placeholder="Select province"
-              />
-              <SelectBox 
-                options={getCitiesByProvince(province).map((city_name) => ({ value: city_name, label: city_name }))}
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Select city or municipality"
-              />
+          <SelectBox 
+            options={[{ value: "Philippines", label: "Philippines" }]} 
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            placeholder="Select country"
+            required
+          />
+          <SelectBox 
+            options={getProvinces().map((prov) => ({ value: prov, label: prov }))}
+            value={province}
+            onChange={(e) => {
+              setProvince(e.target.value);
+              const cities = getCitiesByProvince(e.target.value);
+              setCity(cities.length > 0 ? cities[0] : "");
+            }}
+            placeholder="Select province"
+            required
+          />
+          <SelectBox 
+            options={getCitiesByProvince(province).map((city_name) => ({ value: city_name, label: city_name }))}
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="Select city or municipality"
+            required
+          />
             </div>
             <div className="mt-3">
               <TextBox 
@@ -453,38 +457,47 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
               Salary Rate
             </div>
             <div className="flex items-center gap-3">
-              <TextBox 
-                type="text" 
-                placeholder="Enter amount (e.g., 1000.00)" 
-                value={salary}
+          <TextBox 
+            type="text" 
+            placeholder="Enter amount" 
+            value={salary}
                 onChange={(e) => {
                   let v = e.target.value.replace(/[^0-9.]/g, '');
                   const firstDot = v.indexOf('.');
                   if (firstDot !== -1) {
+                    // Keep only the first dot
                     v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '');
                   }
                   const [intPartRaw, decPartRaw = ''] = v.split('.');
                   const intPart = (intPartRaw || '').slice(0, 6);
                   const decPart = (decPartRaw || '').slice(0, 2);
-                  v = decPart.length ? `${intPart}.${decPart}` : intPart;
+                  if (v === '.') {
+                    v = '0.'; // allow starting with a decimal point
+                  } else if (firstDot !== -1) {
+                    v = decPart.length ? `${intPart}.${decPart}` : `${intPart}.`;
+                  } else {
+                    v = intPart;
+                  }
                   setSalary(v);
                 }}
-                leftIcon={<img src="/icons/PHP.svg" alt="PHP" className="w-4 h-4" />}
-                className="flex-1"
-                min={0}
-                inputMode="decimal"
-                pattern="^[0-9]*\.?[0-9]*$"
-              />
-              <SelectBox 
-                width="180px"
-                options={[
-                  { value: 'day', label: 'per day' },
-                  { value: 'week', label: 'per week' },
-                  { value: 'month', label: 'per month' },
-                ]}
-                value={salaryPeriod}
-                onChange={(e) => setSalaryPeriod(e.target.value as 'day' | 'week' | 'month')}
-              />
+            leftIcon={<img src="/icons/PHP.svg" alt="PHP" className="w-4 h-4" />}
+            className="flex-1"
+            min={0}
+            inputMode="decimal"
+            pattern="^\\d{0,6}(\\.\\d{0,2})?$"
+            required
+          />
+          <SelectBox 
+            width="180px"
+            options={[
+              { value: 'day', label: 'per day' },
+              { value: 'week', label: 'per week' },
+              { value: 'month', label: 'per month' },
+            ]}
+            value={salaryPeriod}
+            onChange={(e) => setSalaryPeriod(e.target.value as 'day' | 'week' | 'month')}
+            required
+          />
             </div>
           </div>
 
@@ -532,6 +545,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
                         });
                       }}
                       className="flex-1"
+                      required={idx === 0}
                     />
                     {isLast && requirementsList.length < 10 ? (
                       <button
