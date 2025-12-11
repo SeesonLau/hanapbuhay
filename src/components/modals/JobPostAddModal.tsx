@@ -11,6 +11,7 @@ import Button from "@/components/ui/Button";
 import { Gender, getGenderOptions } from "@/lib/constants/gender";
 import { ExperienceLevel, getExperienceOptions } from "@/lib/constants/experience-level";
 import { getJobTypeOptions, SubTypes } from "@/lib/constants/job-types";
+import { SALARY_TYPES } from "@/lib/constants/salary-type";
 import type { JobType } from "@/lib/constants/job-types";
 import { GenderTag, ExperienceLevelTag, JobTypeTag } from "@/components/ui/TagItem";
 import JobTypeGrid from "@/components/ui/JobTypeGrid";
@@ -28,7 +29,7 @@ export interface JobPostAddFormData {
   city: string;
   address: string;
   salary: string;
-  salaryPeriod: 'day' | 'week' | 'month';
+  salary_type: string;
   about: string;
   qualifications: string;
 }
@@ -52,7 +53,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [salary, setSalary] = useState("");
-  const [salaryPeriod, setSalaryPeriod] = useState<'day' | 'week' | 'month'>("day");
+  const [salary_type, setSalary_type] = useState(SALARY_TYPES[0].value);
   const [about, setAbout] = useState("");
   const [qualifications, setQualifications] = useState("");
   const [requirementsList, setRequirementsList] = useState<string[]>([""]);
@@ -69,7 +70,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
     setCity("");
     setAddress("");
     setSalary("");
-    setSalaryPeriod("day");
+    setSalary_type(SALARY_TYPES[0].value);
     setAbout("");
     setQualifications("");
     setRequirementsList([""]);
@@ -171,7 +172,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
       city,
       address: address.trim(),
       salary: salary.trim(),
-      salaryPeriod,
+      salary_type: salary_type,
       about: about.trim(),
       qualifications: requirementsList
         .filter((s) => s.trim().length > 0)
@@ -491,13 +492,9 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
           />
           <SelectBox 
             width="180px"
-            options={[
-              { value: 'day', label: 'per day' },
-              { value: 'week', label: 'per week' },
-              { value: 'month', label: 'per month' },
-            ]}
-            value={salaryPeriod}
-            onChange={(e) => setSalaryPeriod(e.target.value as 'day' | 'week' | 'month')}
+            options={SALARY_TYPES}
+            value={salary_type}
+            onChange={(e) => setSalary_type(e.target.value)}
             required
           />
             </div>

@@ -11,6 +11,7 @@ import Button from "@/components/ui/Button";
 import { getGenderOptions, Gender } from "@/lib/constants/gender";
 import { getExperienceOptions, ExperienceLevel } from "@/lib/constants/experience-level";
 import { JobType, getJobTypeOptions, SubTypes } from "@/lib/constants/job-types";
+import { SALARY_TYPES } from "@/lib/constants/salary-type";
 import { getProvinces, getCitiesByProvince, parseLocationDetailed } from "@/lib/constants/philippines-locations";
 import { GenderTag, ExperienceLevelTag, JobTypeTag } from "@/components/ui/TagItem";
 import JobTypeGrid from "@/components/ui/JobTypeGrid";
@@ -58,7 +59,7 @@ function mapPostToInitial(post: Post): Partial<JobPostAddFormData> & { subTypes?
     city: city ?? "",
     address: address ?? "",
     salary: (typeof post.price === 'number') ? String(post.price) : (post.price ?? ""),
-    salaryPeriod: 'month',
+    salary_type: post.salary_type,
     about,
     qualifications,
     subTypes: Array.from(new Set(jobSubTypes)),
@@ -79,7 +80,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
   const [city, setCity] = useState(resolvedInitial?.city ?? "Cebu City");
   const [address, setAddress] = useState(resolvedInitial?.address ?? "");
   const [salary, setSalary] = useState(resolvedInitial?.salary ?? "");
-  const [salaryPeriod, setSalaryPeriod] = useState<'day' | 'week' | 'month'>(resolvedInitial?.salaryPeriod ?? "day");
+  const [salary_type, setSalary_type] = useState<string>(resolvedInitial?.salary_type ?? SALARY_TYPES[0].value);
   const [about, setAbout] = useState(resolvedInitial?.about ?? "");
   const [qualifications, setQualifications] = useState(resolvedInitial?.qualifications ?? "");
   const [requirementsList, setRequirementsList] = useState<string[]>(
@@ -112,7 +113,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
     setCity(ri?.city ?? (ri?.province ? getCitiesByProvince(ri.province)[0] ?? "" : ""));
     setAddress(ri?.address ?? "");
     setSalary(ri?.salary ?? "");
-    setSalaryPeriod(ri?.salaryPeriod ?? "day");
+    setSalary_type(ri?.salary_type ?? SALARY_TYPES[0].value);
     setAbout(ri?.about ?? "");
     setQualifications(ri?.qualifications ?? "");
     setRequirementsList(
@@ -229,7 +230,7 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
       city,
       address: address.trim(),
       salary: salary.trim(),
-      salaryPeriod,
+      salary_type: salary_type,
       about: about.trim(),
       qualifications: finalQualifications,
       subTypes: finalSubTypes,
@@ -544,27 +545,12 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
               />
               <SelectBox
                 width="180px"
-                options={[
-                  { value: 'day', label: t.jobs.jobPostModal.fields.perDay },
-                  { value: 'week', label: t.jobs.jobPostModal.fields.perWeek },
-                  { value: 'month', label: t.jobs.jobPostModal.fields.perMonth },
-                ]}
-                value={salaryPeriod}
-                onChange={(e) => setSalaryPeriod(e.target.value as 'day' | 'week' | 'month')}
+                options={SALARY_TYPES}
+                value={salary_type}
+                onChange={(e) => setSalary_type(e.target.value)}
                 disabled={!!isRestricted}
+                required
               />
-          <SelectBox 
-            width="180px"
-            options={[
-              { value: 'day', label: 'per day' },
-              { value: 'week', label: 'per week' },
-              { value: 'month', label: 'per month' },
-            ]}
-            value={salaryPeriod}
-            onChange={(e) => setSalaryPeriod(e.target.value as 'day' | 'week' | 'month')}
-            disabled={!!isRestricted}
-            required
-          />
             </div>
           </div>
 

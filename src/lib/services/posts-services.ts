@@ -213,7 +213,8 @@ export class PostService {
   static async createPost(postData: Omit<Post, 'postId' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'deletedBy'>): Promise<Post> {
     const { data, error } = await supabase.from('posts').insert(postData).select().single();
     if (error) {
-      throw new Error('Could not create post.');
+      console.error("Failed to create post:", error);
+      throw new Error(`Could not create post: ${error.message}`);
     }
     return data as Post;
   }
@@ -224,7 +225,8 @@ export class PostService {
   static async updatePost(postId: string, postData: Partial<Post>): Promise<Post> {
     const { data, error } = await supabase.from('posts').update(postData).eq('postId', postId).select().single();
     if (error) {
-      throw new Error('Could not update post.');
+      console.error("Failed to update post:", error);
+      throw new Error(`Could not update post: ${error.message}`);
     }
     return data as Post;
   }
