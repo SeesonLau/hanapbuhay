@@ -7,6 +7,7 @@ import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
 import { useTheme } from '@/hooks/useTheme';
+import { parseLocationDetailed } from '@/lib/constants/philippines-locations';
 
 interface JobPostData {
   id: string;
@@ -89,12 +90,53 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
     ...normalizedGenders.map((label) => ({ type: 'gender' as const, label })),
   ];
 
-  const tagMuted = isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : '';
+  // Determine if we should use pastel colors (non-classic themes) or gray (classic theme)
+  const shouldUsePastelColors = theme.name !== 'classic';
+
+  // Format location with comma (e.g., "Cebu, Cebu City") - excludes address when locked
+  const formatLocationWithComma = (locationString: string): string => {
+    const { province, city } = parseLocationDetailed(locationString);
+    let formatted = '';
+    if (province) formatted += province;
+    if (city) formatted += (formatted ? ', ' : '') + city;
+    return formatted || locationString;
+  };
+
+  // Render tag with theme-based styling when locked
+  const renderTag = (tag: typeof allTags[0], key: string) => {
+    const baseTag = tag.type === 'gender' ? (
+      <StaticGenderTag label={tag.label} />
+    ) : tag.type === 'experience' ? (
+      <StaticExperienceLevelTag label={tag.label} />
+    ) : (
+      <StaticJobTypeTag label={tag.label} />
+    );
+
+    if (!isLocked) return baseTag;
+
+    return (
+      <div key={key} style={{
+        backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+        color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+        display: 'inline-flex',
+        borderRadius: '5px',
+        padding: '0 12px',
+        height: '17px',
+        fontSize: '10px',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        {tag.label}
+      </div>
+    );
+  };
   
   const [visibleCount, setVisibleCount] = useState<number>(Math.min(allTags.length, 4));
   const measureRef = useRef<HTMLDivElement | null>(null);
   const overflowMeasureRef = useRef<HTMLDivElement | null>(null);
   const tagsRowRef = useRef<HTMLDivElement | null>(null);
+
+  const tagMuted = isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : '';
 
   const recomputeVisibleCount = () => {
     const container = tagsRowRef.current;
@@ -168,7 +210,7 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
       }}
     >
       {/* Header */}
-      <div className={`flex-shrink-0 mb-[16px] flex items-start justify-between ${isLocked ? 'filter grayscale' : ''}`}>
+      <div className={`flex-shrink-0 mb-[16px] flex items-start justify-between`}>
         <div className="min-w-0">
           <h3 
             className={`font-alexandria font-semibold text-[20px] mb-2 truncate`}
@@ -212,34 +254,31 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
       </div>
 
       {/* Tags Section */}
-      <div className={`mb-[16px] ${isLocked ? 'filter grayscale' : ''}`}>
+      <div className={`mb-[16px]`}>
         <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
-          {allTags.map((tag, index) => (
-            tag.type === 'gender' ? (
-              <StaticGenderTag key={`measure-${index}`} label={tag.label} className={tagMuted} />
-            ) : tag.type === 'experience' ? (
-              <StaticExperienceLevelTag key={`measure-${index}`} label={tag.label} className={tagMuted} />
-            ) : (
-              <StaticJobTypeTag key={`measure-${index}`} label={tag.label} className={tagMuted} />
-            )
-          ))}
+          {allTags.map((tag, index) => renderTag(tag, `measure-${index}`))}
         </div>
-        <div ref={overflowMeasureRef} className="fixed -top-[9999px] -left-[9999px] inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
+        <div 
+          ref={overflowMeasureRef} 
+          className="fixed -top-[9999px] -left-[9999px] inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
+          style={{
+            backgroundColor: isLocked ? (shouldUsePastelColors ? theme.colors.pastelBgLight : '#f3f4f6') : '#f3f4f6',
+            color: isLocked ? (shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af') : '#9ca3af',
+          }}
+        >
           99+
         </div>
 
         <div ref={tagsRowRef} className="flex flex-nowrap gap-1 overflow-hidden whitespace-nowrap items-center">
-          {visibleTags.map((tag, index) => (
-            tag.type === 'gender' ? (
-              <StaticGenderTag key={`tag-${index}`} label={tag.label} className={tagMuted} />
-            ) : tag.type === 'experience' ? (
-              <StaticExperienceLevelTag key={`tag-${index}`} label={tag.label} className={tagMuted} />
-            ) : (
-              <StaticJobTypeTag key={`tag-${index}`} label={tag.label} className={tagMuted} />
-            )
-          ))}
+          {visibleTags.map((tag, index) => renderTag(tag, `tag-${index}`))}
           {extraCount > 0 && (
-            <div className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
+            <div 
+              className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
+              style={{
+                backgroundColor: isLocked ? (shouldUsePastelColors ? theme.colors.pastelBgLight : '#f3f4f6') : '#f3f4f6',
+                color: isLocked ? (shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af') : '#9ca3af',
+              }}
+            >
               {extraCount}+
             </div>
           )}
@@ -249,20 +288,53 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
       {/* Footer */}
       <div className="mt-auto space-y-[16px]">
         {/* Location and Salary */}
-        <div className={`flex flex-wrap items-center gap-2 ${isLocked ? 'filter grayscale' : ''}`}>
-          <StaticLocationTag 
-            label={location} 
-            showFullAddress={false} 
-            className={`${isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} 
-          />
-          <StaticSalaryTag 
-            label={`${salary} /${salaryPeriod}`} 
-            className={`whitespace-nowrap ${isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} 
-          />
+        <div className={`flex flex-wrap items-center gap-2`}>
+          <React.Fragment key="location-tag">
+            {isLocked ? (
+              <StaticLocationTag
+                label={location}
+                showFullAddress={false}
+                iconColor={shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af'}
+                style={{
+                  backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+                  color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+                  borderRadius: '5px',
+                  padding: '0 12px',
+                  fontSize: '10px',
+                }}
+              />
+            ) : (
+              <StaticLocationTag 
+                label={location} 
+                showFullAddress={false} 
+              />
+            )}
+          </React.Fragment>
+          <React.Fragment key="salary-tag">
+            {isLocked ? (
+              <StaticSalaryTag
+                label={`${salary} /${salaryPeriod}`}
+                className="whitespace-nowrap"
+                iconColor={shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af'}
+                style={{
+                  backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+                  color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+                  borderRadius: '5px',
+                  padding: '0 12px',
+                  fontSize: '10px',
+                }}
+              />
+            ) : (
+              <StaticSalaryTag 
+                label={`${salary} /${salaryPeriod}`} 
+                className="whitespace-nowrap"
+              />
+            )}
+          </React.Fragment>
         </div>
 
         {/* Posted Date */}
-        <div className={`flex justify-start ${isLocked ? 'filter grayscale' : ''}`}>
+        <div className={`flex justify-start`}>
           <span 
             className={`font-inter font-medium text-[10px]`}
             style={{ color: textSecondaryColor }}
