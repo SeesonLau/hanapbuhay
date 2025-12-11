@@ -5,6 +5,7 @@ import { JobType, SubTypes } from '@/lib/constants/job-types';
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
 import { useTheme } from '@/hooks/useTheme';
+import { parseLocationDetailed } from '@/lib/constants/philippines-locations';
 
 interface JobPostData {
   id: string;
@@ -92,6 +93,38 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
   const firstTag = allTags[0];
   const hiddenCount = Math.max(0, allTags.length - 1);
 
+  // Determine if we should use pastel colors (non-classic themes) or gray (classic theme)
+  const shouldUsePastelColors = theme.name !== 'classic';
+
+  // Render tag with theme-based styling when locked
+  const renderTag = (tag: typeof allTags[0], key: string) => {
+    const baseTag = tag.type === 'gender' ? (
+      <StaticGenderTag label={tag.label} />
+    ) : tag.type === 'experience' ? (
+      <StaticExperienceLevelTag label={tag.label} />
+    ) : (
+      <StaticJobTypeTag label={tag.label} />
+    );
+
+    if (!isLocked) return baseTag;
+
+    return (
+      <div key={key} style={{
+        backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+        color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+        display: 'inline-flex',
+        borderRadius: '5px',
+        padding: '0 12px',
+        height: '17px',
+        fontSize: '10px',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        {tag.label}
+      </div>
+    );
+  };
+
   const listBgColor = isLocked ? theme.colors.backgroundSecondary : theme.colors.cardBg;
   const listBorderColor = isLocked ? theme.colors.borderLight : theme.colors.cardBorder;
   const titleColor = isLocked ? theme.colors.textMuted : theme.colors.text;
@@ -126,7 +159,7 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
         className="grid items-center h-full gap-6 grid-cols-2 tablet:grid-cols-4 laptop:grid-cols-3 laptop-L:grid-cols-5"
       >
         {/* Title */}
-        <div className={`min-w-0 flex items-center mobile-S:max-w-[150px] ${isLocked ? 'filter grayscale' : ''}`}>
+        <div className={`min-w-0 flex items-center mobile-S:max-w-[150px]`}>
           <h3 
             className="font-alexandria font-semibold text-[15px] truncate"
             style={{ color: titleColor }}
@@ -135,32 +168,50 @@ export const ManageJobPostList: React.FC<ManageJobPostListProps> = ({
           </h3>
         </div>
 
-        <div className={`min-w-0 hidden tablet:block ${isLocked ? 'filter grayscale' : ''}`}>
+        <div className={`min-w-0 hidden tablet:block`}>
           <div className="flex items-center gap-2 whitespace-nowrap overflow-hidden">
-            {firstTag && (
-              firstTag.type === 'gender' ? (
-                <StaticGenderTag label={firstTag.label} className={isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''} />
-              ) : firstTag.type === 'experience' ? (
-                <StaticExperienceLevelTag label={firstTag.label} className={isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''} />
-              ) : (
-                <StaticJobTypeTag label={firstTag.label} className={isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''} />
-              )
-            )}
+            {firstTag && renderTag(firstTag, 'first-tag')}
             {hiddenCount > 0 && (
-              <div className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">+{hiddenCount}</div>
+              <div 
+                className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
+                style={{
+                  backgroundColor: isLocked ? (shouldUsePastelColors ? theme.colors.pastelBgLight : '#f3f4f6') : '#f3f4f6',
+                  color: isLocked ? (shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af') : '#9ca3af',
+                }}
+              >
+                +{hiddenCount}
+              </div>
             )}
           </div>
         </div>
 
         {/* Salary - Laptop-L (1440px) only */}
-        <div className={`hidden laptop-L:flex items-center gap-3 flex-1 ${isLocked ? 'filter grayscale' : ''}`}>
+        <div className={`hidden laptop-L:flex items-center gap-3 flex-1`}>
           <div className="w-[140px] min-w-[140px] max-w-[140px] overflow-hidden">
-            <StaticSalaryTag label={`${salary} /${salaryPeriod}`} className={`whitespace-nowrap ${isLocked ? 'text-gray-neutral600 bg-gray-neutral100' : ''} w-full`} />
+            {isLocked ? (
+              <StaticSalaryTag 
+                label={`${salary} /${salaryPeriod}`} 
+                className={`whitespace-nowrap w-full`} 
+                iconColor={shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af'}
+                style={{
+                  backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+                  color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+                  borderRadius: '5px',
+                  padding: '0 12px',
+                  fontSize: '10px',
+                }}
+              />
+            ) : (
+              <StaticSalaryTag 
+                label={`${salary} /${salaryPeriod}`} 
+                className={`whitespace-nowrap w-full`} 
+              />
+            )}
           </div>
         </div>
 
         {/* Date Posted - Tablet and Laptop-L; hidden at Laptop */}
-        <div className={`hidden tablet:flex laptop:hidden laptop-L:flex flex-shrink-0 ${isLocked ? 'filter grayscale' : ''}`}>
+        <div className={`hidden tablet:flex laptop:hidden laptop-L:flex flex-shrink-0`}>
           <span 
             className="font-inter text-[10px] whitespace-nowrap"
             style={{ color: dateColor }}
