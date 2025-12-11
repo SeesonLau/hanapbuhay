@@ -63,6 +63,7 @@ export interface TextBoxProps extends Omit<React.InputHTMLAttributes<HTMLInputEl
   iconSize?: 'sm' | 'md' | number;
   /** Visual variant: 'default' or 'glassmorphism' */
   variant?: 'default' | 'glassmorphism';
+  hideRequiredAsterisk?: boolean;
 }
 
 const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
@@ -89,6 +90,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
   showLoadingIcon = false,
   iconSize = 'md',
   variant = 'default',
+  hideRequiredAsterisk,
   placeholder,
   value,
   defaultValue,
@@ -254,7 +256,7 @@ const TextBox = forwardRef<HTMLInputElement, TextBoxProps>(({
       {label && (
         <label className={labelClasses} style={labelStyle}>
           {label}
-          {required && (
+          {required && !hideRequiredAsterisk && (
             <span style={{ color: variant === 'glassmorphism' ? '#fca5a5' : theme.colors.error }}>*</span>
           )}
         </label>
