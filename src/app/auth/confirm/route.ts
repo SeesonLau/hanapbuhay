@@ -1,14 +1,15 @@
+// app/auth/confirm/route.ts
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams, origin } = new URL(request.url);
     const token_hash = searchParams.get('token_hash');
     const type = searchParams.get('type') as 'signup' | 'email' | 'recovery' | 'invite' | 'email_change' | 'magiclink' | null;
 
-    console.log('Email verification attempt:', { token_hash: !!token_hash, type });
+    console.log('Auth confirm - params:', { token_hash: !!token_hash, type });
 
     if (!token_hash || !type) {
       return NextResponse.redirect(
@@ -39,26 +40,31 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    const { error } = await supabase.auth.verifyOtp({
+    // Verify the OTP token and establish session
+    const { data, error } = await supabase.auth.verifyOtp({
       token_hash,
       type,
     });
 
     if (error) {
-      console.error('Email verification error:', error);
+      console.error('Token verification error:', error);
       return NextResponse.redirect(
         new URL(`/login?error=${encodeURIComponent(error.message || 'Verification failed')}`, request.url)
       );
     }
 
-    // Determine redirect based on type
+    console.log('✅ Token verified successfully', { hasSession: !!data.session, type });
+
+    // Handle different verification types
     if (type === 'recovery') {
+      // For password recovery, redirect to reset password page
+      // Session is already established by verifyOtp
       return NextResponse.redirect(
-        new URL('/reset-password?message=You+can+now+reset+your+password', request.url)
+        new URL('/reset-password?verified=true', request.url)
       );
     }
 
-    // For signup, email verification, etc.
+    // For signup/email verification
     return NextResponse.redirect(
       new URL('/login?message=Email+verified+successfully!+You+can+now+sign+in.', request.url)
     );
