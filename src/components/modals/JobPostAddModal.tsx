@@ -11,13 +11,14 @@ import Button from "@/components/ui/Button";
 import { Gender, getGenderOptions } from "@/lib/constants/gender";
 import { ExperienceLevel, getExperienceOptions } from "@/lib/constants/experience-level";
 import { getJobTypeOptions, SubTypes } from "@/lib/constants/job-types";
-import { SALARY_TYPES } from "@/lib/constants/salary-type";
+import { SALARY_TYPE } from "@/lib/constants/salary-type";
 import type { JobType } from "@/lib/constants/job-types";
 import { GenderTag, ExperienceLevelTag, JobTypeTag } from "@/components/ui/TagItem";
 import JobTypeGrid from "@/components/ui/JobTypeGrid";
 import { getProvinces, getCitiesByProvince } from "@/lib/constants/philippines-locations";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/hooks/useLanguage";
+import { set } from "date-fns";
 
 export interface JobPostAddFormData {
   title: string;
@@ -29,7 +30,7 @@ export interface JobPostAddFormData {
   city: string;
   address: string;
   salary: string;
-  salary_type: string;
+  salaryType: string;
   about: string;
   qualifications: string;
 }
@@ -53,7 +54,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [salary, setSalary] = useState("");
-  const [salary_type, setSalary_type] = useState(SALARY_TYPES[0].value);
+  const [salaryType, setSalaryType] = useState(SALARY_TYPE[0].value);
   const [about, setAbout] = useState("");
   const [qualifications, setQualifications] = useState("");
   const [requirementsList, setRequirementsList] = useState<string[]>([""]);
@@ -70,7 +71,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
     setCity("");
     setAddress("");
     setSalary("");
-    setSalary_type(SALARY_TYPES[0].value);
+    setSalaryType(SALARY_TYPE[0].value);
     setAbout("");
     setQualifications("");
     setRequirementsList([""]);
@@ -172,7 +173,7 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
       city,
       address: address.trim(),
       salary: salary.trim(),
-      salary_type: salary_type,
+      salaryType: salaryType,
       about: about.trim(),
       qualifications: requirementsList
         .filter((s) => s.trim().length > 0)
@@ -492,9 +493,9 @@ export default function JobPostAddModal({ isOpen, onClose, onSubmit }: JobPostAd
           />
           <SelectBox 
             width="180px"
-            options={SALARY_TYPES}
-            value={salary_type}
-            onChange={(e) => setSalary_type(e.target.value)}
+            options={SALARY_TYPE}
+            value={salaryType}
+            onChange={(e) => setSalaryType(e.target.value)}
             required
           />
             </div>

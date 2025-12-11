@@ -188,7 +188,7 @@ export default function ManageJobPostsPage() {
           title: data.title ?? selectedPost.title,
           description: combinedDescription,
           price: data.salary ? Number(String(data.salary).replace(/[^0-9.-]+/g, '')) : (selectedPost.price ?? 0),
-          salary_type: data.salary_type,
+          salaryType: data.salaryType,
           subType: Array.from(new Set([
             ...((data.subTypes ?? (data.jobTypes ?? selectedPost.subType)) || []),
             ...((data.experienceLevels ?? []) as string[]),
@@ -222,7 +222,7 @@ export default function ManageJobPostsPage() {
             title: data.title ?? "",
             description: combinedDescription,
             price: data.salary ? Number(String(data.salary).replace(/[^0-9.-]+/g, '')) : 0,
-            salary_type: data.salary_type,
+            salaryType: data.salaryType,
             type: (data.jobTypes && data.jobTypes[0]) || (data.subTypes && data.subTypes[0]) || 'other',
             subType: Array.from(new Set([
               ...((data.subTypes ?? (data.jobTypes ?? [])) || []),

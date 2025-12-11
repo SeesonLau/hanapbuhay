@@ -5,7 +5,7 @@ import { toast } from "react-hot-toast";
 import { PostService } from "@/lib/services/posts-services";
 import { ApplicationService } from "@/lib/services/applications-services";
 import type { Post } from "@/lib/models/posts";
-import { SALARY_TYPES } from "@/lib/constants/salary-type";
+import { SALARY_TYPE } from "@/lib/constants/salary-type";
 import { Gender } from "@/lib/constants/gender";
 import { ExperienceLevel } from "@/lib/constants/experience-level";
 import { JobType, SubTypes } from "@/lib/constants/job-types";
@@ -157,7 +157,7 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
          .filter(s => !genderTags.includes(s) && !experienceTags.includes(s))
     ));
     const jobTypeTags = Array.from(new Set([post.type, ...jobSubtypeTags].filter(Boolean)));
-    const salaryTypeLabel = SALARY_TYPES.find(st => st.value === post.salary_type)?.label || '';
+    const salaryTypeLabel = SALARY_TYPE.find(st => st.value === post.salaryType)?.label || '';
     return {
       id: post.postId,
       title: post.title,
