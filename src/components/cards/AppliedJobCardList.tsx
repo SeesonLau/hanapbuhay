@@ -11,6 +11,7 @@ import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
 import { useTheme } from '@/hooks/useTheme';
 import { useLanguage } from '@/hooks/useLanguage';
+import { parseLocationDetailed } from '@/lib/constants/philippines-locations';
 
 export type ApplicationStatus = 'pending' | 'approved' | 'rejected';
 
@@ -199,6 +200,48 @@ export default function AppliedJobCard({
   const visibleTags = allTags.slice(0, Math.max(0, visibleCount));
   const extraCount = Math.max(0, allTags.length - visibleTags.length);
 
+  // Determine if we should use pastel colors (non-classic themes) or gray (classic theme)
+  const shouldUsePastelColors = theme.name !== 'classic';
+
+  // Format location with comma (e.g., "Cebu, Cebu City")
+  const formatLocationWithComma = (locationString: string): string => {
+    const { province, city, address } = parseLocationDetailed(locationString);
+    let formatted = '';
+    if (province) formatted += province;
+    if (city) formatted += (formatted ? ', ' : '') + city;
+    if (address) formatted += (formatted ? ', ' : '') + address;
+    return formatted || locationString;
+  };
+
+  // Render tag with theme-based styling when muted
+  const renderTag = (tag: typeof allTags[0], key: string) => {
+    const baseTag = tag.type === 'gender' ? (
+      <StaticGenderTag label={tag.label} />
+    ) : tag.type === 'experience' ? (
+      <StaticExperienceLevelTag label={tag.label} />
+    ) : (
+      <StaticJobTypeTag label={tag.label} />
+    );
+
+    if (!isMuted) return baseTag;
+
+    return (
+      <div key={key} style={{
+        backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+        color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+        display: 'inline-flex',
+        borderRadius: '5px',
+        padding: '0 12px',
+        height: '17px',
+        fontSize: '10px',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        {tag.label}
+      </div>
+    );
+  };
+
   if (variant === 'list') {
     return (
       <div
@@ -234,30 +277,46 @@ export default function AppliedJobCard({
           </div>
 
           <div className="min-w-0 hidden tablet:block">
-            <div className={`flex items-center gap-2 whitespace-nowrap overflow-hidden ${isMuted ? 'filter grayscale' : ''}`}>
-              {firstTag && (
-                firstTag.type === 'gender' ? (
-                  <StaticGenderTag label={firstTag.label} />
-                ) : firstTag.type === 'experience' ? (
-                  <StaticExperienceLevelTag label={firstTag.label} />
-                ) : (
-                  <StaticJobTypeTag label={firstTag.label} />
-                )
-              )}
+            <div className={`flex items-center gap-2 whitespace-nowrap overflow-hidden`}>
+              {firstTag && renderTag(firstTag, 'first-tag')}
               {hiddenCount > 0 && (
-                <div className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
+                <div 
+                  className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
+                  style={{
+                    backgroundColor: isMuted ? (shouldUsePastelColors ? theme.colors.pastelBgLight : '#f3f4f6') : '#f3f4f6',
+                    color: isMuted ? (shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af') : '#9ca3af',
+                  }}
+                >
                   +{hiddenCount}
                 </div>
               )}
             </div>
           </div>
 
-          <div className={`hidden laptop-L:flex items-center gap-3 flex-1 ${isMuted ? 'filter grayscale' : ''}`}>
+          <div className={`hidden laptop-L:flex items-center gap-3 flex-1`}>
             <div className="w-[140px] min-w-[140px] max-w-[140px] overflow-hidden">
-              <StaticSalaryTag 
-                label={`${job.salary} /${job.salaryPeriod}`} 
-                className={`whitespace-nowrap w-full ${isMuted ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} 
-              />
+              {isMuted ? (
+                <div style={{
+                  backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+                  color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+                  display: 'inline-flex',
+                  borderRadius: '5px',
+                  padding: '0 12px',
+                  height: '17px',
+                  fontSize: '10px',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  whiteSpace: 'nowrap',
+                  width: '100%',
+                }}>
+                  {`${job.salary} /${job.salaryPeriod}`}
+                </div>
+              ) : (
+                <StaticSalaryTag 
+                  label={`${job.salary} /${job.salaryPeriod}`} 
+                  className="whitespace-nowrap w-full"
+                />
+              )}
             </div>
           </div>
 
@@ -271,10 +330,25 @@ export default function AppliedJobCard({
           </div>
 
           <div className="flex-shrink-0 justify-self-end flex items-center gap-3 justify-end">
-            <div className={`flex items-center gap-1 px-2 py-1 rounded-md ${displayStatus.bgColor} ${displayStatus.textColor}`}>
-              <displayStatus.icon className="w-3 h-3" />
-              <span className="font-inter text-[10px] font-medium">{displayStatus.text}</span>
-            </div>
+            {isMuted ? (
+              <div 
+                className="flex items-center gap-1 px-2 py-1 rounded-md"
+                style={{
+                  backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+                  color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+                }}
+              >
+                <displayStatus.icon className="w-3 h-3" />
+                <span className="font-inter text-[10px] font-medium">{displayStatus.text}</span>
+              </div>
+            ) : (
+              <div 
+                className={`flex items-center gap-1 px-2 py-1 rounded-md ${displayStatus.bgColor} ${displayStatus.textColor}`}
+              >
+                <displayStatus.icon className="w-3 h-3" />
+                <span className="font-inter text-[10px] font-medium">{displayStatus.text}</span>
+              </div>
+            )}
 
             {onDelete && (
               <button
@@ -282,7 +356,14 @@ export default function AppliedJobCard({
                   e.stopPropagation();
                   handleDelete();
                 }}
-                className="p-1.5 text-error-error500 hover:text-error-error600 hover:bg-error-error50 rounded-md transition-colors"
+                className="p-1.5 rounded-md transition-colors"
+                style={isMuted ? {
+                  color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+                  backgroundColor: shouldUsePastelColors ? theme.colors.pastelBgLight : '#f3f4f6',
+                } : {
+                  color: '#ef4444',
+                  backgroundColor: 'transparent',
+                }}
                 title={t.jobs.appliedJobs.withdrawApplication}
               >
                 <RiDeleteBin6Line className="w-4 h-4" />
@@ -316,7 +397,7 @@ export default function AppliedJobCard({
         }
       }}
     >
-      <div className={`flex-shrink-0 mb-[16px] flex items-start justify-between gap-2 ${isMuted ? 'filter grayscale' : ''}`}>
+      <div className={`flex-shrink-0 mb-[16px] flex items-start justify-between gap-2`}>
         <div className="min-w-0 flex-1">
           <h3 
             className="font-alexandria font-semibold text-[20px] truncate"
@@ -339,8 +420,13 @@ export default function AppliedJobCard({
                 e.stopPropagation();
                 handleDelete();
               }}
-              style={{ display: 'flex' }}
-              className="laptop:!hidden z-10 flex-shrink-0 bg-white border-2 border-error-error500 text-error-error500 rounded-full w-6 h-6 items-center justify-center hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-md leading-none text-xl font-medium"
+              className="laptop:!hidden z-10 flex-shrink-0 border-2 rounded-full w-6 h-6 items-center justify-center hover:bg-error-error50 shadow-md leading-none text-xl font-medium"
+              style={{
+                display: 'flex',
+                backgroundColor: isMuted ? (shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb') : 'white',
+                borderColor: isMuted ? (shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af') : '#ef4444',
+                color: isMuted ? (shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af') : '#ef4444',
+              }}
               title="Withdraw application"
             >
               −
@@ -350,7 +436,12 @@ export default function AppliedJobCard({
                 e.stopPropagation();
                 handleDelete();
               }}
-              className="hidden laptop:!flex z-10 flex-shrink-0 bg-white border-2 border-error-error500 text-error-error500 rounded-full w-6 h-6 items-center justify-center hover:bg-error-error50 hover:border-error-error600 hover:text-error-error600 shadow-md leading-none text-xl font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+              className="hidden laptop:!flex z-10 flex-shrink-0 border-2 rounded-full w-6 h-6 items-center justify-center shadow-md leading-none text-xl font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{
+                backgroundColor: isMuted ? (shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb') : 'white',
+                borderColor: isMuted ? (shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af') : '#ef4444',
+                color: isMuted ? (shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af') : '#ef4444',
+              }}
               title="Withdraw application"
             >
               −
@@ -359,34 +450,31 @@ export default function AppliedJobCard({
         )}
       </div>
 
-      <div className={`mb-[16px] ${isMuted ? 'filter grayscale' : ''}`}>
+      <div className="mb-[16px]">
         <div ref={measureRef} className="fixed -top-[9999px] -left-[9999px] flex flex-nowrap gap-1">
-          {allTags.map((tag, index) => (
-            tag.type === 'gender' ? (
-              <StaticGenderTag key={`measure-${index}`} label={tag.label} />
-            ) : tag.type === 'experience' ? (
-              <StaticExperienceLevelTag key={`measure-${index}`} label={tag.label} />
-            ) : (
-              <StaticJobTypeTag key={`measure-${index}`} label={tag.label} />
-            )
-          ))}
+          {allTags.map((tag, index) => renderTag(tag, `measure-${index}`))}
         </div>
-        <div ref={overflowMeasureRef} className="fixed -top-[9999px] -left-[9999px] inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
+        <div 
+          ref={overflowMeasureRef} 
+          className="fixed -top-[9999px] -left-[9999px] inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
+          style={{
+            backgroundColor: isMuted ? (shouldUsePastelColors ? theme.colors.pastelBgLight : '#f3f4f6') : '#f3f4f6',
+            color: isMuted ? (shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af') : '#9ca3af',
+          }}
+        >
           99+
         </div>
 
-        <div ref={tagsRowRef} className={`flex flex-nowrap gap-1 overflow-hidden whitespace-nowrap items-center ${isMuted ? 'filter grayscale' : ''}`}>
-          {visibleTags.map((tag, index) => (
-            tag.type === 'gender' ? (
-              <StaticGenderTag key={`tag-${index}`} label={tag.label} />
-            ) : tag.type === 'experience' ? (
-              <StaticExperienceLevelTag key={`tag-${index}`} label={tag.label} />
-            ) : (
-              <StaticJobTypeTag key={`tag-${index}`} label={tag.label} />
-            )
-          ))}
+        <div ref={tagsRowRef} className={`flex flex-nowrap gap-1 overflow-hidden whitespace-nowrap items-center`}>
+          {visibleTags.map((tag, index) => renderTag(tag, `tag-${index}`))}
           {extraCount > 0 && (
-            <div className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px] bg-gray-neutral100 text-gray-neutral400">
+            <div 
+              className="inline-flex items-center justify-center px-2 h-[17px] rounded-[5px] text-[10px]"
+              style={{
+                backgroundColor: isMuted ? (shouldUsePastelColors ? theme.colors.pastelBgLight : '#f3f4f6') : '#f3f4f6',
+                color: isMuted ? (shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af') : '#9ca3af',
+              }}
+            >
               {extraCount}+
             </div>
           )}
@@ -394,16 +482,48 @@ export default function AppliedJobCard({
       </div>
 
       <div className="mt-auto space-y-[16px]">
-        <div className={`flex flex-wrap items-center gap-2 ${isMuted ? 'filter grayscale' : ''}`}>
-          <StaticLocationTag 
-            label={job.location} 
-            showFullAddress={false} 
-            className={`${isMuted ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} 
-          />
-          <StaticSalaryTag 
-            label={`${job.salary} /${job.salaryPeriod}`} 
-            className={`whitespace-nowrap ${isMuted ? 'text-gray-neutral600 bg-gray-neutral100' : ''}`} 
-          />
+        <div className={`flex flex-wrap items-center gap-2`}>
+          {isMuted ? (
+            <div style={{
+              backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+              color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+              display: 'inline-flex',
+              borderRadius: '5px',
+              padding: '0 12px',
+              height: '25px',
+              fontSize: '10px',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              {formatLocationWithComma(job.location)}
+            </div>
+          ) : (
+            <StaticLocationTag 
+              label={job.location} 
+              showFullAddress={false} 
+            />
+          )}
+          {isMuted ? (
+            <div style={{
+              backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+              color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+              display: 'inline-flex',
+              borderRadius: '5px',
+              padding: '0 12px',
+              height: '17px',
+              fontSize: '10px',
+              alignItems: 'center',
+              justifyContent: 'center',
+              whiteSpace: 'nowrap',
+            }}>
+              {`${job.salary} /${job.salaryPeriod}`}
+            </div>
+          ) : (
+            <StaticSalaryTag 
+              label={`${job.salary} /${job.salaryPeriod}`} 
+              className="whitespace-nowrap"
+            />
+          )}
         </div>
 
         <div className="flex items-center justify-between">
@@ -413,10 +533,25 @@ export default function AppliedJobCard({
           >
             Applied on: {job.appliedOn}
           </span>
-          <div className={`flex items-center gap-1 px-3 py-1 rounded-md ${displayStatus.bgColor} ${displayStatus.textColor}`}>
-            <displayStatus.icon className="w-4 h-4" />
-            <span className="font-inter text-tiny font-medium">{displayStatus.text}</span>
-          </div>
+          {isMuted ? (
+            <div 
+              className="flex items-center gap-1 px-3 py-1 rounded-md"
+              style={{
+                backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+                color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+              }}
+            >
+              <displayStatus.icon className="w-4 h-4" />
+              <span className="font-inter text-tiny font-medium">{displayStatus.text}</span>
+            </div>
+          ) : (
+            <div 
+              className={`flex items-center gap-1 px-3 py-1 rounded-md ${displayStatus.bgColor} ${displayStatus.textColor}`}
+            >
+              <displayStatus.icon className="w-4 h-4" />
+              <span className="font-inter text-tiny font-medium">{displayStatus.text}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
