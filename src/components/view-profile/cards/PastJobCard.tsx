@@ -7,6 +7,7 @@ interface PastJobCardProps {
   address: string;
   hiredDate: string | Date;
   className?: string;
+  userType?: 'applicant' | 'employer';
 }
 
 // Helper function to format location
@@ -23,7 +24,14 @@ function formatLocation(address: string): string {
   return address;
 }
 
-export default function PastJobCard({ postId, title, address, hiredDate, className = '' }: PastJobCardProps) {
+export default function PastJobCard({ 
+  postId, 
+  title, 
+  address, 
+  hiredDate, 
+  className = '', 
+  userType = 'applicant' 
+}: PastJobCardProps) {
   const dateString =
     hiredDate instanceof Date ? hiredDate.toLocaleDateString() : new Date(hiredDate).toLocaleDateString();
   
@@ -54,9 +62,11 @@ export default function PastJobCard({ postId, title, address, hiredDate, classNa
         <p className="font-alexandria text-gray-neutral600 truncate tiny">{formattedLocation}</p>
       </div>
 
-      {/* Hired Date */}
+      {/* Hired/Post Date */}
       <div className="flex items-center text-mini text-gray-neutral500 whitespace-nowrap">
-        <span className="font-inter font-medium mr-1">Hired Date:</span>
+        <span className="font-inter font-medium mr-1">
+          {userType === 'employer' ? 'Posted Date:' : 'Hired Date:'}
+        </span>
         <time dateTime={new Date(hiredDate).toISOString()}>{dateString}</time>
       </div>
     </article>

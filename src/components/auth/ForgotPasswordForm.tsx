@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import TextBox from '@/components/ui/TextBox';
 import Image from 'next/image';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface ForgotPasswordFormProps {
   onBackToLogin?: () => void;
@@ -15,9 +16,10 @@ interface ForgotPasswordFormProps {
 
 const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ 
   onBackToLogin, 
-  onLoadingChange 
+  onLoadingChange
 }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -31,12 +33,12 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
     try {
       const result = await AuthService.forgotPassword(email);
       if (result.success) {
-        setMessage('Password reset instructions have been sent to your email.');
+        setMessage(t.auth.forgotPassword.success);
       } else {
-        setMessage(result.message || 'Failed to send reset instructions. Please try again.');
+        setMessage(result.message || t.auth.forgotPassword.errors.userNotFound);
       }
     } catch (error) {
-      setMessage('An error occurred. Please try again.');
+      setMessage(t.common.messages.errorOccurred);
     } finally {
       setLoading(false);
       onLoadingChange?.(false);
@@ -61,12 +63,12 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
 
       {/* Title */}
       <h2 className="text-h3 tablet: text-h2 font-bold text-white text-center mb-2 font-alexandria">
-        Forgot Password?
+        {t.auth.forgotPassword.title}
       </h2>
 
       {/* Subtitle */}
       <p className="text-small sm:text-body text-gray-300 text-center mb-6 sm:mb-8 font-alexandria font-light">
-        Enter your email address and we'll send you reset instructions!
+        {t.auth.forgotPassword.subtitle}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
@@ -92,17 +94,17 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
         <div>
           <TextBox
             type="email"
-            label="Email"
+            label={t.auth.forgotPassword.emailLabel}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
+            placeholder={t.auth.forgotPassword.emailPlaceholder}
             variant="glassmorphism"
           />
         </div>
 
         {/* Send Code Button */}
         <Button
-          type="submit"      
+          type="submit"
           disabled={loading}
           className="w-full justify-center text-body font-semibold"
           isLoading={loading}
@@ -111,7 +113,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
           fullRounded={true}
           useCustomHover={true}
         >
-          {loading ? 'Sending...' : 'Send Reset Instructions'}
+          {loading ? `${t.auth.forgotPassword.sendButton}...` : t.auth.forgotPassword.sendButton}
         </Button>
       </form>
     </div>

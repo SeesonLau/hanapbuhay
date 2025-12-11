@@ -4,6 +4,7 @@ import '../app/global.css'
 import { Toaster } from 'react-hot-toast'
 import { SupabaseHashHandler } from '@/components/auth/SupabaseHashHandler';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
 export const metadata: Metadata = {
   title: 'Hanapbuhay',
@@ -22,11 +23,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${alexandria.variable}`} >
       <body className="min-h-screen relative" suppressHydrationWarning>
-        <ThemeProvider>
-          <Toaster position="top-center" />
-          <SupabaseHashHandler />
-          {children}
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <Toaster position="top-center" />
+            <SupabaseHashHandler />
+            {children}
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   )

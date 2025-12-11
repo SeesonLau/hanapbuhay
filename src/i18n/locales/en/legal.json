@@ -1,0 +1,132 @@
+{
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: December 5, 2025",
+    "introduction": {
+      "title": "Introduction",
+      "content": "Welcome to HanapBuhay. We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform."
+    },
+    "informationWeCollect": {
+      "title": "Information We Collect",
+      "description": "We collect information that you provide directly to us, including:",
+      "items": [
+        "Account information (name, email, password)",
+        "Profile information (skills, experience, location)",
+        "Job posting details and applications",
+        "Communications between users",
+        "Ratings and reviews"
+      ]
+    },
+    "howWeUse": {
+      "title": "How We Use Your Information",
+      "description": "We use the information we collect to:",
+      "items": [
+        "Provide, maintain, and improve our services",
+        "Connect workers with clients in their local community",
+        "Process job applications and facilitate communication",
+        "Send notifications about job opportunities and updates",
+        "Ensure the security and integrity of our platform",
+        "Respond to your inquiries and provide customer support"
+      ]
+    },
+    "informationSharing": {
+      "title": "Information Sharing",
+      "description": "We do not sell your personal information. We may share your information only in the following circumstances:",
+      "items": [
+        "With other users as necessary to facilitate job connections",
+        "With service providers who assist in operating our platform",
+        "When required by law or to protect our rights",
+        "With your consent"
+      ]
+    },
+    "dataSecurity": {
+      "title": "Data Security",
+      "content": "We implement appropriate technical and organizational security measures to protect your personal information. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security."
+    },
+    "yourRights": {
+      "title": "Your Rights",
+      "description": "You have the right to:",
+      "items": [
+        "Access and update your personal information",
+        "Delete your account and associated data",
+        "Opt-out of marketing communications",
+        "Request a copy of your data"
+      ]
+    },
+    "contactUs": {
+      "title": "Contact Us",
+      "content": "If you have questions about this Privacy Policy, please contact us at",
+      "email": "support@hanapbuhay.com"
+    }
+  },
+  "faqs": {
+    "title": "Frequently Asked Questions",
+    "categories": {
+      "general": "General",
+      "workers": "For Workers",
+      "clients": "For Clients",
+      "account": "Account & Settings"
+    },
+    "general": {
+      "whatIs": {
+        "question": "What is HanapBuhay?",
+        "answer": "HanapBuhay is a platform that connects local clients with skilled workers and freelancers in their community. Whether you need help with home repairs, digital services, or any skilled work, HanapBuhay makes it easy to find trusted professionals nearby."
+      },
+      "isFree": {
+        "question": "Is HanapBuhay free to use?",
+        "answer": "Yes! Creating an account and browsing job listings is completely free. Workers can apply to jobs at no cost, and clients can post jobs without any fees. We believe in making local job connections accessible to everyone."
+      },
+      "ratingSystem": {
+        "question": "How does the rating system work?",
+        "answer": "After completing a job, both clients and workers can leave ratings and reviews for each other. Ratings are on a 5-star scale and help build trust within the community. Higher-rated users are more likely to be chosen for jobs."
+      }
+    },
+    "workers": {
+      "findJobs": {
+        "question": "How do I find jobs on HanapBuhay?",
+        "answer": "After creating your account, go to the \"Find Jobs\" section. You can browse available jobs, filter by category, location, and salary range. When you find a job that matches your skills, simply click \"Apply\" and wait for the client to respond."
+      },
+      "standOut": {
+        "question": "How do I make my profile stand out?",
+        "answer": "Complete your profile with detailed information about your skills and experience. Add any certifications or past work examples. Maintain a good rating by providing quality service, and always communicate professionally with clients."
+      },
+      "multipleCategories": {
+        "question": "Can I work in multiple job categories?",
+        "answer": "Absolutely! You can add multiple skills to your profile and apply to jobs across different categories. This increases your chances of finding work that matches your abilities."
+      }
+    },
+    "clients": {
+      "postJob": {
+        "question": "How do I post a job?",
+        "answer": "Click on \"Post a Job\" or go to \"Manage Job Posts\" in your dashboard. Fill in the job details including title, description, required skills, location, and your budget. Once posted, workers in your area can view and apply to your job."
+      },
+      "chooseWorker": {
+        "question": "How do I choose the right worker?",
+        "answer": "Review applicants' profiles, including their skills, experience, and ratings from previous clients. You can also check their completed projects and reviews. Take your time to find someone who best fits your needs."
+      },
+      "notSatisfied": {
+        "question": "What if I'm not satisfied with the work?",
+        "answer": "We encourage open communication between clients and workers. If issues arise, try to resolve them directly first. You can leave an honest review after the job is completed. For serious concerns, contact our support team."
+      }
+    },
+    "account": {
+      "resetPassword": {
+        "question": "How do I reset my password?",
+        "answer": "Click on \"Forgot Password\" on the login page. Enter your email address, and we'll send you a link to reset your password. Make sure to check your spam folder if you don't see the email."
+      },
+      "deleteAccount": {
+        "question": "Can I delete my account?",
+        "answer": "Yes, you can delete your account through your profile settings. Please note that this action is permanent and will remove all your data, including job history, reviews, and messages."
+      },
+      "updateProfile": {
+        "question": "How do I update my profile information?",
+        "answer": "Go to your Profile page and click \"Edit Profile\". You can update your personal information, skills, experience, and profile picture. Remember to save your changes before leaving the page."
+      }
+    },
+    "contactSupport": {
+      "cantFind": "Can't find what you're looking for?",
+      "contactUs": "Contact us at",
+      "email": "support@hanapbuhay.com"
+    }
+  }
+}

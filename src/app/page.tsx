@@ -14,6 +14,7 @@ import {
   fontClasses
 } from '@/styles';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 import {
   SpringParticle,
   createSpringParticle,
@@ -50,6 +51,7 @@ export default function HomePage() {
   const heroRef = useRef(null);
   const router = useRouter();
   const { theme, themeName } = useTheme();
+  const { t } = useLanguage();
   const { scrollYProgress } = useScroll();
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -301,14 +303,14 @@ export default function HomePage() {
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >
-                Find Your Next{' '}
-                <span 
+                {t.home.hero.title}{' '}
+                <span
                   className="bg-clip-text text-transparent"
                   style={{
                     backgroundImage: `linear-gradient(to right, ${theme.landing.headingGradientStart}, ${theme.landing.headingGradientMid}, ${theme.landing.headingGradientEnd})`
                   }}
                 >
-                  Opportunity
+                  {t.home.hero.titleHighlight}
                 </span>
               </motion.h1>
 
@@ -323,7 +325,7 @@ export default function HomePage() {
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >
-                Connect with opportunities that matter. Whether you're seeking work or offering it, HanapBuhay makes finding the perfect match effortless and rewarding.
+                {t.home.hero.description}
               </motion.p>
 
               {/* CTA Buttons */}
@@ -354,7 +356,7 @@ export default function HomePage() {
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  Get Started
+                  {t.common.buttons.getStarted}
                 </motion.button>
                 <motion.button
                   onClick={() => router.push('/login')}
@@ -375,7 +377,7 @@ export default function HomePage() {
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  Sign In
+                  {t.common.buttons.signIn}
                 </motion.button>
               </motion.div>
             </motion.div>

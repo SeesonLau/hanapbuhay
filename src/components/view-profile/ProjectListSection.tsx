@@ -9,17 +9,26 @@ import { Project } from "@/lib/models/profile";
 
 interface ProjectListSectionProps {
   userId: string;
+  projectsData?: Project[];
 }
 
-export default function ProjectListSection({ userId }: ProjectListSectionProps) {
+export default function ProjectListSection({ userId, projectsData: externalProjectsData }: ProjectListSectionProps) {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!externalProjectsData);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isScrollable, setIsScrollable] = useState(false);
   const [isAtEnd, setIsAtEnd] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
+    // If data is provided externally, use it directly
+    if (externalProjectsData) {
+      setProjects(externalProjectsData);
+      setLoading(false);
+      return;
+    }
+
+    // Otherwise, fetch the data
     const fetchProjects = async () => {
       try {
         setLoading(true);
@@ -33,7 +42,7 @@ export default function ProjectListSection({ userId }: ProjectListSectionProps) 
     };
 
     fetchProjects();
-  }, [userId]);
+  }, [userId, externalProjectsData]);
 
   useEffect(() => {
     const el = scrollRef.current;

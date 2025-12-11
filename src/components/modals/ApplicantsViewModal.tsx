@@ -9,6 +9,7 @@ import SearchBar from '@/components/ui/SearchBar';
 import Sort from '../ui/Sort';
 import { DropdownOption } from '../ui/Dropdown';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface ApplicantsModalProps {
   postId?: string;
@@ -29,6 +30,7 @@ export default function ApplicantsModal({
   applicantCount = 0 
 }: ApplicantsModalProps) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [newApplicantsSort, setNewApplicantsSort] = useState<SortOrder>('newest');
   const [allApplicantsSort, setAllApplicantsSort] = useState<SortOrder>('newest');
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,7 +42,7 @@ export default function ApplicantsModal({
     setSearchQuery(query);  
   };
 
-  const truncateTitle = (text: string, maxLength: number = 30) => {
+  const truncateTitle = (text: string, maxLength: number = 50) => {
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
   };
 
@@ -100,26 +102,26 @@ export default function ApplicantsModal({
           className="rounded-lg shadow-lg w-full max-w-md p-6 relative"
           style={{ backgroundColor: theme.modal.background }}
         >
-          <h2 
+          <h2
             className="text-xl font-semibold mb-4"
             style={{ color: theme.colors.error }}
           >
-            Error
+            {t.components.applicantsModal.error}
           </h2>
           <p style={{ color: theme.colors.textMuted }}>
-            Post ID is required to view applicants.
+            {t.components.applicantsModal.postIdRequired}
           </p>
           <button
             onClick={onClose}
             className="mt-4 px-4 py-2 rounded transition-colors"
-            style={{ 
+            style={{
               backgroundColor: theme.colors.primary,
               color: '#fff'
             }}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.primaryHover}
             onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.primary}
           >
-            Close
+            {t.components.applicantsModal.close}
           </button>
         </div>
       </div>
@@ -135,7 +137,7 @@ export default function ApplicantsModal({
       animate={{ opacity: 1 }}
     >
       <motion.div
-        className="rounded-lg shadow-lg w-full max-w-6xl p-4 md:p-4 p-2 relative mx-4"
+        className="rounded-lg shadow-lg w-full max-w-6xl max-h-[85vh] sm:max-h-[90vh] p-4 md:p-4 p-2 relative mx-4 flex flex-col"
         style={{ backgroundColor: theme.modal.background }}
         onClick={(e) => e.stopPropagation()}
         initial={{ y: 20, opacity: 0, scale: 0.98 }}
@@ -153,13 +155,13 @@ export default function ApplicantsModal({
                 className="font-inter font-semibold text-sm sm:text-subtitle md:text-subtitle"
                 style={{ color: theme.colors.text }}
               >
-                {truncateTitle(title, 20)}
+                {truncateTitle(title, 50)}
               </h3>
-              <span 
+              <span
                 className="font-inter font-semibold text-xs sm:text-small md:text-small ml-2"
                 style={{ color: theme.colors.primary }}
               >
-                • {applicantCount} Applicants
+                • {applicantCount} {t.components.applicantsModal.applicants}
               </span>
             </div>
 
@@ -167,7 +169,7 @@ export default function ApplicantsModal({
               <div className="w-full max-w-lg hidden sm:block">
                 <SearchBar
                   variant="simple"
-                  placeholder="Search applicants..."
+                  placeholder={t.components.applicantsModal.searchPlaceholder}
                   onSearch={handleSearch}
                 />
               </div>
@@ -187,7 +189,7 @@ export default function ApplicantsModal({
           <div className="w-full mt-3 sm:hidden">
             <SearchBar
               variant="simple"
-              placeholder="Search applicants..."
+              placeholder={t.components.applicantsModal.searchPlaceholder}
               onSearch={handleSearch}
             />
           </div>
@@ -218,11 +220,11 @@ export default function ApplicantsModal({
               style={{ color: theme.colors.textMuted }}
             />
           </button>
-          <span 
+          <span
             className="font-inter font-semibold text-sm"
             style={{ color: theme.colors.text }}
           >
-            {mobileSection === 'new' ? 'New Applicants' : 'All Applicants'}
+            {mobileSection === 'new' ? t.components.applicantsModal.newApplicants : t.components.applicantsModal.allApplicants}
           </span>
           <button
             onClick={toggleMobileSection}
@@ -257,19 +259,19 @@ export default function ApplicantsModal({
             }}
           >
             <div className="flex items-center justify-between mb-2">
-              <h3 
+              <h3
                 className="font-inter text-sm sm:text-lead font-semibold hidden sm:block"
                 style={{ color: theme.colors.text }}
               >
-                New Applicants
+                {t.components.applicantsModal.newApplicants}
               </h3>
 
               <div className="flex items-center gap-2 shrink-0 sm:ml-auto">
-                <span 
+                <span
                   className="text-xs sm:text-small font-medium whitespace-nowrap"
                   style={{ color: theme.colors.textMuted }}
                 >
-                  Sort by
+                  {t.components.applicantsModal.sortBy}
                 </span>
                 <div className="w-auto px-2">
                   <Sort
@@ -292,19 +294,19 @@ export default function ApplicantsModal({
 
           <section className={`md:pl-4 ${mobileSection === 'all' ? 'block' : 'hidden'} sm:block`}>
             <div className="flex items-center justify-between mb-2">
-              <h3 
+              <h3
                 className="font-inter text-sm sm:text-lead font-semibold hidden sm:block"
                 style={{ color: theme.colors.text }}
               >
-                All Applicants
+                {t.components.applicantsModal.allApplicants}
               </h3>
 
               <div className="flex items-center gap-2 shrink-0 sm:ml-auto">
-                <span 
+                <span
                   className="text-xs sm:text-small font-medium whitespace-nowrap"
                   style={{ color: theme.colors.textMuted }}
                 >
-                  Sort by
+                  {t.components.applicantsModal.sortBy}
                 </span>
                 <div className="w-auto px-2">
                   <Sort

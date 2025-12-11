@@ -1,0 +1,64 @@
+{
+  "navigation": {
+    "backToHome": "Back to Home",
+    "backToLogin": "Back to Login",
+    "backToProfile": "Back to Profile",
+    "backToConversations": "Back to conversations"
+  },
+  "buttons": {
+    "getStarted": "Get Started",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "login": "Login",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "close": "Close",
+    "retry": "Retry",
+    "refresh": "Refresh",
+    "post": "Post",
+    "addPost": "Add Post",
+    "apply": "Apply",
+    "viewMore": "View More",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "labels": {
+    "sortBy": "Sort by",
+    "filterBy": "Filter by",
+    "search": "Search",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "phone": "Phone",
+    "role": "Role",
+    "status": "Status",
+    "date": "Date",
+    "loading": "Loading...",
+    "noResults": "No results found",
+    "na": "N/A",
+    "user": "User"
+  },
+  "messages": {
+    "authRequired": "Authentication Required",
+    "pleaseLogin": "Please log in to access this feature.",
+    "loadingProfile": "Loading profile...",
+    "loadingJobs": "Loading jobs...",
+    "loadingChat": "Loading chat...",
+    "loadingData": "Loading data...",
+    "errorOccurred": "An error occurred",
+    "tryAgain": "Please try again",
+    "success": "Success",
+    "selectConversation": "Select a conversation to start messaging"
+  },
+  "roles": {
+    "admin": "Admin",
+    "user": "User",
+    "employer": "Employer",
+    "jobseeker": "Job Seeker"
+  }
+}

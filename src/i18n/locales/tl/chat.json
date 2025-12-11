@@ -1,0 +1,33 @@
+{
+  "title": "Mga Mensahe",
+  "subtitle": "Makipag-chat sa mga employer at naghahanap ng trabaho",
+  "searchPlaceholder": "Maghanap ng mga pag-uusap...",
+  "banner": {
+    "title": "Makipag-chat sa mga",
+    "highlight": "Kliyente",
+    "subtitle": "at",
+    "subtitleHighlight": "Manggagawa"
+  },
+  "noConversations": "Wala pang mga pag-uusap",
+  "selectConversation": "Pumili ng pag-uusap upang magsimulang mag-message",
+  "typePlaceholder": "Mag-type ng mensahe...",
+  "send": "Ipadala",
+  "online": "Online",
+  "offline": "Offline",
+  "typing": "tumatype...",
+  "globalChat": "Global Realtime Chat",
+  "globalChatDescription": "Global chat room",
+  "directMessage": "Direct message",
+  "authRequired": "Kailangan ng Authentication",
+  "pleaseLogin": "Mangyaring mag-log in upang ma-access ang chat feature.",
+  "loadingChat": "Naglo-load ng chat...",
+  "couldNotStartChat": "Hindi makapagsimula ng chat kay {{name}}.",
+  "messageDeleted": "Natanggal na ang mensaheng ito",
+  "today": "Ngayon",
+  "yesterday": "Kahapon",
+  "seen": "Nakita",
+  "delivered": "Naihatid",
+  "sent": "Naipadala",
+  "guestUser": "Bisita",
+  "unknownUser": "Hindi Kilalang User"
+}

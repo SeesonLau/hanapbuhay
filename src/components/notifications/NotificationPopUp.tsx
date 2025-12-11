@@ -12,6 +12,7 @@ import { HiBell } from "react-icons/hi";
 import { IoClose } from "react-icons/io5";
 import Button from "@/components/ui/Button";
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface NotificationPopUpProps {
   isScrolled?: boolean;
@@ -20,6 +21,7 @@ interface NotificationPopUpProps {
 
 const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = false, onClose }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const router = useRouter();
   const [displayCount, setDisplayCount] = useState(5);
   const [maxHeight, setMaxHeight] = useState(380);
@@ -71,12 +73,26 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
     try {
       if (!userId) return;
 
+      console.log('Notification clicked:', notif);
+      console.log('Related ID:', notif.relatedId);
+
+      // Mark as read first
       if (!notif.isRead) {
         await markAsRead(notif.notificationId);
       }
 
+      // Get the route
       const route = getNotificationRoute(notif);
-      router.push(route);
+      console.log('Navigating to route:', route);
+
+      // Close the popup if onClose is provided
+      if (onClose) {
+        onClose();
+      }
+
+      // Always use window.location.href for full navigation with reload
+      // This ensures query params trigger page effects and modals
+      window.location.href = route;
       
     } catch (error) {
       console.error('Error handling notification click:', error);
@@ -158,11 +174,11 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
             className="w-4 h-4 sm:w-5 sm:h-5" 
             style={{ color: theme.colors.textSecondary }}
           />
-          <span 
+          <span
             className="font-bold text-base sm:text-lead"
             style={{ color: theme.colors.textSecondary }}
           >
-            Notifications
+            {t.components.notifications.title}
             {unreadCount > 0 && (
               <span 
                 className="ml-2 px-1.5 py-0.5 text-[10px] sm:text-xs font-medium text-white rounded-full"
@@ -182,7 +198,7 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
             onMouseOver={(e) => e.currentTarget.style.color = theme.colors.primaryHover}
             onMouseOut={(e) => e.currentTarget.style.color = theme.colors.primary}
           >
-            Mark all read
+            {t.components.notifications.markAllRead}
           </button>
         )}
       </div>
@@ -209,14 +225,14 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
               className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto"
               style={{ borderColor: theme.colors.primary }}
             />
-            <p className="mt-2 text-sm">Loading notifications...</p>
+            <p className="mt-2 text-sm">{t.components.notifications.loading}</p>
           </div>
         ) : !userId ? (
           <div 
             className="p-8 text-center"
             style={{ color: theme.colors.textMuted }}
           >
-            <p className="text-sm">Please log in to view notifications</p>
+            <p className="text-sm">{t.components.notifications.pleaseLogin}</p>
           </div>
         ) : notifications.length === 0 ? (
           <div 
@@ -224,7 +240,7 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
             style={{ color: theme.colors.textMuted }}
           >
             <HiBell className="w-12 h-12 mx-auto mb-2 opacity-30" />
-            <p className="text-sm">No notifications yet</p>
+            <p className="text-sm">{t.components.notifications.noNotifications}</p>
           </div>
         ) : (
           <>
@@ -319,7 +335,7 @@ const NotificationPopUp: React.FC<NotificationPopUpProps> = ({ isScrolled = fals
             onClick={handleSeePrevious}
             className="w-full"
           >
-            See previous notifications ({remainingCount} more)
+            {t.components.notifications.seePrevious} ({remainingCount} {t.components.notifications.more})
           </Button>
         </div>
       )}

@@ -50,11 +50,11 @@ const SelectBox = forwardRef<HTMLSelectElement, SelectBoxProps>(({
 
   const selectClasses = `
     w-full
-    ${responsive ? 'h-10 sm:h-10' : 'h-10'}
+    ${!props.style?.height ? (responsive ? 'h-10 sm:h-10' : 'h-10') : ''}
     ${responsive ? 'px-4 py-1 sm:px-5 sm:py-2' : 'px-5 py-2'}
-    border rounded-[10px] 
-    ${responsive ? 'text-small sm:text-small' : 'text-small'}
-    font-inter font-normal 
+    border rounded-[10px]
+    ${!props.style?.fontSize ? (responsive ? 'text-small sm:text-small' : 'text-small') : ''}
+    font-inter font-normal
     transition-all duration-200
     focus:outline-none focus:ring-2
     disabled:cursor-not-allowed

@@ -164,241 +164,348 @@ export default function ProfileForm({ userId, className }: ProfileFormProps) {
 
   return (
     <div 
-      className={`${className} relative h-full py-3 max-[425px]:py-2 md:py-6 lg:py-8 px-3 max-[425px]:px-2 md:px-10 lg:px-12 rounded-xl shadow-md flex flex-col gap-2.5 max-[425px]:gap-2 md:gap-5 overflow-y-auto`}
+      className={`${className} relative h-full rounded-xl shadow-md flex flex-col overflow-y-auto scrollbar-hide`}
       style={{ backgroundColor: theme.colors.cardBg }}
     >
-      {/* Edit Icon */}
-      <button
-        onClick={() => setIsEditing(!isEditing)}
-        className="absolute top-3 right-3 max-[425px]:top-2 max-[425px]:right-2 p-1.5 max-[425px]:p-1 rounded-full transition z-10"
-        style={{
-          backgroundColor: 'transparent',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = theme.colors.backgroundSecondary;
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-        }}
-      >
-        <Edit3 
-          size={18} 
-          className="max-[425px]:w-3.5 max-[425px]:h-3.5"
-          style={{ color: theme.colors.textSecondary }}
-        />
-      </button>
-
-      {/* Profile Picture Upload */}
-      <div className="flex items-center justify-center gap-3 max-[425px]:gap-2">
-        <div 
-          className={`relative flex-shrink-0 group ${isEditing ? 'cursor-pointer' : ''}`}
-          onClick={handleProfilePictureClick}
+      {/* Main Content with Dynamic Spacing */}
+      <div className="flex-1 flex flex-col px-[2vw] md:px-[4vw] lg:px-[5vw] py-[2vh] md:py-[3vh]">
+        {/* Edit Icon */}
+        <button
+          onClick={() => setIsEditing(!isEditing)}
+          className="absolute top-[2vh] right-[2vw] p-[0.8vh] rounded-full transition z-10"
+          style={{
+            backgroundColor: 'transparent',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = theme.colors.backgroundSecondary;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
         >
-          {previewUrl ? (
-            <>
-              <img
-                src={previewUrl}
-                alt="Profile"
-                className={`w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 object-cover rounded-full border ${isEditing ? 'group-hover:brightness-75 transition-all duration-200' : ''}`}
-                style={{ borderColor: theme.colors.border }}
-              />
-              {isEditing && (
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <Camera className="w-8 h-8 max-[425px]:w-5 max-[425px]:h-5 text-white drop-shadow-lg" />
-                </div>
-              )}
-            </>
-          ) : (
-            <div 
-              className={`w-20 h-20 max-[425px]:w-12 max-[425px]:h-12 flex items-center justify-center rounded-full relative ${isEditing ? 'transition' : ''}`}
-              style={{ backgroundColor: theme.colors.backgroundSecondary }}
-              onMouseEnter={(e) => {
-                if (isEditing) {
-                  e.currentTarget.style.backgroundColor = theme.colors.background;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (isEditing) {
-                  e.currentTarget.style.backgroundColor = theme.colors.backgroundSecondary;
-                }
-              }}
-            >
-              <FaUserCircle 
-                className="w-20 h-20 max-[425px]:w-12 max-[425px]:h-12"
-                style={{ color: theme.colors.textMuted }}
-              />
-              {isEditing && (
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <Camera 
-                    className="w-8 h-8 max-[425px]:w-5 max-[425px]:h-5"
-                    style={{ color: theme.colors.textSecondary }}
-                  />
-                </div>
-              )}
+          <Edit3 
+            className="w-[2vh] h-[2vh] min-w-[14px] min-h-[14px]"
+            style={{ color: theme.colors.textSecondary }}
+          />
+        </button>
+
+        {/* Profile Picture Upload - Scales with viewport */}
+        <div className="flex items-center justify-center mb-[2.5vh]" style={{ gap: 'clamp(0.75rem, 1.5vh, 1.5rem)' }}>
+          <div
+            className={`relative flex-shrink-0 group ${isEditing ? 'cursor-pointer' : ''}`}
+            onClick={handleProfilePictureClick}
+            style={{
+              width: 'clamp(3rem, 11vh, 11rem)',
+              height: 'clamp(3rem, 11vh, 11rem)',
+            }}
+          >
+            {previewUrl ? (
+              <>
+                <img
+                  src={previewUrl}
+                  alt="Profile"
+                  className={`w-full h-full object-cover rounded-full border ${isEditing ? 'group-hover:brightness-75 transition-all duration-200' : ''}`}
+                  style={{ borderColor: theme.colors.border }}
+                />
+                {isEditing && (
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <Camera 
+                      className="text-white drop-shadow-lg"
+                      style={{ 
+                        width: 'clamp(1.5rem, 4vh, 2.5rem)',
+                        height: 'clamp(1.5rem, 4vh, 2.5rem)'
+                      }}
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+              <div 
+                className={`w-full h-full flex items-center justify-center rounded-full relative ${isEditing ? 'transition' : ''}`}
+                style={{ backgroundColor: theme.colors.backgroundSecondary }}
+                onMouseEnter={(e) => {
+                  if (isEditing) {
+                    e.currentTarget.style.backgroundColor = theme.colors.background;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (isEditing) {
+                    e.currentTarget.style.backgroundColor = theme.colors.backgroundSecondary;
+                  }
+                }}
+              >
+                <FaUserCircle 
+                  className="w-full h-full"
+                  style={{ color: theme.colors.textMuted }}
+                />
+                {isEditing && (
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <Camera 
+                      style={{ 
+                        width: 'clamp(1.5rem, 4vh, 2.5rem)',
+                        height: 'clamp(1.5rem, 4vh, 2.5rem)',
+                        color: theme.colors.textSecondary
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+          </div>
+
+          {displayName && (
+            <div className="flex flex-col" style={{ gap: 'clamp(0.125rem, 0.5vh, 0.5rem)' }}>
+              <p 
+                className="font-alexandria font-bold"
+                style={{ 
+                  color: theme.colors.text,
+                  fontSize: 'clamp(0.875rem, 2vh, 1.125rem)'
+                }}
+              >
+                {displayName}
+              </p>
+              <p 
+                className="font-alexandria"
+                style={{ 
+                  color: theme.colors.textMuted,
+                  fontSize: 'clamp(0.625rem, 1.4vh, 0.875rem)'
+                }}
+              >
+                {email}
+              </p>
             </div>
           )}
-          
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
         </div>
 
-        {displayName && (
-          <div className="flex flex-col gap-0.5 max-[425px]:gap-0">
-            <p 
-              className="font-alexandria font-bold text-body max-[425px]:text-sm"
-              style={{ color: theme.colors.text }}
-            >
-              {displayName}
-            </p>
-            <p 
-              className="font-alexandria text-xs max-[425px]:text-[10px] max-[425px]:leading-tight"
-              style={{ color: theme.colors.textMuted }}
-            >
-              {email}
-            </p>
+        {/* Form Fields Container with Dynamic Gaps */}
+        <div className="flex flex-col flex-1" style={{ gap: 'clamp(0.75rem, 2.5vh, 3rem)' }}>
+          {/* First & Last Name */}
+          <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 'clamp(1.5rem, 4vh, 3rem)' }}>
+            <TextBox
+              label="First Name"
+              placeholder="First name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              width="100%"
+              readOnly={!isEditing}
+              disabled={!isEditing}
+              style={{
+                height: 'clamp(2.5rem, 5vh, 3.5rem)',
+                fontSize: 'clamp(0.8rem, 1.6vh, 1rem)',
+                borderColor: isEditing ? undefined : theme.colors.text,
+                borderWidth: isEditing ? undefined : '1.5px',
+                backgroundColor: isEditing ? undefined : theme.colors.background
+              }}
+            />
+
+            <TextBox
+              label="Last Name"
+              placeholder="Last name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              width="100%"
+              readOnly={!isEditing}
+              disabled={!isEditing}
+              style={{
+                height: 'clamp(2.5rem, 5vh, 3.5rem)',
+                fontSize: 'clamp(0.8rem, 1.6vh, 1rem)',
+                borderColor: isEditing ? undefined : theme.colors.text,
+                borderWidth: isEditing ? undefined : '1.5px',
+                backgroundColor: isEditing ? undefined : theme.colors.background
+              }}
+            />
           </div>
-        )}
-      </div>
 
-      {/* First & Last Name */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-[425px]:gap-2 md:gap-10">
-        <TextBox
-          label="First Name"
-          placeholder="First name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          width="100%"
-          readOnly={!isEditing}
-          disabled={!isEditing}
-        />
+          {/* Phone Number & Birthdate */}
+          <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 'clamp(1.5rem, 4vh, 3rem)' }}>
+            <TextBox
+              label="Phone Number"
+              type="tel"
+              placeholder="09XXXXXXXXX"
+              value={profile?.phoneNumber ?? ''}
+              onChange={(e) => handleChange('phoneNumber', e.target.value)}
+              width="100%"
+              enableValidation={true}
+              showSuccessIcon={true}
+              readOnly={!isEditing}
+              disabled={!isEditing}
+              style={{
+                height: 'clamp(2.5rem, 5vh, 3.5rem)',
+                fontSize: 'clamp(0.8rem, 1.6vh, 1rem)',
+                borderColor: isEditing ? undefined : theme.colors.text,
+                borderWidth: isEditing ? undefined : '1.5px',
+                backgroundColor: isEditing ? undefined : theme.colors.background
+              }}
+            />
 
-        <TextBox
-          label="Last Name"
-          placeholder="Last name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          width="100%"
-          readOnly={!isEditing}
-          disabled={!isEditing}
-        />
-      </div>
+            <TextBox
+              label="Birthdate"
+              type="date"
+              value={profile?.birthdate ?? ''}
+              onChange={(e) => handleBirthdateChange(e.target.value)}
+              width="100%"
+              readOnly={!isEditing}
+              disabled={!isEditing}
+              max={new Date().toISOString().split('T')[0]}
+              onKeyDown={(e) => e.preventDefault()}
+              onClick={(e) => {
+                if (!isEditing) return;
+                const input = e.currentTarget as HTMLInputElement;
+                input.showPicker?.();
+              }}
+              style={{
+                height: 'clamp(2.5rem, 5vh, 3.5rem)',
+                fontSize: 'clamp(0.8rem, 1.6vh, 1rem)',
+                borderColor: isEditing ? undefined : theme.colors.text,
+                borderWidth: isEditing ? undefined : '1.5px',
+                backgroundColor: isEditing ? undefined : theme.colors.background
+              }}
+            />
+          </div>
 
-      {/* Phone Number & Birthdate */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-[425px]:gap-2 md:gap-10">
-        <TextBox
-          label="Phone Number"
-          type="tel"
-          placeholder="09XXXXXXXXX"
-          value={profile?.phoneNumber ?? ''}
-          onChange={(e) => handleChange('phoneNumber', e.target.value)}
-          width="100%"
-          enableValidation={true}
-          showSuccessIcon={true}
-          readOnly={!isEditing}
-          disabled={!isEditing}
-        />
+          {/* Age & Sex */}
+          <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 'clamp(1.5rem, 4vh, 3rem)' }}>
+            <TextBox
+              label="Age"
+              type="number"
+              value={profile?.age ?? ''}
+              readOnly
+              width="100%"
+              disabled={!isEditing}
+              style={{
+                height: 'clamp(2.5rem, 5vh, 3.5rem)',
+                fontSize: 'clamp(0.8rem, 1.6vh, 1rem)',
+                borderColor: isEditing ? undefined : theme.colors.text,
+                borderWidth: isEditing ? undefined : '1.5px',
+                backgroundColor: isEditing ? undefined : theme.colors.background
+              }}
+            />
 
-        <TextBox
-          label="Birthdate"
-          type="date"
-          value={profile?.birthdate ?? ''}
-          onChange={(e) => handleBirthdateChange(e.target.value)}
-          width="100%"
-          readOnly={!isEditing}
-          disabled={!isEditing}
-          max={new Date().toISOString().split('T')[0]}
-          onKeyDown={(e) => e.preventDefault()}
-          onClick={(e) => {
-            if (!isEditing) return;
-            const input = e.currentTarget as HTMLInputElement;
-            input.showPicker?.();
-          }}
-        />
-      </div>
+            <SelectBox
+              label="Sex"
+              value={profile?.sex ?? ''}
+              onChange={(e) => handleChange("sex", e.target.value)}
+              options={[
+                { value: '', label: 'Select Sex' },
+                { value: 'Male', label: 'Male' },
+                { value: 'Female', label: 'Female' },
+                { value: 'Other', label: 'Other' }
+              ]}
+              width="100%"
+              disabled={!isEditing}
+              style={{
+                height: 'clamp(2.5rem, 5vh, 3.5rem)',
+                fontSize: 'clamp(0.8rem, 1.6vh, 1rem)',
+                borderColor: isEditing ? undefined : theme.colors.text,
+                borderWidth: isEditing ? undefined : '1.5px',
+                backgroundColor: isEditing ? undefined : theme.colors.background
+              }}
+            />
+          </div>
 
-      {/* Age & Sex */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-[425px]:gap-2 md:gap-10">
-        <TextBox
-          label="Age"
-          type="number"
-          value={profile?.age ?? ''}
-          readOnly
-          width="100%"
-          disabled
-        />
+          {/* Address Section*/}
+          <div>
+            <div
+              className="font-semibold"
+              style={{
+                color: theme.colors.text,
+                fontSize: 'clamp(0.75rem, 1.6vh, 0.95rem)',
+                marginBottom: 'clamp(0.375rem, 1vh, 0.75rem)'
+              }}
+            >
+              Address
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3" style={{ gap: 'clamp(0.5rem, 1.5vh, 1rem)' }}>
+              <SelectBox
+                options={getProvinces().map((prov) => ({ value: prov, label: prov }))}
+                value={province}
+                onChange={(e) => {
+                  setProvince(e.target.value);
+                  const cities = getCitiesByProvince(e.target.value);
+                  setCity(cities.length > 0 ? cities[0] : "");
+                }}
+                placeholder="Select province"
+                disabled={!isEditing}
+                width="100%"
+                style={{
+                  height: 'clamp(2.5rem, 5vh, 3.5rem)',
+                  fontSize: 'clamp(0.8rem, 1.6vh, 1rem)',
+                  borderColor: isEditing ? undefined : theme.colors.text,
+                  borderWidth: isEditing ? undefined : '1.5px',
+                  backgroundColor: isEditing ? undefined : theme.colors.background
+                }}
+              />
+              <SelectBox
+                options={getCitiesByProvince(province).map((city_name) => ({ value: city_name, label: city_name }))}
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Select city or municipality"
+                disabled={!isEditing || !province}
+                width="100%"
+                style={{
+                  height: 'clamp(2.5rem, 5vh, 3.5rem)',
+                  fontSize: 'clamp(0.8rem, 1.6vh, 1rem)',
+                  borderColor: isEditing ? undefined : theme.colors.text,
+                  borderWidth: isEditing ? undefined : '1.5px',
+                  backgroundColor: isEditing ? undefined : theme.colors.background
+                }}
+              />
+              <TextBox
+                placeholder="Specific address"
+                value={streetAddress}
+                onChange={(e) => setStreetAddress(e.target.value)}
+                maxLength={50}
+                width="100%"
+                readOnly={!isEditing}
+                disabled={!isEditing}
+                style={{
+                  height: 'clamp(2.5rem, 5vh, 3.5rem)',
+                  fontSize: 'clamp(0.8rem, 1.6vh, 1rem)',
+                  borderColor: isEditing ? undefined : theme.colors.text,
+                  borderWidth: isEditing ? undefined : '1.5px',
+                  backgroundColor: isEditing ? undefined : theme.colors.background
+                }}
+              />
+            </div>
+          </div>
 
-        <SelectBox
-          label="Sex"
-          value={profile?.sex ?? ''}
-          onChange={(e) => handleChange("sex", e.target.value)}
-          options={[
-            { value: '', label: 'Select Sex' },
-            { value: 'Male', label: 'Male' },
-            { value: 'Female', label: 'Female' },
-            { value: 'Other', label: 'Other' }
-          ]}
-          width="100%"
-          disabled={!isEditing}
-        />
-      </div>
-
-      {/* Address Section*/}
-      <div>
-        <div 
-          className="text-small max-[425px]:text-xs font-semibold mb-1.5 max-[425px]:mb-1"
-          style={{ color: theme.colors.text }}
-        >
-          Address
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-[425px]:gap-2">
-          <SelectBox 
-            options={getProvinces().map((prov) => ({ value: prov, label: prov }))}
-            value={province}
-            onChange={(e) => {
-              setProvince(e.target.value);
-              const cities = getCitiesByProvince(e.target.value);
-              setCity(cities.length > 0 ? cities[0] : "");
+          {/* Save Button with Dynamic Sizing */}
+          <div
+            className={`flex justify-center transition-all duration-200 ${isEditing ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            style={{
+              marginTop: 'clamp(0.5rem, 1.5vh, 1rem)',
+              height: isEditing ? 'auto' : '0',
+              overflow: isEditing ? 'visible' : 'hidden'
             }}
-            placeholder="Select province"
-            disabled={!isEditing}
-            width="100%"
-          />
-          <SelectBox 
-            options={getCitiesByProvince(province).map((city_name) => ({ value: city_name, label: city_name }))}
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder="Select city or municipality"
-            disabled={!isEditing || !province}
-            width="100%"
-          />
-          <TextBox 
-            placeholder="Specific address" 
-            value={streetAddress}
-            onChange={(e) => setStreetAddress(e.target.value)}
-            maxLength={50}
-            width="100%"
-            readOnly={!isEditing}
-            disabled={!isEditing}
-          />
+          >
+            <div
+              style={{
+                height: 'clamp(2.5rem, 5vh, 4rem)',
+                width: 'clamp(18rem, 35vw, 25rem)',
+                fontSize: 'clamp(0.875rem, 1.75vh, 1.125rem)'
+              }}
+            >
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                variant="primary400"
+                size="xl"
+                fullRounded={false}
+                className="!h-full !w-full !text-[length:inherit]"
+              >
+                Save
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
-        
-      {/* Save Button */}
-      <div className={`flex justify-center transition-opacity duration-200 ${isEditing ? 'opacity-100' : 'opacity-0 pointer-events-none h-0'}`}>
-        <Button
-          onClick={handleSave}
-          disabled={saving}
-          variant="primary400"
-          size="xl"
-          fullRounded={false}
-        > 
-          Save
-        </Button>
       </div>
     </div>
   );

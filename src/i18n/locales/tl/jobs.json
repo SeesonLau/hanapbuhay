@@ -1,0 +1,159 @@
+{
+  "findJobs": {
+    "title": "Maghanap ng Trabaho",
+    "subtitle": "Tuklasin ang mga oportunidad na tugma sa iyong mga kasanayan",
+    "searchPlaceholder": "Maghanap ng mga trabaho...",
+    "noJobsFound": "Walang nahanap na trabaho",
+    "loadingJobPosts": "Naglo-load ng mga job post...",
+    "noJobPostsAvailable": "Walang available na job post.",
+    "loadingMoreJobPosts": "Naglo-load ng higit pang mga job post...",
+    "scrollForMore": "Mag-scroll para sa higit pa",
+    "reachedEnd": "Naabot mo na ang dulo",
+    "banner": {
+      "title": "Hanapin ang iyong Ideal na Trabaho sa",
+      "highlight": "HanapBuhay",
+      "searchPlaceholder": "Titulo ng trabaho o keyword",
+      "locationPlaceholder": "Lokasyon"
+    },
+    "stats": {
+      "totalJobs": "Kabuuang Trabaho",
+      "ratings": "Mga Rating",
+      "completed": "Natapos",
+      "posted": "Nai-post"
+    },
+    "filters": {
+      "title": "Mga Filter",
+      "jobType": "Uri ng Trabaho",
+      "location": "Lokasyon",
+      "salary": "Saklaw ng Sahod",
+      "experience": "Antas ng Karanasan",
+      "posted": "Petsa ng Pag-post"
+    }
+  },
+  "appliedJobs": {
+    "title": "Mga Inaplayan na Trabaho",
+    "subtitle": "Subaybayan ang iyong mga aplikasyon sa trabaho",
+    "noApplications": "Wala ka pang naaplayan na trabaho",
+    "appliedOn": "Nag-apply noong",
+    "withdrawApplication": "Bawiin ang aplikasyon",
+    "loadingApplications": "Naglo-load ng mga aplikasyon...",
+    "noApplicationsAvailable": "Walang available na aplikasyon.",
+    "loadingMoreApplications": "Naglo-load ng higit pang mga aplikasyon...",
+    "scrollForMore": "Mag-scroll para sa higit pa",
+    "reachedEnd": "Naabot mo na ang dulo",
+    "banner": {
+      "title": "Subaybayan ang iyong mga",
+      "highlight": "Aplikasyon sa Trabaho",
+      "searchPlaceholder": "Maghanap"
+    },
+    "stats": {
+      "totalApplications": "Kabuuang Aplikasyon",
+      "pending": "Naghihintay",
+      "approved": "Aprubado",
+      "rejected": "Tinanggihan"
+    },
+    "status": {
+      "pending": "Naghihintay",
+      "reviewing": "Sinusuri",
+      "approved": "Aprubado",
+      "rejected": "Tinanggihan",
+      "deleted": "Natanggal",
+      "locked": "Nakakandado",
+      "unknown": "Hindi Alam"
+    }
+  },
+  "manageJobPosts": {
+    "title": "Pamahalaan ang mga Job Post",
+    "subtitle": "Pamahalaan ang iyong mga job posting",
+    "addNewPost": "Magdagdag ng Bagong Post",
+    "noPosts": "Wala ka pang job post",
+    "editPost": "I-edit ang Post",
+    "deletePost": "Tanggalin ang Post",
+    "viewApplicants": "Tingnan ang mga Aplikante",
+    "loadingJobPosts": "Naglo-load ng mga job post...",
+    "noJobPostsAvailable": "Walang available na job post.",
+    "loadingMoreJobPosts": "Naglo-load ng higit pang mga job post...",
+    "scrollForMore": "Mag-scroll para sa higit pa",
+    "reachedEnd": "Naabot mo na ang dulo",
+    "banner": {
+      "title": "Kailangan ng",
+      "highlight": "Trabaho",
+      "subtitle": "na tapos? Mag-post ng",
+      "subtitleHighlight": "Job",
+      "endText": "ngayon!",
+      "searchPlaceholder": "Maghanap"
+    },
+    "stats": {
+      "totalPosts": "Kabuuang Job Post",
+      "inactive": "Hindi Aktibong Job Post",
+      "active": "Aktibong Job Post",
+      "resolved": "Nalutas na Job Post"
+    }
+  },
+  "jobCard": {
+    "posted": "Na-post",
+    "applicants": "Mga Aplikante",
+    "viewDetails": "Tingnan ang Detalye",
+    "applyNow": "Mag-apply",
+    "applied": "Naaplayan na",
+    "salaryRange": "Saklaw ng Sahod"
+  },
+  "jobDetails": {
+    "description": "Deskripsyon ng Trabaho",
+    "requirements": "Mga Kinakailangan",
+    "responsibilities": "Mga Responsibilidad",
+    "benefits": "Mga Benepisyo",
+    "location": "Lokasyon",
+    "jobType": "Uri ng Trabaho",
+    "experience": "Kinakailangang Karanasan",
+    "education": "Kinakailangang Edukasyon",
+    "deadline": "Deadline ng Aplikasyon",
+    "contactInfo": "Impormasyon sa Pakikipag-ugnayan"
+  },
+  "jobPostModal": {
+    "addTitle": "Mag-post ng Trabaho",
+    "editTitle": "I-edit ang Job Post",
+    "viewTitle": "Detalye ng Trabaho",
+    "fields": {
+      "jobTitle": "Titulo ng Trabaho",
+      "jobTitlePlaceholder": "Ilagay ang titulo ng trabaho",
+      "tags": "Mga Tag",
+      "selectedTags": "Mga napiling tag",
+      "jobType": "Uri ng Trabaho",
+      "experienceLevel": "Antas ng Karanasan",
+      "gender": "Kasarian",
+      "location": "Lokasyon",
+      "country": "Bansa",
+      "province": "Probinsya",
+      "city": "Lungsod",
+      "address": "Address",
+      "addressPlaceholder": "Ilagay ang detalyadong address",
+      "salary": "Sahod",
+      "salaryPlaceholder": "Ilagay ang halaga ng sahod",
+      "salaryPeriod": "Panahon",
+      "perDay": "bawat araw",
+      "perWeek": "bawat linggo",
+      "perMonth": "bawat buwan",
+      "about": "Tungkol",
+      "aboutPlaceholder": "Ilarawan ang posisyon ng trabaho, mga responsibilidad, at iba pang detalye",
+      "qualifications": "Mga Kwalipikasyon",
+      "qualificationsPlaceholder": "Ilista ang mga kinakailangang kwalipikasyon",
+      "requirements": "Mga Kinakailangan"
+    },
+    "buttons": {
+      "postJob": "Mag-post ng Trabaho",
+      "saveChanges": "I-save ang mga Pagbabago",
+      "next": "Susunod",
+      "previous": "Nakaraan",
+      "clearAll": "Tanggalin Lahat",
+      "apply": "Mag-apply",
+      "step": "Hakbang",
+      "of": "ng"
+    },
+    "messages": {
+      "selectProvince": "Pumili muna ng probinsya",
+      "fillRequired": "Pakipunan ang lahat ng kinakailangang field",
+      "invalidSalary": "Mangyaring maglagay ng wastong halaga ng sahod"
+    }
+  }
+}

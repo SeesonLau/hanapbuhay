@@ -11,9 +11,11 @@ import Image from 'next/image';
 import { passwordRequirements } from '@/lib/constants';
 import { validatePassword } from '@/lib/utils/validation';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function ResetPasswordForm() {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const router = useRouter();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -29,7 +31,7 @@ export default function ResetPasswordForm() {
       if (user) {
         setIsAuthenticated(true);
       } else {
-        setError('Session expired. Please request a new password reset link.');
+        setError(t.auth.resetPassword.errors.invalidToken);
       }
       setCheckingAuth(false);
     };
@@ -42,13 +44,13 @@ export default function ResetPasswordForm() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t.auth.resetPassword.errors.passwordMismatch);
       return;
     }
 
     const validationErrors = validatePassword(password);
     if (validationErrors.length > 0) {
-      setError('Please fix the password requirements below');
+      setError(t.auth.resetPassword.errors.weakPassword);
       return;
     }
 
@@ -58,12 +60,12 @@ export default function ResetPasswordForm() {
       const result = await AuthService.updatePassword(password);
       
       if (result.success) {
-        router.push(`${ROUTES.LOGIN}?message=${encodeURIComponent('Password reset successful! Please sign in with your new password.')}`);
+        router.push(`${ROUTES.LOGIN}?message=${encodeURIComponent(t.auth.resetPassword.success)}`);
       } else {
-        setError(result.message || 'Failed to reset password');
+        setError(result.message || t.auth.resetPassword.errors.invalidToken);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to reset password');
+      setError(err.message || t.common.messages.errorOccurred);
     } finally {
       setLoading(false);
     }
@@ -155,10 +157,10 @@ export default function ResetPasswordForm() {
 
       {/* Title */}
       <h1 className="text-h3 tablet:text-h2 font-bold text-white text-center mb-2 font-alexandria">
-        Reset Password
+        {t.auth.resetPassword.title}
       </h1>
       <p className="text-gray-neutral100 font-light text-small sm:text-body text-center mb-2 sm:mb-4 font-alexandria">
-        Enter a new password to change your password
+        {t.auth.resetPassword.subtitle}
       </p>
 
       {error && (
@@ -180,13 +182,13 @@ export default function ResetPasswordForm() {
         <div>
           <TextBox
             type="password"
-            label="New Password"
+            label={t.auth.resetPassword.passwordLabel}
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
               checkPasswordRequirements(e.target.value);
             }}
-            placeholder="Password"
+            placeholder={t.auth.resetPassword.passwordPlaceholder}
             enableValidation={false}
             variant="glassmorphism"
           />
@@ -240,10 +242,10 @@ export default function ResetPasswordForm() {
         <div>
           <TextBox
             type="password"
-            label="Confirm New Password"
+            label={t.auth.resetPassword.confirmPasswordLabel}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Password"
+            placeholder={t.auth.resetPassword.confirmPasswordPlaceholder}
             enableValidation={false}
             variant="glassmorphism"
           />
@@ -259,12 +261,12 @@ export default function ResetPasswordForm() {
           fullRounded={true}
           useCustomHover={true}
         >
-          {loading ? 'Resetting password...' : 'Reset Password'}
+          {loading ? `${t.auth.resetPassword.resetButton}...` : t.auth.resetPassword.resetButton}
         </Button>
 
         {/* Back to Login */}
         <p className="text-center text-small sm:text-body text-gray-300 mt-4 font-alexandria">
-          Remember your password?{' '}
+          {t.auth.login.noAccount} {' '}
           <button
             type="button"
             onClick={() => router.push(ROUTES.LOGIN)}
@@ -277,7 +279,7 @@ export default function ResetPasswordForm() {
               e.currentTarget.style.color = theme.colors.primary;
             }}
           >
-            Sign in
+            {t.common.buttons.signIn}
           </button>
         </p>
       </form>

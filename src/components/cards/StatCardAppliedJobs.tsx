@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useTheme } from "@/hooks/useTheme";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type AppliedType = "total" | "pending" | "approved" | "rejected";
 
@@ -12,13 +13,6 @@ interface StatCardAppliedJobsProps {
   className?: string;
   onClick?: (type: AppliedType) => void;
 }
-
-const titleForType: Record<AppliedType, string> = {
-  total: "Total Applications",
-  pending: "Pending",
-  approved: "Approved",
-  rejected: "Rejected",
-};
 
 const iconForType: Record<AppliedType, string> = {
   total: "/icons/stats-totalapplications.svg",
@@ -35,6 +29,15 @@ export const StatCardAppliedJobs: React.FC<StatCardAppliedJobsProps> = ({
   onClick,
 }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
+
+  const titleForType: Record<AppliedType, string> = {
+    total: t.jobs.appliedJobs.stats.totalApplications,
+    pending: t.jobs.appliedJobs.stats.pending,
+    approved: t.jobs.appliedJobs.stats.approved,
+    rejected: t.jobs.appliedJobs.stats.rejected,
+  };
+
   const resolvedTitle = title || titleForType[type];
   const iconSrc = iconForType[type];
 

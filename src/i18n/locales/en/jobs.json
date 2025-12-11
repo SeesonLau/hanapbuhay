@@ -1,0 +1,159 @@
+{
+  "findJobs": {
+    "title": "Find Jobs",
+    "subtitle": "Discover opportunities that match your skills",
+    "searchPlaceholder": "Search for jobs...",
+    "noJobsFound": "No jobs found",
+    "loadingJobPosts": "Loading job posts...",
+    "noJobPostsAvailable": "No job posts available.",
+    "loadingMoreJobPosts": "Loading more job posts...",
+    "scrollForMore": "Scroll for more",
+    "reachedEnd": "You've reached the end",
+    "banner": {
+      "title": "Find your Ideal Job at",
+      "highlight": "HanapBuhay",
+      "searchPlaceholder": "Job title or keyword",
+      "locationPlaceholder": "Location"
+    },
+    "stats": {
+      "totalJobs": "Total Jobs",
+      "ratings": "Ratings",
+      "completed": "Completed",
+      "posted": "Posted"
+    },
+    "filters": {
+      "title": "Filters",
+      "jobType": "Job Type",
+      "location": "Location",
+      "salary": "Salary Range",
+      "experience": "Experience Level",
+      "posted": "Posted Date"
+    }
+  },
+  "appliedJobs": {
+    "title": "Applied Jobs",
+    "subtitle": "Track your job applications",
+    "noApplications": "You haven't applied to any jobs yet",
+    "appliedOn": "Applied on",
+    "withdrawApplication": "Withdraw application",
+    "loadingApplications": "Loading applications...",
+    "noApplicationsAvailable": "No applications available.",
+    "loadingMoreApplications": "Loading more applications...",
+    "scrollForMore": "Scroll for more",
+    "reachedEnd": "You've reached the end",
+    "banner": {
+      "title": "Track down your",
+      "highlight": "Job Applications",
+      "searchPlaceholder": "Search"
+    },
+    "stats": {
+      "totalApplications": "Total Applications",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "status": {
+      "pending": "Pending",
+      "reviewing": "Under Review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "deleted": "Deleted",
+      "locked": "Locked",
+      "unknown": "Unknown"
+    }
+  },
+  "manageJobPosts": {
+    "title": "Manage Job Posts",
+    "subtitle": "Manage your job postings",
+    "addNewPost": "Add New Post",
+    "noPosts": "You don't have any job posts yet",
+    "editPost": "Edit Post",
+    "deletePost": "Delete Post",
+    "viewApplicants": "View Applicants",
+    "loadingJobPosts": "Loading job posts...",
+    "noJobPostsAvailable": "No job posts available.",
+    "loadingMoreJobPosts": "Loading more job posts...",
+    "scrollForMore": "Scroll for more",
+    "reachedEnd": "You've reached the end",
+    "banner": {
+      "title": "Need a",
+      "highlight": "Work",
+      "subtitle": "done? Post a",
+      "subtitleHighlight": "Job",
+      "endText": "now!",
+      "searchPlaceholder": "Search"
+    },
+    "stats": {
+      "totalPosts": "Total Job Posts",
+      "inactive": "Inactive Job Posts",
+      "active": "Active Job Posts",
+      "resolved": "Resolved Job Posts"
+    }
+  },
+  "jobCard": {
+    "posted": "Posted",
+    "applicants": "Applicants",
+    "viewDetails": "View Details",
+    "applyNow": "Apply Now",
+    "applied": "Applied",
+    "salaryRange": "Salary Range"
+  },
+  "jobDetails": {
+    "description": "Job Description",
+    "requirements": "Requirements",
+    "responsibilities": "Responsibilities",
+    "benefits": "Benefits",
+    "location": "Location",
+    "jobType": "Job Type",
+    "experience": "Experience Required",
+    "education": "Education Required",
+    "deadline": "Application Deadline",
+    "contactInfo": "Contact Information"
+  },
+  "jobPostModal": {
+    "addTitle": "Post a Job",
+    "editTitle": "Edit Job Post",
+    "viewTitle": "Job Details",
+    "fields": {
+      "jobTitle": "Job Title",
+      "jobTitlePlaceholder": "Enter job title",
+      "tags": "Tags",
+      "selectedTags": "Selected tags",
+      "jobType": "Job Type",
+      "experienceLevel": "Experience Level",
+      "gender": "Gender",
+      "location": "Location",
+      "country": "Country",
+      "province": "Province",
+      "city": "City",
+      "address": "Address",
+      "addressPlaceholder": "Enter detailed address",
+      "salary": "Salary",
+      "salaryPlaceholder": "Enter salary amount",
+      "salaryPeriod": "Period",
+      "perDay": "per day",
+      "perWeek": "per week",
+      "perMonth": "per month",
+      "about": "About",
+      "aboutPlaceholder": "Describe the job position, responsibilities, and other details",
+      "qualifications": "Qualifications",
+      "qualificationsPlaceholder": "List the required qualifications",
+      "requirements": "Requirements"
+    },
+    "buttons": {
+      "postJob": "Post Job",
+      "saveChanges": "Save Changes",
+      "next": "Next",
+      "previous": "Previous",
+      "clearAll": "Clear All",
+      "apply": "Apply",
+      "step": "Step",
+      "of": "of"
+    },
+    "messages": {
+      "selectProvince": "Select a province first",
+      "fillRequired": "Please fill in all required fields",
+      "invalidSalary": "Please enter a valid salary amount"
+    }
+  }
+}

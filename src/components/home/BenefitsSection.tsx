@@ -5,6 +5,7 @@ import { motion, useInView } from 'framer-motion';
 import { FaStar, FaMapMarkerAlt, FaBolt, FaShieldAlt } from 'react-icons/fa';
 import { fontClasses } from '@/styles/fonts';
 import { useTheme } from '@/hooks/useTheme';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface Feature {
   icon: React.ReactNode;
@@ -15,28 +16,29 @@ interface Feature {
 export default function BenefitsSection() {
   const ref = useRef(null);
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const isInView = useInView(ref, { once: false, amount: 0.15 });
 
   const features: Feature[] = [
     {
       icon: <FaMapMarkerAlt className="text-xl" />,
-      title: "Local Connections",
-      description: "Find trusted workers and clients right in your community, no more searching far and wide."
+      title: t.home.benefits.localConnections.title,
+      description: t.home.benefits.localConnections.description
     },
     {
       icon: <FaBolt className="text-xl" />,
-      title: "Quick Hiring",
-      description: "Post a job in minutes and receive responses from nearby skilled professionals fast."
+      title: t.home.benefits.quickHiring.title,
+      description: t.home.benefits.quickHiring.description
     },
     {
       icon: <FaStar className="text-xl" />,
-      title: "Verified Reviews",
-      description: "Build trust with transparent ratings and authentic feedback from the community."
+      title: t.home.benefits.verifiedReviews.title,
+      description: t.home.benefits.verifiedReviews.description
     },
     {
       icon: <FaShieldAlt className="text-xl" />,
-      title: "Secure Platform",
-      description: "Your data and transactions are protected with our reliable and secure system."
+      title: t.home.benefits.securePlatform.title,
+      description: t.home.benefits.securePlatform.description
     }
   ];
 
@@ -95,26 +97,26 @@ export default function BenefitsSection() {
             className="laptop:col-span-4 laptop:sticky laptop:top-32"
             variants={itemVariants}
           >
-            <h2 
+            <h2
               className={`text-h2 tablet:text-h1 laptop:text-hero font-bold mb-6 leading-tight ${fontClasses.heading}`}
               style={{ color: theme.landing.headingPrimary }}
             >
-              Core Features That{' '}
-              <span 
+              {t.home.benefits.heading}{' '}
+              <span
                 className="bg-clip-text text-transparent"
                 style={{
                   backgroundImage: `linear-gradient(to right, ${theme.landing.headingGradientStart}, ${theme.landing.headingGradientMid}, ${theme.landing.headingGradientEnd})`
                 }}
               >
-                Power Your Success
+                {t.home.benefits.headingHighlight}
               </span>
             </h2>
-            
-            <p 
+
+            <p
               className={`text-body tablet:text-lead leading-relaxed ${fontClasses.body}`}
               style={{ color: theme.landing.bodyText }}
             >
-              A platform designed to connect local talent with opportunities, making hiring and finding work simpler than ever before.
+              {t.home.benefits.subtitle}
             </p>
 
             {/* Decorative line */}
