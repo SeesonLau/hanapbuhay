@@ -66,6 +66,7 @@ const Dropdown = memo(function Dropdown({
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const [triggerWidth, setTriggerWidth] = useState<number | undefined>(undefined);
+  const hasInitializedRef = useRef(false);
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
@@ -87,7 +88,7 @@ const Dropdown = memo(function Dropdown({
     } else {
       setActiveIndex(-1);
     }
-  }, [open, selected?.id]); 
+  }, [open, selected?.id, options]); 
 
   useEffect(() => {
     function measure() {
@@ -108,24 +109,31 @@ const Dropdown = memo(function Dropdown({
     return () => window.removeEventListener('resize', measure);
   }, [fullWidth]); 
 
+  // Handle value changes and defaultToFirst logic
   useEffect(() => {
     if (value != null) {
       const found = options.find((o) => o.value === value || o.id === String(value)) ?? null;
-      setSelected(found);
+      if (found?.id !== selected?.id) {
+        setSelected(found);
+      }
       return;
     }
     if (defaultToFirst && options.length > 0) {
-      setSelected(options[0]);
-    } else {
+      if (options[0].id !== selected?.id) {
+        setSelected(options[0]);
+      }
+    } else if (selected !== null) {
       setSelected(null);
     }
-  }, [value, options, defaultToFirst]);
+  }, [value, options, defaultToFirst, selected?.id]);
 
+  // Only call onChange once on initial mount if defaultToFirst is true
   useEffect(() => {
-    if (value == null && defaultToFirst && options.length > 0 && selected === options[0]) {
-      onChange?.(options[0]);
+    if (!hasInitializedRef.current && value == null && defaultToFirst && options.length > 0 && selected) {
+      hasInitializedRef.current = true;
+      onChange?.(selected);
     }
-  }, [options, selected, defaultToFirst, value, onChange]);
+  }, []);
 
   const handleSelect = useCallback((opt: DropdownOption) => {
     setSelected(opt);
@@ -162,7 +170,7 @@ const Dropdown = memo(function Dropdown({
       e.preventDefault();
       handleSelect(options[activeIndex]);
     }
-  }, [options.length, activeIndex, handleSelect]);
+  }, [options.length, activeIndex, handleSelect, options]);
 
   const toggleOpen = useCallback(() => setOpen((s) => !s), []);
 
