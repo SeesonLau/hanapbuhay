@@ -218,7 +218,7 @@ export default function AppliedJobsPage() {
     const requirementsMatch = desc.match(/\[requirements\]\s*([\s\S]*)/i);
     const aboutText = requirementsMatch ? desc.substring(0, requirementsMatch.index).trim() : desc;
     const requirementsText = requirementsMatch ? requirementsMatch[1].trim() : '';
-    const requirementsArray = requirementsText ? requirementsText.split('\n').map((r: string) => r.trim()).filter(Boolean) : [];
+    const requirementsArray = requirementsText ? requirementsText.split('\n').map((r: string) => r.trim().replace(/^[-•]\s*/, '')).filter(Boolean) : [];
     
     let applicantCount = 0;
     if (post.postId) {
