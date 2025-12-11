@@ -55,6 +55,23 @@ export default function HeaderHome({
     setLocale(locale === 'en' ? 'tl' : 'en');
   };
 
+  // Get logo source based on theme
+  const getLogoSource = () => {
+    switch (themeName) {
+      case 'spring':
+        return '/image/spring.svg';
+      case 'summer':
+        return '/image/summer.svg';
+      case 'autumn':
+        return '/image/autumn.svg';
+      case 'winter':
+        return '/image/winter.svg';
+      case 'classic':
+      default:
+        return '/image/hanapbuhay-logo.svg';
+    }
+  };
+
   // Get theme icon and label based on current theme
   const getThemeInfo = () => {
     switch (themeName) {
@@ -129,6 +146,7 @@ export default function HeaderHome({
   }, [isMobileMenuOpen]);
 
   const themeInfo = getThemeInfo();
+  const logoSource = getLogoSource();
 
   return (
     <header 
@@ -145,7 +163,7 @@ export default function HeaderHome({
         transition: 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease-out'
       }}
     >
-      {/* Logo - Clickable to home or scroll to top */}
+      {/* Logo - Clickable to home or scroll to top - Changes based on theme */}
       <div className="flex-shrink-0">
         <button 
           onClick={handleLogoClick}
@@ -153,11 +171,12 @@ export default function HeaderHome({
         >
           <Image
             className="w-32 h-10 sm:w-40 sm:h-12 md:w-44 md:h-14 lg:w-48 lg:h-16"
-            src="/image/hanapbuhay-logo.svg"
-            alt="HanapBuhat Logo"
+            src={logoSource}
+            alt="HanapBuhay Logo"
             width={187}
             height={68}
             priority
+            key={themeName} // Force re-render when theme changes
           />
         </button>
       </div>
