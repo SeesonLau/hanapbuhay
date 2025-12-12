@@ -8,6 +8,7 @@ import { ProfileService } from '@/lib/services/profile-services';
 import { ROUTES } from '@/lib/constants';
 import type { AppliedJob } from '@/components/cards/AppliedJobCardList';
 import type { FilterOptions } from '@/components/ui/FilterSection';
+import { SALARY_TYPE } from "@/lib/constants/salary-type";
 import { Gender } from '@/lib/constants/gender';
 import { ExperienceLevel } from '@/lib/constants/experience-level';
 import { ApplicationStatus } from '@/lib/constants/application-status';
@@ -189,7 +190,7 @@ export function useApplications(userId?: string | null, options: UseApplications
           description: post.description ?? '',
           location: post.location ?? '',
           salary: formatPeso(post.price),
-          salaryPeriod: 'month',
+          salaryPeriod: SALARY_TYPE.find(st => st.value === post.salaryType)?.label || '',
           appliedOn: formatAppliedDate(appliedOn),
           status: a.status ?? 'pending',
           genderTags,

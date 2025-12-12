@@ -187,9 +187,8 @@ export default function ManageJobPostsPage() {
           const payload: Partial<Post> = {
           title: data.title ?? selectedPost.title,
           description: combinedDescription,
-          // Price: try to parse numeric from string
           price: data.salary ? Number(String(data.salary).replace(/[^0-9.-]+/g, '')) : (selectedPost.price ?? 0),
-          // Persist subtypes plus experience and gender selections (deduped)
+          salaryType: data.salaryType,
           subType: Array.from(new Set([
             ...((data.subTypes ?? (data.jobTypes ?? selectedPost.subType)) || []),
             ...((data.experienceLevels ?? []) as string[]),
@@ -206,6 +205,7 @@ export default function ManageJobPostsPage() {
                 .filter(Boolean)
                 .join(' > ')
             : selectedPost.location,
+          updatedBy: userId as string,
         };
 
         await updatePost?.(selectedPost.postId, payload);
@@ -222,8 +222,8 @@ export default function ManageJobPostsPage() {
             title: data.title ?? "",
             description: combinedDescription,
             price: data.salary ? Number(String(data.salary).replace(/[^0-9.-]+/g, '')) : 0,
+            salaryType: data.salaryType,
             type: (data.jobTypes && data.jobTypes[0]) || (data.subTypes && data.subTypes[0]) || 'other',
-            // Persist subtypes plus experience and gender selections (deduped)
             subType: Array.from(new Set([
               ...((data.subTypes ?? (data.jobTypes ?? [])) || []),
               ...((data.experienceLevels ?? []) as string[]),

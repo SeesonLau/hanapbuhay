@@ -4,6 +4,7 @@ export interface Post {
   title: string;
   description: string;
   price: number;
+  salaryType: string;
   type: string;
   subType: string[];
   location: string;

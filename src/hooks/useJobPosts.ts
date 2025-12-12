@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import { PostService } from "@/lib/services/posts-services";
 import { ApplicationService } from "@/lib/services/applications-services";
 import type { Post } from "@/lib/models/posts";
+import { SALARY_TYPE } from "@/lib/constants/salary-type";
 import { Gender } from "@/lib/constants/gender";
 import { ExperienceLevel } from "@/lib/constants/experience-level";
 import { JobType, SubTypes } from "@/lib/constants/job-types";
@@ -156,13 +157,14 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
          .filter(s => !genderTags.includes(s) && !experienceTags.includes(s))
     ));
     const jobTypeTags = Array.from(new Set([post.type, ...jobSubtypeTags].filter(Boolean)));
+    const salaryTypeLabel = SALARY_TYPE.find(st => st.value === post.salaryType)?.label || '';
     return {
       id: post.postId,
       title: post.title,
       description: about,
       location: post.location ?? "",
-      salary: formatPeso((post as any).price),
-      salaryPeriod: "month",
+      salary: formatPeso(post.price),
+      salaryPeriod: salaryTypeLabel,
       postedDate: formatPostedDate(post.createdAt),
       isLocked: post.isLocked,
       applicantCount,
@@ -557,10 +559,11 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     if (!userId) throw new Error("User not authenticated");
     try {
       await PostService.deletePost(postId, userId);
+      toast.success(PostMessages.DELETE_POST_SUCCESS);
       // refresh
       await load({ page: 1 });
     } catch (err) {
-      toast.error("Failed to delete post");
+      toast.error(PostMessages.DELETE_POST_ERROR);
       throw err;
     }
   }, [userId, load]);
@@ -582,10 +585,12 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     if (!userId) throw new Error("User not authenticated");
     try {
       const updated = await PostService.updatePost(postId, postData);
+      toast.success(PostMessages.UPDATE_POST_SUCCESS);
       // After updating, refresh the list
       await load({ page: 1 });
       return updated;
     } catch (err) {
+      toast.error(PostMessages.UPDATE_POST_ERROR);
       throw err;
     }
   }, [userId, load]);
@@ -594,10 +599,12 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     if (!userId) throw new Error("User not authenticated");
     try {
       const created = await PostService.createPost(postData);
+      toast.success(PostMessages.CREATE_POST_SUCCESS)
       // After creating, refresh the list
       await load({ page: 1 });
       return created;
     } catch (err) {
+      toast.error(PostMessages.CREATE_POST_ERROR);
       throw err;
     }
   }, [userId, load]);

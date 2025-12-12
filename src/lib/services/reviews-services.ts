@@ -299,4 +299,29 @@ export class ReviewService {
       throw error;
     }
   }
+
+  // Check if a user has reviewed a worker for a specific post
+  static async hasUserReviewedWorkerForPost(
+    reviewerId: string,
+    workerId: string,
+    postId: string
+  ): Promise<boolean> {
+    try {
+      const { count, error } = await supabase
+        .from('reviews')
+        .select('*', { count: 'exact', head: true })
+        .eq('createdBy', reviewerId)
+        .eq('userId', workerId) // userId in reviews table refers to the worker being reviewed
+        .eq('postId', postId)
+        .is('deletedAt', null);
+
+      if (error) throw error;
+
+      return (count || 0) > 0;
+    } catch (error) {
+      console.error('Error checking for existing review:', error);
+      toast.error(ReviewMessages.FETCH_REVIEWS_ERROR);
+      throw error;
+    }
+  }
 }

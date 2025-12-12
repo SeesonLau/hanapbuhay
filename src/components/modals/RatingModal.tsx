@@ -1,6 +1,4 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { IoIosClose } from 'react-icons/io';
 import { MdOutlineRateReview } from 'react-icons/md';
@@ -13,19 +11,27 @@ interface RatingModalProps {
   isOpen: boolean;
   onClose: () => void;
   workerName: string;
-  onSubmit: (rating: number, comment: string) => void;
+  currentRating: number;
+  currentComment: string;
+  onRatingChange: (rating: number) => void;
+  onCommentChange: (comment: string) => void;
+  onSubmit: () => void;
+  isLoading: boolean;
 }
 
 export const RatingModal: React.FC<RatingModalProps> = ({
   isOpen,
   onClose,
   workerName,
+  currentRating,
+  currentComment,
+  onRatingChange,
+  onCommentChange,
   onSubmit,
+  isLoading,
 }) => {
   const { theme } = useTheme();
-  const [rating, setRating] = useState<number>(0);
-  const [comment, setComment] = useState<string>('');
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = React.useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -35,18 +41,14 @@ export const RatingModal: React.FC<RatingModalProps> = ({
   if (!isOpen || !mounted) return null;
 
   const handleSubmit = () => {
-    if (rating > 0) {
-      onSubmit(rating, comment);
-      setRating(0);
-      setComment('');
-      onClose();
+    if (currentRating > 0) {
+      onSubmit();
     }
   };
 
   const handleClose = () => {
-    setRating(0);
-    setComment('');
     onClose();
+    // No need to reset rating/comment here, hook manages it
   };
 
   const modalContent = (
@@ -120,8 +122,8 @@ export const RatingModal: React.FC<RatingModalProps> = ({
             <div className="mobile-S:block mobile-M:block mobile-L:block tablet:hidden laptop:hidden laptop-L:hidden">
               <StarRating
                 variant="rating"
-                value={rating}
-                onChange={setRating}
+                value={currentRating}
+                onChange={onRatingChange}
                 size="lg"
                 max={5}
                 labelVariant="none"
@@ -130,8 +132,8 @@ export const RatingModal: React.FC<RatingModalProps> = ({
             <div className="hidden tablet:block laptop:hidden laptop-L:hidden">
               <StarRating
                 variant="rating"
-                value={rating}
-                onChange={setRating}
+                value={currentRating}
+                onChange={onRatingChange}
                 size="xlg"
                 max={5}
                 labelVariant="none"
@@ -140,8 +142,8 @@ export const RatingModal: React.FC<RatingModalProps> = ({
             <div className="hidden laptop:block laptop-L:block">
               <StarRating
                 variant="rating"
-                value={rating}
-                onChange={setRating}
+                value={currentRating}
+                onChange={onRatingChange}
                 size="xxlg"
                 max={5}
                 labelVariant="none"
@@ -153,8 +155,8 @@ export const RatingModal: React.FC<RatingModalProps> = ({
           <div className="w-full">
             <TextArea
               placeholder="Add a comment"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              value={currentComment}
+              onChange={(e) => onCommentChange(e.target.value)}
               height="140px"
               width="100%"
               responsive={true}
@@ -170,7 +172,7 @@ export const RatingModal: React.FC<RatingModalProps> = ({
               variant="primary"
               size="xl"
               onClick={handleSubmit}
-              disabled={rating === 0}
+              disabled={currentRating === 0 || isLoading}
               className="w-full mobile-S:w-full mobile-M:w-full mobile-L:w-full tablet:w-[420px]"
               fullRounded={true}
             >

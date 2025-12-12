@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { FaUserCircle } from 'react-icons/fa';
 import Image from 'next/image';
@@ -8,10 +8,14 @@ import StarRating from '@/components/ui/StarRating';
 import ChatIcon from '@/assets/chat.svg';
 import ReviewIcon from '@/assets/review.svg';
 import { RatingModal } from '@/components/modals/RatingModal';
+import { COLORS } from '@/styles/colors'; // Import COLORS
 import { useTheme } from '@/hooks/useTheme';
+import { useReview } from '@/hooks/useReview'; // Import the new hook
 
 interface ApplicantStatusCardProps {
-  userId: string;
+  userId: string; // This is the workerId
+  postId: string;
+  applicationId: string;
   name: string;
   rating?: number;
   reviewCount?: number;
@@ -23,6 +27,8 @@ interface ApplicantStatusCardProps {
 
 export default function ApplicantStatusCard({
   userId,
+  postId,
+  applicationId,
   name,
   rating = 0,
   reviewCount = 0,
@@ -33,7 +39,16 @@ export default function ApplicantStatusCard({
 }: ApplicantStatusCardProps) {
   const { theme } = useTheme();
   const router = useRouter();
-  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const {
+    isReviewModalOpen,
+    reviewForm,
+    openReviewModal,
+    closeReviewModal,
+    handleRatingChange,
+    handleCommentChange,
+    submitReview,
+    isLoading,
+  } = useReview();
 
   const handleChatClick = (e: React.MouseEvent) => {
     e.stopPropagation(); 
@@ -42,16 +57,30 @@ export default function ApplicantStatusCard({
 
   const handleReviewClick = (e: React.MouseEvent) => {
     e.stopPropagation(); 
-    setIsRatingModalOpen(true);
+    openReviewModal(userId, postId, applicationId); // Open the modal with necessary IDs
   };
 
-  const handleSubmitRating = (rating: number, comment: string) => {
-    console.log('Rating submitted:', { userId, rating, comment });
+  const getStatusStyles = (currentStatus: 'Accepted' | 'Denied' | 'Completed') => {
+    if (currentStatus === 'Completed') {
+      return {
+        color: COLORS.white, // Use COLORS.white
+        borderColor: theme.colors.success,
+        backgroundColor: theme.colors.success,
+      };
+    } else if (currentStatus === 'Accepted') {
+      return {
+        color: theme.colors.success,
+        borderColor: theme.colors.success,
+        backgroundColor: theme.colors.surface, // Assuming surface is the neutral background
+      };
+    } else { // 'Denied'
+      return {
+        color: theme.colors.error,
+        borderColor: theme.colors.error,
+        backgroundColor: theme.colors.surface, // Assuming surface is the neutral background
+      };
+    }
   };
-
-  const statusColors = status === 'Accepted'
-    ? { color: theme.colors.success, borderColor: theme.colors.success }
-    : { color: theme.colors.error, borderColor: theme.colors.error };
 
   const displayName = name.trim().split(/\s+/).slice(0, 2).join(' ');
 
@@ -152,21 +181,29 @@ export default function ApplicantStatusCard({
         <span
           className="text-tiny md:text-xs font-semibold px-4 md:px-3 h-[25px] md:h-[22px] flex items-center justify-center rounded-md w-full border"
           style={{
-            color: statusColors.color,
-            borderColor: statusColors.borderColor,
-            backgroundColor: theme.colors.surface,
+            color: getStatusStyles(status).color,
+            borderColor: getStatusStyles(status).borderColor,
+            backgroundColor: getStatusStyles(status).backgroundColor,
           }}
         >
           {status}
         </span>
       </div>
 
-      <RatingModal
-        isOpen={isRatingModalOpen}
-        onClose={() => setIsRatingModalOpen(false)}
-        workerName={name}
-        onSubmit={handleSubmitRating}
-      />
+      {isReviewModalOpen && reviewForm && (
+        <RatingModal
+          isOpen={isReviewModalOpen}
+          onClose={closeReviewModal}
+          workerName={name} // Pass the worker's name to the modal
+          currentRating={reviewForm.rating}
+          currentComment={reviewForm.comment}
+          onRatingChange={handleRatingChange}
+          onCommentChange={handleCommentChange}
+          onSubmit={submitReview}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 }
+
