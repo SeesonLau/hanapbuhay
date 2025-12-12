@@ -71,28 +71,54 @@ export default function NewApplicantsSection({
 
       setTotalCount(count);
 
-      const applicantsWithProfiles = await Promise.all(
-        applications.map(async (app) => {
-          const displayName = await ProfileService.getDisplayNameByUserId(app.userId);
-          const profileData = await ProfileService.getNameProfilePic(app.userId);
-          const averageRating = await ReviewService.getAverageRating(app.userId);
-          const totalReviews = await ReviewService.getTotalReviewsCountByUserId(app.userId);
+      // Process in chunks to avoid network congestion (ERR_CONNECTION_CLOSED)
+      const chunkSize = 5;
+      const applicantsWithProfiles: Applicant[] = [];
 
-          return {
-            userId: app.userId,
-            name: displayName || 'Unknown Applicant',
-            rating: averageRating || 0,
-            reviewCount: totalReviews || 0,
-            dateApplied: new Date(app.createdAt).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-            }),
-            applicationId: app.applicationId,
-            profilePicUrl: profileData?.profilePicUrl || null,
-          };
-        })
-      );
+      for (let i = 0; i < applications.length; i += chunkSize) {
+        const chunk = applications.slice(i, i + chunkSize);
+        const chunkResults = await Promise.all(
+          chunk.map(async (app) => {
+            try {
+              const [profileData, averageRating, totalReviews] = await Promise.all([
+                ProfileService.getNameProfilePic(app.userId),
+                ReviewService.getAverageRating(app.userId),
+                ReviewService.getTotalReviewsCountByUserId(app.userId)
+              ]);
+
+              return {
+                userId: app.userId,
+                name: profileData?.name || 'Unknown Applicant',
+                rating: averageRating || 0,
+                reviewCount: totalReviews || 0,
+                dateApplied: new Date(app.createdAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                }),
+                applicationId: app.applicationId,
+                profilePicUrl: profileData?.profilePicUrl || null,
+              };
+            } catch (e) {
+              console.error(`Error fetching details for applicant ${app.userId}`, e);
+              return {
+                userId: app.userId,
+                name: 'Unknown Applicant',
+                rating: 0,
+                reviewCount: 0,
+                dateApplied: new Date(app.createdAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                }),
+                applicationId: app.applicationId,
+                profilePicUrl: null,
+              };
+            }
+          })
+        );
+        applicantsWithProfiles.push(...chunkResults);
+      }
 
       setApplicants(applicantsWithProfiles);
     } catch (error) {

@@ -369,6 +369,8 @@ export class NotificationService {
       case NotificationType.JOB_APPLICATION:
         return `/manageJobPosts?postId=${notification.relatedId}&action=applicants`;
       case NotificationType.APPLICATION_ACCEPTED:
+      case NotificationType.APPLICATION_REJECTED:
+      case NotificationType.APPLICATION_COMPLETED:
         return `/appliedJobs?applicationId=${notification.relatedId}`;
       default:
         return '#';
