@@ -542,17 +542,6 @@ export default function JobPostEditModal({ isOpen, onClose, initialData, onSubmi
                 disabled={!!isRestricted}
                 required
               />
-              <SelectBox
-                width="180px"
-                options={[
-                  { value: 'day', label: t.jobs.jobPostModal.fields.perDay },
-                  { value: 'week', label: t.jobs.jobPostModal.fields.perWeek },
-                  { value: 'month', label: t.jobs.jobPostModal.fields.perMonth },
-                ]}
-                value={salaryPeriod}
-                onChange={(e) => setSalaryPeriod(e.target.value as 'day' | 'week' | 'month')}
-                disabled={!!isRestricted}
-              />
           <SelectBox 
             width="180px"
             options={[
