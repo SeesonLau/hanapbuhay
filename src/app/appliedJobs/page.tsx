@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 import Banner from '@/components/ui/Banner';
 import StatsSection from '@/components/posts/StatsSection';
 import { useStats } from '@/hooks/useStats';
@@ -23,6 +25,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 export default function AppliedJobsPage() {
   const { theme } = useTheme();
   const { t } = useLanguage();
+  const searchParams = useSearchParams();
   const [user, setUser] = useState<any | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -31,6 +34,8 @@ export default function AppliedJobsPage() {
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
   const [selectedApplication, setSelectedApplication] = useState<AppliedJob | null>(null);
+  const [pendingApplicationId, setPendingApplicationId] = useState<string | null>(null);
+  const [hasPerformedInitialFetch, setHasPerformedInitialFetch] = useState(false);
   
   const [activeFilters, setActiveFilters] = useState<FilterOptions>({
     jobTypes: {},
@@ -101,19 +106,39 @@ export default function AppliedJobsPage() {
       setActiveFilters(parsedFilters);
     }
     if (applicationId) {
-      try {
-        const ref = document.referrer || '';
-        const isInternalRef = ref.startsWith(window.location.origin);
-        if (isInternalRef) {
-          setSelectedApplicationId?.(applicationId);
-        } else {
-          setSelectedApplicationId?.(null, false);
-        }
-      } catch (e) {
-        // ignore
-      }
+      setPendingApplicationId(applicationId);
+      setSelectedApplicationId?.(applicationId);
     }
   }, []);
+
+  useEffect(() => {
+    const appId = searchParams.get('applicationId');
+    if (appId) {
+      setPendingApplicationId(appId);
+    }
+  }, [searchParams]);
+
+  const prevLoading = useRef(loading);
+  useEffect(() => {
+    if (prevLoading.current && !loading) {
+      setHasPerformedInitialFetch(true);
+    }
+    prevLoading.current = loading;
+  }, [loading]);
+
+  useEffect(() => {
+    if (pendingApplicationId && hasPerformedInitialFetch && !loading) {
+      const app = applications.find(a => a.id === pendingApplicationId);
+      if (app) {
+        handleOpenJobView(app);
+        setPendingApplicationId(null);
+      } else {
+        toast.error("Application not found or has been withdrawn.");
+        setSelectedApplicationId?.(null);
+        setPendingApplicationId(null);
+      }
+    }
+  }, [applications, pendingApplicationId, loading, hasPerformedInitialFetch]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;

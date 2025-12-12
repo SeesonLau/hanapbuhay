@@ -2,6 +2,8 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 import Banner from '@/components/ui/Banner';
 import AddButtonIcon from '@/assets/add.svg';
 import StatsSection from '@/components/posts/StatsSection';
@@ -27,9 +29,10 @@ import { useLanguage } from '@/hooks/useLanguage';
 export default function ManageJobPostsPage() {
   const { theme } = useTheme();
   const { t } = useLanguage();
+  const searchParams = useSearchParams();
   const [user, setUser] = useState<any | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort: hookHandleSort, loadMore, refresh, deletePost, updatePost, createPost, toggleLockPost, applyFilters, setSelectedPostId, parseUrlParams, sortValue } = useJobPosts(userId, { skip: !userId });
+  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort, loadMore, refresh, deletePost, updatePost, createPost, toggleLockPost, applyFilters, setSelectedPostId, parseUrlParams, setSortInUrlForManage } = useJobPosts(userId, { skip: !userId });
   const [initialLoading, setInitialLoading] = useState(true);
   const { stats, loading: statsLoading, error: statsError } = useStats({ variant: 'manageJobs', userId });
   
@@ -40,6 +43,8 @@ export default function ManageJobPostsPage() {
   const [isRestrictionModalOpen, setIsRestrictionModalOpen] = useState(false);
   const [isApplicantsModalOpen, setIsApplicantsModalOpen] = useState(false);
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
+  const [pendingPostId, setPendingPostId] = useState<string | null>(null);
+  const [hasPerformedInitialFetch, setHasPerformedInitialFetch] = useState(false);
   
   // View mode state
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
@@ -128,11 +133,11 @@ export default function ManageJobPostsPage() {
     setIsDeleteModalOpen(true);
   };
 
-  // Removed handleManageSortChange as hookHandleSort will be used directly
-  // const handleManageSortChange = useCallback((opt: any) => {
-  //   const val = String(opt?.value ?? 'latest');
-  //   setSortInUrlForManage?.(val);
-  // }, [setSortInUrlForManage]);
+  // Stable sort change handler to avoid re-render loops
+  const handleManageSortChange = useCallback((opt: any) => {
+    const val = String(opt?.value ?? 'latest');
+    setSortInUrlForManage?.(val);
+  }, [setSortInUrlForManage]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -268,58 +273,53 @@ export default function ManageJobPostsPage() {
     }
   };
 
-  // On mount - if URL contains postId, honor it only for internal navigation.
-  const _processedUrlPostRef = useRef<string | null>(null);
+  // Handle deep linking for postId
+  useEffect(() => {
+    const postId = searchParams.get('postId');
+    if (postId) {
+      setPendingPostId(postId);
+      setSelectedPostId?.(postId);
+    }
+  }, [searchParams]);
+
+  const prevLoading = useRef(loading);
+  useEffect(() => {
+    if (prevLoading.current && !loading) {
+      setHasPerformedInitialFetch(true);
+    }
+    prevLoading.current = loading;
+  }, [loading]);
 
   useEffect(() => {
-    try {
-      const { postId } = parseUrlParams?.() ?? { postId: '' } as any;
-      if (!postId) return;
+    if (pendingPostId && hasPerformedInitialFetch && !loading) {
+      const found = jobs.find((j) => j.id === pendingPostId);
+      if (found) {
+        const data: JobPostViewData = {
+          id: found.id,
+          title: found.title,
+          description: found.description,
+          requirements: found.requirements ?? [],
+          location: found.location ?? '',
+          salary: String(found.salary).replace(/₱|,/g, ''),
+          salaryPeriod: found.salaryPeriod ?? 'month',
+          postedDate: found.postedDate ?? '',
+          applicantCount: found.applicantCount ?? 0,
+          genderTags: found.genderTags,
+          experienceTags: found.experienceTags,
+          jobTypeTags: found.jobTypeTags,
+          raw: found.raw,
+        };
 
-      // Avoid re-processing the same postId repeatedly which can cause update loops
-      if (_processedUrlPostRef.current === postId) return;
-
-      const ref = document.referrer || '';
-      const isInternalRef = ref.startsWith(window.location.origin);
-
-      if (!isInternalRef) {
-        setSelectedPostId?.(null, false);
-        _processedUrlPostRef.current = null;
-        return;
+        setSelectedJob(data);
+        setIsJobViewOpen(true);
+        setPendingPostId(null);
+      } else {
+        toast.error("Post not found or has been deleted.");
+        setSelectedPostId?.(null);
+        setPendingPostId(null);
       }
-
-      const found = jobs?.find((j) => j.id === postId);
-      if (!found) {
-        // If not found in the currently loaded list, remove the param (avoid stale URL)
-        setSelectedPostId?.(null, false);
-        _processedUrlPostRef.current = null;
-        return;
-      }
-
-      const data: JobPostViewData = {
-        id: found.id,
-        title: found.title,
-        description: found.description,
-        requirements: found.requirements ?? [],
-        location: found.location ?? '',
-        salary: String(found.salary).replace(/₱|,/g, ''),
-        salaryPeriod: found.salaryPeriod ?? 'month',
-        postedDate: found.postedDate ?? '',
-        applicantCount: found.applicantCount ?? 0,
-        genderTags: found.genderTags,
-        experienceTags: found.experienceTags,
-        jobTypeTags: found.jobTypeTags,
-        raw: found.raw,
-      };
-
-      _processedUrlPostRef.current = postId;
-      setSelectedPostId?.(postId);
-      setSelectedJob(data);
-      setIsJobViewOpen(true);
-    } catch (e) {
-      // ignore
     }
-  }, [jobs]);
+  }, [jobs, pendingPostId, loading, hasPerformedInitialFetch]);
 
   // Show preloader while loading user data
   if (initialLoading) {
@@ -386,7 +386,7 @@ export default function ManageJobPostsPage() {
                 >
                   {t.common.labels.sortBy}
                 </span>
-                <Sort variant="manageJobs" value={sortValue} onChange={hookHandleSort} />
+                <Sort variant="manageJobs" onChange={handleManageSortChange} />
               </div>
               {/* View Toggle */}
               <ViewToggle value={viewMode} onChange={setViewMode} />
@@ -423,7 +423,7 @@ export default function ManageJobPostsPage() {
                         >
                           {t.common.labels.sortBy}
                         </span>
-                        <Sort variant="manageJobs" value={sortValue} onChange={hookHandleSort} />
+                        <Sort variant="manageJobs" onChange={handleManageSortChange} />
                         <ViewToggle value={viewMode} onChange={setViewMode} />
                     </div>
                 </div>
@@ -497,7 +497,7 @@ export default function ManageJobPostsPage() {
 
       <JobPostViewModal 
         isOpen={isJobViewOpen} 
-        onClose={() => setIsJobViewOpen(false)} 
+        onClose={() => { setSelectedPostId?.(null, false); setIsJobViewOpen(false); }}
         job={selectedJob}
       />
 
