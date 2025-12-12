@@ -132,6 +132,17 @@ export class ReviewService {
         throw error;
       }
 
+      // Update application status to completed
+      const { error: appError } = await supabase
+        .from('applications')
+        .update({ 
+          status: 'completed',
+          updatedAt: new Date().toISOString(),
+          updatedBy: createdBy
+        })
+        .eq('postId', postId)
+        .eq('userId', userId);
+
       toast.success(ReviewMessages.CREATE_REVIEW_SUCCESS);
       return data;
     } catch (error: any) {

@@ -9,19 +9,19 @@ export type SortVariant = 'findJobs' | 'manageJobs';
 export interface SortProps {
   variant: SortVariant;
   onChange?: (option: DropdownOption) => void;
-  value?: string | number | null; // Added value prop
   className?: string;
   fullWidth?: boolean;
   defaultToFirst?: boolean;
+  value?: string;
 }
 
 export default function Sort({
   variant,
   onChange,
-  value = null, // Added value prop
   className = '',
   fullWidth = false,
-  defaultToFirst = true
+  defaultToFirst = true,
+  value
 }: SortProps) {
   const { t } = useLanguage();
 
@@ -47,10 +47,10 @@ export default function Sort({
       options={options}
       placeholder={t.components.sort.sortBy}
       onChange={onChange}
-      value={value} // Pass the value prop to Dropdown
       className={className}
       fullWidth={fullWidth}
       defaultToFirst={defaultToFirst}
+      value={value}
     />
   );
 }

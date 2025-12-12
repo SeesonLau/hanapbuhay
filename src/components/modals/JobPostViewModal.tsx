@@ -18,6 +18,7 @@ import { ProfileService } from "@/lib/services/profile-services";
 import { formatDisplayName } from "@/lib/utils/profile-utils";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/hooks/useLanguage";
+import { ApplicationStatusBadge, ApplicationStatus } from '@/components/cards/AppliedJobCardList';
 
 export interface JobPostViewData {
   id: string;
@@ -38,6 +39,7 @@ export interface JobPostViewData {
     avatarUrl?: string;
   };
   raw?: any;
+  status?: ApplicationStatus;
 }
 
 interface JobPostViewModalProps {
@@ -45,6 +47,7 @@ interface JobPostViewModalProps {
   onClose: () => void;
   job: JobPostViewData | null;
   onApply?: (id: string) => void;
+  onViewApplicants?: () => void;
 }
 
 const normalizeJobType = (label: string): string | null => {
@@ -60,7 +63,7 @@ const normalizeExperience = (label: string): string | null => {
   return Object.values(ExperienceLevel).includes(label as ExperienceLevel) ? label : null;
 };
 
-export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobPostViewModalProps) {
+export default function JobPostViewModal({ isOpen, onClose, job, onApply, onViewApplicants }: JobPostViewModalProps) {
   const { theme } = useTheme();
   const { t } = useLanguage();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -294,7 +297,7 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
 
         {/* Footer: posted date + applicants + Apply */}
         <div className="px-6 py-6">
-          <div className={`flex items-center ${onApply ? 'justify-between' : 'justify-start'}`}>
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span
                 className="text-[11px] font-medium"
@@ -303,24 +306,39 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
                 {t.jobs.jobCard.posted}: {postedDate}
               </span>
               <span style={{ color: theme.colors.borderLight }}>•</span>
-              <span
-                className="text-[11px]"
-                style={{ color: theme.colors.textMuted }}
-              >
-                {applicantCount} {t.jobs.jobCard.applicants}
-              </span>
+              {onViewApplicants ? (
+                <button
+                  onClick={onViewApplicants}
+                  className="text-[11px] hover:underline focus:outline-none font-medium"
+                  style={{ color: theme.colors.primary }}
+                >
+                  {applicantCount} {t.jobs.jobCard.applicants}
+                </button>
+              ) : (
+                <span
+                  className="text-[11px]"
+                  style={{ color: theme.colors.textMuted }}
+                >
+                  {applicantCount} {t.jobs.jobCard.applicants}
+                </span>
+              )}
             </div>
-            {onApply && (
-              <button
-                onClick={() => onApply(id)}
-                className="px-4 py-2 rounded-lg text-white text-sm transition-colors"
-                style={{ backgroundColor: theme.colors.primary }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.primaryHover}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.primary}
-              >
-                {t.jobs.jobCard.applyNow}
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {job.status && (
+                <ApplicationStatusBadge status={job.status} size="md" />
+              )}
+              {onApply && (
+                <button
+                  onClick={() => onApply(id)}
+                  className="px-4 py-2 rounded-lg text-white text-sm transition-colors"
+                  style={{ backgroundColor: theme.colors.primary }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.primaryHover}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.primary}
+                >
+                  {t.jobs.jobCard.applyNow}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
