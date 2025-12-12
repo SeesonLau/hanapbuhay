@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/chat/input';
 import { UserContact } from '@/lib/models/chat';
 import { ChatService } from '@/lib/services/chat/chat-services';
+import { ProfileService } from '@/lib/services/profile-services';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
 import { toast } from 'react-hot-toast';
 import { useTheme } from '@/hooks/useTheme';
@@ -38,9 +39,21 @@ export const SearchUsers: React.FC<SearchUsersProps> = ({ currentUserId, onUserS
         if (debouncedSearchTerm.trim().length >= 1) {
             setIsSearching(true);
             ChatService.searchUsers(debouncedSearchTerm, currentUserId)
-                .then(results => {
+                .then(async results => {
                     console.log('Search results for', debouncedSearchTerm, ':', results);
-                    setSearchResults(results);
+                    
+                    // Fetch display names for all results
+                    const resultsWithDisplayNames = await Promise.all(
+                        results.map(async (user) => {
+                            const displayName = await ProfileService.getDisplayNameByUserId(user.userId);
+                            return {
+                                ...user,
+                                name: displayName || user.name,
+                            };
+                        })
+                    );
+                    
+                    setSearchResults(resultsWithDisplayNames);
                 })
                 .catch(err => {
                     console.error('User search failed:', err);
