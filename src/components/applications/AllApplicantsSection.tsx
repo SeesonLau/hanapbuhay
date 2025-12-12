@@ -9,6 +9,7 @@ import { ReviewService } from '@/lib/services/reviews-services';
 import { ApplicationStatus } from '@/lib/constants/application-status';
 import ViewProfileModal from '../modals/ViewProfileModal';
 import { useTheme } from '@/hooks/useTheme';
+import Sort from '@/components/ui/Sort';
 
 interface Applicant {
   userId: string;
@@ -40,6 +41,7 @@ export default function AllApplicantsSection({
 }: AllApplicantsSectionProps) {
   const { theme } = useTheme();
   const [applicants, setApplicants] = useState<Applicant[]>([]);
+  const [currentSort, setCurrentSort] = useState<SortOrder>(sortOrder);
   const [loading, setLoading] = useState(true);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -127,9 +129,9 @@ export default function AllApplicantsSection({
     return [...filtered].sort((a, b) => {
       const dateA = new Date(a.dateApplied).getTime();
       const dateB = new Date(b.dateApplied).getTime();
-      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+      return currentSort === 'newest' ? dateB - dateA : dateA - dateB;
     });
-  }, [applicants, sortOrder, searchQuery]);
+  }, [applicants, currentSort, searchQuery]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -169,6 +171,13 @@ export default function AllApplicantsSection({
 
   return (
     <div className="relative">
+      <div className="flex justify-end px-2 mb-2">
+        <Sort 
+          variant="applicants" 
+          value={currentSort} 
+          onChange={(opt) => setCurrentSort(opt.value as SortOrder)} 
+        />
+      </div>
       <div
         ref={scrollRef}
         className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 justify-items-center p-2 max-h-[350px] md:max-h-[500px] overflow-y-auto scrollbar-hide scroll-smooth"

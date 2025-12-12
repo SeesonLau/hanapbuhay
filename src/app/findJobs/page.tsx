@@ -65,8 +65,8 @@ export default function FindJobsPage() {
     isLoadingMore,
     error: jobsError,
     hasMore,
-    handleSearch: hookHandleSearch,
-    handleSort: hookHandleSort,
+    handleSearch,
+    handleSort,
     loadMore,
     refresh,
     applyFilters,
@@ -105,12 +105,6 @@ export default function FindJobsPage() {
     return count;
   }, [activeFilters]);
 
-  const handleSortChange = useCallback((opt: any) => {
-    const val = String(opt?.value ?? 'latest');
-    const sortParam = val === 'latest' ? 'date_desc' : val === 'oldest' ? 'date_asc' : val === 'salary-asc' ? 'salary_asc' : val === 'salary-desc' ? 'salary_desc' : undefined;
-    setSortInUrl?.(sortParam);
-  }, [setSortInUrl]);
-
   const handleApplyFilters = (filters: FilterOptions) => {
     setActiveFilters(filters);
     applyFilters?.(filters);
@@ -138,10 +132,6 @@ export default function FindJobsPage() {
       },
     });
     applyFilters?.(null);
-  };
-
-  const handleSearch = async (query: string, location?: string) => {
-    await hookHandleSearch(query, location);
   };
 
   const handleApplyNow = useCallback(async (postId: string) => {
@@ -265,7 +255,7 @@ export default function FindJobsPage() {
                 >
                   {t.common.labels.sortBy}
                 </span>
-                <Sort variant="findJobs" onChange={handleSortChange} value={sortValue} />
+                <Sort variant="findJobs" onChange={handleSort} value={sortValue} />
               </div>
               
               {/* View Toggle */}
@@ -305,7 +295,7 @@ export default function FindJobsPage() {
                   >
                     {t.common.labels.sortBy}
                   </span>
-                  <Sort variant="findJobs" onChange={handleSortChange} value={sortValue} />
+                  <Sort variant="findJobs" onChange={handleSort} value={sortValue} />
                   <ViewToggle value={viewMode} onChange={setViewMode} />
                 </div>
               </div>

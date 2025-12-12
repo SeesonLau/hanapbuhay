@@ -4,7 +4,7 @@ import React from 'react';
 import Dropdown, { DropdownOption } from './Dropdown';
 import { useLanguage } from '@/hooks/useLanguage';
 
-export type SortVariant = 'findJobs' | 'manageJobs';
+export type SortVariant = 'findJobs' | 'manageJobs' | 'applicants';
 
 export interface SortProps {
   variant: SortVariant;
@@ -37,7 +37,12 @@ export default function Sort({
     manageJobs: [
       { id: 'latest', label: t.components.sort.newest, value: 'latest' },
       { id: 'oldest', label: t.components.sort.oldest, value: 'oldest' },
-    ] as DropdownOption[]
+    ] as DropdownOption[],
+
+    applicants: [
+      { id: 'newest', label: t.components.sort.newest, value: 'newest' },
+      { id: 'oldest', label: t.components.sort.oldest, value: 'oldest' },
+    ] as DropdownOption[],
   };
 
   const options = sortOptions[variant];
