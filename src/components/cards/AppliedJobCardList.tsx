@@ -203,13 +203,12 @@ export default function AppliedJobCard({
   // Determine if we should use pastel colors (non-classic themes) or gray (classic theme)
   const shouldUsePastelColors = theme.name !== 'classic';
 
-  // Format location with comma (e.g., "Cebu, Cebu City")
+  // Format location with comma (e.g., "Cebu, Cebu City") - excludes address when muted
   const formatLocationWithComma = (locationString: string): string => {
-    const { province, city, address } = parseLocationDetailed(locationString);
+    const { province, city } = parseLocationDetailed(locationString);
     let formatted = '';
     if (province) formatted += province;
     if (city) formatted += (formatted ? ', ' : '') + city;
-    if (address) formatted += (formatted ? ', ' : '') + address;
     return formatted || locationString;
   };
 
@@ -296,21 +295,18 @@ export default function AppliedJobCard({
           <div className={`hidden laptop-L:flex items-center gap-3 flex-1`}>
             <div className="w-[140px] min-w-[140px] max-w-[140px] overflow-hidden">
               {isMuted ? (
-                <div style={{
-                  backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
-                  color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
-                  display: 'inline-flex',
-                  borderRadius: '5px',
-                  padding: '0 12px',
-                  height: '17px',
-                  fontSize: '10px',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  whiteSpace: 'nowrap',
-                  width: '100%',
-                }}>
-                  {`${job.salary} /${job.salaryPeriod}`}
-                </div>
+                <StaticSalaryTag 
+                  label={`${job.salary} /${job.salaryPeriod}`} 
+                  className="whitespace-nowrap w-full"
+                  iconColor={shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af'}
+                  style={{
+                    backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+                    color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+                    borderRadius: '5px',
+                    padding: '0 12px',
+                    fontSize: '10px',
+                  }}
+                />
               ) : (
                 <StaticSalaryTag 
                   label={`${job.salary} /${job.salaryPeriod}`} 
@@ -484,19 +480,18 @@ export default function AppliedJobCard({
       <div className="mt-auto space-y-[16px]">
         <div className={`flex flex-wrap items-center gap-2`}>
           {isMuted ? (
-            <div style={{
-              backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
-              color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
-              display: 'inline-flex',
-              borderRadius: '5px',
-              padding: '0 12px',
-              height: '25px',
-              fontSize: '10px',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              {formatLocationWithComma(job.location)}
-            </div>
+            <StaticLocationTag
+              label={job.location}
+              showFullAddress={false}
+              iconColor={shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af'}
+              style={{
+                backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+                color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+                borderRadius: '5px',
+                padding: '0 12px',
+                fontSize: '10px',
+              }}
+            />
           ) : (
             <StaticLocationTag 
               label={job.location} 
@@ -504,20 +499,18 @@ export default function AppliedJobCard({
             />
           )}
           {isMuted ? (
-            <div style={{
-              backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
-              color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
-              display: 'inline-flex',
-              borderRadius: '5px',
-              padding: '0 12px',
-              height: '17px',
-              fontSize: '10px',
-              alignItems: 'center',
-              justifyContent: 'center',
-              whiteSpace: 'nowrap',
-            }}>
-              {`${job.salary} /${job.salaryPeriod}`}
-            </div>
+            <StaticSalaryTag
+              label={`${job.salary} /${job.salaryPeriod}`}
+              className="whitespace-nowrap"
+              iconColor={shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af'}
+              style={{
+                backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+                color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+                borderRadius: '5px',
+                padding: '0 12px',
+                fontSize: '10px',
+              }}
+            />
           ) : (
             <StaticSalaryTag 
               label={`${job.salary} /${job.salaryPeriod}`} 

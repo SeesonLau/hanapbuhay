@@ -64,12 +64,27 @@ interface StaticLocationTagProps {
   className?: string;
   variant?: 'default' | 'glassy';
   showFullAddress?: boolean;
+  iconColor?: string;
+  style?: React.CSSProperties;
 }
 
-export const StaticLocationTag: React.FC<StaticLocationTagProps> = ({ label, className = '', showFullAddress = true, variant = 'default'}) => {
+export const StaticLocationTag: React.FC<StaticLocationTagProps> = ({ label, className = '', showFullAddress = true, variant = 'default', iconColor, style }) => {
   const { province, city, address } = parseLocationDetailed(label || '');
   const hasAddress = showFullAddress && !!address;
   const isGlassy = variant === 'glassy';
+  
+  // Determine filter based on iconColor
+  let iconFilter: string | undefined;
+  if (iconColor) {
+    if (iconColor === '#9ca3af') {
+      iconFilter = 'brightness(0) saturate(100%) invert(72%) sepia(8%) saturate(328%) hue-rotate(187deg) brightness(104%) contrast(88%)';
+    } else {
+      iconFilter = undefined;
+    }
+  } else {
+    iconFilter = isGlassy ? 'brightness(0) invert(1)' : undefined;
+  }
+  
   return (
     <div 
       className={`inline-flex items-center px-3 h-[25px] rounded-[5px] font-alexandria font-normal text-[10px] min-w-0 max-w-full ${
@@ -77,13 +92,31 @@ export const StaticLocationTag: React.FC<StaticLocationTagProps> = ({ label, cla
           ? 'text-gray-200 bg-white/10 backdrop-blur-sm border border-white/20' 
           : 'text-black bg-gray-default'
       } ${className}`}
+      style={style}
     >
-      <img 
-        src="/icons/Location.svg" 
-        alt="Location" 
-        className="w-[15px] h-[15px] mr-2" 
-        style={isGlassy ? { filter: 'brightness(0) invert(1)' } : undefined}
-      />
+      {iconColor && iconColor !== '#9ca3af' ? (
+        <span
+          className="w-[15px] h-[15px] mr-2 inline-block"
+          style={{
+            backgroundColor: iconColor,
+            WebkitMaskImage: 'url(/icons/Location.svg)',
+            maskImage: 'url(/icons/Location.svg)',
+            WebkitMaskRepeat: 'no-repeat',
+            maskRepeat: 'no-repeat',
+            WebkitMaskPosition: 'center',
+            maskPosition: 'center',
+            WebkitMaskSize: 'contain',
+            maskSize: 'contain',
+          }}
+        />
+      ) : (
+        <img 
+          src="/icons/Location.svg" 
+          alt="Location" 
+          className="w-[15px] h-[15px] mr-2" 
+          style={iconFilter ? { filter: iconFilter } : undefined}
+        />
+      )}
       <div className="flex items-center min-w-0">
         {province && <span className="flex-shrink-0">{province}</span>}
         {city && <span className="flex-shrink-0">{province ? ', ' : ''}{city}</span>}
@@ -102,10 +135,25 @@ interface StaticSalaryTagProps {
   label: string;
   className?: string;
   variant?: 'default' | 'glassy';
+  iconColor?: string;
+  style?: React.CSSProperties;
 }
 
-export const StaticSalaryTag: React.FC<StaticSalaryTagProps> = ({ label, className = '', variant = 'default' }) => {
+export const StaticSalaryTag: React.FC<StaticSalaryTagProps> = ({ label, className = '', variant = 'default', iconColor, style }) => {
   const isGlassy = variant === 'glassy';
+  
+  // Determine filter based on iconColor
+  let iconFilter: string | undefined;
+  if (iconColor) {
+    if (iconColor === '#9ca3af') {
+      iconFilter = 'brightness(0) saturate(100%) invert(72%) sepia(8%) saturate(328%) hue-rotate(187deg) brightness(104%) contrast(88%)';
+    } else {
+      iconFilter = undefined;
+    }
+  } else {
+    iconFilter = isGlassy ? 'brightness(0) invert(1)' : undefined;
+  }
+  
   return (
     <div 
       className={`inline-flex items-center justify-center px-3 h-[25px] rounded-[5px] font-alexandria font-normal text-[10px] ${
@@ -113,13 +161,31 @@ export const StaticSalaryTag: React.FC<StaticSalaryTagProps> = ({ label, classNa
           ? 'text-gray-200 bg-white/10 backdrop-blur-sm border border-white/20' 
           : 'text-black bg-gray-default'
       } ${className}`}
+      style={style}
     >
-      <img 
-        src="/icons/PHP.svg" 
-        alt="Salary icon" 
-        className="w-[15px] h-[15px] mr-2" 
-        style={isGlassy ? { filter: 'brightness(0) invert(1)' } : undefined}
-      />
+      {iconColor && iconColor !== '#9ca3af' ? (
+        <span
+          className="w-[15px] h-[15px] mr-2 inline-block"
+          style={{
+            backgroundColor: iconColor,
+            WebkitMaskImage: 'url(/icons/PHP.svg)',
+            maskImage: 'url(/icons/PHP.svg)',
+            WebkitMaskRepeat: 'no-repeat',
+            maskRepeat: 'no-repeat',
+            WebkitMaskPosition: 'center',
+            maskPosition: 'center',
+            WebkitMaskSize: 'contain',
+            maskSize: 'contain',
+          }}
+        />
+      ) : (
+        <img 
+          src="/icons/PHP.svg" 
+          alt="Salary icon" 
+          className="w-[15px] h-[15px] mr-2" 
+          style={iconFilter ? { filter: iconFilter } : undefined}
+        />
+      )}
       {label.replace(/₱/g, '')}
     </div>
   );

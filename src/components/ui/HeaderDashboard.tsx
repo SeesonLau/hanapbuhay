@@ -78,6 +78,23 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   const profileRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+  // Get logo source based on theme
+  const getLogoSource = () => {
+    switch (themeName) {
+      case 'spring':
+        return '/image/spring.svg';
+      case 'summer':
+        return '/image/summer.svg';
+      case 'autumn':
+        return '/image/autumn.svg';
+      case 'winter':
+        return '/image/winter.svg';
+      case 'classic':
+      default:
+        return '/image/hanapbuhay-logo.svg';
+    }
+  };
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -302,22 +319,24 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
   };
 
   const themeInfo = getThemeInfo();
+  const logoSource = getLogoSource();
 
   return (
     <>
       <header className={`${fontClasses.body} w-full relative`}>
         <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 pt-3 pb-1 sm:pt-4 pb-1 flex items-center justify-between relative z-10">
-          {/* Logo */}
+          {/* Logo - Changes based on theme */}
           <div className="flex-shrink-0">
             <div className="flex items-center">
               <Link href={ROUTES.FINDJOBS} className="cursor-pointer transition-all duration-500 hover:scale-105">
                 <Image
-                  src="/image/hanapbuhay-logo.svg"
+                  src={logoSource}
                   alt="HanapBuhay Logo"
                   width={187}
                   height={68}
                   className="w-32 h-10 sm:w-40 sm:h-12 md:w-44 md:h-14 lg:w-48 lg:h-16"
                   priority
+                  key={themeName} // Force re-render when theme changes
                 />
               </Link>
             </div>
