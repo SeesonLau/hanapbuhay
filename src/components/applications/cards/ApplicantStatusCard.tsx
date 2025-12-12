@@ -8,6 +8,7 @@ import StarRating from '@/components/ui/StarRating';
 import ChatIcon from '@/assets/chat.svg';
 import ReviewIcon from '@/assets/review.svg';
 import { RatingModal } from '@/components/modals/RatingModal';
+import { COLORS } from '@/styles/colors'; // Import COLORS
 import { useTheme } from '@/hooks/useTheme';
 import { useReview } from '@/hooks/useReview'; // Import the new hook
 
@@ -62,7 +63,7 @@ export default function ApplicantStatusCard({
   const getStatusStyles = (currentStatus: 'Accepted' | 'Denied' | 'Completed') => {
     if (currentStatus === 'Completed') {
       return {
-        color: theme.colors.white,
+        color: COLORS.white, // Use COLORS.white
         borderColor: theme.colors.success,
         backgroundColor: theme.colors.success,
       };
