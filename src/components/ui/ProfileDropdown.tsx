@@ -38,7 +38,6 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
     { href: ROUTES.APPLIEDJOBS, label: t.components.header.appliedJobs, showOnMobile: true },
     { href: ROUTES.CHAT, label: t.components.header.chat, showOnMobile: true },
     { href: ROUTES.PROFILE, label: t.components.header.profile, showOnMobile: false },
-    { href: ROUTES.QUERY, label: 'Query Test', showOnMobile: false },
   ];
 
   return createPortal(
