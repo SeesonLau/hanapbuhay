@@ -43,7 +43,7 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({
             const privateRoom: ChatRoom = {
                 id: contact.room_id,
                 type: 'private',
-                name: contact.name,
+                name: contact.name, // Already using display name from parent
                 participants: [currentUserId, contact.userId],
                 created_at: new Date().toISOString(),
             };
@@ -159,7 +159,7 @@ export const ChatRoomList: React.FC<ChatRoomListProps> = ({
                             )}
                         </div>
 
-                        {/* Contact Info */}
+                        {/* Contact Info - Using display name */}
                         <div className="ml-2 mobile-L:ml-3 flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
                                 <p 

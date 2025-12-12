@@ -41,6 +41,7 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
   const [newMessage, setNewMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
   
+  // useRealtimeChat already fetches display names via ProfileService.getDisplayNameByUserId
   const { 
     messages, 
     sendMessage, 
@@ -105,6 +106,16 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
     }
   }
 
+  // Helper to get display name for rendering
+  // message.sender_name is already formatted by useRealtimeChat using ProfileService.getDisplayNameByUserId
+  const getDisplayName = (message: ChatMessage): string => {
+    if (message.sender_id === userId) {
+      return 'You'
+    }
+    // Use the display name that's already formatted in the message
+    return message.sender_name || 'Unknown'
+  }
+
   const renderMessageItem = (message: ChatMessage, index: number) => {
     const isCurrentUser = message.sender_id === userId
     const prevMessage = index > 0 ? messages[index - 1] : null
@@ -133,6 +144,8 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
       borderRadiusClass = isCurrentUser ? 'rounded-l-2xl rounded-br-lg rounded-tr-lg' : 'rounded-r-2xl rounded-bl-lg rounded-tl-lg'
     }
 
+    const displayName = getDisplayName(message)
+
     return (
       <div
         key={message.id}
@@ -145,7 +158,7 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
             <Avatar className="h-6 w-6 mobile-L:h-8 mobile-L:w-8">
               <AvatarImage 
                 src={message.sender_profile_pic_url || undefined} 
-                alt={message.sender_name} 
+                alt={displayName} 
               />
               <AvatarFallback 
                 className="text-[10px] mobile-L:text-xs"
@@ -154,7 +167,7 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
                   color: theme.colors.textSecondary,
                 }}
               >
-                {message.sender_name?.substring(0, 2).toUpperCase() || '??'}
+                {displayName.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </div>
@@ -172,7 +185,7 @@ export const RealtimeChat: React.FC<RealtimeChatProps> = ({
                 color: isCurrentUser ? theme.colors.primary : theme.colors.textSecondary,
               }}
             >
-              {isCurrentUser ? 'You' : message.sender_name}
+              {displayName}
             </p>
           )}
           
