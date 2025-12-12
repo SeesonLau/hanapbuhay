@@ -136,12 +136,6 @@ export default function ManageJobPostsPage() {
     setIsDeleteModalOpen(true);
   };
 
-  // Stable sort change handler to avoid re-render loops
-  const handleManageSortChange = useCallback((opt: any) => {
-    const val = String(opt?.value ?? 'latest');
-    setSortInUrlForManage?.(val);
-  }, [setSortInUrlForManage]);
-
   const activeFilterCount = useMemo(() => {
     let count = 0;
     const jobTypeCount = Object.values(activeFilters.jobTypes).filter(Boolean).length;
@@ -406,7 +400,7 @@ export default function ManageJobPostsPage() {
                 >
                   {t.common.labels.sortBy}
                 </span>
-                <Sort variant="manageJobs" onChange={handleManageSortChange} value={sortValue} />
+                <Sort variant="manageJobs" onChange={handleSort} value={sortValue} />
               </div>
               {/* View Toggle */}
               <ViewToggle value={viewMode} onChange={setViewMode} />
@@ -443,7 +437,7 @@ export default function ManageJobPostsPage() {
                         >
                           {t.common.labels.sortBy}
                         </span>
-                        <Sort variant="manageJobs" onChange={handleManageSortChange} value={sortValue} />
+                        <Sort variant="manageJobs" onChange={handleSort} value={sortValue} />
                         <ViewToggle value={viewMode} onChange={setViewMode} />
                     </div>
                 </div>

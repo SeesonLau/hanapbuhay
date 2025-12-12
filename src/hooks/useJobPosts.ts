@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { PostService } from "@/lib/services/posts-services";
 import { ApplicationService } from "@/lib/services/applications-services";
@@ -121,6 +122,7 @@ const parseFiltersFromUrl = (str: string | null): FilterOptions | null => {
 };
 
 export function useJobPosts(userId?: string | null, options: { skip?: boolean; excludeMine?: boolean; excludeApplied?: boolean } = {}) {
+  const searchParams = useSearchParams();
   const [jobs, setJobs] = useState<JobPostData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
@@ -400,7 +402,19 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
 
     let sortBy = 'createdAt';
     let sortOrder: 'asc' | 'desc' = 'desc';
-    if (sortVal) {
+    if (sortVal === 'latest') {
+      sortBy = 'createdAt';
+      sortOrder = 'desc';
+    } else if (sortVal === 'oldest') {
+      sortBy = 'createdAt';
+      sortOrder = 'asc';
+    } else if (sortVal === 'salary-asc') {
+      sortBy = 'price';
+      sortOrder = 'asc';
+    } else if (sortVal === 'salary-desc') {
+      sortBy = 'price';
+      sortOrder = 'desc';
+    } else if (sortVal) {
       const parts = sortVal.split('_');
       sortBy = parts[0] || 'createdAt';
       sortOrder = parts[1] === 'asc' ? 'asc' : 'desc';
@@ -423,7 +437,7 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     } else if (!options.skip) {
       load({ page: 1 });
     }
-  }, [options.skip]);
+  }, [options.skip, searchParams]);
   
   const setSelectedPostId = (id?: string | null, push = true) => {
     updateQueryParams({ postId: id || undefined }, push);
