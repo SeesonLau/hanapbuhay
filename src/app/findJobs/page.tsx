@@ -67,7 +67,7 @@ export default function FindJobsPage() {
     loadMore,
     refresh,
     applyFilters,
-    setSortInUrl,
+    sortValue, // Destructure sortValue
     setSelectedPostId,
   } = useJobPosts(currentUserId ?? undefined, { excludeMine: true, excludeApplied: true, skip: !currentUserId });
 
@@ -101,11 +101,12 @@ export default function FindJobsPage() {
     return count;
   }, [activeFilters]);
 
-  const handleSortChange = useCallback((opt: any) => {
-    const val = String(opt?.value ?? 'latest');
-    const sortParam = val === 'latest' ? 'date_desc' : val === 'oldest' ? 'date_asc' : val === 'salary-asc' ? 'salary_asc' : val === 'salary-desc' ? 'salary_desc' : undefined;
-    setSortInUrl?.(sortParam);
-  }, [setSortInUrl]);
+  // Remove the old handleSortChange as hookHandleSort will be used directly
+  // const handleSortChange = useCallback((opt: any) => {
+  //   const val = String(opt?.value ?? 'latest');
+  //   const sortParam = val === 'latest' ? 'date_desc' : val === 'oldest' ? 'date_asc' : val === 'salary-asc' ? 'salary_asc' : val === 'salary-desc' ? 'salary_desc' : undefined;
+  //   setSortInUrl?.(sortParam);
+  // }, [setSortInUrl]);
 
   const handleApplyFilters = (filters: FilterOptions) => {
     setActiveFilters(filters);
@@ -229,7 +230,7 @@ export default function FindJobsPage() {
                 >
                   {t.common.labels.sortBy}
                 </span>
-                <Sort variant="findJobs" onChange={handleSortChange} />
+                <Sort variant="findJobs" value={sortValue} onChange={hookHandleSort} />
               </div>
               
               {/* View Toggle */}
@@ -269,7 +270,7 @@ export default function FindJobsPage() {
                   >
                     {t.common.labels.sortBy}
                   </span>
-                  <Sort variant="findJobs" onChange={handleSortChange} />
+                  <Sort variant="findJobs" value={sortValue} onChange={hookHandleSort} />
                   <ViewToggle value={viewMode} onChange={setViewMode} />
                 </div>
               </div>

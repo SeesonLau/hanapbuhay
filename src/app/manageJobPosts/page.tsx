@@ -29,7 +29,7 @@ export default function ManageJobPostsPage() {
   const { t } = useLanguage();
   const [user, setUser] = useState<any | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort, loadMore, refresh, deletePost, updatePost, createPost, toggleLockPost, applyFilters, setSelectedPostId, parseUrlParams, setSortInUrlForManage } = useJobPosts(userId, { skip: !userId });
+  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort: hookHandleSort, loadMore, refresh, deletePost, updatePost, createPost, toggleLockPost, applyFilters, setSelectedPostId, parseUrlParams, sortValue } = useJobPosts(userId, { skip: !userId });
   const [initialLoading, setInitialLoading] = useState(true);
   const { stats, loading: statsLoading, error: statsError } = useStats({ variant: 'manageJobs', userId });
   
@@ -128,11 +128,11 @@ export default function ManageJobPostsPage() {
     setIsDeleteModalOpen(true);
   };
 
-  // Stable sort change handler to avoid re-render loops
-  const handleManageSortChange = useCallback((opt: any) => {
-    const val = String(opt?.value ?? 'latest');
-    setSortInUrlForManage?.(val);
-  }, [setSortInUrlForManage]);
+  // Removed handleManageSortChange as hookHandleSort will be used directly
+  // const handleManageSortChange = useCallback((opt: any) => {
+  //   const val = String(opt?.value ?? 'latest');
+  //   setSortInUrlForManage?.(val);
+  // }, [setSortInUrlForManage]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -386,7 +386,7 @@ export default function ManageJobPostsPage() {
                 >
                   {t.common.labels.sortBy}
                 </span>
-                <Sort variant="manageJobs" onChange={handleManageSortChange} />
+                <Sort variant="manageJobs" value={sortValue} onChange={hookHandleSort} />
               </div>
               {/* View Toggle */}
               <ViewToggle value={viewMode} onChange={setViewMode} />
@@ -423,7 +423,7 @@ export default function ManageJobPostsPage() {
                         >
                           {t.common.labels.sortBy}
                         </span>
-                        <Sort variant="manageJobs" onChange={handleManageSortChange} />
+                        <Sort variant="manageJobs" value={sortValue} onChange={hookHandleSort} />
                         <ViewToggle value={viewMode} onChange={setViewMode} />
                     </div>
                 </div>

@@ -17,7 +17,7 @@ interface PaginatedReviews {
 }
 
 export class ReviewService {
-  private static readonly DEFAULT_PAGE_SIZE = 10;
+  private static readonly DEFAULT_PAGE_SIZE = 12;
 
   // Helper: Validate rating
   private static validateRating(rating: number): boolean {

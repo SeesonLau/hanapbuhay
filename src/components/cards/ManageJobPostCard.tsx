@@ -104,15 +104,15 @@ export const ManageJobPostCard: React.FC<ManageJobPostCardProps> = ({
 
   // Render tag with theme-based styling when locked
   const renderTag = (tag: typeof allTags[0], key: string) => {
-    const baseTag = tag.type === 'gender' ? (
-      <StaticGenderTag label={tag.label} />
-    ) : tag.type === 'experience' ? (
-      <StaticExperienceLevelTag label={tag.label} />
-    ) : (
-      <StaticJobTypeTag label={tag.label} />
-    );
-
-    if (!isLocked) return baseTag;
+    if (!isLocked) {
+      if (tag.type === 'gender') {
+        return <StaticGenderTag key={key} label={tag.label} />;
+      } else if (tag.type === 'experience') {
+        return <StaticExperienceLevelTag key={key} label={tag.label} />;
+      } else {
+        return <StaticJobTypeTag key={key} label={tag.label} />;
+      }
+    }
 
     return (
       <div key={key} style={{
