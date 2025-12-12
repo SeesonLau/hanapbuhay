@@ -172,11 +172,6 @@ export default function AllApplicantsSection({
   return (
     <div className="relative">
       <div className="flex justify-end px-2 mb-2">
-        <Sort 
-          variant="applicants" 
-          value={currentSort} 
-          onChange={(opt) => setCurrentSort(opt.value as SortOrder)} 
-        />
       </div>
       <div
         ref={scrollRef}
