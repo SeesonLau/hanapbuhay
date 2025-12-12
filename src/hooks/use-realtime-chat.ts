@@ -28,29 +28,25 @@ export function useRealtimeChat({ roomId, userId, username }: UseRealtimeChatPro
       try {
         const history = await ChatService.getMessageHistory(roomId)
         
-        // Enhance messages with profile data
+        // Enhance messages with profile data using display names
         const enhancedMessages = await Promise.all(
           history.map(async (msg) => {
-            // If we already have profile data, use it
-            if (msg.sender_name && msg.sender_name !== 'Unknown') {
-              return msg
-            }
-            
-            // Otherwise fetch profile data with display name
             try {
+              // Always fetch display name for consistency
               const displayName = await ProfileService.getDisplayNameByUserId(msg.sender_id)
               const profileData = await ProfileService.getNameProfilePic(msg.sender_id)
+              
               return {
                 ...msg,
-                sender_name: displayName || profileData?.name || 'Unknown',
-                sender_profile_pic_url: profileData?.profilePicUrl,
+                sender_name: displayName || 'Unknown',
+                sender_profile_pic_url: profileData?.profilePicUrl || msg.sender_profile_pic_url,
               }
             } catch (error) {
               console.error('Error fetching profile for message:', error)
               return {
                 ...msg,
-                sender_name: 'Unknown',
-                sender_profile_pic_url: null,
+                sender_name: msg.sender_name || 'Unknown',
+                sender_profile_pic_url: msg.sender_profile_pic_url || null,
               }
             }
           })
@@ -137,7 +133,7 @@ export function useRealtimeChat({ roomId, userId, username }: UseRealtimeChatPro
               content: newMsg.content,
               created_at: newMsg.created_at,
               is_read_by: newMsg.is_read_by || [],
-              sender_name: displayName || profileData?.name || 'Unknown',
+              sender_name: displayName || 'Unknown',
               sender_profile_pic_url: profileData?.profilePicUrl,
             }
 
@@ -212,7 +208,18 @@ export function useRealtimeChat({ roomId, userId, username }: UseRealtimeChatPro
 
       console.log('📤 Sending message:', content)
 
-      // Create optimistic message
+      // Fetch current user's display name for optimistic message
+      let displayName = username
+      try {
+        const fetchedDisplayName = await ProfileService.getDisplayNameByUserId(userId)
+        if (fetchedDisplayName) {
+          displayName = fetchedDisplayName
+        }
+      } catch (error) {
+        console.error('Error fetching display name for optimistic message:', error)
+      }
+
+      // Create optimistic message with display name
       const tempId = `temp-${Date.now()}`
       const optimisticMessage: ChatMessage = {
         id: tempId,
@@ -221,7 +228,7 @@ export function useRealtimeChat({ roomId, userId, username }: UseRealtimeChatPro
         content: content.trim(),
         created_at: new Date().toISOString(),
         is_read_by: [userId],
-        sender_name: username,
+        sender_name: displayName,
         sender_profile_pic_url: null,
       }
 
@@ -233,10 +240,12 @@ export function useRealtimeChat({ roomId, userId, username }: UseRealtimeChatPro
         
         if (sentMessage) {
           console.log('✅ Message sent successfully:', sentMessage)
-          // Replace optimistic message with real message
+          // Replace optimistic message with real message, keeping display name
           setMessages(prev => 
             prev.map(msg => 
-              msg.id === tempId ? { ...sentMessage, sender_name: username } : msg
+              msg.id === tempId 
+                ? { ...sentMessage, sender_name: displayName, sender_profile_pic_url: msg.sender_profile_pic_url } 
+                : msg
             )
           )
           return sentMessage
