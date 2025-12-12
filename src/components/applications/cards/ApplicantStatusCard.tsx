@@ -59,9 +59,27 @@ export default function ApplicantStatusCard({
     openReviewModal(userId, postId, applicationId); // Open the modal with necessary IDs
   };
 
-  const statusColors = status === 'Accepted'
-    ? { color: theme.colors.success, borderColor: theme.colors.success }
-    : { color: theme.colors.error, borderColor: theme.colors.error };
+  const getStatusStyles = (currentStatus: 'Accepted' | 'Denied' | 'Completed') => {
+    if (currentStatus === 'Completed') {
+      return {
+        color: theme.colors.white,
+        borderColor: theme.colors.success,
+        backgroundColor: theme.colors.success,
+      };
+    } else if (currentStatus === 'Accepted') {
+      return {
+        color: theme.colors.success,
+        borderColor: theme.colors.success,
+        backgroundColor: theme.colors.surface, // Assuming surface is the neutral background
+      };
+    } else { // 'Denied'
+      return {
+        color: theme.colors.error,
+        borderColor: theme.colors.error,
+        backgroundColor: theme.colors.surface, // Assuming surface is the neutral background
+      };
+    }
+  };
 
   const displayName = name.trim().split(/\s+/).slice(0, 2).join(' ');
 
@@ -162,9 +180,9 @@ export default function ApplicantStatusCard({
         <span
           className="text-tiny md:text-xs font-semibold px-4 md:px-3 h-[25px] md:h-[22px] flex items-center justify-center rounded-md w-full border"
           style={{
-            color: statusColors.color,
-            borderColor: statusColors.borderColor,
-            backgroundColor: theme.colors.surface,
+            color: getStatusStyles(status).color,
+            borderColor: getStatusStyles(status).borderColor,
+            backgroundColor: getStatusStyles(status).backgroundColor,
           }}
         >
           {status}
