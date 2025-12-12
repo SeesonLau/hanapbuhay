@@ -15,7 +15,7 @@ import { ApplicationStatus } from '@/lib/constants/application-status';
 import { SubTypes } from '@/lib/constants/job-types';
 import { parseStoredName } from '@/lib/utils/profile-utils';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
 
 interface UseApplicationsOptions {
   skip?: boolean;
@@ -211,10 +211,19 @@ export function useApplications(userId?: string | null, options: UseApplications
         return Number.isFinite(t) ? t : 0;
       };
       const sortOrder = params.sortOrder ?? sort.sortOrder;
+      const currentSortBy = params.sortBy ?? sort.sortBy;
+
       const sortFn = (a: AppliedJob, b: AppliedJob) => {
         const sa = score(a);
         const sb = score(b);
         if (sa !== sb) return sa - sb;
+
+        if (currentSortBy === 'price') {
+          const pa = Number(a.raw?.posts?.price ?? 0);
+          const pb = Number(b.raw?.posts?.price ?? 0);
+          return sortOrder === 'asc' ? pa - pb : pb - pa;
+        }
+
         const ca = getCreated(a);
         const cb = getCreated(b);
         return sortOrder === 'asc' ? ca - cb : cb - ca;

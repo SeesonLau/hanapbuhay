@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback, Suspense } from "react";
+import { useEffect, useState, useMemo, useCallback, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import { toast } from "react-hot-toast";
 import Banner from "@/components/ui/Banner";
 import JobPostViewModal, { JobPostViewData } from "@/components/modals/JobPostViewModal";
 import { ViewToggle } from "@/components/ui/ViewToggle";
@@ -29,6 +30,8 @@ export default function FindJobsPage() {
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPostViewData | null>(null);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [pendingPostId, setPendingPostId] = useState<string | null>(null);
+  const [hasPerformedInitialFetch, setHasPerformedInitialFetch] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState<FilterOptions>({
     jobTypes: {},
@@ -165,6 +168,38 @@ export default function FindJobsPage() {
       }
     }
   }, [searchParams, jobs, currentUserId, createApplication]);
+
+  // Handle deep linking for postId (e.g. from notifications)
+  useEffect(() => {
+    const postId = searchParams.get('postId');
+    if (postId) {
+      setPendingPostId(postId);
+      setSelectedPostId?.(postId);
+    }
+  }, [searchParams]);
+
+  const prevLoading = useRef(jobsLoading);
+  useEffect(() => {
+    if (prevLoading.current && !jobsLoading) {
+      setHasPerformedInitialFetch(true);
+    }
+    prevLoading.current = jobsLoading;
+  }, [jobsLoading]);
+
+  useEffect(() => {
+    if (pendingPostId && hasPerformedInitialFetch && !jobsLoading) {
+      const job = jobs.find(j => j.id === pendingPostId);
+      if (job) {
+        setSelectedJob(job as JobPostViewData);
+        setIsJobViewOpen(true);
+        setPendingPostId(null);
+      } else {
+        toast.error("Post not found or has been deleted.");
+        setSelectedPostId?.(null);
+        setPendingPostId(null);
+      }
+    }
+  }, [jobs, pendingPostId, jobsLoading, hasPerformedInitialFetch]);
 
   const formatPeso = (amount: number) => {
   };

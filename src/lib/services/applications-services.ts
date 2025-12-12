@@ -9,7 +9,7 @@ interface ApplicationQueryParams {
   page?: number;
   pageSize?: number;
   status?: ApplicationStatus[];
-  sortBy?: 'createdAt' | 'updatedAt';
+  sortBy?: 'createdAt' | 'updatedAt' | 'price';
   sortOrder?: 'asc' | 'desc';
   // Optional server-side filters to restrict applications by their related post fields
   filters?: {
@@ -35,7 +35,7 @@ interface PaginatedApplications {
 }
 
 export class ApplicationService {
-  private static readonly DEFAULT_PAGE_SIZE = 10;
+  private static readonly DEFAULT_PAGE_SIZE = 12;
 
   // Create new application
   static async createApplication(postId: string, userId: string): Promise<Application | null> {
@@ -259,9 +259,13 @@ export class ApplicationService {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    const { data, count, error } = await query
-      .order(sortBy, { ascending: sortOrder === 'asc' })
-      .range(from, to);
+    if (sortBy === 'price') {
+      query = query.order('price', { foreignTable: 'posts', ascending: sortOrder === 'asc' });
+    } else {
+      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+    }
+
+    const { data, count, error } = await query.range(from, to);
 
     if (error) throw error;
 

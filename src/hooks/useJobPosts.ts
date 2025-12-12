@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { toast } from "react-hot-toast";
 import { PostService } from "@/lib/services/posts-services";
 import { ApplicationService } from "@/lib/services/applications-services";
@@ -10,11 +10,12 @@ import { Gender } from "@/lib/constants/gender";
 import { ExperienceLevel } from "@/lib/constants/experience-level";
 import { JobType, SubTypes } from "@/lib/constants/job-types";
 import type { FilterOptions } from '@/components/ui/FilterSection';
+import { DropdownOption } from '@/components/ui/Dropdown'; // Added this import
 
 import { PostMessages } from "@/resources/messages/posts";
 import { supabase } from "@/lib/services/supabase/client";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
 
 export interface JobPostData {
   id: string;
@@ -489,7 +490,29 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     })();
   }, [load]);
 
-  const handleSort = useCallback(async (sortBy: string, sortOrder: 'asc' | 'desc') => {
+  const handleSort = useCallback(async (option: DropdownOption) => {
+    let sortBy: string;
+    let sortOrder: 'asc' | 'desc';
+    const sortVal = option.value || option.id; // Use value if present, else id
+
+    if (sortVal === 'latest') {
+      sortBy = 'createdAt';
+      sortOrder = 'desc';
+    } else if (sortVal === 'oldest') {
+      sortBy = 'createdAt';
+      sortOrder = 'asc';
+    } else if (sortVal === 'salary-asc') {
+      sortBy = 'price';
+      sortOrder = 'asc';
+    } else if (sortVal === 'salary-desc') {
+      sortBy = 'price';
+      sortOrder = 'desc';
+    } else {
+      // Default or unknown sort option
+      sortBy = 'createdAt';
+      sortOrder = 'desc';
+    }
+
     const requested = { sortBy, sortOrder };
 
     // Update state and reload
@@ -499,6 +522,7 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     // Determine current sort value in URL
     const { sortVal: currentSortVal } = parseUrlParams();
     const requestedSortParam = sortOrder === 'asc' ? `${sortBy}_asc` : `${sortBy}_desc`;
+    const requestedSortParamForUrl = sortVal; // The direct value from the dropdown
 
     // Default sort is createdAt desc -> treated as absence of `sort` param
     const isDefault = sortBy === 'createdAt' && sortOrder === 'desc';
@@ -513,16 +537,26 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     }
 
     // For non-default: only update URL if it differs
-    if (currentSortVal === requestedSortParam) return;
-    updateQueryParams({ sort: requestedSortParam });
+    // Use the direct sortVal from dropdown for URL
+    if (currentSortVal === requestedSortParamForUrl) return;
+    updateQueryParams({ sort: requestedSortParamForUrl });
   }, [load]);
+
+  const sortValue = useMemo(() => {
+    if (sort.sortBy === 'createdAt') {
+      return sort.sortOrder === 'desc' ? 'latest' : 'oldest';
+    } else if (sort.sortBy === 'price') {
+      return sort.sortOrder === 'asc' ? 'salary-asc' : 'salary-desc';
+    }
+    return 'latest'; // Default
+  }, [sort.sortBy, sort.sortOrder]);
 
   const setSortInUrl = useCallback((sort?: string) => {
     // Default sorts treated as absence of `sort` param
-    const defaultSorts = new Set(['createdAt_desc', 'date_desc']);
+    const defaultSorts = new Set(['latest', 'date_desc']); // 'date_desc' is equivalent to 'latest'
     const { sortVal: currentSort } = parseUrlParams();
 
-    if (!sort || defaultSorts.has(sort)) {
+    if (!sort || defaultSorts.has(sort) || (sort === 'createdAt_desc' || sort === 'createdAt_asc')) { // Also handle internal format
       if (!currentSort) return;
       // use replaceState to avoid adding to history
       updateQueryParams({ sort: undefined }, false);
@@ -652,8 +686,9 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     applyFilters,
     setSelectedPostId,
     parseUrlParams,
-    setSortInUrl, // findJobs uses this
+    setSortInUrl,
     setSortInUrlForManage,
     updateQueryParams,
+    sortValue, // Added sortValue
   };
 }

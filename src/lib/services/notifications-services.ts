@@ -361,4 +361,17 @@ export class NotificationService {
       supabase.removeChannel(channel);
     };
   }
+
+  static getNotificationLink(
+    notification: Pick<Notification, 'type' | 'relatedId'>
+  ): string {
+    switch (notification.type) {
+      case NotificationType.JOB_APPLICATION:
+        return `/manageJobPosts?postId=${notification.relatedId}`;
+      case NotificationType.APPLICATION_ACCEPTED:
+        return `/appliedJobs?applicationId=${notification.relatedId}`;
+      default:
+        return '#';
+    }
+  }
 }
