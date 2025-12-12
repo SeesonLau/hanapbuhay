@@ -559,10 +559,11 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     if (!userId) throw new Error("User not authenticated");
     try {
       await PostService.deletePost(postId, userId);
+      toast.success(PostMessages.DELETE_POST_SUCCESS);
       // refresh
       await load({ page: 1 });
     } catch (err) {
-      toast.error("Failed to delete post");
+      toast.error(PostMessages.DELETE_POST_ERROR);
       throw err;
     }
   }, [userId, load]);
@@ -584,10 +585,12 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     if (!userId) throw new Error("User not authenticated");
     try {
       const updated = await PostService.updatePost(postId, postData);
+      toast.success(PostMessages.UPDATE_POST_SUCCESS);
       // After updating, refresh the list
       await load({ page: 1 });
       return updated;
     } catch (err) {
+      toast.error(PostMessages.UPDATE_POST_ERROR);
       throw err;
     }
   }, [userId, load]);
@@ -596,10 +599,12 @@ export function useJobPosts(userId?: string | null, options: { skip?: boolean; e
     if (!userId) throw new Error("User not authenticated");
     try {
       const created = await PostService.createPost(postData);
+      toast.success(PostMessages.CREATE_POST_SUCCESS)
       // After creating, refresh the list
       await load({ page: 1 });
       return created;
     } catch (err) {
+      toast.error(PostMessages.CREATE_POST_ERROR);
       throw err;
     }
   }, [userId, load]);
