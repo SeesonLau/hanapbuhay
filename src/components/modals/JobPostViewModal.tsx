@@ -296,12 +296,7 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
 
         {/* Footer: posted date + applicants + Apply */}
         <div className="px-6 py-6">
-          {job.status && (
-             <div className="mb-3 flex justify-start">
-               <ApplicationStatusBadge status={job.status} size="md" />
-             </div>
-          )}
-          <div className={`flex items-center ${onApply ? 'justify-between' : 'justify-start'}`}>
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span
                 className="text-[11px] font-medium"
@@ -317,17 +312,22 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
                 {applicantCount} {t.jobs.jobCard.applicants}
               </span>
             </div>
-            {onApply && (
-              <button
-                onClick={() => onApply(id)}
-                className="px-4 py-2 rounded-lg text-white text-sm transition-colors"
-                style={{ backgroundColor: theme.colors.primary }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.primaryHover}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.primary}
-              >
-                {t.jobs.jobCard.applyNow}
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {job.status && (
+                <ApplicationStatusBadge status={job.status} size="md" />
+              )}
+              {onApply && (
+                <button
+                  onClick={() => onApply(id)}
+                  className="px-4 py-2 rounded-lg text-white text-sm transition-colors"
+                  style={{ backgroundColor: theme.colors.primary }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme.colors.primaryHover}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme.colors.primary}
+                >
+                  {t.jobs.jobCard.applyNow}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
