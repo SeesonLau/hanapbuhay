@@ -98,7 +98,8 @@ export default function AppliedJobsPage() {
     setSortInUrl,
     parseUrlParams,
     searchApplications,
-  } = useApplications(currentUserId);
+    sortValue,
+  } = useApplications(currentUserId, { skip: !currentUserId });
 
   useEffect(() => {
     const { parsedFilters, applicationId } = parseUrlParams();
@@ -254,7 +255,7 @@ export default function AppliedJobsPage() {
       }
     }
     
-    const jobData: JobPostViewData = {
+    const jobData: any = {
       id: post.postId || job.id,
       title: job.title,
       description: aboutText,
@@ -268,6 +269,7 @@ export default function AppliedJobsPage() {
       experienceTags: job.experienceTags,
       jobTypeTags: job.jobTypeTags,
       raw: post,
+      status: job.status,
     };
     setSelectedJob(jobData);
     setIsJobViewOpen(true);
@@ -340,7 +342,7 @@ export default function AppliedJobsPage() {
                 >
                   {t.common.labels.sortBy}
                 </span>
-                <Sort variant="findJobs" onChange={handleSortChange} />
+                <Sort variant="findJobs" onChange={handleSortChange} value={sortValue} />
               </div>
               <ViewToggle value={viewMode} onChange={setViewMode} />
             </div>
@@ -374,7 +376,7 @@ export default function AppliedJobsPage() {
                   >
                     {t.common.labels.sortBy}
                   </span>
-                  <Sort variant="findJobs" onChange={handleSortChange} />
+                  <Sort variant="findJobs" onChange={handleSortChange} value={sortValue} />
                   <ViewToggle value={viewMode} onChange={setViewMode} />
                 </div>
               </div>

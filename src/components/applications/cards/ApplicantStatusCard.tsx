@@ -23,6 +23,7 @@ interface ApplicantStatusCardProps {
   status: 'Accepted' | 'Denied' | 'Completed';
   profilePicUrl?: string | null;
   onProfileClick?: () => void; 
+  onReviewSuccess?: () => void;
 }
 
 export default function ApplicantStatusCard({
@@ -35,7 +36,8 @@ export default function ApplicantStatusCard({
   dateApplied,
   status,
   profilePicUrl,
-  onProfileClick
+  onProfileClick,
+  onReviewSuccess
 }: ApplicantStatusCardProps) {
   const { theme } = useTheme();
   const router = useRouter();
@@ -58,6 +60,11 @@ export default function ApplicantStatusCard({
   const handleReviewClick = (e: React.MouseEvent) => {
     e.stopPropagation(); 
     openReviewModal(userId, postId, applicationId); // Open the modal with necessary IDs
+  };
+
+  const handleReviewSubmit = async () => {
+    await submitReview();
+    onReviewSuccess?.();
   };
 
   const getStatusStyles = (currentStatus: 'Accepted' | 'Denied' | 'Completed') => {
@@ -199,11 +206,10 @@ export default function ApplicantStatusCard({
           currentComment={reviewForm.comment}
           onRatingChange={handleRatingChange}
           onCommentChange={handleCommentChange}
-          onSubmit={submitReview}
+          onSubmit={handleReviewSubmit}
           isLoading={isLoading}
         />
       )}
     </div>
   );
 }
-

@@ -72,6 +72,7 @@ export default function FindJobsPage() {
     applyFilters,
     setSortInUrl,
     setSelectedPostId,
+    sortValue,
   } = useJobPosts(currentUserId ?? undefined, { excludeMine: true, excludeApplied: true, skip: !currentUserId });
 
   // Applications hook for apply functionality
@@ -264,7 +265,7 @@ export default function FindJobsPage() {
                 >
                   {t.common.labels.sortBy}
                 </span>
-                <Sort variant="findJobs" onChange={handleSortChange} />
+                <Sort variant="findJobs" onChange={handleSortChange} value={sortValue} />
               </div>
               
               {/* View Toggle */}
@@ -304,7 +305,7 @@ export default function FindJobsPage() {
                   >
                     {t.common.labels.sortBy}
                   </span>
-                  <Sort variant="findJobs" onChange={handleSortChange} />
+                  <Sort variant="findJobs" onChange={handleSortChange} value={sortValue} />
                   <ViewToggle value={viewMode} onChange={setViewMode} />
                 </div>
               </div>

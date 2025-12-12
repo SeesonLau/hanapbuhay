@@ -18,6 +18,7 @@ import { ProfileService } from "@/lib/services/profile-services";
 import { formatDisplayName } from "@/lib/utils/profile-utils";
 import { useTheme } from "@/hooks/useTheme";
 import { useLanguage } from "@/hooks/useLanguage";
+import { ApplicationStatusBadge, ApplicationStatus } from '@/components/cards/AppliedJobCardList';
 
 export interface JobPostViewData {
   id: string;
@@ -38,6 +39,7 @@ export interface JobPostViewData {
     avatarUrl?: string;
   };
   raw?: any;
+  status?: ApplicationStatus;
 }
 
 interface JobPostViewModalProps {
@@ -294,6 +296,11 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
 
         {/* Footer: posted date + applicants + Apply */}
         <div className="px-6 py-6">
+          {job.status && (
+             <div className="mb-3 flex justify-start">
+               <ApplicationStatusBadge status={job.status} size="md" />
+             </div>
+          )}
           <div className={`flex items-center ${onApply ? 'justify-between' : 'justify-start'}`}>
             <div className="flex items-center gap-2">
               <span

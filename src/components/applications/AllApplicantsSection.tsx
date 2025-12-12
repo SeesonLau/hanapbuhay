@@ -9,18 +9,16 @@ import { ReviewService } from '@/lib/services/reviews-services';
 import { ApplicationStatus } from '@/lib/constants/application-status';
 import ViewProfileModal from '../modals/ViewProfileModal';
 import { useTheme } from '@/hooks/useTheme';
-import { supabase } from '@/lib/services/supabase/client'; // Added supabase import
 
 interface Applicant {
   userId: string;
   name: string;
-  status: 'Approved' | 'Rejected';
+  status: 'Approved' | 'Rejected' | 'Completed';
   rating: number;
   reviewCount: number;
   dateApplied: string;
   applicationId: string;
   profilePicUrl: string | null;
-  hasBeenReviewed: boolean; // Added
 }
 
 type SortOrder = 'newest' | 'oldest';
@@ -64,11 +62,8 @@ export default function AllApplicantsSection({
     try {
       setLoading(true);
 
-      const { data: { session } } = await supabase.auth.getSession(); // Get current user session
-      const reviewerId = session?.user?.id;
-
       const { applications } = await ApplicationService.getApplicationsByPostId(postId, {
-        status: [ApplicationStatus.APPROVED, ApplicationStatus.REJECTED],
+        status: [ApplicationStatus.APPROVED, ApplicationStatus.REJECTED, 'completed' as ApplicationStatus],
         pageSize: 100,
         sortBy: 'createdAt',
         sortOrder: 'desc',
@@ -81,13 +76,12 @@ export default function AllApplicantsSection({
           const averageRating = await ReviewService.getAverageRating(app.userId);
           const totalReviews = await ReviewService.getTotalReviewsCountByUserId(app.userId);
           
-          // Check if the current user (reviewerId) has already reviewed this worker for this post
-          const hasBeenReviewed = reviewerId 
-            ? await ReviewService.hasUserReviewedWorkerForPost(reviewerId, app.userId, postId)
-            : false;
-
-          const cardStatus: 'Approved' | 'Rejected' =
-            app.status === ApplicationStatus.APPROVED ? 'Approved' : 'Rejected';
+          let cardStatus: 'Approved' | 'Rejected' | 'Completed';
+          if (app.status === 'completed') {
+            cardStatus = 'Completed';
+          } else {
+            cardStatus = app.status === ApplicationStatus.APPROVED ? 'Approved' : 'Rejected';
+          }
 
           return {
             userId: app.userId,
@@ -102,7 +96,6 @@ export default function AllApplicantsSection({
             }),
             applicationId: app.applicationId,
             profilePicUrl: profileData?.profilePicUrl || null,
-            hasBeenReviewed: hasBeenReviewed, // Assign the result
           };
         })
       );
@@ -154,14 +147,13 @@ export default function AllApplicantsSection({
   }, [filteredAndSortedApplicants]);
 
   const handleCardStatusChange = useCallback(
-    (status: ApplicationStatus) => {
-      console.log('Status changed to:', status);
+    async () => {
+      await fetchApplicants();
       if (onStatusChange) {
-        console.log('Calling parent onStatusChange');
         onStatusChange();
       }
     },
-    [onStatusChange]
+    [fetchApplicants, onStatusChange]
   );
 
   if (loading) {
@@ -203,12 +195,11 @@ export default function AllApplicantsSection({
               dateApplied={applicant.dateApplied}
               // Conditional status update
               status={
-                applicant.hasBeenReviewed && applicant.status === 'Approved'
-                  ? 'Completed'
-                  : (applicant.status === 'Approved' ? 'Accepted' : 'Denied')
+                applicant.status === 'Completed' ? 'Completed' : (applicant.status === 'Approved' ? 'Accepted' : 'Denied')
               }
               profilePicUrl={applicant.profilePicUrl}
               onProfileClick={() => openProfileModal(applicant.userId)}
+              onReviewSuccess={handleCardStatusChange}
             />
           ))
         )}

@@ -32,7 +32,7 @@ export default function ManageJobPostsPage() {
   const searchParams = useSearchParams();
   const [user, setUser] = useState<any | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort, loadMore, refresh, deletePost, updatePost, createPost, toggleLockPost, applyFilters, setSelectedPostId, parseUrlParams, setSortInUrlForManage } = useJobPosts(userId, { skip: !userId });
+  const { jobs, loading, isLoadingMore, error, hasMore, handleSearch, handleSort, loadMore, refresh, deletePost, updatePost, createPost, toggleLockPost, applyFilters, setSelectedPostId, parseUrlParams, setSortInUrlForManage, updateQueryParams, sortValue } = useJobPosts(userId, { skip: !userId });
   const [initialLoading, setInitialLoading] = useState(true);
   const { stats, loading: statsLoading, error: statsError } = useStats({ variant: 'manageJobs', userId });
   
@@ -44,6 +44,7 @@ export default function ManageJobPostsPage() {
   const [isApplicantsModalOpen, setIsApplicantsModalOpen] = useState(false);
   const [isJobViewOpen, setIsJobViewOpen] = useState(false);
   const [pendingPostId, setPendingPostId] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [hasPerformedInitialFetch, setHasPerformedInitialFetch] = useState(false);
   
   // View mode state
@@ -102,6 +103,7 @@ export default function ManageJobPostsPage() {
   const handleOpenApplicants = (data: { id: string; title: string; applicantCount?: number }) => {
     setSelectedApplicants({ title: data.title, applicantCount: data.applicantCount ?? 0, postId: data.id });
     setIsApplicantsModalOpen(true);
+    updateQueryParams?.({ postId: data.id, action: 'applicants' });
   };
 
   const handleCreatePost = () => {
@@ -111,6 +113,7 @@ export default function ManageJobPostsPage() {
   };
 
   const handleEditPost = async (post: Post) => {
+    updateQueryParams?.({ postId: post.postId, action: 'edit' });
     try {
       setSelectedPost(post);
       const { ApplicationService } = await import('@/lib/services/applications-services');
@@ -259,6 +262,7 @@ export default function ManageJobPostsPage() {
       setIsEditModalOpen(false);
       setSelectedPost(null);
       refresh(); // Refresh the posts list
+      updateQueryParams?.({ postId: undefined, action: undefined }, false);
     }
   };
 
@@ -276,8 +280,10 @@ export default function ManageJobPostsPage() {
   // Handle deep linking for postId
   useEffect(() => {
     const postId = searchParams.get('postId');
+    const action = searchParams.get('action');
     if (postId) {
       setPendingPostId(postId);
+      setPendingAction(action);
       setSelectedPostId?.(postId);
     }
   }, [searchParams]);
@@ -294,32 +300,46 @@ export default function ManageJobPostsPage() {
     if (pendingPostId && hasPerformedInitialFetch && !loading) {
       const found = jobs.find((j) => j.id === pendingPostId);
       if (found) {
-        const data: JobPostViewData = {
-          id: found.id,
-          title: found.title,
-          description: found.description,
-          requirements: found.requirements ?? [],
-          location: found.location ?? '',
-          salary: String(found.salary).replace(/₱|,/g, ''),
-          salaryPeriod: found.salaryPeriod ?? 'month',
-          postedDate: found.postedDate ?? '',
-          applicantCount: found.applicantCount ?? 0,
-          genderTags: found.genderTags,
-          experienceTags: found.experienceTags,
-          jobTypeTags: found.jobTypeTags,
-          raw: found.raw,
-        };
+        if (pendingAction === 'applicants') {
+          handleOpenApplicants({
+            id: found.id,
+            title: found.title,
+            applicantCount: found.applicantCount
+          });
+        } else if (pendingAction === 'edit') {
+          if (found.raw) {
+            handleEditPost(found.raw);
+          }
+        } else {
+          const data: JobPostViewData = {
+            id: found.id,
+            title: found.title,
+            description: found.description,
+            requirements: found.requirements ?? [],
+            location: found.location ?? '',
+            salary: String(found.salary).replace(/₱|,/g, ''),
+            salaryPeriod: found.salaryPeriod ?? 'month',
+            postedDate: found.postedDate ?? '',
+            applicantCount: found.applicantCount ?? 0,
+            genderTags: found.genderTags,
+            experienceTags: found.experienceTags,
+            jobTypeTags: found.jobTypeTags,
+            raw: found.raw,
+          };
 
-        setSelectedJob(data);
-        setIsJobViewOpen(true);
+          setSelectedJob(data);
+          setIsJobViewOpen(true);
+        }
         setPendingPostId(null);
+        setPendingAction(null);
       } else {
         toast.error("Post not found or has been deleted.");
-        setSelectedPostId?.(null);
+        updateQueryParams?.({ postId: undefined, action: undefined });
         setPendingPostId(null);
+        setPendingAction(null);
       }
     }
-  }, [jobs, pendingPostId, loading, hasPerformedInitialFetch]);
+  }, [jobs, pendingPostId, loading, hasPerformedInitialFetch, pendingAction]);
 
   // Show preloader while loading user data
   if (initialLoading) {
@@ -386,7 +406,7 @@ export default function ManageJobPostsPage() {
                 >
                   {t.common.labels.sortBy}
                 </span>
-                <Sort variant="manageJobs" onChange={handleManageSortChange} />
+                <Sort variant="manageJobs" onChange={handleManageSortChange} value={sortValue} />
               </div>
               {/* View Toggle */}
               <ViewToggle value={viewMode} onChange={setViewMode} />
@@ -423,7 +443,7 @@ export default function ManageJobPostsPage() {
                         >
                           {t.common.labels.sortBy}
                         </span>
-                        <Sort variant="manageJobs" onChange={handleManageSortChange} />
+                        <Sort variant="manageJobs" onChange={handleManageSortChange} value={sortValue} />
                         <ViewToggle value={viewMode} onChange={setViewMode} />
                     </div>
                 </div>
@@ -437,7 +457,7 @@ export default function ManageJobPostsPage() {
                     viewMode={viewMode}
                     onViewModeChange={(v) => setViewMode(v)}
                     onLoadMore={loadMore as () => void}
-                    onOpen={(data) => { setSelectedPostId?.(data?.id); setSelectedJob(data); setIsJobViewOpen(true); }}
+                    onOpen={(data) => { updateQueryParams?.({ postId: data?.id, action: undefined }); setSelectedJob(data); setIsJobViewOpen(true); }}
                     onViewApplicants={handleOpenApplicants}
                     onEdit={handleEditPost}
                     onDelete={handleDeletePost}
@@ -467,7 +487,7 @@ export default function ManageJobPostsPage() {
 
       <JobPostEditModal
         isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        onClose={() => { setIsEditModalOpen(false); updateQueryParams?.({ postId: undefined, action: undefined }, false); }}
         onSubmit={handlePostSaved}
         post={selectedPost}
         isRestricted={isEditRestricted}
@@ -482,7 +502,7 @@ export default function ManageJobPostsPage() {
 
       <ApplicantsModal 
         isOpen={isApplicantsModalOpen}
-        onClose={() => setIsApplicantsModalOpen(false)}
+        onClose={() => { setIsApplicantsModalOpen(false); updateQueryParams?.({ postId: undefined, action: undefined }, false); }}
         title={selectedApplicants?.title ?? 'Applicants'}
         applicantCount={selectedApplicants?.applicantCount ?? 0}
         postId={selectedApplicants?.postId}
@@ -497,7 +517,7 @@ export default function ManageJobPostsPage() {
 
       <JobPostViewModal 
         isOpen={isJobViewOpen} 
-        onClose={() => { setSelectedPostId?.(null, false); setIsJobViewOpen(false); }}
+        onClose={() => { setIsJobViewOpen(false); updateQueryParams?.({ postId: undefined, action: undefined }, false); }}
         job={selectedJob}
       />
 

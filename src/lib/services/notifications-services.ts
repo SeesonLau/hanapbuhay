@@ -367,7 +367,7 @@ export class NotificationService {
   ): string {
     switch (notification.type) {
       case NotificationType.JOB_APPLICATION:
-        return `/manageJobPosts?postId=${notification.relatedId}`;
+        return `/manageJobPosts?postId=${notification.relatedId}&action=applicants`;
       case NotificationType.APPLICATION_ACCEPTED:
         return `/appliedJobs?applicationId=${notification.relatedId}`;
       default:

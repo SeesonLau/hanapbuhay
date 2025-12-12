@@ -38,6 +38,86 @@ export interface AppliedJobCardProps {
   className?: string;
 }
 
+export const ApplicationStatusBadge = ({ 
+  status, 
+  isLocked = false, 
+  isDeleted = false,
+  className = '',
+  size = 'sm'
+}: { 
+  status: ApplicationStatus; 
+  isLocked?: boolean; 
+  isDeleted?: boolean;
+  className?: string;
+  size?: 'sm' | 'md';
+}) => {
+  const { theme } = useTheme();
+  const { t } = useLanguage();
+  const shouldUsePastelColors = theme.name !== 'classic';
+
+  const statusConfig = {
+    pending: {
+      text: t.jobs.appliedJobs.status.pending,
+      bgColor: 'bg-warning-warning100',
+      textColor: 'text-warning-warning700',
+      icon: GoClock
+    },
+    approved: {
+      text: t.jobs.appliedJobs.status.approved,
+      bgColor: 'bg-success-success100',
+      textColor: 'text-success-success700',
+      icon: IoCheckmarkCircleOutline
+    },
+    rejected: {
+      text: t.jobs.appliedJobs.status.rejected,
+      bgColor: 'bg-error-error100',
+      textColor: 'text-error-error700',
+      icon: LuCircleX
+    },
+    unknown: {
+      text: t.jobs.appliedJobs.status.unknown,
+      bgColor: 'bg-gray-neutral100',
+      textColor: 'text-gray-neutral700',
+      icon: GoClock
+    },
+  };
+
+  const config = statusConfig[status] || statusConfig.unknown;
+  const isMuted = isLocked || isDeleted;
+  
+  const statusOverride = isDeleted
+    ? { text: t.jobs.appliedJobs.status.deleted, bgColor: 'bg-gray-neutral100', textColor: 'text-gray-neutral600', icon: RiDeleteBin6Line }
+    : isLocked
+      ? { text: t.jobs.appliedJobs.status.locked, bgColor: 'bg-gray-neutral100', textColor: 'text-gray-neutral600', icon: LuCircleX }
+      : null;
+      
+  const displayStatus = statusOverride || config;
+  const Icon = displayStatus.icon;
+  
+  const iconClass = size === 'sm' ? 'w-3 h-3' : 'w-4 h-4';
+  const textClass = size === 'sm' ? 'text-[10px]' : 'text-tiny';
+  const paddingClass = size === 'sm' ? 'px-2 py-1' : 'px-3 py-1';
+
+  if (isMuted) {
+    return (
+      <div className={`flex items-center gap-1 ${paddingClass} rounded-md ${className}`} style={{
+        backgroundColor: shouldUsePastelColors ? theme.colors.pastelBg : '#e5e7eb',
+        color: shouldUsePastelColors ? theme.colors.pastelText : '#9ca3af',
+      }}>
+        <Icon className={iconClass} />
+        <span className={`font-inter ${textClass} font-medium`}>{displayStatus.text}</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`flex items-center gap-1 ${paddingClass} rounded-md ${displayStatus.bgColor} ${displayStatus.textColor} ${className}`}>
+      <Icon className={iconClass} />
+      <span className={`font-inter ${textClass} font-medium`}>{displayStatus.text}</span>
+    </div>
+  );
+};
+
 export default function AppliedJobCard({
   job,
   variant = 'card',

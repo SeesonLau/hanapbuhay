@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { ApplicationService } from '@/lib/services/applications-services';
@@ -268,8 +268,16 @@ export function useApplications(userId?: string | null, options: UseApplications
     }
 
     load({ searchTerm: q, location, sortBy, sortOrder, filters: parsedFilters });
-  }, [options.skip]);
+  }, [options.skip, userId]);
 
+  const sortValue = useMemo(() => {
+    if (sort.sortBy === 'createdAt') {
+      return sort.sortOrder === 'desc' ? 'latest' : 'oldest';
+    } else if (sort.sortBy === 'price') {
+      return sort.sortOrder === 'asc' ? 'salary-asc' : 'salary-desc';
+    }
+    return 'latest';
+  }, [sort.sortBy, sort.sortOrder]);
 
   const createApplication = useCallback((postId: string) => {
     if (!userId) {
@@ -470,6 +478,7 @@ export function useApplications(userId?: string | null, options: UseApplications
     parseUrlParams,
     updateQueryParams,
     searchApplications,
+    sortValue,
   };
 }
 
