@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { FaUserCircle } from 'react-icons/fa';
 import Image from 'next/image';
@@ -9,9 +9,12 @@ import ChatIcon from '@/assets/chat.svg';
 import ReviewIcon from '@/assets/review.svg';
 import { RatingModal } from '@/components/modals/RatingModal';
 import { useTheme } from '@/hooks/useTheme';
+import { useReview } from '@/hooks/useReview'; // Import the new hook
 
 interface ApplicantStatusCardProps {
-  userId: string;
+  userId: string; // This is the workerId
+  postId: string;
+  applicationId: string;
   name: string;
   rating?: number;
   reviewCount?: number;
@@ -23,6 +26,8 @@ interface ApplicantStatusCardProps {
 
 export default function ApplicantStatusCard({
   userId,
+  postId,
+  applicationId,
   name,
   rating = 0,
   reviewCount = 0,
@@ -33,7 +38,16 @@ export default function ApplicantStatusCard({
 }: ApplicantStatusCardProps) {
   const { theme } = useTheme();
   const router = useRouter();
-  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const {
+    isReviewModalOpen,
+    reviewForm,
+    openReviewModal,
+    closeReviewModal,
+    handleRatingChange,
+    handleCommentChange,
+    submitReview,
+    isLoading,
+  } = useReview();
 
   const handleChatClick = (e: React.MouseEvent) => {
     e.stopPropagation(); 
@@ -42,11 +56,7 @@ export default function ApplicantStatusCard({
 
   const handleReviewClick = (e: React.MouseEvent) => {
     e.stopPropagation(); 
-    setIsRatingModalOpen(true);
-  };
-
-  const handleSubmitRating = (rating: number, comment: string) => {
-    console.log('Rating submitted:', { userId, rating, comment });
+    openReviewModal(userId, postId, applicationId); // Open the modal with necessary IDs
   };
 
   const statusColors = status === 'Accepted'
@@ -161,12 +171,20 @@ export default function ApplicantStatusCard({
         </span>
       </div>
 
-      <RatingModal
-        isOpen={isRatingModalOpen}
-        onClose={() => setIsRatingModalOpen(false)}
-        workerName={name}
-        onSubmit={handleSubmitRating}
-      />
+      {isReviewModalOpen && reviewForm && (
+        <RatingModal
+          isOpen={isReviewModalOpen}
+          onClose={closeReviewModal}
+          workerName={name} // Pass the worker's name to the modal
+          currentRating={reviewForm.rating}
+          currentComment={reviewForm.comment}
+          onRatingChange={handleRatingChange}
+          onCommentChange={handleCommentChange}
+          onSubmit={submitReview}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 }
+

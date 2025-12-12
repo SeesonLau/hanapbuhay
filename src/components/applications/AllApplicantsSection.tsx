@@ -184,6 +184,8 @@ export default function AllApplicantsSection({
             <ApplicantStatusCard
               key={`${applicant.applicationId}-${index}`}
               userId={applicant.userId}
+              postId={postId}
+              applicationId={applicant.applicationId}
               name={applicant.name}
               rating={applicant.rating}
               reviewCount={applicant.reviewCount}
