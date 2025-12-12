@@ -305,47 +305,6 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
                 </select>
               </div>
             </div>
-            
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <FiBell size={14} style={{ color: theme.colors.primary }} />
-                <label className="text-tiny mobile-L:text-small font-medium text-gray-neutral700">
-                  {t.settings.preferences.notifications.title}
-                </label>
-              </div>
-              <div className="space-y-2 pl-5">
-                <label className="flex items-center cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    name="email"
-                    checked={settings.notifications.email}
-                    onChange={handleInputChange}
-                    className="w-4 h-4 rounded transition-all cursor-pointer"
-                    style={{
-                      accentColor: theme.colors.primary,
-                    }}
-                  />
-                  <span className="ml-2 text-tiny mobile-L:text-small group-hover:translate-x-0.5 transition-transform text-gray-neutral700">
-                    {t.settings.preferences.notifications.email}
-                  </span>
-                </label>
-                <label className="flex items-center cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    name="push"
-                    checked={settings.notifications.push}
-                    onChange={handleInputChange}
-                    className="w-4 h-4 rounded transition-all cursor-pointer"
-                    style={{
-                      accentColor: theme.colors.primary,
-                    }}
-                  />
-                  <span className="ml-2 text-tiny mobile-L:text-small group-hover:translate-x-0.5 transition-transform text-gray-neutral700">
-                    {t.settings.preferences.notifications.push}
-                  </span>
-                </label>
-              </div>
-            </div>
           </div>
         </div>
         
