@@ -519,6 +519,16 @@ export default function ManageJobPostsPage() {
         isOpen={isJobViewOpen} 
         onClose={() => { setIsJobViewOpen(false); updateQueryParams?.({ postId: undefined, action: undefined }, false); }}
         job={selectedJob}
+        onViewApplicants={() => {
+          if (selectedJob) {
+            setIsJobViewOpen(false);
+            handleOpenApplicants({
+              id: selectedJob.id,
+              title: selectedJob.title,
+              applicantCount: selectedJob.applicantCount
+            });
+          }
+        }}
       />
 
       {/* Floating Add Post Button - Mobile only */}

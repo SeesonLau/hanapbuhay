@@ -47,6 +47,7 @@ interface JobPostViewModalProps {
   onClose: () => void;
   job: JobPostViewData | null;
   onApply?: (id: string) => void;
+  onViewApplicants?: () => void;
 }
 
 const normalizeJobType = (label: string): string | null => {
@@ -62,7 +63,7 @@ const normalizeExperience = (label: string): string | null => {
   return Object.values(ExperienceLevel).includes(label as ExperienceLevel) ? label : null;
 };
 
-export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobPostViewModalProps) {
+export default function JobPostViewModal({ isOpen, onClose, job, onApply, onViewApplicants }: JobPostViewModalProps) {
   const { theme } = useTheme();
   const { t } = useLanguage();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -305,12 +306,22 @@ export default function JobPostViewModal({ isOpen, onClose, job, onApply }: JobP
                 {t.jobs.jobCard.posted}: {postedDate}
               </span>
               <span style={{ color: theme.colors.borderLight }}>•</span>
-              <span
-                className="text-[11px]"
-                style={{ color: theme.colors.textMuted }}
-              >
-                {applicantCount} {t.jobs.jobCard.applicants}
-              </span>
+              {onViewApplicants ? (
+                <button
+                  onClick={onViewApplicants}
+                  className="text-[11px] hover:underline focus:outline-none font-medium"
+                  style={{ color: theme.colors.primary }}
+                >
+                  {applicantCount} {t.jobs.jobCard.applicants}
+                </button>
+              ) : (
+                <span
+                  className="text-[11px]"
+                  style={{ color: theme.colors.textMuted }}
+                >
+                  {applicantCount} {t.jobs.jobCard.applicants}
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-3">
               {job.status && (
